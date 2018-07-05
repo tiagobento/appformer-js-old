@@ -11,14 +11,13 @@ export function foo(): string {
     return "1234567890";
 }
 
-
-export class ShoppingList extends React.Component<{ name: string, number: string }, {}> {
+export class ExampleList extends React.Component<{ name: string, id: string }, {}> {
     render() {
         return (
-            <div className="shopping-list">
-                <h1>Shopping List for {this.props.name}</h1>
+            <div>
+                <h4>List of {this.props.name}</h4>
                 <ul>
-                    <li>{this.props.number}</li>
+                    <li>Id: {this.props.id}</li>
                     <li>WhatsApp</li>
                     <li>Oculus</li>
                 </ul>

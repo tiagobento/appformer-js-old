@@ -1,16 +1,12 @@
 import React from "react";
-import {ShoppingList} from "../core";
+import {ExampleList} from "../core";
 
-export class OtherList extends React.Component {
+export class App extends React.Component {
     render() {
         return (
-            <div className="shopping-list">
-                <h1>List for stuff</h1>
-                <ul>
-                    <li>React</li>
-                    <li>Babel</li>
-                </ul>
-                <ShoppingList name={"Test"} number={this.props.number}/>
+            <div className="app">
+                <h1>This is a React application</h1>
+                <ExampleList name={"Random stuff"} id={this.props.number}/>
             </div>
         );
     }
