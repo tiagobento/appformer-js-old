@@ -36,6 +36,6 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "npx webpack-dev-server --open",
     "build": "webpack",
-    "build:production": "webpack --mode production"
+    "build:production": "webpack --mode production && mvn clean install -f webjar/pom.xml"
   }
 }
