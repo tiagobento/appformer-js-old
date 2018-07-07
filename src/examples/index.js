@@ -6,6 +6,6 @@ import {App} from "./JSComponents";
 new core.Clazz();
 
 ReactDOM.render(<App number={core.foo()}/>,
-    document.getElementById("root"));
+    document.getElementById("appformer-example-root"));
 
 document.appendChild(core.testComponent());
