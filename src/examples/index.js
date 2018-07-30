@@ -5,7 +5,16 @@ import {App} from "./JSComponents";
 
 new core.Clazz();
 
-ReactDOM.render(<App number={core.foo()}/>,
-    document.getElementById("appformer-example-root"));
+export function bootstrapExamples() {
 
-document.appendChild(core.testComponent());
+    ReactDOM.render(<App number={core.foo()}/>,
+        document.getElementById("appformer-example-root"));
+
+    // alert("Alive!");
+
+    // document.appendChild(core.testComponent());
+}
+
+window.appformer.examples = bootstrapExamples;
+
+window.appformer.examples();
