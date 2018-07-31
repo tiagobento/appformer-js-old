@@ -7,13 +7,16 @@ new core.Clazz();
 
 export function bootstrapExamples() {
 
-    ReactDOM.render(<App number={core.foo()}/>,
-        document.getElementById("appformer-example-root"));
+    ReactDOM.render(<App number={core.foo()}/>, window.reactAppContainerElement);
 
     // alert("Alive!");
 
     // document.appendChild(core.testComponent());
 }
+
+window.reactAppContainerElement =
+    window.reactAppContainerElement ||
+    document.getElementById("appformer-react-example-root");
 
 window.appformer.examples = bootstrapExamples;
 
