@@ -6,7 +6,12 @@ module.exports = {
     mode: "development",
     entry: {
         "core": './src/core/index.ts',
-        "examples/examples": './src/examples/index.js'
+        "examples/examples": './src/examples/index.jsx'
+    },
+    externals: {
+        // 'core': "core",
+        // 'react': "react",
+        // 'react-dom': "react-dom"
     },
     output: {
         path: path.resolve(__dirname, 'dist'),

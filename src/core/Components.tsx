@@ -1,11 +1,5 @@
 import * as React from "react";
 
-export function testComponent(): HTMLDivElement {
-    let div = document.createElement("div");
-    div.textContent = foo();
-    div.style.color = "red";
-    return div;
-}
 
 export function foo(): string {
     return "1234567890";
