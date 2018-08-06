@@ -9,15 +9,15 @@ export class App extends React.Component {
     }
 
     add() {
-        this.setState({
-            count: this.state.count + 1
-        });
+        this.setState((prevState) => ({
+            count: prevState.count + 1
+        }));
     }
 
     subtract() {
-        this.setState({
-            count: Math.max(0, this.state.count - 1)
-        });
+        this.setState((prevState) => ({
+            count: Math.max(0, prevState.count - 1)
+        }));
     }
 
     render() {
