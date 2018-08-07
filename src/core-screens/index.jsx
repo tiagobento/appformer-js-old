@@ -9,14 +9,14 @@ const two = () => <App number={2}/>;
 
 appformerBridge.registerScreen({
     af_componentId: "A-react-poc-native___examples1",
-    af_componentRoot: one,
     af_componentTitle: "First",
+    af_componentRoot: one,
     af_onOpen: () => console.info('open!')
 });
 
 appformerBridge.registerScreen({
     af_componentId: "A-react-poc-native___examples2",
-    af_componentRoot: two,
     af_componentTitle: "Second",
+    af_componentRoot: two,
     af_onOpen: () => console.info('open2!')
 });

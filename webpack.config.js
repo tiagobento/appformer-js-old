@@ -6,12 +6,12 @@ module.exports = {
     mode: "development",
     entry: {
         "core": './src/core/index.ts',
-        "examples/examples": './src/examples/index.jsx'
+        "core-screens/screens": './src/core-screens/index.jsx'
     },
     externals: {
         // 'core': "core",
-        // 'react': "react",
-        // 'react-dom': "react-dom"
+        'react': "React",
+        'react-dom': "ReactDOM"
     },
     output: {
         path: path.resolve(__dirname, 'dist'),
@@ -20,11 +20,11 @@ module.exports = {
     },
     devtool: 'inline-source-map',
     devServer: {
-        contentBase: path.join(__dirname, './dist/examples'),
+        contentBase: path.join(__dirname, './dist/core-screens'),
         compress: true,
         port: 9000,
         historyApiFallback: {
-            index: '/examples/index.html'
+            index: '/core-screens/index.html'
         }
     },
     module: {
@@ -47,10 +47,10 @@ module.exports = {
     plugins: [
         new CleanWebpackPlugin(['dist']),
         new HtmlWebpackPlugin({
-            title: 'AppFormer.js :: Examples',
-            filename: 'examples/index.html',
-            chunks: ['examples/examples'],
-            template: "./src/examples/index.template.html",
+            title: 'AppFormer.js :: Core Screens',
+            filename: 'core-screens/index.html',
+            chunks: ['core-screens/screens'],
+            template: "./src/core-screens/index.template.html",
         })
     ]
 };
