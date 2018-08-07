@@ -1,7 +1,7 @@
 import React from "react";
 import {ExampleList} from "../core";
 
-export class App extends React.Component {
+export class DemoApp extends React.Component {
 
     constructor(props) {
         super(props);
@@ -28,8 +28,10 @@ export class App extends React.Component {
 
                 <span>Count: {this.state.count}</span>
                 <br/>
-                <button className={"btn btn-primary btn-sm"} onClick={() => this.add()}> + </button>
-                <button className={"btn btn-primary btn-sm"} onClick={() => this.subtract()}> - </button>
+                <button className={"btn btn-primary btn-sm"} onClick={() => this.add()}> +</button>
+                <button className={"btn btn-primary btn-sm"} onClick={() => this.subtract()}> -</button>
+
+                <input placeholder={"Type here.."}/>
 
             </div>
         );

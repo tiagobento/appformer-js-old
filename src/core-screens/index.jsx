@@ -1,22 +1,10 @@
-import * as core from '../core'
 import React from "react";
-import {App} from "./JSComponents";
+import * as core from '../core'
+import * as screens from "./Screens";
 
+//This is here just as a sanity check.
 new core.Clazz();
 
-const one = () => <App number={1}/>;
-const two = () => <App number={2}/>;
+//Registers the AppFormer components.
+core.register(screens);
 
-appformerBridge.registerScreen({
-    af_componentId: "A-react-poc-native___examples1",
-    af_componentTitle: "First",
-    af_componentRoot: one,
-    af_onOpen: () => console.info('open!')
-});
-
-appformerBridge.registerScreen({
-    af_componentId: "A-react-poc-native___examples2",
-    af_componentTitle: "Second",
-    af_componentRoot: two,
-    af_onOpen: () => console.info('open2!')
-});

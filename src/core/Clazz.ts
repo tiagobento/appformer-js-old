@@ -1,7 +1,7 @@
 export class Clazz {
 
     constructor() {
-        console.info("Clazz was built");
+        console.info("Core clazz was built");
     }
 
 }
