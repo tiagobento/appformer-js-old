@@ -8,7 +8,7 @@ export * from './API';
 
 export function register(components: any) {
     for (let c in components) {
-        if (components[c].prototype instanceof DefaultAppFormerScreen) {
+        if (components.hasOwnProperty(c) && components[c].prototype instanceof DefaultAppFormerScreen) {
             let screen = new components[c]();
             console.info(`Registering screen ${screen.af_componentId}`);
             (<any>window).appformerBridge.registerScreen(screen);

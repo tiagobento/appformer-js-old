@@ -43,3 +43,8 @@ export abstract class DefaultAppFormerScreen implements AppFormerScreen {
     abstract af_componentRoot(): any;
 
 }
+
+
+export function goTo(path: string) {
+    (<any>window).$goToPlace(path);
+}

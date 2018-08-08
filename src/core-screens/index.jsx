@@ -6,5 +6,9 @@ import * as screens from "./Screens";
 new core.Clazz();
 
 //Registers the AppFormer components.
-core.register(screens);
+export function init() {
+    core.register(screens);
+}
+
+init();
 
