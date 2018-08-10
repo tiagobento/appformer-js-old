@@ -19,14 +19,20 @@ export class ReactComponentScreen extends AppFormer.Screen {
     }
 
     af_onOpen() {
-        get("org.uberfire.shared.MessageService|hello", []).then(msg => {
-            console.info(`Opened ${this.af_componentId} :: ${this.af_componentTitle} (${msg})`);
+        console.info(`Opened ${this.af_componentId} :: ${this.af_componentTitle} (Starting to make requests..)`);
+
+        Promise.resolve().then(() => {
+            return get("org.uberfire.shared.MessageService|hello", []);
+        }).then(msg => {
+            console.info(`First call returned (${msg})`);
             return get("org.uberfire.shared.MessageService|hello:java.lang.String", ["foo"]);
         }).then(msg => {
             console.info(`Second call returned (${msg})`);
             return get("org.uberfire.shared.MessageService|muteHello", []);
         }).then(msg => {
             console.info(`Third call returned (${msg})`);
+        }).catch(e => {
+            console.error(e);
         });
     }
 

@@ -35,7 +35,7 @@ export class Bridge {
     }
 
     get(path: string, params: any[]) {
-        console.info("Requested " + path);
+        return Promise.reject("Sorry, RPC mocks are not available yet :(");
     }
 
     goTo(path: string) {
