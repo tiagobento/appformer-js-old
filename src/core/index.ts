@@ -1,10 +1,10 @@
 import {DefaultAppFormerScreen} from "core/API";
-import {AppFormerJsMockBridge} from "core";
+import {AppFormerJsBridge} from "core";
 
 export * from './Components';
 export * from './API';
 
-export const bridge = (window as any).appformerGwtBridge || new AppFormerJsMockBridge(() => {
+export const bridge = (window as any).appformerGwtBridge || new AppFormerJsBridge(() => {
     console.info("Finished mounting AppFormer JS");
 });
 

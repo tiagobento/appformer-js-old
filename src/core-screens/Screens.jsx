@@ -9,7 +9,7 @@ export class InoffensiveNonScreenClass {
 export class ReactComponentScreen extends DefaultAppFormerScreen {
 
     constructor() {
-        super("AAA-this-is-the-screen-id", "This is a React Component");
+        super("AAA-this-is-the-screen-id", "This is a React screen");
         this.af_subscriptions = () => ({
             bang: time => this.onBang(time),
             reverseBang: time => this.onBang(time.split("").reverse().join(""))
@@ -39,7 +39,7 @@ export class ReactComponentScreen extends DefaultAppFormerScreen {
 export class PureDomElementScreen extends DefaultAppFormerScreen {
 
     constructor() {
-        super("pure-dom-element-screen", "Pure DOM Elements component");
+        super("pure-dom-element-screen", "Pure DOM Elements screen");
         this.af_subscriptions = () => ({
             alertEvent: message => alert(message),
         });
@@ -55,7 +55,12 @@ export class PureDomElementScreen extends DefaultAppFormerScreen {
 export class StringElementScreen extends DefaultAppFormerScreen {
 
     constructor() {
-        super("string-template-screen", "HTML String component");
+        super("string-template-screen", "HTML String screen");
+    }
+
+    af_onMayClose() {
+        alert("Sorry, this screen is UNCLOSEABLE!");
+        return false;
     }
 
     af_componentRoot() {

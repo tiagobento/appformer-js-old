@@ -3,115 +3,196 @@ import * as Core from "core";
 import * as ReactDOM from "react-dom";
 import {DefaultAppFormerScreen} from "core/API";
 
-export class AppFormerJsMockBridge {
+export class AppFormerJsBridge {
 
-    screenInclusionFunction: (stateSettingFunction: DefaultAppFormerScreen) => void;
+    root: () => AppFormerJsRoot;
 
     constructor(callback: () => void) {
-
-        (window as any).asdf = () => ({});
-        let appFormerJsRootComponent = <AppFormerJsRoot expose={r => this.screenInclusionFunction = r}/>;
-        render(appFormerJsRootComponent, document.getElementById("appformer-root"), callback);
+        let root = <AppFormerJsRoot exposing={self => this.root = self}/>;
+        Core.render(root, document.getElementById("appformer-root"), callback);
     }
 
     registerScreen(screen: DefaultAppFormerScreen) {
-        this.screenInclusionFunction(screen);
-
-        //FIXME: Just as POC. ideally AppFormer should
-        if ((screen as any).af_subscriptions) {
-            (window as any).allSubscriptions = {
-                ...(window as any).allSubscriptions, ...((screen as any).af_subscriptions())
-            };
-        }
+        this.root().registerScreen(screen);
     }
 
     goTo(path: string) {
+        console.log(typeof (this.root() as any));
         alert(`Go to ${path} called!`);
     }
 }
 
-type AppFormerJsRootProps = { expose: (stateSettingFunction: (s: DefaultAppFormerScreen) => void) => void };
+type AppFormerJsRootProps = { exposing: (self: () => AppFormerJsRoot) => void };
+type AppFormerJsRootState = { screens: DefaultAppFormerScreen[] };
 
-class AppFormerJsRoot extends React.Component<AppFormerJsRootProps, { screens: DefaultAppFormerScreen[] }> {
+class AppFormerJsRoot extends React.Component<AppFormerJsRootProps, AppFormerJsRootState> {
 
     constructor(props: AppFormerJsRootProps) {
         super(props);
         this.state = {screens: []};
-        this.props.expose((screen: DefaultAppFormerScreen) => {
+        this.props.exposing(() => this);
+    }
+
+    registerScreen(screen: DefaultAppFormerScreen) {
+        this.setState(prevState => ({
+            screens: [...prevState.screens, screen]
+        }));
+    }
+
+    removeScreen(screen: DefaultAppFormerScreen) {
+        if (screen.af_onMayClose()) {
             this.setState(prevState => ({
-                screens: [...prevState.screens, screen]
+                screens: prevState.screens.filter(s => s !== screen)
             }));
+        }
+    }
+
+    subscriptionsOfAllOpenScreens() {
+        return this.state.screens
+            .filter(s => s.af_subscriptions)
+            .map(s => s.af_subscriptions())
+            .reduce((a, b) => ({...a, ...b}), {});
+    }
+
+    diff<T>(a: T[], b: T[]): T[] {
+        return a.filter((i) => b.indexOf(i) < 0);
+    }
+
+    componentDidUpdate(prevProps: Readonly<AppFormerJsRootProps>,
+                       prevState: Readonly<AppFormerJsRootState>,
+                       snapshot?: any): void {
+
+        this.diff(prevState.screens, this.state.screens).forEach(removedScreen => {
+            console.info(`Removing ${removedScreen.af_componentId}`);
+            removedScreen.af_onClose();
+        });
+
+        this.diff(this.state.screens, prevState.screens).forEach(newScreen => {
+
+            console.info(`Rendering ${newScreen.af_componentId}`);
+
+            Core.render(newScreen.af_componentRoot(),
+                        document.getElementById(`screen-container-${newScreen.af_componentId}`),
+                        () => console.info(`Rendered ${newScreen.af_componentId}`));
         });
     }
 
-
-    componentDidUpdate(prevProps: Readonly<AppFormerJsRootProps>,
-                       prevState: Readonly<{ screens: DefaultAppFormerScreen[] }>,
-                       snapshot?: any): void {
-
+    componentWillUnmount(): void {
         this.state.screens.forEach(screen => {
-            let componentContainer = document.getElementById(`screen-container-${screen.af_componentId}`);
-            Core.render(screen.af_componentRoot(), componentContainer);
+            console.info(`Shutting down ${screen.af_componentId}`);
+            screen.af_onShutdown();
         });
     }
 
     render() {
         return (
 
-            <div id={"appformer-js-root"}>
-                <EventsConsolePanel/>
-                {this.state.screens.map(screen => <div key={screen.af_componentId}
-                                                       style={{
-                                                           border: "2px solid red",
-                                                           margin: "0 10px 10px 10px",
-                                                           padding: "10px"
-                                                       }}>
+            <div id={"appformer-js-root"}
+                 style={{
+                     padding: "10px", fontFamily: "Helvetica", fontWeight: "lighter",
+                 }}>
 
-                    <h4 style={{color: "green"}}>{screen.af_componentTitle}</h4>
+                <h1>Welcome to AppFormer.js</h1>
 
-                    <div id={`screen-container-${screen.af_componentId}`}>
-                        {/*Empty on purpose*/}
-                    </div>
-                </div>)}
+                <EventsConsolePanel subscriptions={this.subscriptionsOfAllOpenScreens()}/>
+
+                {this.state.screens.map(screen => (
+
+                    <AppFormerJsScreen screen={screen} onClose={() => this.removeScreen(screen)}/>
+
+                ))}
             </div>
 
         );
     }
 }
 
-export class EventsConsolePanel extends React.Component<{}, { bang: string, channel?: string }> {
+type AppFormerJsScreenProps = { screen: DefaultAppFormerScreen, onClose: () => void }
 
-    constructor(props: {}) {
+class AppFormerJsScreen extends React.Component<AppFormerJsScreenProps, {}> {
+
+    constructor(props: AppFormerJsScreenProps) {
         super(props);
-        this.state = {bang: "0", channel: "bang"};
+    }
+
+    render() {
+        const screen = this.props.screen;
+        return <div key={screen.af_componentId}
+                    onFocus={() => screen.af_onFocus()}
+                    onBlur={() => screen.af_onLostFocus()}
+                    style={{
+                        borderRadius: "5px",
+                        border: "0.5px solid #ccc",
+                        marginBottom: "20px",
+                        padding: "15px",
+                        boxShadow: "0px 5px 8px -4px #ccc",
+                    }}>
+
+
+            <h4 style={{color: "green"}}>
+                {screen.af_componentTitle}
+                &nbsp;&nbsp;
+                <a href="#" onClick={() => this.props.onClose()}>Close</a>
+            </h4>
+
+            <div id={`screen-container-${screen.af_componentId}`}>
+                {/*Empty on purpose*/}
+            </div>
+        </div>;
+    }
+};
+
+//FIXME: fix subscriptions type (Map<String, Consumer<Object>)
+type EventsConsolePanelProps = { subscriptions: any }
+
+class EventsConsolePanel extends React.Component<EventsConsolePanelProps, { bang: string, channel?: string }> {
+
+    constructor(props: EventsConsolePanelProps) {
+        super(props);
+        this.state = {bang: ""};
+    }
+
+    componentWillReceiveProps(nextProps: Readonly<EventsConsolePanelProps>, nextContext: any): void {
+        this.setState({channel: Object.keys(nextProps.subscriptions)[0] || null});
     }
 
     render() {
         return (
 
             <div style={{border: "2px dotted blue", margin: "10px", padding: "10px"}}>
-                <h2>Events console</h2>
 
-                <select onChange={(e: any) => this.setState({channel: e.target.value})}>
-                    {Object.keys(this.allSubscriptions()).map(channel => {
-                        return <option key={channel} value={channel}>{channel}</option>
-                    })}
-                </select>
+                <h2>Events simulation console</h2>
 
-                <input type={"text"} onChange={(e: any) => this.setState({bang: e.target.value})}
-                       placeholder={"Type bang value"} value={this.state.bang}/>
+                {this.state.channel && <>
+                    <select onChange={e => this.setState({channel: e.target.value})}
+                            value={this.state.channel}>
+                        {Object.keys(this.props.subscriptions).map(channel => {
+                            return <option key={channel} value={channel}>{channel}</option>
+                        })}
+                    </select>
 
-                <button onClick={() => this.allSubscriptions()[this.state.channel](this.state.bang)}>Send bang event!
-                </button>
+                    &nbsp;
+
+                    <input onChange={e => this.setState({bang: e.target.value})}
+                           placeholder={"Type bang value"} value={this.state.bang}/>
+
+                    &nbsp;
+
+                    <button onClick={() => this.sendBang()}>
+                        Send bang event!
+                    </button>
+                </>}
+
+                {!this.state.channel && <>
+                    <p>No one is listening to events at the moment :(</p>
+                </>}
             </div>
 
         );
     }
 
-    private allSubscriptions() {
-        //FIXME: Get events from all open screens
-        const allSubscriptions = (window as any).allSubscriptions;
-        return allSubscriptions ? allSubscriptions : {};
+    private sendBang() {
+        this.props.subscriptions[this.state.channel](this.state.bang);
     }
 }
 
@@ -124,9 +205,9 @@ export class AppFormerLink extends React.Component<{ to: string }, {}> {
     render() {
         return (
 
-            <div onClick={() => this.go()}>
+            <span onClick={() => this.go()}>
                 {this.props.children}
-            </div>
+            </span>
 
         );
     }
@@ -142,9 +223,11 @@ export class ExampleList extends React.Component<{ name: string, id: string }, {
                     <li>Id: {this.props.id}</li>
                     <li>WhatsApp</li>
                     <li>
+                        Oculus (and
                         <AppFormerLink to={"TodoListScreen"}>
-                            Oculus (and link to the TodoListScreen!)
+                            &nbsp;<a href="#">link</a>&nbsp;
                         </AppFormerLink>
+                        to the TodoListScreen!)
                     </li>
                 </ul>
             </div>
