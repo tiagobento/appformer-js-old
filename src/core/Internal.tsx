@@ -11,8 +11,7 @@ export function render(component: any, container: HTMLElement, callback = () => 
         callback();
     }
 
-    //FIXME: What's wrong with that?
-    else if (typeof component === "string" || component instanceof String) {
+    else if (typeof component.prototype === "string" || component.prototype instanceof String) {
         container.innerHTML = component as string;
         callback();
     }
@@ -27,7 +26,8 @@ export class Bridge {
     root: () => Root.Component;
 
     constructor(callback: () => void) {
-        render(<Root.Component exposing={root => this.root = root}/>, document.body, callback);
+        const root = <Root.Component exposing={root => this.root = root}/>;
+        render(root, document.body.children[0] as HTMLElement, callback);
     }
 
     registerScreen(screen: AppFormer.Screen) {
@@ -41,26 +41,35 @@ export class Bridge {
 
 namespace Root {
     export type Props = { exposing: (self: () => Component) => void };
-    export type State = { screens: AppFormer.Screen[] };
+    export type State = { screens: AppFormer.Screen[], openScreens: AppFormer.Screen[] };
 
     export class Component extends React.Component<Props, State> {
 
         constructor(props: Props) {
             super(props);
-            this.state = {screens: []};
+            this.state = {screens: [], openScreens: []};
             this.props.exposing(() => this);
         }
 
         registerScreen(screen: AppFormer.Screen) {
             this.setState(prevState => ({
-                screens: [...prevState.screens, screen]
+                screens: [...prevState.screens, screen],
+                openScreens: [...prevState.openScreens, screen]
             }));
         }
 
-        removeScreen(screen: AppFormer.Screen) {
+        openScreen(screen: AppFormer.Screen) {
+            if (!this.isOpen(screen)) {
+                this.setState(prevState => ({
+                    openScreens: [...prevState.openScreens, screen]
+                }));
+            }
+        }
+
+        closeScreen(screen: AppFormer.Screen) {
             if (screen.af_onMayClose()) {
                 this.setState(prevState => ({
-                    screens: prevState.screens.filter(s => s !== screen)
+                    openScreens: prevState.openScreens.filter(s => s !== screen)
                 }));
             }
         }
@@ -70,7 +79,7 @@ namespace Root {
 
             let all: any = {};
 
-            const subscriptions = this.state.screens
+            const subscriptions = this.state.openScreens
                 .filter(s => s.af_subscriptions)
                 .map(s => s.af_subscriptions() as any);
 
@@ -93,6 +102,10 @@ namespace Root {
             return all;
         }
 
+        private isOpen(screen: AppFormer.Screen) {
+            return this.state.openScreens.indexOf(screen) >= 0;
+        }
+
 
         componentDidUpdate(prevProps: Readonly<Props>,
                            prevState: Readonly<State>,
@@ -101,12 +114,12 @@ namespace Root {
             const diff = (a: AppFormer.Screen[],
                           b: AppFormer.Screen[]) => a.filter((i) => b.indexOf(i) < 0);
 
-            diff(prevState.screens, this.state.screens).forEach(removedScreen => {
+            diff(prevState.openScreens, this.state.openScreens).forEach(removedScreen => {
                 console.info(`Closing ${removedScreen.af_componentId}`);
                 removedScreen.af_onClose();
             });
 
-            diff(this.state.screens, prevState.screens).forEach(newScreen => {
+            diff(this.state.openScreens, prevState.openScreens).forEach(newScreen => {
 
                 console.info(`Opening ${newScreen.af_componentId}`);
 
@@ -133,17 +146,33 @@ namespace Root {
         render() {
             return <div className={"af-js-root"}>
 
-                <h1>Welcome to AppFormer.js</h1>
-
                 <EventsConsolePanel.Component
                     subscriptions={this.subscriptionsOfAllOpenScreens()}/>
 
-                {this.state.screens.map(screen => (
+                <div className={"af-screens-panel"}>
+                    <div className={"contents"}>
+                        {this.state.screens.map(screen => (
+
+                            <button key={screen.af_componentId}
+                                    onClick={() => this.openScreen(screen)}
+                                    disabled={this.isOpen(screen)}>
+                                {screen.af_componentId}
+                            </button>
+
+                        ))}
+                    </div>
+                </div>
+
+
+                <h1 style={{textAlign: "center"}}>Welcome to AppFormer.js</h1>
+
+
+                {this.state.openScreens.map(screen => (
 
                     <ScreenContainer.Component key={screen.af_componentId}
                                                containerId={this.containerId(screen)}
                                                screen={screen}
-                                               onClose={() => this.removeScreen(screen)}/>
+                                               onClose={() => this.closeScreen(screen)}/>
 
                 ))}
             </div>;
@@ -167,25 +196,27 @@ namespace ScreenContainer {
 
         render() {
             const screen = this.props.screen;
-            return <div className={"af-screen"}
+            return <div className={"af-screen-container"}
                         key={screen.af_componentId}
                         onFocus={() => screen.af_onFocus()}
                         onBlur={() => screen.af_onLostFocus()}>
 
-                <h4>
+                <div className={"title"}>
+                <span>
                     <span>{screen.af_componentTitle}</span>
                     &nbsp;&nbsp;
-                    <a href="#" onClick={() => this.props.onClose()}>Close</a>
-                </h4>
+                    <a style={{color: "#828282"}} href="#"
+                       onClick={() => this.props.onClose()}>Close</a>
+                </span>
+                </div>
 
-                <div id={this.props.containerId}>
+                <div className={"contents"} id={this.props.containerId}>
                     {/*Empty on purpose*/}
                     {/*This is where the screens will be rendered on.*/}
                     {/*Each screens gets a fresh container*/}
                 </div>
             </div>;
         }
-
     }
 }
 
@@ -193,62 +224,60 @@ namespace ScreenContainer {
 namespace EventsConsolePanel {
     //FIXME: fix subscriptions type (Map<String, Consumer<Object>)
     export type Props = { subscriptions: any }
-    export type State = { bang: string, channel?: string }
+    export type State = { event: string, channel?: string }
 
     export class Component extends React.Component<Props, State> {
 
         constructor(props: Props) {
             super(props);
-            this.state = {bang: ""};
+            this.state = {event: ""};
         }
 
         componentWillReceiveProps(nextProps: Readonly<Props>, nextContext: any): void {
-            this.setState({channel: Object.keys(nextProps.subscriptions)[0] || null});
+            this.setState({channel: Object.keys(nextProps.subscriptions).sort()[0] || null});
         }
 
-        private sendBang() {
-            this.props.subscriptions[this.state.channel](this.state.bang);
+        private sendEvent() {
+            this.props.subscriptions[this.state.channel](this.state.event);
         }
 
         render() {
             return (
 
-                <div
-                    style={{
-                        borderRadius: "5px",
-                        margin: "10px",
-                        padding: "10px 30px 30px 30px",
-                        backgroundColor: "#8fa7b3",
-                    }}>
+                <div className={"af-events-console"}>
 
-                    <h2 style={{fontWeight: "lighter"}}>Events simulation console</h2>
+                    <div className={"title"}>
+                        <span>Events simulation console</span>
+                    </div>
 
-                    {this.state.channel && <>
+                    <div className={"contents"}>
+                        {this.state.channel && <>
 
-                        <select value={this.state.channel}
-                                onChange={e => this.setState({channel: e.target.value})}>
+                            <select value={this.state.channel}
+                                    onChange={e => this.setState({channel: e.target.value})}>
 
-                            {Object.keys(this.props.subscriptions).map(channel => {
-                                return <option key={channel} value={channel}>{channel}</option>
-                            })}
+                                {Object.keys(this.props.subscriptions).sort().map(channel => {
+                                    return <option key={channel} value={channel}>{channel}</option>
+                                })}
 
-                        </select>
+                            </select>
 
-                        &nbsp;
+                            &nbsp;
 
-                        <input onChange={e => this.setState({bang: e.target.value})}
-                               placeholder={"Type bang value"} value={this.state.bang}/>
+                            <input onChange={e => this.setState({event: e.target.value})}
+                                   placeholder={"Type event value"} value={this.state.event}/>
 
-                        &nbsp;
+                            &nbsp;
 
-                        <button onClick={() => this.sendBang()}>
-                            Send event!
-                        </button>
-                    </>}
+                            <button onClick={() => this.sendEvent()}>
+                                Send event!
+                            </button>
+                        </>}
 
-                    {!this.state.channel && <>
-                        <p>No one is listening to events at the moment :(</p>
-                    </>}
+                        {!this.state.channel && <>
+                            <p>No one is listening to events at the moment :(</p>
+                        </>}
+                    </div>
                 </div>
 
             );

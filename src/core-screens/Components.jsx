@@ -5,8 +5,8 @@ export class DemoApp extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = {count: 0, lastBang: "0"};
-        this.props.onBang(time => this.setState({lastBang: time}));
+        this.state = {count: 0, lastFooMessage: "0"};
+        this.props.onFoo(message => this.setState({lastFooMessage: message}));
     }
 
     add() {
@@ -27,18 +27,18 @@ export class DemoApp extends React.Component {
 
                 <AppFormer.ExampleList name={"Random stuff"} id={this.props.number}/>
 
-                <span>Count: {this.state.count}</span>
+                <span><b>Count: </b>{this.state.count}</span>
                 <br/>
                 <button className={"btn btn-primary btn-sm"} onClick={() => this.add()}> +</button>
-                <button className={"btn btn-primary btn-sm"} onClick={() => this.subtract()}> -</button>
+                <button className={"btn btn-primary btn-sm"} onClick={() => this.subtract()}> -
+                </button>
                 <br/>
 
                 <br/>
-                <span>Last bang: {this.state.lastBang}</span>
+                <span><b>Last Foo Message (or reversed): </b></span>
                 <br/>
-
+                <span>{this.state.lastFooMessage}</span>
                 <br/>
-                <input placeholder={"Type something here.."}/>
 
             </div>
         );

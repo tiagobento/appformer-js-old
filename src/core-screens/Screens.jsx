@@ -11,10 +11,10 @@ export class ReactComponentScreen extends AppFormer.Screen {
     constructor() {
         super();
         this.af_componentId = "AAA-this-is-the-screen-id";
-        this.af_componentTitle = "This is a React screen";
+        this.af_componentTitle = "React Component";
         this.af_subscriptions = () => ({
-            bang: time => this.onBang(time),
-            reverseBang: time => this.onBang(time.split("").reverse().join(""))
+            fooMessage: message => this.onFoo(message),
+            reverseFooMessage: message => this.onFoo(message.split("").reverse().join(""))
         });
     }
 
@@ -33,7 +33,7 @@ export class ReactComponentScreen extends AppFormer.Screen {
     }
 
     af_componentRoot() {
-        return <DemoApp number={this.af_componentId} onBang={o => this.onBang = o}/>;
+        return <DemoApp number={this.af_componentId} onFoo={o => this.onFoo = o}/>;
     }
 
 }
@@ -43,17 +43,27 @@ export class PureDomElementScreen extends AppFormer.Screen {
     constructor() {
         super();
         this.af_componentId = "pure-dom-element-screen";
-        this.af_componentTitle = "Pure DOM Elements screen";
+        this.af_componentTitle = "Pure DOM Elements Component";
+        this.span = document.createElement("span");
         this.af_subscriptions = () => ({
-            alertEvent: message => alert(message),
-            bang: message => alert(message),
+            popupEvent: message => alert(message),
+            fooMessage: message => this.span.textContent = message,
         });
     }
 
     af_componentRoot() {
         const button = document.createElement("button");
         button.textContent = "This is a pure DOM Button element";
-        return button;
+
+        const label = document.createElement("label");
+        label.textContent = "This is also a Foo Message: ";
+
+        const div = document.createElement("div");
+        div.appendChild(button);
+        div.appendChild(document.createElement("br"));
+        div.appendChild(label);
+        div.appendChild(this.span);
+        return div;
     }
 }
 
@@ -62,7 +72,8 @@ export class StringElementScreen extends AppFormer.Screen {
     constructor() {
         super();
         this.af_componentId = "string-template-screen";
-        this.af_componentTitle = "HTML String screen";
+        this.af_componentTitle = "Pure HTML String Component";
+        this.af_subscriptions = () => {};
     }
 
     af_onMayClose() {
@@ -71,7 +82,7 @@ export class StringElementScreen extends AppFormer.Screen {
     }
 
     af_componentRoot() {
-        return "\<div\>Hi, i'm a simple pure string template\</div\>";
+        return "Hi, i'm a simple pure string template";
     }
 }
 
