@@ -27,12 +27,7 @@ export class Bridge {
     root: () => Root.Component;
 
     constructor(callback: () => void) {
-        let root = <Root.Component exposing={self => this.root = self}/>;
-        render(root, this.findRootContainer(), callback);
-    }
-
-    private findRootContainer() {
-        return document.getElementById("appformer-root");
+        render(<Root.Component exposing={root => this.root = root}/>, document.body, callback);
     }
 
     registerScreen(screen: AppFormer.Screen) {
@@ -98,20 +93,20 @@ namespace Root {
             return all;
         }
 
-        diff<T>(a: T[], b: T[]): T[] {
-            return a.filter((i) => b.indexOf(i) < 0);
-        }
 
         componentDidUpdate(prevProps: Readonly<Props>,
                            prevState: Readonly<State>,
                            snapshot?: any): void {
 
-            this.diff(prevState.screens, this.state.screens).forEach(removedScreen => {
+            const diff = (a: AppFormer.Screen[],
+                          b: AppFormer.Screen[]) => a.filter((i) => b.indexOf(i) < 0);
+
+            diff(prevState.screens, this.state.screens).forEach(removedScreen => {
                 console.info(`Closing ${removedScreen.af_componentId}`);
                 removedScreen.af_onClose();
             });
 
-            this.diff(this.state.screens, prevState.screens).forEach(newScreen => {
+            diff(this.state.screens, prevState.screens).forEach(newScreen => {
 
                 console.info(`Opening ${newScreen.af_componentId}`);
 
@@ -136,36 +131,32 @@ namespace Root {
         }
 
         render() {
-            return (
+            return <div className={"af-js-root"}>
 
-                <div id={"appformer-js-root"}
-                     style={{
-                         padding: "10px", fontFamily: "Helvetica", fontWeight: "lighter",
-                     }}>
+                <h1>Welcome to AppFormer.js</h1>
 
-                    <h1>Welcome to AppFormer.js</h1>
+                <EventsConsolePanel.Component
+                    subscriptions={this.subscriptionsOfAllOpenScreens()}/>
 
-                    <EventsConsolePanel.Component
-                        subscriptions={this.subscriptionsOfAllOpenScreens()}/>
+                {this.state.screens.map(screen => (
 
-                    {this.state.screens.map(screen => (
+                    <ScreenContainer.Component key={screen.af_componentId}
+                                               containerId={this.containerId(screen)}
+                                               screen={screen}
+                                               onClose={() => this.removeScreen(screen)}/>
 
-                        <ScreenContainer.Component key={screen.af_componentId}
-                                                   screen={screen}
-                                                   containerId={this.containerId(screen)}
-                                                   onClose={() => this.removeScreen(screen)}/>
-
-                    ))}
-                </div>
-
-            );
+                ))}
+            </div>;
         }
     }
 }
 
 namespace ScreenContainer {
-    export type Props = {
-        containerId: string, screen: AppFormer.Screen, onClose: () => void,
+
+    export interface Props {
+        containerId: string;
+        screen: AppFormer.Screen;
+        onClose: () => void;
     }
 
     export class Component extends React.Component<Props, {}> {
@@ -176,27 +167,21 @@ namespace ScreenContainer {
 
         render() {
             const screen = this.props.screen;
-            return <div key={screen.af_componentId}
+            return <div className={"af-screen"}
+                        key={screen.af_componentId}
                         onFocus={() => screen.af_onFocus()}
-                        onBlur={() => screen.af_onLostFocus()}
-                        style={{
-                            borderRadius: "5px",
-                            border: "0.5px solid #ccc",
-                            marginBottom: "20px",
-                            padding: "15px",
-                            backgroundColor: "white",
-                            boxShadow: "0px 5px 8px -4px #ccc",
-                        }}>
+                        onBlur={() => screen.af_onLostFocus()}>
 
-
-                <h4 style={{color: "green"}}>
-                    {screen.af_componentTitle}
+                <h4>
+                    <span>{screen.af_componentTitle}</span>
                     &nbsp;&nbsp;
                     <a href="#" onClick={() => this.props.onClose()}>Close</a>
                 </h4>
 
                 <div id={this.props.containerId}>
                     {/*Empty on purpose*/}
+                    {/*This is where the screens will be rendered on.*/}
+                    {/*Each screens gets a fresh container*/}
                 </div>
             </div>;
         }

@@ -1,5 +1,5 @@
 import * as React from "react";
-import * as Core from "core/index";
+import * as Core from "core";
 
 export namespace AppFormer {
 
