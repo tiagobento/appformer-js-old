@@ -1,5 +1,5 @@
 import * as CoreScreens from "core-screens";
 
-// Reference core-screens/index.jsx to that it calls its init() function.
+// Reference core-screens/index.jsx so that it gets registered
 // noinspection BadExpressionStatementJS
 CoreScreens;

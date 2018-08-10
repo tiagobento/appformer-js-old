@@ -12,8 +12,8 @@ module.exports = {
     externals: {
         // 'core': "core",
         /* Comment the two lines below when running npm start */
-        'react': "React",
-        'react-dom': "ReactDOM"
+        // 'react': "React",
+        // 'react-dom': "ReactDOM"
     },
     output: {
         path: path.resolve(__dirname, 'dist'),

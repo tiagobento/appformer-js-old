@@ -1,56 +1,27 @@
-export interface AppFormerScreen {
+import * as Internal from "core/Internal";
+import {AppFormer} from "core/Components";
 
-    af_componentId: string;
-    af_componentTitle: string;
-    af_subscriptions: () => any;
+const bridge = (window as any).appformerGwtBridge || new Internal.Bridge(() => {
+    console.info("Finished mounting AppFormer JS");
+});
 
-    af_onOpen(): void
+export const render = Internal.render;
 
-    af_onFocus(): void
-
-    af_onLostFocus(): void
-
-    af_onMayClose(): boolean
-
-    af_onClose(): void
-
-    af_onShutdown(): void
-
-    af_componentRoot(): any
-
+export function goTo(path: string) {
+    return bridge.goTo(path);
 }
 
-export abstract class DefaultAppFormerScreen implements AppFormerScreen {
+export function register(components: any) {
+    for (let component in components) {
+        if (components.hasOwnProperty(component)) {
 
-    af_componentId: string;
-    af_componentTitle: string;
-    af_subscriptions: () => any;
+            if (components[component].prototype instanceof AppFormer.Screen) {
+                bridge.registerScreen(new components[component]());
+            }
 
-    protected constructor(id: string, title: string) {
-
-        this.af_componentId = id;
-        this.af_componentTitle = title;
+            else {
+                //TODO: Register other kinds of components
+            }
+        }
     }
-
-    af_onOpen(): void {
-    }
-
-    af_onFocus(): void {
-    }
-
-    af_onLostFocus(): void {
-    }
-
-    af_onMayClose(): boolean {
-        return true;
-    }
-
-    af_onClose(): void {
-    }
-
-    af_onShutdown(): void {
-    }
-
-    abstract af_componentRoot(): any;
-
 }
