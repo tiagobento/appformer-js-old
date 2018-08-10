@@ -42,6 +42,7 @@ export class PureDomElementScreen extends DefaultAppFormerScreen {
         super("pure-dom-element-screen", "Pure DOM Elements screen");
         this.af_subscriptions = () => ({
             alertEvent: message => alert(message),
+            bang: message => alert(message),
         });
     }
 

@@ -9,11 +9,16 @@ export const bridge = (window as any).appformerGwtBridge || new AppFormerJsBridg
 });
 
 export function register(components: any) {
-    for (let c in components) {
-        if (components.hasOwnProperty(c) && components[c].prototype instanceof DefaultAppFormerScreen) {
-            let screen = new components[c]();
-            console.info(`Registering screen ${screen.af_componentId}`);
-            bridge.registerScreen(screen);
+    for (let component in components) {
+        if (components.hasOwnProperty(component)) {
+
+            if (components[component].prototype instanceof DefaultAppFormerScreen) {
+                bridge.registerScreen(new components[component]());
+            }
+
+            else {
+                //TODO: Register other kinds of components
+            }
         }
     }
 }

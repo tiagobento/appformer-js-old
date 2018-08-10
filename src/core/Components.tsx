@@ -47,11 +47,32 @@ class AppFormerJsRoot extends React.Component<AppFormerJsRootProps, AppFormerJsR
         }
     }
 
+    //FIXME: There's probably a much better way to do that without increasing the stack size too much.
     subscriptionsOfAllOpenScreens() {
-        return this.state.screens
+
+        let all: any = {};
+
+        const subscriptions = this.state.screens
             .filter(s => s.af_subscriptions)
-            .map(s => s.af_subscriptions())
-            .reduce((a, b) => ({...a, ...b}), {});
+            .map(s => s.af_subscriptions() as any);
+
+        subscriptions.forEach(subscription => {
+            for (const channel in subscription) {
+                if (subscription.hasOwnProperty(channel)) {
+                    if (!all[channel]) {
+                        all[channel] = subscription[channel];
+                    } else {
+                        const prev = all[channel];
+                        all[channel] = (a: any) => {
+                            prev(a);
+                            (subscription[channel] as any)(a);
+                        };
+                    }
+                }
+            }
+        });
+
+        return all;
     }
 
     diff<T>(a: T[], b: T[]): T[] {
@@ -63,16 +84,16 @@ class AppFormerJsRoot extends React.Component<AppFormerJsRootProps, AppFormerJsR
                        snapshot?: any): void {
 
         this.diff(prevState.screens, this.state.screens).forEach(removedScreen => {
-            console.info(`Removing ${removedScreen.af_componentId}`);
+            console.info(`Closing ${removedScreen.af_componentId}`);
             removedScreen.af_onClose();
         });
 
         this.diff(this.state.screens, prevState.screens).forEach(newScreen => {
 
-            console.info(`Rendering ${newScreen.af_componentId}`);
+            console.info(`Opening ${newScreen.af_componentId}`);
 
             Core.render(newScreen.af_componentRoot(),
-                        document.getElementById(`screen-container-${newScreen.af_componentId}`),
+                        document.getElementById(this.containerId(newScreen)),
                         () => console.info(`Rendered ${newScreen.af_componentId}`));
         });
     }
@@ -82,6 +103,10 @@ class AppFormerJsRoot extends React.Component<AppFormerJsRootProps, AppFormerJsR
             console.info(`Shutting down ${screen.af_componentId}`);
             screen.af_onShutdown();
         });
+    }
+
+    containerId(screen: DefaultAppFormerScreen) {
+        return `screen-container-${screen.af_componentId}`
     }
 
     render() {
@@ -98,7 +123,10 @@ class AppFormerJsRoot extends React.Component<AppFormerJsRootProps, AppFormerJsR
 
                 {this.state.screens.map(screen => (
 
-                    <AppFormerJsScreen screen={screen} onClose={() => this.removeScreen(screen)}/>
+                    <AppFormerJsScreen key={screen.af_componentId}
+                                       screen={screen}
+                                       containerId={this.containerId(screen)}
+                                       onClose={() => this.removeScreen(screen)}/>
 
                 ))}
             </div>
@@ -107,7 +135,7 @@ class AppFormerJsRoot extends React.Component<AppFormerJsRootProps, AppFormerJsR
     }
 }
 
-type AppFormerJsScreenProps = { screen: DefaultAppFormerScreen, onClose: () => void }
+type AppFormerJsScreenProps = { containerId: string, screen: DefaultAppFormerScreen, onClose: () => void }
 
 class AppFormerJsScreen extends React.Component<AppFormerJsScreenProps, {}> {
 
@@ -125,6 +153,7 @@ class AppFormerJsScreen extends React.Component<AppFormerJsScreenProps, {}> {
                         border: "0.5px solid #ccc",
                         marginBottom: "20px",
                         padding: "15px",
+                        backgroundColor: "white",
                         boxShadow: "0px 5px 8px -4px #ccc",
                     }}>
 
@@ -135,7 +164,7 @@ class AppFormerJsScreen extends React.Component<AppFormerJsScreenProps, {}> {
                 <a href="#" onClick={() => this.props.onClose()}>Close</a>
             </h4>
 
-            <div id={`screen-container-${screen.af_componentId}`}>
+            <div id={this.props.containerId}>
                 {/*Empty on purpose*/}
             </div>
         </div>;
@@ -159,16 +188,22 @@ class EventsConsolePanel extends React.Component<EventsConsolePanelProps, { bang
     render() {
         return (
 
-            <div style={{border: "2px dotted blue", margin: "10px", padding: "10px"}}>
+            <div
+                style={{
+                    borderRadius: "5px", margin: "10px", padding: "10px 30px 30px 30px", backgroundColor: "#8fa7b3",
+                }}>
 
-                <h2>Events simulation console</h2>
+                <h2 style={{fontWeight: "lighter"}}>Events simulation console</h2>
 
                 {this.state.channel && <>
-                    <select onChange={e => this.setState({channel: e.target.value})}
-                            value={this.state.channel}>
+
+                    <select value={this.state.channel}
+                            onChange={e => this.setState({channel: e.target.value})}>
+
                         {Object.keys(this.props.subscriptions).map(channel => {
                             return <option key={channel} value={channel}>{channel}</option>
                         })}
+
                     </select>
 
                     &nbsp;
@@ -179,7 +214,7 @@ class EventsConsolePanel extends React.Component<EventsConsolePanelProps, { bang
                     &nbsp;
 
                     <button onClick={() => this.sendBang()}>
-                        Send bang event!
+                        Send event!
                     </button>
                 </>}
 
