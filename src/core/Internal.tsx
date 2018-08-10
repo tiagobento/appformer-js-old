@@ -34,6 +34,10 @@ export class Bridge {
         this.root().registerScreen(screen);
     }
 
+    get(path: string, params: any[]) {
+        console.info("Requested " + path);
+    }
+
     goTo(path: string) {
         alert(`Go to ${path} called!`);
     }
@@ -164,9 +168,6 @@ namespace Root {
                 </div>
 
 
-                <h1 style={{textAlign: "center"}}>Welcome to AppFormer.js</h1>
-
-
                 {this.state.openScreens.map(screen => (
 
                     <ScreenContainer.Component key={screen.af_componentId}
@@ -175,6 +176,8 @@ namespace Root {
                                                onClose={() => this.closeScreen(screen)}/>
 
                 ))}
+
+                <CoolBackground/>
             </div>;
         }
     }
@@ -283,4 +286,42 @@ namespace EventsConsolePanel {
             );
         }
     }
+}
+
+function CoolBackground() {
+    return <>
+        <h1 style={{
+            position: "absolute",
+            top: "-150px",
+            left: "-120px",
+            margin: 0,
+            zIndex: -20,
+            fontSize: "60em",
+            maxHeight: "0",
+            textAlign: "left",
+            fontWeight: "lighter",
+            opacity: 0.02,
+            color: "black"
+        }}>App</h1>
+
+        <h1 style={{
+            position: "absolute",
+            top: "384px",
+            left: "170px",
+            marginTop: "100px",
+            zIndex: -20,
+            fontSize: "30em",
+            maxHeight: "0",
+            textAlign: "left",
+            fontWeight: "lighter",
+            opacity: 0.04,
+            color: "black"
+        }}>Former.js</h1>
+
+        <hr style={{position: "absolute", top: "922px", width: "100%"}}/>
+
+        <span style={{
+            top: "895px", position: "absolute", right: 0, padding: "10px"
+        }}>AppFormer.js</span>
+    </>
 }

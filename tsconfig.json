@@ -2,7 +2,7 @@
   "compilerOptions": {
     "baseUrl": "./src/",
     "module": "commonjs",
-    "target": "es2015",
+    "target": "es5",
     "sourceMap": true,
     "outDir": "./src/",
     "noImplicitAny": true,

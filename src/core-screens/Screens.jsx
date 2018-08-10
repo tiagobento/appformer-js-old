@@ -1,5 +1,5 @@
 import React from "react";
-import {AppFormer} from "core"
+import {AppFormer, get} from "core"
 import {DemoApp} from "./Components";
 
 export class InoffensiveNonScreenClass {
@@ -19,7 +19,15 @@ export class ReactComponentScreen extends AppFormer.Screen {
     }
 
     af_onOpen() {
-        console.info(`Opened ${this.af_componentId} :: ${this.af_componentTitle}`);
+        get("org.uberfire.shared.MessageService|hello", []).then(msg => {
+            console.info(`Opened ${this.af_componentId} :: ${this.af_componentTitle} (${msg})`);
+            return get("org.uberfire.shared.MessageService|hello:java.lang.String", ["foo"]);
+        }).then(msg => {
+            console.info(`Second call returned (${msg})`);
+            return get("org.uberfire.shared.MessageService|muteHello", []);
+        }).then(msg => {
+            console.info(`Third call returned (${msg})`);
+        });
     }
 
     af_onFocus() {
@@ -73,7 +81,8 @@ export class StringElementScreen extends AppFormer.Screen {
         super();
         this.af_componentId = "string-template-screen";
         this.af_componentTitle = "Pure HTML String Component";
-        this.af_subscriptions = () => {};
+        this.af_subscriptions = () => {
+        };
     }
 
     af_onMayClose() {
