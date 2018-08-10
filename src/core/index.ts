@@ -1,28 +1,27 @@
-import * as React from "react";
-import * as ReactDOM from "react-dom";
 import {DefaultAppFormerScreen} from "core/API";
+import {AppFormerJsMockBridge} from "core";
 
-export * from './Clazz';
 export * from './Components';
 export * from './API';
+
+export const bridge = (window as any).appformerGwtBridge || new AppFormerJsMockBridge(() => {
+    console.info("Finished mounting AppFormer JS");
+});
 
 export function register(components: any) {
     for (let c in components) {
         if (components.hasOwnProperty(c) && components[c].prototype instanceof DefaultAppFormerScreen) {
             let screen = new components[c]();
             console.info(`Registering screen ${screen.af_componentId}`);
-            (<any>window).appformerBridge.registerScreen(screen);
+            bridge.registerScreen(screen);
         }
     }
 }
 
 
-export function render(component: React.ReactElement<any>,
-                       container: HTMLElement) {
-
-    ReactDOM.render(component, container);
-}
-
 //Expose this module as a global variable
-(<any>window).appformer = this;
+(window as any).appformer = this;
+
+
+
 

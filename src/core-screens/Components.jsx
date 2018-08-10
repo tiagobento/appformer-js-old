@@ -5,7 +5,8 @@ export class DemoApp extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = {count: 0};
+        this.state = {count: 0, lastBang: "0"};
+        this.props.onBang(time => this.setState({lastBang: time}));
     }
 
     add() {
@@ -22,16 +23,22 @@ export class DemoApp extends React.Component {
 
     render() {
         return (
-            <div className="react-app-example" style={{padding: "20px"}}>
-                <h1>This is a React application</h1>
+            <div className="react-app-example">
+
                 <ExampleList name={"Random stuff"} id={this.props.number}/>
 
                 <span>Count: {this.state.count}</span>
                 <br/>
                 <button className={"btn btn-primary btn-sm"} onClick={() => this.add()}> +</button>
                 <button className={"btn btn-primary btn-sm"} onClick={() => this.subtract()}> -</button>
+                <br/>
 
-                <input placeholder={"Type here.."}/>
+                <br/>
+                <span>Last bang: {this.state.lastBang}</span>
+                <br/>
+
+                <br/>
+                <input placeholder={"Type something here.."}/>
 
             </div>
         );

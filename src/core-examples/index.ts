@@ -1,6 +1,5 @@
-import {FirstScreen} from "core-screens/Screens"
-import * as ReactDOM from "react-dom";
+import * as CoreScreens from "core-screens";
 
-ReactDOM.render(new FirstScreen().af_componentRoot(), document.getElementById("appformer-react-example-root"));
-
-(<any>window).$goToPlace = (path : string) => alert(`Go to ${path} called!`);
+// Reference core-screens/index.jsx to that it calls its init() function.
+// noinspection BadExpressionStatementJS
+CoreScreens;

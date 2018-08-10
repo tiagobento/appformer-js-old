@@ -1,17 +1,20 @@
 import React from "react";
 import {DemoApp} from "./Components";
-import {DefaultAppFormerScreen} from "../core"
+import {DefaultAppFormerScreen} from "core"
 
-export class Test {
+export class InoffensiveNonScreenClass {
 
 }
 
-export class FirstScreen extends DefaultAppFormerScreen {
+export class ReactComponentScreen extends DefaultAppFormerScreen {
 
     constructor() {
-        super("AAA-this-is-the-screen-id", "This is the screen title");
+        super("AAA-this-is-the-screen-id", "This is a React Component");
+        this.af_subscriptions = () => ({
+            bang: time => this.onBang(time),
+            reverseBang: time => this.onBang(time.split("").reverse().join(""))
+        });
     }
-
 
     af_onOpen() {
         console.info(`Opened ${this.af_componentId} :: ${this.af_componentTitle}`);
@@ -27,44 +30,36 @@ export class FirstScreen extends DefaultAppFormerScreen {
         return true;
     }
 
-    // af_onMayClose() {
-    //     console.info(`${this.af_componentId} may close..`);
-    //     return true;
-    // }
-
     af_componentRoot() {
-        return <DemoApp number={this.af_componentId}/>;
+        return <DemoApp number={this.af_componentId} onBang={o => this.onBang = o}/>;
     }
 
 }
 
-export class SecondScreen extends DefaultAppFormerScreen {
+export class PureDomElementScreen extends DefaultAppFormerScreen {
 
     constructor() {
-        super("AAA-this-is-the-screen-id2", "This is the screen title2");
+        super("pure-dom-element-screen", "Pure DOM Elements component");
+        this.af_subscriptions = () => ({
+            alertEvent: message => alert(message),
+        });
     }
-
-
-    af_onOpen() {
-        console.info(`Opened ${this.af_componentId} :: ${this.af_componentTitle}`);
-    }
-
-    af_onFocus() {
-        console.info(`Focused on ${this.af_componentId}`);
-        return true;
-    }
-
-    af_onLostFocus() {
-        console.info(`Lost focus on ${this.af_componentId}`);
-        return true;
-    }
-
-    // af_onMayClose() {
-    //     console.info(`${this.af_componentId} may close..`);
-    //     return true;
-    // }
 
     af_componentRoot() {
-        return <DemoApp number={this.af_componentId}/>;
+        const button = document.createElement("button");
+        button.textContent = "This is a pure DOM Button element";
+        return button;
     }
 }
+
+export class StringElementScreen extends DefaultAppFormerScreen {
+
+    constructor() {
+        super("string-template-screen", "HTML String component");
+    }
+
+    af_componentRoot() {
+        return "\<div\>Hi, i'm a simple pure string template\</div\>";
+    }
+}
+
