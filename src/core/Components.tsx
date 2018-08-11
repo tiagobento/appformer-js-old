@@ -3,11 +3,13 @@ import * as Core from "core";
 
 export namespace AppFormer {
 
+    export type Subscriptions = { [channel: string]: (m: any) => void };
+
     export abstract class Screen {
 
         af_componentId: string;
         af_componentTitle: string;
-        af_subscriptions: () => any; //FIXME: maybe this one should be a method? Also fix its type
+        af_subscriptions: () => Subscriptions; //FIXME: maybe this one should be a method?
 
         af_onOpen(): void {
         }
@@ -51,6 +53,11 @@ export namespace AppFormer {
                             &nbsp;<a href="#">link</a>&nbsp;
                         </Link>
                         to the TodoListScreen!)
+                    </li>
+                    <li>
+                        <Link to={"dom-elements-screen"}>
+                            <a href="#">Open DOM Elements screen</a>&nbsp;
+                        </Link>
                     </li>
                 </ul>
             </div>;

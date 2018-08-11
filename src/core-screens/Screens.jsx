@@ -13,8 +13,8 @@ export class ReactComponentScreen extends AppFormer.Screen {
         this.af_componentId = "AAA-this-is-the-screen-id";
         this.af_componentTitle = "React Component";
         this.af_subscriptions = () => ({
-            fooMessage: message => this.onFoo(message),
-            reverseFooMessage: message => this.onFoo(message.split("").reverse().join(""))
+            "fooMessage": message => this.onFoo(message),
+            "reverseFooMessage": message => this.onFoo(message.split("").reverse().join(""))
         });
     }
 
@@ -38,12 +38,10 @@ export class ReactComponentScreen extends AppFormer.Screen {
 
     af_onFocus() {
         console.info(`Focused on ${this.af_componentId}`);
-        return true;
     }
 
     af_onLostFocus() {
         console.info(`Lost focus on ${this.af_componentId}`);
-        return true;
     }
 
     af_componentRoot() {
@@ -56,18 +54,18 @@ export class PureDomElementScreen extends AppFormer.Screen {
 
     constructor() {
         super();
-        this.af_componentId = "pure-dom-element-screen";
-        this.af_componentTitle = "Pure DOM Elements Component";
+        this.af_componentId = "dom-elements-screen";
+        this.af_componentTitle = "DOM Elements Component";
         this.span = document.createElement("span");
         this.af_subscriptions = () => ({
-            popupEvent: message => alert(message),
-            fooMessage: message => this.span.textContent = message,
+            "popupEvent": message => alert(message),
+            "fooMessage": message => this.span.textContent = message,
         });
     }
 
     af_componentRoot() {
         const button = document.createElement("button");
-        button.textContent = "This is a pure DOM Button element";
+        button.textContent = "This is a HTMLButton element";
 
         const label = document.createElement("label");
         label.textContent = "This is also a Foo Message: ";

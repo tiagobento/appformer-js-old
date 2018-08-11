@@ -39,13 +39,13 @@ export class Bridge {
     }
 
     goTo(path: string) {
-        alert(`Go to ${path} called!`);
+        this.root().openScreenWithId(path);
     }
 }
 
 namespace Root {
-    export type Props = { exposing: (self: () => Component) => void };
-    export type State = { screens: AppFormer.Screen[], openScreens: AppFormer.Screen[] };
+    type Props = { exposing: (self: () => Component) => void };
+    type State = { screens: AppFormer.Screen[], openScreens: AppFormer.Screen[] };
 
     export class Component extends React.Component<Props, State> {
 
@@ -55,27 +55,54 @@ namespace Root {
             this.props.exposing(() => this);
         }
 
+        reducers = {
+            "registerScreen": (screen: AppFormer.Screen) => (prevState: State): any => {
+                return {
+                    screens: [...prevState.screens, screen],
+                    openScreens: [...prevState.openScreens, screen]
+                }
+            },
+
+            "closeScreen": (screen: AppFormer.Screen) => (prevState: State): any => {
+                if (screen.af_onMayClose()) {
+                    return {openScreens: prevState.openScreens.filter(s => s !== screen)};
+                }
+            },
+
+            "openScreen": (screen: AppFormer.Screen) => (prevState: State): any => {
+                if (!this.isOpen(screen)) {
+                    return {openScreens: [...prevState.openScreens, screen]};
+                }
+            },
+
+            "openScreenWithId": (screenId: string) => (prevState: State): any => {
+                let screen = prevState.screens.filter(s => s.af_componentId === screenId).pop();
+                return screen ? this.reducers.openScreen(screen)(prevState) : prevState;
+            }
+        };
+
         registerScreen(screen: AppFormer.Screen) {
-            this.setState(prevState => ({
-                screens: [...prevState.screens, screen],
-                openScreens: [...prevState.openScreens, screen]
-            }));
+            this.setState(this.reducers.registerScreen(screen));
+        }
+
+        openScreenWithId(screenId: string) {
+            this.setState(this.reducers.openScreenWithId(screenId));
         }
 
         openScreen(screen: AppFormer.Screen) {
-            if (!this.isOpen(screen)) {
-                this.setState(prevState => ({
-                    openScreens: [...prevState.openScreens, screen]
-                }));
-            }
+            this.setState(this.reducers.openScreen(screen));
         }
 
         closeScreen(screen: AppFormer.Screen) {
-            if (screen.af_onMayClose()) {
-                this.setState(prevState => ({
-                    openScreens: prevState.openScreens.filter(s => s !== screen)
-                }));
-            }
+            this.setState(this.reducers.closeScreen(screen));
+        }
+
+        private isOpen(screen: AppFormer.Screen) {
+            return this.state.openScreens.indexOf(screen) >= 0;
+        }
+
+        private containerId(screen: AppFormer.Screen) {
+            return `screen-container-${screen.af_componentId}`
         }
 
         //FIXME: There's probably a much better way to do that without increasing the stack size too much.
@@ -106,11 +133,6 @@ namespace Root {
             return all;
         }
 
-        private isOpen(screen: AppFormer.Screen) {
-            return this.state.openScreens.indexOf(screen) >= 0;
-        }
-
-
         componentDidUpdate(prevProps: Readonly<Props>,
                            prevState: Readonly<State>,
                            snapshot?: any): void {
@@ -128,7 +150,7 @@ namespace Root {
                 console.info(`Opening ${newScreen.af_componentId}`);
 
                 render(newScreen.af_componentRoot(),
-                       document.getElementById(this.containerId(newScreen)),
+                       document.getElementById(this.containerId(newScreen))!,
                        () => {
                            console.info(`Rendered ${newScreen.af_componentId}`);
                            newScreen.af_onOpen();
@@ -136,15 +158,11 @@ namespace Root {
             });
         }
 
-        componentWillUnmount(): void {
+        componentWillUnmount() {
             this.state.screens.forEach(screen => {
                 console.info(`Shutting down ${screen.af_componentId}`);
                 screen.af_onShutdown();
             });
-        }
-
-        containerId(screen: AppFormer.Screen) {
-            return `screen-container-${screen.af_componentId}`
         }
 
         render() {
@@ -185,7 +203,7 @@ namespace Root {
 
 namespace ScreenContainer {
 
-    export interface Props {
+    interface Props {
         containerId: string;
         screen: AppFormer.Screen;
         onClose: () => void;
@@ -225,9 +243,9 @@ namespace ScreenContainer {
 
 
 namespace EventsConsolePanel {
-    //FIXME: fix subscriptions type (Map<String, Consumer<Object>)
-    export type Props = { subscriptions: any }
-    export type State = { event: string, channel?: string }
+
+    type Props = { subscriptions: AppFormer.Subscriptions }
+    type State = { event: string, channel?: string }
 
     export class Component extends React.Component<Props, State> {
 
@@ -237,11 +255,13 @@ namespace EventsConsolePanel {
         }
 
         componentWillReceiveProps(nextProps: Readonly<Props>, nextContext: any): void {
-            this.setState({channel: Object.keys(nextProps.subscriptions).sort()[0] || null});
+            this.setState({channel: Object.keys(nextProps.subscriptions).sort()[0] || undefined});
         }
 
         private sendEvent() {
-            this.props.subscriptions[this.state.channel](this.state.event);
+            if (this.state.channel) {
+                this.props.subscriptions[this.state.channel!](this.state.event)
+            }
         }
 
         render() {

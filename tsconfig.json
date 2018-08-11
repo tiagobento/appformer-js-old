@@ -7,6 +7,7 @@
     "sourceMap": true,
     "outDir": "./src/",
     "noImplicitAny": true,
+    "strictNullChecks": true,
     "experimentalDecorators": true,
     "allowJs": true,
     "jsx": "react"
