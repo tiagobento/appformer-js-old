@@ -63,6 +63,10 @@ export class PureDomElementScreen extends AppFormer.Screen {
         });
     }
 
+    af_onMayClose() {
+        return this.span.textContent === "close me!";
+    }
+
     af_componentRoot() {
         const button = document.createElement("button");
         button.textContent = "This is a HTMLButton element";
@@ -90,12 +94,32 @@ export class StringElementScreen extends AppFormer.Screen {
     }
 
     af_onMayClose() {
-        alert("Sorry, this screen is UNCLOSEABLE!");
-        return false;
+        return true;
     }
 
     af_componentRoot() {
         return "Hi, i'm a simple pure string template";
+    }
+}
+
+export class HomePerspective extends AppFormer.Perspective {
+
+    constructor() {
+        super();
+        this.id = "home-perspective";
+        this.screens = ["string-template-screen", "AAA-this-is-the-screen-id"];
+        this.default = true;
+    }
+}
+
+
+export class OtherPerspective extends AppFormer.Perspective {
+
+    constructor() {
+        super();
+        this.id = "other-perspective";
+        this.screens = ["string-template-screen", "dom-elements-screen"];
+        this.default = false;
     }
 }
 

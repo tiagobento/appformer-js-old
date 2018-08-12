@@ -9,6 +9,7 @@
             background-color: #f3f3f3;
             padding: 0;
             margin: 0;
+            height: 100%;
         }
 
         body {
@@ -42,32 +43,28 @@
             color: black;
             outline: none;
             font-size: 0.8em;
+            padding: 5px;
         }
 
-        button:hover {
+        button:hover:enabled {
             border-color: #82b3ff;
             color: #82b3ff;
             cursor: pointer;
         }
 
-        button:active {
+        button:active:enabled {
             background-color: #82b3ff;
             color: white;
         }
 
-        button[disabled] {
+        button:disabled {
             opacity: 0.5;
-            cursor: text;
-        }
-
-        button[disabled]:hover {
-            background-color: white;
+            cursor: default;
         }
 
         .title {
             margin: -1px -1px 10px -1px;
             padding: 10px;
-            border-radius: 5px 5px 0 0;
             border: 1px solid black;
             background-color: #2e2e2e;
             min-height: 40px;
@@ -110,8 +107,7 @@
 
         .af-events-console {
             position: absolute;
-            top: 815px;
-            border-radius: 5px;
+            bottom: 0;
             margin: 10px;
             background-color: #cbcbcc;
             border: 1px solid #666;

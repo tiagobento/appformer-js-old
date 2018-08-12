@@ -34,6 +34,17 @@ export namespace AppFormer {
 
     }
 
+    export abstract class Perspective {
+        id: string;
+        screens: string[];
+        default: boolean;
+
+        has(screen: AppFormer.Screen | string) {
+            const id = typeof screen === 'string' ? screen : screen.af_componentId;
+            return this.screens.indexOf(id) > -1;
+        }
+    }
+
     export const Link = (props: { to: string, children: any }) => (
         <span onClick={() => Core.goTo(props.to)}>
             {props.children}

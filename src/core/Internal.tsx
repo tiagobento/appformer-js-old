@@ -34,78 +34,146 @@ export class Bridge {
         this.root().registerScreen(screen);
     }
 
-    get(path: string, params: any[]) {
-        return Promise.reject("Sorry, RPC mocks are not available yet :(");
+    registerPerspective(perspective: AppFormer.Perspective) {
+        this.root().registerPerspective(perspective);
     }
 
     goTo(path: string) {
         this.root().openScreenWithId(path);
     }
+
+    get(path: string, params: any[]) {
+        return Promise.reject("Sorry, RPC mocks are not available yet :(");
+    }
 }
 
-namespace Root {
+export namespace Root {
     type Props = { exposing: (self: () => Component) => void };
-    type State = { screens: AppFormer.Screen[], openScreens: AppFormer.Screen[] };
+
+    interface State {
+        currentPerspective?: AppFormer.Perspective;
+        perspectives: AppFormer.Perspective[];
+        screens: AppFormer.Screen[];
+        openScreens: AppFormer.Screen[];
+        canBeClosed: (thing: AppFormer.Screen | AppFormer.Perspective) => boolean;
+    }
 
     export class Component extends React.Component<Props, State> {
 
         constructor(props: Props) {
             super(props);
-            this.state = {screens: [], openScreens: []};
+            this.state = {
+                currentPerspective: undefined,
+                perspectives: [],
+                screens: [],
+                openScreens: [],
+
+                //FIXME: Is there a way to put this function inside State type declaration?
+                canBeClosed: function (thing: AppFormer.Screen | AppFormer.Perspective) {
+                    if (thing instanceof AppFormer.Screen) {
+                        return this.openScreens.indexOf(thing) > -1;
+                    } else {
+                        return this.currentPerspective === thing;
+                    }
+                }
+            };
             this.props.exposing(() => this);
         }
 
-        reducers = {
-            "registerScreen": (screen: AppFormer.Screen) => (prevState: State): any => {
+        static actions = {
+
+            "registerPerspective": (perspective: AppFormer.Perspective) => (state: State): any => {
+                //FIXME: First default perspective found is the one that wins.
                 return {
-                    screens: [...prevState.screens, screen],
-                    openScreens: [...prevState.openScreens, screen]
+                    perspectives: [...state.perspectives, perspective],
+                    currentPerspective: state.currentPerspective
+                        ? state.currentPerspective
+                        : perspective.default ? perspective : undefined,
+                    openScreens: perspective.default
+                        ? state.screens.filter((screen) => perspective.has(screen))
+                        : state.openScreens
                 }
             },
 
-            "closeScreen": (screen: AppFormer.Screen) => (prevState: State): any => {
-                if (screen.af_onMayClose()) {
-                    return {openScreens: prevState.openScreens.filter(s => s !== screen)};
+            "openPerspective": (perspective: AppFormer.Perspective) => (state: State): any => {
+
+                let closeableScreens = state.openScreens
+                    .map(screen => ({
+                        screen: screen,
+                        canBeClosed: screen.af_onMayClose()
+                    }))
+                    .filter(t => !t.canBeClosed)
+                    .map(t => t.screen.af_componentId);
+
+                if (closeableScreens.length > 0) {
+                    const msg = `[${closeableScreens}] cannot be closed at the moment. Force close and proceed to open ${perspective.id}?`;
+                    if (!confirm(msg)) {
+                        return state;
+                    }
+                }
+
+                return {
+                    currentPerspective: perspective,
+                    openScreens: state.screens.filter(screen => perspective.has(screen))
+                };
+            },
+
+            "registerScreen": (screen: AppFormer.Screen) => (state: State): any => {
+                return {
+                    screens: [...state.screens, screen]
+                };
+            },
+
+            "closeScreen": (screen: AppFormer.Screen) => (state: State): any => {
+                const msg = `Screen ${screen.af_componentId} cannot be closed. Do you want to force it?`;
+                if (screen.af_onMayClose() || confirm(msg)) {
+                    return {openScreens: state.openScreens.filter(s => s !== screen)};
+                } else {
+                    return state;
                 }
             },
 
-            "openScreen": (screen: AppFormer.Screen) => (prevState: State): any => {
-                if (!this.isOpen(screen)) {
-                    return {openScreens: [...prevState.openScreens, screen]};
+            "openScreen": (screen: AppFormer.Screen) => (state: State): any => {
+                if (!state.canBeClosed(screen)) {
+                    return {openScreens: [...state.openScreens, screen]};
                 }
             },
 
-            "openScreenWithId": (screenId: string) => (prevState: State): any => {
-                let screen = prevState.screens.filter(s => s.af_componentId === screenId).pop();
-                return screen ? this.reducers.openScreen(screen)(prevState) : prevState;
+            "openScreenWithId": (screenId: string) => (state: State): any => {
+                const screen = state.screens.filter(s => s.af_componentId === screenId).pop();
+                return screen ? Component.actions.openScreen(screen)(state) : state;
             }
         };
 
         registerScreen(screen: AppFormer.Screen) {
-            this.setState(this.reducers.registerScreen(screen));
+            this.setState(Component.actions.registerScreen(screen));
+        }
+
+        registerPerspective(perspective: AppFormer.Perspective) {
+            this.setState(Component.actions.registerPerspective(perspective));
+        }
+
+        openPerspective(perspective: AppFormer.Perspective) {
+            this.setState(Component.actions.openPerspective(perspective));
         }
 
         openScreenWithId(screenId: string) {
-            this.setState(this.reducers.openScreenWithId(screenId));
+            this.setState(Component.actions.openScreenWithId(screenId));
         }
 
         openScreen(screen: AppFormer.Screen) {
-            this.setState(this.reducers.openScreen(screen));
+            this.setState(Component.actions.openScreen(screen));
         }
 
         closeScreen(screen: AppFormer.Screen) {
-            this.setState(this.reducers.closeScreen(screen));
+            this.setState(Component.actions.closeScreen(screen));
         }
 
-        private isOpen(screen: AppFormer.Screen) {
-            return this.state.openScreens.indexOf(screen) >= 0;
-        }
-
-        private containerId(screen: AppFormer.Screen) {
+        private static containerId(screen: AppFormer.Screen) {
             return `screen-container-${screen.af_componentId}`
         }
 
-        //FIXME: There's probably a much better way to do that without increasing the stack size too much.
+//FIXME: There's probably a much better way to do that without increasing the stack size too much.
         subscriptionsOfAllOpenScreens() {
 
             let all: any = {};
@@ -135,7 +203,7 @@ namespace Root {
 
         componentDidUpdate(prevProps: Readonly<Props>,
                            prevState: Readonly<State>,
-                           snapshot?: any): void {
+                           snapshot ?: any): void {
 
             const diff = (a: AppFormer.Screen[],
                           b: AppFormer.Screen[]) => a.filter((i) => b.indexOf(i) < 0);
@@ -150,7 +218,7 @@ namespace Root {
                 console.info(`Opening ${newScreen.af_componentId}`);
 
                 render(newScreen.af_componentRoot(),
-                       document.getElementById(this.containerId(newScreen))!,
+                       document.getElementById(Component.containerId(newScreen))!,
                        () => {
                            console.info(`Rendered ${newScreen.af_componentId}`);
                            newScreen.af_onOpen();
@@ -166,37 +234,62 @@ namespace Root {
         }
 
         render() {
+
             return <div className={"af-js-root"}>
+
+                {/*<CoolBackground/>*/}
 
                 <EventsConsolePanel.Component
                     subscriptions={this.subscriptionsOfAllOpenScreens()}/>
 
-                <div className={"af-screens-panel"}>
-                    <div className={"contents"}>
-                        {this.state.screens.map(screen => (
-
-                            <button key={screen.af_componentId}
-                                    onClick={() => this.openScreen(screen)}
-                                    disabled={this.isOpen(screen)}>
-                                {screen.af_componentId}
-                            </button>
-
-                        ))}
-                    </div>
-                </div>
-
+                {this.ScreensPicker()}
 
                 {this.state.openScreens.map(screen => (
 
                     <ScreenContainer.Component key={screen.af_componentId}
-                                               containerId={this.containerId(screen)}
+                                               containerId={Component.containerId(screen)}
                                                screen={screen}
                                                onClose={() => this.closeScreen(screen)}/>
 
                 ))}
 
-                <CoolBackground/>
             </div>;
+        }
+
+        private ScreensPicker() {
+            return <>
+                <div className={"af-screens-panel"}>
+                    <div className={"contents"} style={{backgroundColor: "#2e2e2e"}}>
+                        {this.state.perspectives.map(perspective => (
+
+                            <button key={perspective.id}
+                                    onClick={() => this.openPerspective(perspective)}
+                                    disabled={this.state.canBeClosed(perspective)}>
+
+                                {perspective.id}
+
+                                {this.state.canBeClosed(perspective) && <Check/>}
+                            </button>
+
+                        ))}
+                    </div>
+
+                    <div className={"contents"}>
+                        {this.state.screens.map(screen => (
+
+                            <button key={screen.af_componentId}
+                                    onClick={() => this.openScreen(screen)}
+                                    disabled={this.state.canBeClosed(screen)}>
+
+                                {screen.af_componentId}
+
+                                {this.state.canBeClosed(screen) && <Check/>}
+                            </button>
+
+                        ))}
+                    </div>
+                </div>
+            </>;
         }
     }
 }
@@ -223,12 +316,7 @@ namespace ScreenContainer {
                         onBlur={() => screen.af_onLostFocus()}>
 
                 <div className={"title"}>
-                <span>
-                    <span>{screen.af_componentTitle}</span>
-                    &nbsp;&nbsp;
-                    <a style={{color: "#828282"}} href="#"
-                       onClick={() => this.props.onClose()}>Close</a>
-                </span>
+                    {this.titleBar(screen)}
                 </div>
 
                 <div className={"contents"} id={this.props.containerId}>
@@ -238,9 +326,28 @@ namespace ScreenContainer {
                 </div>
             </div>;
         }
+
+        private titleBar(screen: AppFormer.Screen) {
+            return <>
+                <span>
+                    <span>{screen.af_componentTitle}</span>
+                    &nbsp;&nbsp;
+                    <a href="#"
+                       style={{color: "#828282"}}
+                       onClick={() => this.props.onClose()}>Close</a>
+                </span>
+            </>;
+        }
     }
 }
 
+function Check() {
+    return <>
+        <span style={{color: "green"}}>
+           &nbsp;&#10003;
+        </span>
+    </>;
+}
 
 namespace EventsConsolePanel {
 
@@ -306,42 +413,4 @@ namespace EventsConsolePanel {
             );
         }
     }
-}
-
-function CoolBackground() {
-    return <>
-        <h1 style={{
-            position: "absolute",
-            top: "-150px",
-            left: "-120px",
-            margin: 0,
-            zIndex: -20,
-            fontSize: "60em",
-            maxHeight: "0",
-            textAlign: "left",
-            fontWeight: "lighter",
-            opacity: 0.02,
-            color: "black"
-        }}>App</h1>
-
-        <h1 style={{
-            position: "absolute",
-            top: "384px",
-            left: "170px",
-            marginTop: "100px",
-            zIndex: -20,
-            fontSize: "30em",
-            maxHeight: "0",
-            textAlign: "left",
-            fontWeight: "lighter",
-            opacity: 0.04,
-            color: "black"
-        }}>Former.js</h1>
-
-        <hr style={{position: "absolute", top: "922px", width: "100%"}}/>
-
-        <span style={{
-            top: "895px", position: "absolute", right: 0, padding: "10px"
-        }}>AppFormer.js</span>
-    </>
 }

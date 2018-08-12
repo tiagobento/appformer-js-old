@@ -13,13 +13,20 @@ export function goTo(path: string) {
     return bridge.goTo(path);
 }
 
-export function register(components: any) {
-    for (let component in components) {
-        if (components.hasOwnProperty(component)) {
+export function register(potentialComponents: any) {
+    for (let potentialComponent in potentialComponents) {
+        if (potentialComponents.hasOwnProperty(potentialComponent)) {
 
-            const c = components[component];
-            if (c.prototype instanceof AppFormer.Screen) {
-                bridge.registerScreen(new c());
+            const Component = potentialComponents[potentialComponent];
+
+            if (Component.prototype instanceof AppFormer.Screen) {
+                console.info(`Registering screen ${Component.prototype}`);
+                bridge.registerScreen(new Component());
+            }
+
+            else if (Component.prototype instanceof AppFormer.Perspective) {
+                console.info(`Registering perspective ${Component.prototype}`);
+                bridge.registerPerspective(new Component());
             }
 
             else {
