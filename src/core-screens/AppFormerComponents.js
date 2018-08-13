@@ -115,10 +115,10 @@ export class HomePerspective extends AppFormer.Perspective {
     }
 
     af_perspectiveRoot() {
-        return `<div>` +
-            `<div class="string-template-screen"></div>` +
-            `<div class="AAA-this-is-the-screen-id"></div>` +
-            `</div>`;
+        return `` +
+            `<div id="component-container-string-template-screen">A</div>` +
+            `<div id="component-container-AAA-this-is-the-screen-id">C</div>` +
+            ``;
     }
 }
 
@@ -134,10 +134,10 @@ export class OtherPerspective extends AppFormer.Perspective {
 
 
     af_perspectiveRoot() {
-        return `<div>` +
-            `<div class="string-template-screen"></div>` +
-            `<div class="dom-elements-screen"></div>` +
-            `</div>`;
+        return `<div><div>` +
+            `<div id="component-container-string-template-screen">A</div>` +
+            `<div id="component-container-dom-elements-screen">B</div>` +
+            `</div></div>`;
     }
 }
 

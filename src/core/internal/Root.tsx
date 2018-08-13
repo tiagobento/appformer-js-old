@@ -1,4 +1,5 @@
 import * as React from "react";
+import * as ReactDOM from "react-dom";
 import {AppFormer} from "core/Components";
 import ScreenContainer from "core/internal/ScreenContainer";
 import EventsConsolePanel from "core/internal/EventsConsolePanel";
@@ -131,28 +132,78 @@ export default class Root extends React.Component<Props, State> {
                        prevState: Readonly<State>,
                        snapshot?: any): void {
 
-        //FIXME: Check if currentPerspective exists
-
         const diff = (a: AppFormer.Screen[],
                       b: AppFormer.Screen[]) => a.filter((i) => b.indexOf(i) < 0);
 
-        diff(prevState.openScreens, this.state.openScreens).forEach(removedScreen => {
+        //FIXME: Check if currentPerspective exists
+
+        const currentPerspective = this.state.currentPerspective;
+
+        if (prevState.currentPerspective !== currentPerspective) {
+
+            const savedScreens = prevState.openScreens
+                .filter(s => currentPerspective!.has(s))
+                .map(s => ({
+                    screen: s,
+                    containerId: Root.componentContainerId(s),
+                    domContainer: document.getElementById(Root.componentContainerId(s))
+                }))
+                .filter(s => s.domContainer);
+
+
+            const currentPerspectiveContainer = document.getElementById(Root.componentContainerId(
+                currentPerspective!));
+
+
+            this.props.bridge.render(currentPerspective!.af_perspectiveRoot(),
+                                     currentPerspectiveContainer!,
+                                     () => {
+                                         savedScreens.forEach(savedScreen => {
+                                             const potentialScreenContainer = searchTree(
+                                                 currentPerspectiveContainer!,
+                                                 savedScreen.containerId)! as HTMLElement;
+                                             (potentialScreenContainer as any).replaceWith(
+                                                 savedScreen.domContainer!);
+                                         });
+                                         this.updateScreens(diff(prevState.openScreens,
+                                                                 this.state.openScreens),
+                                                            diff(this.state.openScreens,
+                                                                 prevState.openScreens));
+                                     });
+        } else {
+            this.updateScreens(diff(prevState.openScreens, this.state.openScreens),
+                               diff(this.state.openScreens, prevState.openScreens))
+        }
+    }
+
+    private updateScreens(screensToClose: AppFormer.Screen[], screensToAdd: AppFormer.Screen[]) {
+
+
+        screensToClose.forEach(removedScreen => {
             console.info(`Closing ${removedScreen.af_componentId}`);
             removedScreen.af_onClose();
             console.info(`Closed ${removedScreen.af_componentId}`);
         });
 
-        diff(this.state.openScreens, prevState.openScreens).forEach(newScreen => {
+
+        screensToAdd.forEach(newScreen => {
 
             console.info(`Opening ${newScreen.af_componentId}...`);
 
-            this.props.bridge.render(newScreen.af_componentRoot(),
-                                     document.getElementById(Root.componentContainerId(newScreen))!,
-                                     () => {
-                                         console.info(`Rendered ${newScreen.af_componentId}`);
-                                         newScreen.af_onOpen();
-                                         console.info(`Opened ${newScreen.af_componentId}...`);
-                                     });
+            const containerId = Root.componentContainerId(newScreen);
+            const screenContainer = document.getElementById(containerId) || (() => {
+                const div = document.createElement("div");
+                div.id = Root.componentContainerId(newScreen);
+                document.getElementById(Root.componentContainerId(this.state.currentPerspective!))!.appendChild(
+                    div);
+                return div;
+            })();
+
+            this.props.bridge.render(newScreen.af_componentRoot(), screenContainer!, () => {
+                console.info(`Rendered ${newScreen.af_componentId}`);
+                newScreen.af_onOpen();
+                console.info(`Opened ${newScreen.af_componentId}...`);
+            });
         });
     }
 
@@ -162,15 +213,13 @@ export default class Root extends React.Component<Props, State> {
 
             {this.Header()}
 
-
-            {this.state.openScreens.map(screen => (
-
-                <ScreenContainer key={screen.af_componentId}
-                                 containerId={Root.componentContainerId(screen)}
-                                 screen={screen}
-                                 onClose={() => this.setState(actions.closeScreen(screen))}/>
-
-            ))}
+            {this.state.currentPerspective && <>
+                <div id={Root.componentContainerId(this.state.currentPerspective!)}>
+                    {/*Empty on purpose*/}
+                </div>
+            </> || <>
+                <div><span>No perspectives found :(</span></div>
+            </>}
 
             <EventsConsolePanel screens={this.state.openScreens}/>
 
@@ -214,13 +263,17 @@ export default class Root extends React.Component<Props, State> {
     }
 }
 
-type AProps = { perspective: AppFormer.Perspective, screens: AppFormer.Screen[], onClose: (screen: AppFormer.Screen) => void }
+type AProps = { perspective: AppFormer.Perspective, screens: AppFormer.Screen[], onClose: (screen: AppFormer.Screen) => void, bridge: JsBridge }
+type AState = {}
 
-class PerspectiveContainer extends React.Component<AProps, {}> {
+class PerspectiveContainer extends React.Component<AProps, AState> {
 
     constructor(props: AProps) {
         super(props);
+    }
 
+    componentWillReceiveProps(nextProps: Readonly<AProps>, nextContext: any): void {
+        this.setState({openScreens: nextProps.screens});
     }
 
     render() {
@@ -242,3 +295,23 @@ const Check = () => <>
         &nbsp;&#10003;
     </span>
 </>;
+
+function searchTree(root: HTMLElement, id: string): Node {
+    let stack = [], node: any, ii;
+    stack.push(root);
+
+    while (stack.length > 0) {
+        node = stack.pop()!;
+        if (node instanceof HTMLElement && (node as HTMLElement).id === id) {
+            // Found it!
+            break;
+        } else if (node.children && node.children.length) {
+            for (ii = 0; ii < node.children.length; ii += 1) {
+                stack.push(node.children[ii]);
+            }
+        }
+    }
+
+    return node;
+
+}
