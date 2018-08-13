@@ -1,9 +1,6 @@
 export * from './Components';
 export * from './API';
+export * from './react/Shorthands'
 
-//Expose this module as a global variable
+//Exposes this module as a global variable
 (window as any).appformer = this;
-
-
-
-

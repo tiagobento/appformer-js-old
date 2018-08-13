@@ -1,7 +1,7 @@
 import React from "react";
-import {AppFormer} from "core";
+import {ExampleList} from "core";
 
-export class DemoApp extends React.Component {
+export default class DemoApp extends React.Component {
 
     constructor(props) {
         super(props);
@@ -25,7 +25,7 @@ export class DemoApp extends React.Component {
         return (
             <div className="react-app-example">
 
-                <AppFormer.ExampleList name={"Random stuff"} id={this.props.number}/>
+                <ExampleList name={"Random stuff"} id={this.props.number}/>
 
                 <span><b>Count: </b>{this.state.count}</span>
                 <br/>

@@ -1,13 +1,15 @@
-import * as Internal from "core/Internal";
 import {AppFormer} from "core/Components";
+import JsBridge from "core/internal/JsBridge";
 
-const bridge = (window as any).appformerGwtBridge || new Internal.Bridge(() => {
+const jsBridge = new JsBridge();
+
+const bridge = (window as any).appformerGwtBridge || jsBridge.init(() => {
     console.info("Finished mounting AppFormer JS");
 });
 
-export const render = Internal.render;
+export const render = jsBridge.render;
 
-export const get = bridge.get;
+export const RPC = bridge.RPC;
 
 export function goTo(path: string) {
     return bridge.goTo(path);

@@ -1,15 +1,36 @@
-import * as React from "react";
-import * as Core from "core";
+//
+//
+//
+//
+//FIXME: All public API methods need a revision. Their names are *temporary*.
+
 
 export namespace AppFormer {
 
-    export type Subscriptions = { [channel: string]: (m: any) => void };
+    export type Subscriptions = { [channel: string]: (event: any) => void };
+
+    export type Component = Screen | Perspective;
+
+    export abstract class Perspective {
+
+        af_componentId: Readonly<string>;
+        af_perspectiveScreens: Readonly<string[]>;
+        af_isDefaultPerspective: Readonly<boolean>;
+
+        abstract af_perspectiveRoot(): any;
+
+        public has(screen: AppFormer.Screen | string) {
+            const id = typeof screen === 'string' ? screen : screen.af_componentId;
+            return this.af_perspectiveScreens.indexOf(id) > -1;
+        }
+    }
+
 
     export abstract class Screen {
 
-        af_componentId: string;
-        af_componentTitle: string;
-        af_subscriptions: () => Subscriptions; //FIXME: maybe this one should be a method?
+        af_componentId: Readonly<string>;
+        af_componentTitle: Readonly<string>;
+        af_subscriptions: () => Subscriptions; //FIXME: Maybe this one should be a method?
 
         af_onOpen(): void {
         }
@@ -32,46 +53,5 @@ export namespace AppFormer {
 
         abstract af_componentRoot(): any;
 
-    }
-
-    export abstract class Perspective {
-        id: string;
-        screens: string[];
-        default: boolean;
-
-        has(screen: AppFormer.Screen | string) {
-            const id = typeof screen === 'string' ? screen : screen.af_componentId;
-            return this.screens.indexOf(id) > -1;
-        }
-    }
-
-    export const Link = (props: { to: string, children: any }) => (
-        <span onClick={() => Core.goTo(props.to)}>
-            {props.children}
-        </span>);
-
-    //FIXME: This is temporary \/
-    export class ExampleList extends React.Component<{ name: string, id: string }, {}> {
-        render() {
-            return <div>
-                <h4>List of {this.props.name}</h4>
-                <ul>
-                    <li>Id: {this.props.id}</li>
-                    <li>WhatsApp</li>
-                    <li>
-                        Oculus (and
-                        <Link to={"TodoListScreen"}>
-                            &nbsp;<a href="#">link</a>&nbsp;
-                        </Link>
-                        to the TodoListScreen!)
-                    </li>
-                    <li>
-                        <Link to={"dom-elements-screen"}>
-                            <a href="#">Open DOM Elements screen</a>&nbsp;
-                        </Link>
-                    </li>
-                </ul>
-            </div>;
-        }
     }
 }

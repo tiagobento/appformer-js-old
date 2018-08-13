@@ -1,6 +1,6 @@
 import React from "react";
-import {AppFormer, get} from "core"
-import {DemoApp} from "./Components";
+import {AppFormer, RPC} from "core"
+import DemoApp from "core-screens/DemoApp";
 
 export class InoffensiveNonScreenClass {
 
@@ -22,13 +22,13 @@ export class ReactComponentScreen extends AppFormer.Screen {
         console.info(`Opened ${this.af_componentId} :: ${this.af_componentTitle} (Starting to make requests..)`);
 
         Promise.resolve().then(() => {
-            return get("org.uberfire.shared.MessageService|hello", []);
+            return RPC("org.uberfire.shared.MessageService|hello", []);
         }).then(msg => {
             console.info(`First call returned (${msg})`);
-            return get("org.uberfire.shared.MessageService|hello:java.lang.String", ["foo"]);
+            return RPC("org.uberfire.shared.MessageService|hello:java.lang.String", ["foo"]);
         }).then(msg => {
             console.info(`Second call returned (${msg})`);
-            return get("org.uberfire.shared.MessageService|muteHello", []);
+            return RPC("org.uberfire.shared.MessageService|muteHello", []);
         }).then(msg => {
             console.info(`Third call returned (${msg})`);
         }).catch(e => {
@@ -45,7 +45,10 @@ export class ReactComponentScreen extends AppFormer.Screen {
     }
 
     af_componentRoot() {
-        return <DemoApp number={this.af_componentId} onFoo={o => this.onFoo = o}/>;
+        return React.createElement(DemoApp, {
+            number: this.af_componentId,
+            onFoo: o => this.onFoo = o
+        });
     }
 
 }
@@ -98,7 +101,7 @@ export class StringElementScreen extends AppFormer.Screen {
     }
 
     af_componentRoot() {
-        return "Hi, i'm a simple pure string template";
+        return '<p style="color: red"> Hi,a i\'m a simple pure string template</p>';
     }
 }
 
@@ -106,9 +109,16 @@ export class HomePerspective extends AppFormer.Perspective {
 
     constructor() {
         super();
-        this.id = "home-perspective";
-        this.screens = ["string-template-screen", "AAA-this-is-the-screen-id"];
-        this.default = true;
+        this.af_componentId = "home-perspective";
+        this.af_perspectiveScreens = ["string-template-screen", "AAA-this-is-the-screen-id"];
+        this.af_isDefaultPerspective = true;
+    }
+
+    af_perspectiveRoot() {
+        return `<div>` +
+            `<div class="string-template-screen"></div>` +
+            `<div class="AAA-this-is-the-screen-id"></div>` +
+            `</div>`;
     }
 }
 
@@ -117,9 +127,17 @@ export class OtherPerspective extends AppFormer.Perspective {
 
     constructor() {
         super();
-        this.id = "other-perspective";
-        this.screens = ["string-template-screen", "dom-elements-screen"];
-        this.default = false;
+        this.af_componentId = "other-perspective";
+        this.af_perspectiveScreens = ["string-template-screen", "dom-elements-screen"];
+        this.af_isDefaultPerspective = false;
+    }
+
+
+    af_perspectiveRoot() {
+        return `<div>` +
+            `<div class="string-template-screen"></div>` +
+            `<div class="dom-elements-screen"></div>` +
+            `</div>`;
     }
 }
 

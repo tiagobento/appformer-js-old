@@ -10,8 +10,7 @@ module.exports = {
         "core-examples/examples": './src/core-examples/index.ts'
     },
     externals: {
-        // 'core': "core",
-        /* Comment the two lines below when running npm start */
+        // 'core': "core", //FIXME: Do we want to exclude core from the build?
         'react': "React",
         'react-dom': "ReactDOM"
     },
