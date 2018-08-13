@@ -127,45 +127,16 @@ export default class Root extends React.Component<Props, State> {
         });
     }
 
-    componentDidUpdate(prevProps: Readonly<Props>,
-                       prevState: Readonly<State>,
-                       snapshot?: any): void {
-
-        //FIXME: Check if currentPerspective exists
-
-        const diff = (a: AppFormer.Screen[],
-                      b: AppFormer.Screen[]) => a.filter((i) => b.indexOf(i) < 0);
-
-        diff(prevState.openScreens, this.state.openScreens).forEach(removedScreen => {
-            console.info(`Closing ${removedScreen.af_componentId}`);
-            removedScreen.af_onClose();
-            console.info(`Closed ${removedScreen.af_componentId}`);
-        });
-
-        diff(this.state.openScreens, prevState.openScreens).forEach(newScreen => {
-
-            console.info(`Opening ${newScreen.af_componentId}...`);
-
-            this.props.bridge.render(newScreen.af_componentRoot(),
-                                     document.getElementById(Root.componentContainerId(newScreen))!,
-                                     () => {
-                                         console.info(`Rendered ${newScreen.af_componentId}`);
-                                         newScreen.af_onOpen();
-                                         console.info(`Opened ${newScreen.af_componentId}...`);
-                                     });
-        });
-    }
-
     render() {
 
         return <div className={"af-js-root"}>
 
             {this.Header()}
 
-
             {this.state.openScreens.map(screen => (
 
                 <ScreenContainer key={screen.af_componentId}
+                                 bridge={this.props.bridge}
                                  containerId={Root.componentContainerId(screen)}
                                  screen={screen}
                                  onClose={() => this.setState(actions.closeScreen(screen))}/>
@@ -214,28 +185,6 @@ export default class Root extends React.Component<Props, State> {
     }
 }
 
-type AProps = { perspective: AppFormer.Perspective, screens: AppFormer.Screen[], onClose: (screen: AppFormer.Screen) => void }
-
-class PerspectiveContainer extends React.Component<AProps, {}> {
-
-    constructor(props: AProps) {
-        super(props);
-
-    }
-
-    render() {
-        return <>
-            {this.props.screens.map(screen => (
-
-                <ScreenContainer key={screen.af_componentId}
-                                 containerId={Root.componentContainerId(screen)}
-                                 screen={screen}
-                                 onClose={() => this.props.onClose(screen)}/>
-
-            ))}
-        </>;
-    }
-}
 
 const Check = () => <>
     <span style={{color: "green"}}>

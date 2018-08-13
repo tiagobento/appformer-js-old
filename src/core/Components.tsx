@@ -5,11 +5,15 @@
 //FIXME: All public API methods need a revision. Their names are *temporary*.
 
 
+import {ReactElement} from "react";
+
 export namespace AppFormer {
 
     export type Subscriptions = { [channel: string]: (event: any) => void };
 
     export type Component = Screen | Perspective;
+
+    export type Element = ReactElement<any> | HTMLElement | string;
 
     export abstract class Perspective {
 
@@ -17,7 +21,7 @@ export namespace AppFormer {
         af_perspectiveScreens: Readonly<string[]>;
         af_isDefaultPerspective: Readonly<boolean>;
 
-        abstract af_perspectiveRoot(): any;
+        abstract af_perspectiveRoot(): Element;
 
         public has(screen: AppFormer.Screen | string) {
             const id = typeof screen === 'string' ? screen : screen.af_componentId;
@@ -51,7 +55,7 @@ export namespace AppFormer {
         af_onShutdown(): void {
         }
 
-        abstract af_componentRoot(): any;
+        abstract af_componentRoot(): Element;
 
     }
 }

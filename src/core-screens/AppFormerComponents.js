@@ -101,7 +101,7 @@ export class StringElementScreen extends AppFormer.Screen {
     }
 
     af_componentRoot() {
-        return '<p style="color: red"> Hi,a i\'m a simple pure string template</p>';
+        return '<p style="color: red"> Hi, I\'m a simple pure HTML String Template</p>';
     }
 }
 
@@ -131,7 +131,6 @@ export class OtherPerspective extends AppFormer.Perspective {
         this.af_perspectiveScreens = ["string-template-screen", "dom-elements-screen"];
         this.af_isDefaultPerspective = false;
     }
-
 
     af_perspectiveRoot() {
         return `<div>` +

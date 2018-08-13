@@ -1,16 +1,39 @@
 import * as React from "react";
+import * as ReactDOM from "react-dom";
 import {AppFormer} from "core/Components";
+import JsBridge from "core/internal/JsBridge";
 
 interface Props {
     containerId: string;
     screen: AppFormer.Screen;
     onClose: () => void;
+    bridge: JsBridge;
 }
 
 export default class ScreenContainer extends React.Component<Props, {}> {
 
     constructor(props: Props) {
         super(props);
+    }
+
+    componentDidMount(): void {
+        const screen = this.props.screen;
+        this.props.bridge.render(screen.af_componentRoot(), this.getDomContainer()!, () => {
+            console.info(`Rendered ${screen.af_componentId}`);
+            this.props.screen.af_onOpen();
+            console.info(`Opened ${screen.af_componentId}...`);
+        });
+    }
+
+    componentWillUnmount(): void {
+        const screen = this.props.screen;
+        screen.af_onClose();
+        console.info(`Unmounting ${screen.af_componentId}...`);
+        ReactDOM.unmountComponentAtNode(this.getDomContainer()!);
+    }
+
+    private getDomContainer() {
+        return document.getElementById(this.props.containerId);
     }
 
     render() {
@@ -28,7 +51,7 @@ export default class ScreenContainer extends React.Component<Props, {}> {
                 <div className={"contents"} id={this.props.containerId}>
                     {/*Empty on purpose*/}
                     {/*This is where the screens will be rendered on.*/}
-                    {/*Each screens gets a fresh container*/}
+                    {/*See `componentDidMount` and `componentWillUnmount`*/}
                 </div>
             </div>
         </>;
