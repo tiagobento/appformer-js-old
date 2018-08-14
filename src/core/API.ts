@@ -1,6 +1,8 @@
 import {AppFormer} from "core/Components";
 import JsBridge from "core/internal/JsBridge";
 
+
+
 const jsBridge = new JsBridge();
 
 const bridge = (window as any).appformerGwtBridge || jsBridge.init(() => {
@@ -11,9 +13,11 @@ export const render = jsBridge.render;
 
 export const RPC = bridge.RPC;
 
+
 export function goTo(path: string) {
     return bridge.goTo(path);
 }
+
 
 export function register(potentialComponents: any) {
     for (let potentialComponent in potentialComponents) {

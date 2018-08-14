@@ -2,11 +2,15 @@ import * as React from "react";
 import {AppFormer} from "core/Components";
 import JsBridge from "core/internal/JsBridge";
 
+
+
 interface Props {
     screen: AppFormer.Screen;
     onClose: () => void;
     bridge: JsBridge;
 }
+
+
 
 export default class ScreenContainer extends React.Component<Props, {}> {
 
@@ -14,9 +18,11 @@ export default class ScreenContainer extends React.Component<Props, {}> {
         super(props);
     }
 
+
     getSelfContainerElement() {
         return document.getElementById(ScreenContainer.getSelfContainerElementId(this.props.screen));
     }
+
 
     componentDidMount(): void {
         const screen = this.props.screen;
@@ -32,12 +38,14 @@ export default class ScreenContainer extends React.Component<Props, {}> {
         }
     }
 
+
     private invokeOnOpen() {
         console.info(`Rendered ${this.props.screen.af_componentId}`);
         console.info(`...Opening ${this.props.screen.af_componentId}...`);
         this.props.screen.af_onOpen();
         console.info(`Opened ${this.props.screen.af_componentId}.`);
     }
+
 
     componentWillUnmount(): void {
         const screen = this.props.screen;
@@ -46,39 +54,42 @@ export default class ScreenContainer extends React.Component<Props, {}> {
         console.info(`Closed ${screen.af_componentId}.`);
     }
 
+
     render() {
-        const screen = this.props.screen;
         return <>
-            <div className={"af-screen-container"}
-                 key={screen.af_componentId}
-                 onFocus={() => screen.af_onFocus()}
-                 onBlur={() => screen.af_onLostFocus()}>
+            <div key={this.props.screen.af_componentId}
+                 className={"af-screen-container"}
+                 onFocus={() => this.props.screen.af_onFocus()}
+                 onBlur={() => this.props.screen.af_onLostFocus()}>
 
                 <div className={"title"}>
-                    {this.TitleBar(screen)}
+                    {this.TitleBar(this.props.screen)}
                 </div>
 
                 <div className={"contents"}
                      key={this.props.screen.af_componentId}
                      id={`${ScreenContainer.getSelfContainerElementId(this.props.screen)}`}>
+
                     {/*Empty on purpose*/}
                     {/*This is where the screens will be rendered on.*/}
                     {/*See `componentDidMount` and `componentWillUnmount`*/}
+                    {/*If it is a ReactElement we can embedded it directly*/}
                     {this.props.screen.isReact && this.props.screen.af_componentRoot()}
+
                 </div>
             </div>
         </>;
     }
 
+
     private TitleBar(screen: AppFormer.Screen) {
-        return <>
-            <span>
-                <span>{screen.af_componentTitle}</span>
-                &nbsp;&nbsp;
-                <a href="#" onClick={() => this.props.onClose()}>Close</a>
-            </span>
-        </>;
+        return <span>
+            <span>{screen.af_componentTitle}</span>
+            &nbsp;&nbsp;
+            <a href="#" onClick={() => this.props.onClose()}>Close</a>
+        </span>;
     }
+
 
     private static getSelfContainerElementId(screen: AppFormer.Screen) {
         return "self-screen-" + screen.af_componentId;

@@ -4,9 +4,11 @@ import {AppFormer} from "core/Components";
 import Root from "core/internal/Root";
 
 
+
 export default class JsBridge {
 
     root: () => Root;
+
 
     init(callback: () => void) {
         const root = <Root exposing={root => this.root = root} bridge={this}/>;
@@ -15,24 +17,28 @@ export default class JsBridge {
         return this;
     }
 
+
     registerScreen(screen: AppFormer.Screen) {
         this.root().registerScreen(screen);
     }
+
 
     registerPerspective(perspective: AppFormer.Perspective) {
         this.root().registerPerspective(perspective);
     }
 
+
     goTo(path: string) {
-        this.root().openScreenWithId(path);
+        this.root().openScreen(path);
     }
+
 
     RPC(path: string, params: any[]) {
         return Promise.reject("Sorry, RPC mocks are not available yet :(");
     }
 
-    render(component: any, container: HTMLElement, callback = () => {
-    }) {
+
+    render(component: any, container: HTMLElement, callback = () => {}) {
         if (component instanceof HTMLElement) {
             container.innerHTML = "";
             container.appendChild(component);
@@ -40,12 +46,9 @@ export default class JsBridge {
         }
 
         //FIXME: What's wrong here?
-        else if (typeof component === 'string') {
+        else if (typeof component === "string") {
             container.innerHTML = component;
             callback();
-        }
-
-        else {
         }
     }
 }

@@ -1,13 +1,26 @@
 import {AppFormer} from "core/Components";
 import * as React from "react";
 
-type Props = { screens: AppFormer.Screen[] }
-type State = { event: string, channel?: string }
+
+
+interface Props {
+    screens: AppFormer.Screen[];
+}
+
+
+
+interface State {
+    event: string;
+    channel?: string
+}
+
+
 
 const actions = {
     "setChannel": (channel: string) => (state: State) => ({channel: channel}),
-    "setEvent": (event: string) => (state: State) => ({event: event})
+    "setEvent": (event: string) => (state: State) => ({event: event}),
 };
+
 
 export default class EventsConsolePanel extends React.Component<Props, State> {
 
@@ -17,8 +30,8 @@ export default class EventsConsolePanel extends React.Component<Props, State> {
     }
 
 
-    //FIXME: There's probably a much better way to do that without increasing the stack size too much.
     subscriptions(props = this.props) {
+        //FIXME: There's probably a much better way to do that without increasing the stack size too much.
 
         let all: AppFormer.Subscriptions = {};
 
@@ -44,19 +57,21 @@ export default class EventsConsolePanel extends React.Component<Props, State> {
         return all;
     }
 
+
     componentWillReceiveProps(nextProps: Readonly<Props>, nextContext: any): void {
         this.setState({channel: Object.keys(this.subscriptions(nextProps)).sort()[0] || undefined});
     }
 
+
     private sendEvent() {
         if (this.state.channel) {
-            this.subscriptions()[this.state.channel!](this.state.event)
+            this.subscriptions()[this.state.channel!](this.state.event);
         }
     }
 
-    render() {
-        return (
 
+    render() {
+        return <>
             <div className={"af-events-console"}>
 
                 <div className={"title"}>
@@ -70,7 +85,7 @@ export default class EventsConsolePanel extends React.Component<Props, State> {
                                 onChange={e => this.setState(actions.setChannel(e.target.value))}>
 
                             {Object.keys(this.subscriptions()).sort().map(channel => {
-                                return <option key={channel} value={channel}>{channel}</option>
+                                return <option key={channel} value={channel}>{channel}</option>;
                             })}
 
                         </select>
@@ -87,11 +102,10 @@ export default class EventsConsolePanel extends React.Component<Props, State> {
                             Send event!
                         </button>
                     </> || <>
-                        <span>No one is listening to events at the moment :(</span>
-                    </>}
+                         <span>No one is listening to events at the moment :(</span>
+                     </>}
                 </div>
             </div>
-
-        );
+        </>;
     }
 }

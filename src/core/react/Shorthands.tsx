@@ -1,11 +1,15 @@
 import * as Core from "core";
 import * as React from "react";
 
+
+
 export const Link = (props: { to: string, children: any }) => <>
     <span onClick={() => Core.goTo(props.to)}>
         {props.children}
     </span>
 </>;
+
+
 
 //FIXME: This is a temporary component \/
 export class ExampleList extends React.Component<{ name: string, id: string }, {}> {

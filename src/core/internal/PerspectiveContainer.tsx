@@ -4,6 +4,8 @@ import {AppFormer} from "core/Components";
 import JsBridge from "core/internal/JsBridge";
 import ScreenContainer from "core/internal/ScreenContainer";
 
+
+
 interface Props {
     perspective: AppFormer.Perspective;
     screens: AppFormer.Screen[];
@@ -11,14 +13,20 @@ interface Props {
     onClose: (screen: AppFormer.Screen) => void;
 }
 
+
+
 interface State {
 }
+
+
 
 interface Snapshot {
     shouldRenderPerspective: boolean;
     opened: AppFormer.Screen[];
     kept: { screen: AppFormer.Screen, containerElement: HTMLElement }[];
 }
+
+
 
 export default class PerspectiveContainer extends React.Component<Props, State> {
 
@@ -27,12 +35,40 @@ export default class PerspectiveContainer extends React.Component<Props, State> 
         this.state = {ready: false};
     }
 
+
     componentDidMount(): void {
         this.componentDidUpdate(this.props, this.state, {
-            shouldRenderPerspective: true,
-            opened: this.props.screens,
-            kept: []
+            shouldRenderPerspective: true, opened: this.props.screens, kept: [],
         });
+    }
+
+
+    getSnapshotBeforeUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>): Snapshot {
+
+        const diff = (a: AppFormer.Screen[], b: AppFormer.Screen[]) => {
+            return a.filter((i) => b.indexOf(i) < 0);
+        };
+
+        const intersect = (a: AppFormer.Screen[], b: AppFormer.Screen[]) => {
+            return a.filter(i => -1 !== b.indexOf(i));
+        };
+
+        const keptScreens = intersect(this.props.screens, prevProps.screens);
+        const closedScreens = diff(diff(prevProps.screens, this.props.screens), keptScreens);
+        const openedScreens = diff(diff(this.props.screens, prevProps.screens), keptScreens);
+
+        closedScreens.forEach(screen => {
+            this.closeScreen(screen, prevProps.perspective);
+        });
+
+        return {
+            shouldRenderPerspective: prevProps.perspective !== this.props.perspective,
+            opened: openedScreens,
+            kept: keptScreens.map(s => ({
+                screen: s,
+                containerElement: PerspectiveContainer.findContainerFor(s, prevProps.perspective)!,
+            })),
+        };
     }
 
 
@@ -40,8 +76,6 @@ export default class PerspectiveContainer extends React.Component<Props, State> 
                        prevState: Readonly<State>,
                        snapshot?: Snapshot): void {
 
-        //FIXME: Remove this unnecessary log
-        console.info(snapshot);
 
         if (!snapshot!.shouldRenderPerspective) {
             this.renderScreens(snapshot!);
@@ -58,109 +92,112 @@ export default class PerspectiveContainer extends React.Component<Props, State> 
                                  () => this.renderScreens(snapshot!));
     }
 
-    getSnapshotBeforeUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>): Snapshot {
-
-        const diff = (a: AppFormer.Screen[], b: AppFormer.Screen[]) => {
-            return a.filter((i) => b.indexOf(i) < 0);
-        };
-
-        const intersect = (a: AppFormer.Screen[], b: AppFormer.Screen[]) => {
-            return a.filter(i => -1 !== b.indexOf(i));
-        };
-
-        const kept = intersect(this.props.screens, prevProps.screens).map(screen => ({
-            screen: screen,
-            containerElement: PerspectiveContainer.findContainerFor(screen, prevProps.perspective)!
-        }));
-
-        const closed = diff(diff(prevProps.screens, this.props.screens), kept.map(s => s.screen));
-        closed.forEach(screen => {
-            const container = PerspectiveContainer.findContainerFor(screen, prevProps.perspective);
-
-            if (!container) {
-                console.error(`[C] A screen container for ${screen.af_componentId} should exist at this point for sure.`);
-                return;
-            }
-
-            ReactDOM.unmountComponentAtNode(container);
-        });
-
-        return {
-            shouldRenderPerspective: prevProps.perspective !== this.props.perspective,
-            opened: diff(diff(this.props.screens, prevProps.screens), kept.map(s => s.screen)),
-            kept: kept
-        };
-    }
 
     private renderScreens(snapshot: Snapshot) {
-
-        snapshot.kept.forEach(kept => {
-
-            const container = PerspectiveContainer.findContainerFor(kept.screen,
-                                                                    this.props.perspective);
-
-            if (!container) {
-                console.error(`[K] A default screen container for ${kept.screen.af_componentId} should exist at this point for sure.`);
-                return;
-            }
-
-            kept.containerElement.id = container.id; //For when default-container contains a kept screen.
-            (container as any).replaceWith(kept.containerElement);
-        });
-
-        snapshot.opened.forEach(screen => {
-            const container = PerspectiveContainer.findContainerFor(screen, this.props.perspective);
-
-            if (!container) {
-                console.error(`[O] A default screen container for ${screen.af_componentId} should exist at this point for sure.`);
-                return;
-            }
-
-            this.renderScreen(screen, container);
-        });
+        snapshot.kept.forEach(kept => { this.keepScreen(kept.screen, kept.containerElement); });
+        snapshot.opened.forEach(screen => { this.openScreen(screen); });
     }
 
-    private renderScreen(screen: AppFormer.Screen, container: Node) {
-        ReactDOM.render(<ScreenContainer
-            key={screen.af_componentId}
-            bridge={this.props.bridge}
-            screen={screen}
-            onClose={() => this.props.onClose(screen)}
-        />, container as HTMLElement, () => {
-        });
+
+    private openScreen(screen: AppFormer.Screen) {
+        const container = PerspectiveContainer.findContainerFor(screen, this.props.perspective);
+        if (container) {
+            const screenContainer = <ScreenContainer
+                key={screen.af_componentId}
+                bridge={this.props.bridge}
+                screen={screen}
+                onClose={() => this.props.onClose(screen)}
+            />;
+
+            ReactDOM.render(screenContainer, container as HTMLElement, () => {
+                container.setAttribute(PerspectiveContainer.OpenScreenAttributeName,
+                                       screen.af_componentId);
+            });
+        } else {
+            console.error(`[O] A default screen container for ${screen.af_componentId} should exist at this point for sure.`);
+        }
     }
+
+
+    private keepScreen(screen: AppFormer.Screen, formerContainerElement: HTMLElement) {
+        const container = PerspectiveContainer.findContainerFor(screen, this.props.perspective);
+
+        if (container) {
+
+            formerContainerElement.id = container.id;
+
+            Array.prototype.slice.call(formerContainerElement.attributes).forEach((x: Attr) => {
+                if (!container.hasAttribute(x.name)) {
+                    formerContainerElement.removeAttribute(x.name);
+                } else {
+                    formerContainerElement.setAttribute(x.name,
+                                                        container.getAttribute(x.name) || "");
+                }
+            });
+
+            formerContainerElement.setAttribute(PerspectiveContainer.OpenScreenAttributeName,
+                                                screen.af_componentId);
+
+            //FIXME: this "replaceWith" method does not work on IE.
+            (container as any).replaceWith(formerContainerElement);
+        } else {
+            console.error(`[K] A default screen container for ${screen.af_componentId} should exist at this point for sure.`);
+        }
+    }
+
+
+    private closeScreen(screen: AppFormer.Screen, perspective: AppFormer.Perspective) {
+        const container = PerspectiveContainer.findContainerFor(screen, perspective);
+        if (container) {
+            ReactDOM.unmountComponentAtNode(container as HTMLElement);
+            container.removeAttribute(PerspectiveContainer.OpenScreenAttributeName);
+        } else {
+            console.error(`[C] A screen container for ${screen.af_componentId} should exist at this point for sure.`);
+        }
+    }
+
 
     componentWillUnmount(): void {
         console.info(`...Unmounting ${this.props.perspective.af_componentId}...`);
         console.info(`Unmounted ${this.props.perspective.af_componentId}.`);
     }
 
+
     render() {
         return <>
             <div className={"af-perspective-container"}
                  key={this.props.perspective.af_componentId}
                  id={PerspectiveContainer.getSelfContainerElementId(this.props.perspective)}>
+
                 {/*Empty on purpose*/}
                 {/*This is where the perspective will be rendered on.*/}
                 {/*See `componentDidMount` and `componentWillUnmount`*/}
+                {/*If it is a ReactElement we can embedded it directly*/}
                 {this.props.perspective.isReact && this.props.perspective.af_perspectiveRoot()}
+
             </div>
         </>;
     }
+
 
     private static getSelfContainerElementId(perspective: AppFormer.Perspective) {
         return "self-perspective-" + perspective.af_componentId;
     }
 
+
     private static findSelfContainerElement(perspective: AppFormer.Perspective) {
         return document.getElementById(this.getSelfContainerElementId(perspective));
     }
+
+
+    public static OpenScreenAttributeName = "af-open-screen";
+
 
     public static findContainerFor(screen: AppFormer.Screen, perspective: AppFormer.Perspective) {
 
         const root = this.findSelfContainerElement(perspective)!;
         return searchTree(root, AppFormer.Screen.containerId(screen)) ||
-               searchTree(root, AppFormer.DefaultScreenContainerId)
+               searchTree(root, AppFormer.DefaultScreenContainerId);
     }
 }
 
