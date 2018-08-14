@@ -1,10 +1,8 @@
 import * as React from "react";
-import * as ReactDOM from "react-dom";
 import {AppFormer} from "core/Components";
 import JsBridge from "core/internal/JsBridge";
 
 interface Props {
-    containerId: string;
     screen: AppFormer.Screen;
     onClose: () => void;
     bridge: JsBridge;
@@ -16,24 +14,35 @@ export default class ScreenContainer extends React.Component<Props, {}> {
         super(props);
     }
 
+    getSelfContainerElement() {
+        return document.getElementById(ScreenContainer.getSelfContainerElementId(this.props.screen));
+    }
+
     componentDidMount(): void {
         const screen = this.props.screen;
-        this.props.bridge.render(screen.af_componentRoot(), this.getDomContainer()!, () => {
-            console.info(`Rendered ${screen.af_componentId}`);
-            this.props.screen.af_onOpen();
-            console.info(`Opened ${screen.af_componentId}...`);
-        });
+        console.info(`...Rendering ${screen.af_componentId}...`);
+
+        if (this.props.screen.isReact) {
+            this.invokeOnOpen();
+        } else {
+            this.props.bridge.render(screen.af_componentRoot(),
+                                     this.getSelfContainerElement()!,
+                                     () => this.invokeOnOpen());
+        }
+    }
+
+    private invokeOnOpen() {
+        console.info(`Rendered ${this.props.screen.af_componentId}`);
+        console.info(`...Opening ${this.props.screen.af_componentId}...`);
+        this.props.screen.af_onOpen();
+        console.info(`Opened ${this.props.screen.af_componentId}.`);
     }
 
     componentWillUnmount(): void {
         const screen = this.props.screen;
+        console.info(`...Closing ${screen.af_componentId}...`);
         screen.af_onClose();
-        console.info(`Unmounting ${screen.af_componentId}...`);
-        ReactDOM.unmountComponentAtNode(this.getDomContainer()!);
-    }
-
-    private getDomContainer() {
-        return document.getElementById(this.props.containerId);
+        console.info(`Closed ${screen.af_componentId}.`);
     }
 
     render() {
@@ -48,10 +57,13 @@ export default class ScreenContainer extends React.Component<Props, {}> {
                     {this.TitleBar(screen)}
                 </div>
 
-                <div className={"contents"} id={this.props.containerId}>
+                <div className={"contents"}
+                     key={this.props.screen.af_componentId}
+                     id={`${ScreenContainer.getSelfContainerElementId(this.props.screen)}`}>
                     {/*Empty on purpose*/}
                     {/*This is where the screens will be rendered on.*/}
                     {/*See `componentDidMount` and `componentWillUnmount`*/}
+                    {this.props.screen.isReact && this.props.screen.af_componentRoot()}
                 </div>
             </div>
         </>;
@@ -65,5 +77,9 @@ export default class ScreenContainer extends React.Component<Props, {}> {
                 <a href="#" onClick={() => this.props.onClose()}>Close</a>
             </span>
         </>;
+    }
+
+    private static getSelfContainerElementId(screen: AppFormer.Screen) {
+        return "self-screen-" + screen.af_componentId;
     }
 }

@@ -1,6 +1,8 @@
 import React from "react";
 import {AppFormer, RPC} from "core"
 import DemoApp from "core-screens/DemoApp";
+import homePerspectiveTemplate from "core-screens/HomePerspective.html";
+import otherPerspectiveTemplate from "core-screens/other-perspective.html";
 
 export class InoffensiveNonScreenClass {
 
@@ -10,6 +12,7 @@ export class ReactComponentScreen extends AppFormer.Screen {
 
     constructor() {
         super();
+        this.isReact = true;
         this.af_componentId = "AAA-this-is-the-screen-id";
         this.af_componentTitle = "React Component";
         this.af_subscriptions = () => ({
@@ -19,7 +22,7 @@ export class ReactComponentScreen extends AppFormer.Screen {
     }
 
     af_onOpen() {
-        console.info(`Opened ${this.af_componentId} :: ${this.af_componentTitle} (Starting to make requests..)`);
+        console.info(`[${this.af_componentId}] is open! :: (Starting to make requests..)`);
 
         Promise.resolve().then(() => {
             return RPC("org.uberfire.shared.MessageService|hello", []);
@@ -45,10 +48,10 @@ export class ReactComponentScreen extends AppFormer.Screen {
     }
 
     af_componentRoot() {
-        return React.createElement(DemoApp, {
-            number: this.af_componentId,
-            onFoo: o => this.onFoo = o
-        });
+        return <DemoApp
+            number={this.af_componentId}
+            onFoo={o => this.onFoo = o}
+        />;
     }
 
 }
@@ -115,10 +118,7 @@ export class HomePerspective extends AppFormer.Perspective {
     }
 
     af_perspectiveRoot() {
-        return `<div>` +
-            `<div class="string-template-screen"></div>` +
-            `<div class="AAA-this-is-the-screen-id"></div>` +
-            `</div>`;
+        return homePerspectiveTemplate;
     }
 }
 
@@ -133,10 +133,7 @@ export class OtherPerspective extends AppFormer.Perspective {
     }
 
     af_perspectiveRoot() {
-        return `<div>` +
-            `<div class="string-template-screen"></div>` +
-            `<div class="dom-elements-screen"></div>` +
-            `</div>`;
+        return otherPerspectiveTemplate;
     }
 }
 

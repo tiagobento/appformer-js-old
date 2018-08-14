@@ -1,8 +1,8 @@
 import * as React from "react";
 import {AppFormer} from "core/Components";
-import ScreenContainer from "core/internal/ScreenContainer";
 import EventsConsolePanel from "core/internal/EventsConsolePanel";
 import JsBridge from "core/internal/JsBridge";
+import PerspectiveContainer from "core/internal/PerspectiveContainer";
 
 type Props = { exposing: (self: () => Root) => void, bridge: JsBridge };
 
@@ -77,6 +77,18 @@ const actions = {
     },
 
     "openScreen": (screen: AppFormer.Screen) => (state: State): any => {
+        const container = PerspectiveContainer.findContainerFor(screen, state.currentPerspective!);
+        if (!container) {
+            console.error(`Could not render ${screen.af_componentId} because no default container for screens found on perspective ${state.currentPerspective!.af_componentId}. Add a div with id \"default-container-for-screens\" to your perspective and try again.`);
+            return state;
+        }
+
+        //TODO: Store containers by screens and check if there's someone already using `container`
+        //If so, close the it and return the new updated state.
+        if (typeof 1 == "string") {
+            return state;
+        }
+
         if (!state.hasAnOpen(screen)) {
             return {openScreens: [...state.openScreens, screen]};
         }
@@ -116,14 +128,11 @@ export default class Root extends React.Component<Props, State> {
         this.setState(actions.openScreenWithId(screenId));
     }
 
-    public static componentContainerId(screen: AppFormer.Component) {
-        return `component-container-${screen.af_componentId}`
-    }
-
     componentWillUnmount() {
         this.state.screens.forEach(screen => {
-            console.info(`Shutting down ${screen.af_componentId}`);
+            console.info(`...Shutting down ${screen.af_componentId}...`);
             screen.af_onShutdown();
+            console.info(`Shut down ${screen.af_componentId}.`);
         });
     }
 
@@ -133,15 +142,11 @@ export default class Root extends React.Component<Props, State> {
 
             {this.Header()}
 
-            {this.state.openScreens.map(screen => (
-
-                <ScreenContainer key={screen.af_componentId}
-                                 bridge={this.props.bridge}
-                                 containerId={Root.componentContainerId(screen)}
-                                 screen={screen}
-                                 onClose={() => this.setState(actions.closeScreen(screen))}/>
-
-            ))}
+            {this.state.currentPerspective && <PerspectiveContainer
+                perspective={this.state.currentPerspective!}
+                screens={this.state.openScreens}
+                bridge={this.props.bridge}
+                onClose={(screen) => this.setState(actions.closeScreen(screen))}/>}
 
             <EventsConsolePanel screens={this.state.openScreens}/>
 
@@ -149,7 +154,11 @@ export default class Root extends React.Component<Props, State> {
     }
 
     private Header() {
-        return <>
+        return <div style={{
+            position: "fixed",
+            width: "100%",
+            height: "100px"
+        }}>
             <div className={"af-screens-panel"}>
                 <div className={"contents"} style={{backgroundColor: "#2e2e2e"}}>
                     {this.state.perspectives.map(perspective => (
@@ -181,10 +190,9 @@ export default class Root extends React.Component<Props, State> {
                     ))}
                 </div>
             </div>
-        </>;
+        </div>;
     }
 }
-
 
 const Check = () => <>
     <span style={{color: "green"}}>

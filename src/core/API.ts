@@ -22,12 +22,12 @@ export function register(potentialComponents: any) {
             const Component = potentialComponents[potentialComponent];
 
             if (Component.prototype instanceof AppFormer.Screen) {
-                console.info(`Registering screen ${Component.prototype}`);
+                console.info(`Registering screen [${Component.prototype.constructor.name}]`);
                 bridge.registerScreen(new Component());
             }
 
             else if (Component.prototype instanceof AppFormer.Perspective) {
-                console.info(`Registering perspective ${Component.prototype}`);
+                console.info(`Registering perspective [${Component.prototype.constructor.name}]`);
                 bridge.registerPerspective(new Component());
             }
 

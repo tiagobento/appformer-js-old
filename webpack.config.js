@@ -36,6 +36,9 @@ module.exports = {
             test: /\.jsx?$/,
             exclude: /node_modules/,
             use: ['babel-loader']
+        }, {
+            test: /-?[Pp]erspective\.(html)$/,
+            use: ['html-loader']
         }]
     },
     resolve: {
