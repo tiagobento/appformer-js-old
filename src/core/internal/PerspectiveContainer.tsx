@@ -14,13 +14,11 @@ interface Props {
 interface State {
 }
 
-
 interface Snapshot {
     shouldRenderPerspective: boolean;
     opened: AppFormer.Screen[];
-    closed: AppFormer.Screen[];
     kept: { screen: AppFormer.Screen, containerElement: HTMLElement }[];
-};
+}
 
 export default class PerspectiveContainer extends React.Component<Props, State> {
 
@@ -33,8 +31,7 @@ export default class PerspectiveContainer extends React.Component<Props, State> 
         this.componentDidUpdate(this.props, this.state, {
             shouldRenderPerspective: true,
             opened: this.props.screens,
-            kept: [],
-            closed: []
+            kept: []
         });
     }
 
@@ -43,6 +40,7 @@ export default class PerspectiveContainer extends React.Component<Props, State> 
                        prevState: Readonly<State>,
                        snapshot?: Snapshot): void {
 
+        //FIXME: Remove this unnecessary log
         console.info(snapshot);
 
         if (!snapshot!.shouldRenderPerspective) {
@@ -75,30 +73,26 @@ export default class PerspectiveContainer extends React.Component<Props, State> 
             containerElement: PerspectiveContainer.findContainerFor(screen, prevProps.perspective)!
         }));
 
+        const closed = diff(diff(prevProps.screens, this.props.screens), kept.map(s => s.screen));
+        closed.forEach(screen => {
+            const container = PerspectiveContainer.findContainerFor(screen, prevProps.perspective);
+
+            if (!container) {
+                console.error(`[C] A screen container for ${screen.af_componentId} should exist at this point for sure.`);
+                return;
+            }
+
+            ReactDOM.unmountComponentAtNode(container);
+        });
+
         return {
             shouldRenderPerspective: prevProps.perspective !== this.props.perspective,
             opened: diff(diff(this.props.screens, prevProps.screens), kept.map(s => s.screen)),
-            closed: diff(diff(prevProps.screens, this.props.screens), kept.map(s => s.screen)),
             kept: kept
         };
     }
 
-
     private renderScreens(snapshot: Snapshot) {
-
-        if (!snapshot.shouldRenderPerspective) {
-            snapshot.closed.forEach(screen => {
-                const container = PerspectiveContainer.findContainerFor(screen,
-                                                                        this.props.perspective);
-
-                if (!container) {
-                    console.error(`[C] A screen container for ${screen.af_componentId} should exist at this point for sure.`);
-                    return;
-                }
-
-                ReactDOM.unmountComponentAtNode(container);
-            });
-        }
 
         snapshot.kept.forEach(kept => {
 
@@ -124,9 +118,7 @@ export default class PerspectiveContainer extends React.Component<Props, State> 
 
             this.renderScreen(screen, container);
         });
-
     }
-
 
     private renderScreen(screen: AppFormer.Screen, container: Node) {
         ReactDOM.render(<ScreenContainer
@@ -138,11 +130,8 @@ export default class PerspectiveContainer extends React.Component<Props, State> 
         });
     }
 
-
-
     componentWillUnmount(): void {
         console.info(`...Unmounting ${this.props.perspective.af_componentId}...`);
-        ReactDOM.unmountComponentAtNode(PerspectiveContainer.findSelfContainerElement(this.props.perspective)!);
         console.info(`Unmounted ${this.props.perspective.af_componentId}.`);
     }
 
