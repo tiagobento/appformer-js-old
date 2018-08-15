@@ -17,7 +17,7 @@ export class ReactComponentScreen extends AppFormer.Screen {
         this.af_componentTitle = "React Component";
         this.af_subscriptions = () => ({
             "org.uberfire.shared.TestEvent": testEvent => this.onFoo("An event from server has arrived! " + testEvent),
-            "reverseFooMessage": message => this.onFoo(message.split("").reverse().join(""))
+            // "reverseFooMessage": message => this.onFoo(message.split("").reverse().join(""))
         });
     }
 
@@ -71,8 +71,8 @@ export class PureDomElementScreen extends AppFormer.Screen {
         this.af_componentTitle = "DOM Elements Component";
         this.span = document.createElement("span");
         this.af_subscriptions = () => ({
-            "popupEvent": message => alert(message),
-            "fooMessage": message => this.span.textContent = message,
+            // "popupEvent": message => alert(message),
+            // "fooMessage": message => this.span.textContent = message,
         });
     }
 
