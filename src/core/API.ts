@@ -1,3 +1,4 @@
+import * as ReactDOM from "react-dom";
 import {AppFormer} from "core/Components";
 import JsBridge from "core/internal/JsBridge";
 
@@ -9,7 +10,24 @@ const bridge = (window as any).appformerGwtBridge || jsBridge.init(() => {
     console.info("Finished mounting AppFormer JS");
 });
 
-export const render = jsBridge.render;
+export const render = bridge.render || ((component: any, container: HTMLElement, callback = () => {}) => {
+
+    //FIXME: Duplicated!!
+
+    if (component instanceof HTMLElement) {
+        container.innerHTML = "";
+        container.appendChild(component);
+        callback();
+    }
+
+    //FIXME: What's wrong here?
+    else if (typeof component === "string") {
+        container.innerHTML = component;
+        callback();
+    } else {
+        ReactDOM.render(component, container, callback);
+    }
+});
 
 export const RPC = bridge.RPC;
 

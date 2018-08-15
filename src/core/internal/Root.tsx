@@ -3,6 +3,7 @@ import {AppFormer} from "core/Components";
 import EventsConsolePanel from "core/internal/EventsConsolePanel";
 import JsBridge from "core/internal/JsBridge";
 import PerspectiveContainer from "core/internal/PerspectiveContainer";
+import {Link} from "core";
 
 
 
@@ -81,13 +82,12 @@ const actions = {
         } else {
             return state;
         }
+
     },
 
-    "openScreen": (s: AppFormer.Screen | string) => (state: State): any => {
+    "openScreen": (screenId: string) => (state: State): any => {
 
-        const screen = typeof s === "string"
-            ? state.screens.filter(x => x.af_componentId === s).pop()!
-            : s;
+        const screen = state.screens.filter(x => x.af_componentId === screenId).pop()!;
 
         const container = PerspectiveContainer.findContainerFor(screen, state.currentPerspective!);
         if (!container) {
@@ -95,10 +95,13 @@ const actions = {
             return state;
         }
 
-        const screenOnContainer = container.getAttribute(PerspectiveContainer.OpenScreenAttributeName);
-        if (screenOnContainer) {
-            const c = state.screens.filter(x => x.af_componentId === screenOnContainer).pop()!;
-            return {openScreens: [...state.openScreens.filter(y => y !== c), screen]};
+        const existingScreenId = container.getAttribute(PerspectiveContainer.AfOpenScreenAttr);
+        if (existingScreenId) {
+            //FIXME: Not checking onMayClose to close the existing screen
+            return {
+                openScreens: [...state.openScreens.filter(
+                    x => x.af_componentId !== existingScreenId), screen],
+            };
         }
 
         if (!state.hasAnOpen(screen)) {
@@ -106,6 +109,7 @@ const actions = {
         }
     },
 };
+
 
 export default class Root extends React.Component<Props, State> {
 
@@ -137,6 +141,17 @@ export default class Root extends React.Component<Props, State> {
     }
 
 
+
+
+    componentDidUpdate(prevProps: Readonly<Props>,
+                       prevState: Readonly<State>,
+                       snapshot?: any): void {
+
+        console.info("=======================");
+    }
+
+
+
     componentWillUnmount() {
         this.state.screens.forEach(screen => {
             console.info(`...Shutting down ${screen.af_componentId}...`);
@@ -152,11 +167,13 @@ export default class Root extends React.Component<Props, State> {
 
             {this.Header()}
 
-            {this.state.currentPerspective && <PerspectiveContainer
-                perspective={this.state.currentPerspective!}
-                screens={this.state.openScreens}
-                bridge={this.props.bridge}
-                onClose={screen => this.setState(actions.closeScreen(screen))}/>}
+            {this.state.currentPerspective &&
+
+             <PerspectiveContainer
+                 perspective={this.state.currentPerspective!}
+                 screens={this.state.openScreens}
+                 bridge={this.props.bridge}
+                 onCloseScreen={screen => this.setState(actions.closeScreen(screen))}/>}
 
             <EventsConsolePanel screens={this.state.openScreens}/>
 
@@ -172,6 +189,7 @@ export default class Root extends React.Component<Props, State> {
                 <div className={"contents"} style={{backgroundColor: "#2e2e2e"}}>
                     {this.state.perspectives.map(perspective => (
 
+                        //FIXME: Implement goTo for perspectives
                         <button key={perspective.af_componentId}
                                 onClick={() => this.setState(actions.openPerspective(perspective))}
                                 disabled={this.state.hasAnOpen(perspective)}>
@@ -187,14 +205,14 @@ export default class Root extends React.Component<Props, State> {
                 <div className={"contents"}>
                     {this.state.screens.map(screen => (
 
-                        <button key={screen.af_componentId}
-                                onClick={() => this.setState(actions.openScreen(screen))}
-                                disabled={this.state.hasAnOpen(screen)}>
+                        <Link to={screen.af_componentId} key={screen.af_componentId}>
+                            <button disabled={this.state.hasAnOpen(screen)}>
 
-                            {screen.af_componentId}
+                                {screen.af_componentId}
 
-                            {this.state.hasAnOpen(screen) && <Check/>}
-                        </button>
+                                {this.state.hasAnOpen(screen) && <Check/>}
+                            </button>
+                        </Link>
 
                     ))}
                 </div>

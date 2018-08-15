@@ -33,7 +33,9 @@ export namespace AppFormer {
 
 
         public has(screen: AppFormer.Screen | string) {
-            const id = typeof screen === "string" ? screen : screen.af_componentId;
+            const id = typeof screen === "string"
+                ? screen
+                : screen.af_componentId;
             return this.af_perspectiveScreens.indexOf(id) > -1;
         }
     }
@@ -85,22 +87,20 @@ export class DefaultPerspective extends AppFormer.Perspective {
         this.isReact = true;
         this.af_componentId = "default-perspective";
         this.af_perspectiveScreens = [];
+        this.af_isDefaultPerspective = true;
     }
 
 
     af_perspectiveRoot(): AppFormer.Element {
-        return <>
-            <div>
-                <div style={{
-                    textAlign: "center", padding: "5px",
-                }}>
-                    This is the default perspective. It has no screens.
-                </div>
-                <div id={AppFormer.DefaultScreenContainerId} style={{width: "300px", float: "left"}}>
-
-                </div>
+        return <div>
+            <div style={{textAlign: "center", padding: "5px"}}>
+                This is the default perspective. It has no screens.
             </div>
-        </>;
+            <div id={AppFormer.DefaultScreenContainerId}
+                 style={{width: "300px", float: "left"}}>
+
+            </div>
+        </div>;
     }
 
 }

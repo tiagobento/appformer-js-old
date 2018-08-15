@@ -108,13 +108,29 @@ export class StringElementScreen extends AppFormer.Screen {
     }
 }
 
+export class SillyReactScreen extends AppFormer.Screen {
+
+    constructor() {
+        super();
+        this.isReact = true;
+        this.af_componentId = "silly-react-screen";
+        this.af_componentTitle = "Silly React Component";
+        this.af_subscriptions = () => {
+        };
+    }
+
+    af_componentRoot() {
+        return <h1>{`This is just an <h1>`}</h1>
+    }
+}
+
 export class HomePerspective extends AppFormer.Perspective {
 
     constructor() {
         super();
         this.af_componentId = "home-perspective";
         this.af_perspectiveScreens = ["string-template-screen", "AAA-this-is-the-screen-id"];
-        this.af_isDefaultPerspective = true;
+        this.af_isDefaultPerspective = false;
     }
 
     af_perspectiveRoot() {

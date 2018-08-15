@@ -14,13 +14,11 @@ interface Props {
 
 export default class ScreenContainer extends React.Component<Props, {}> {
 
+    private ref: HTMLDivElement;
+
+
     constructor(props: Props) {
         super(props);
-    }
-
-
-    getSelfContainerElement() {
-        return document.getElementById(ScreenContainer.getSelfContainerElementId(this.props.screen));
     }
 
 
@@ -33,7 +31,7 @@ export default class ScreenContainer extends React.Component<Props, {}> {
             this.invokeOnOpen();
         } else {
             this.props.bridge.render(screen.af_componentRoot(),
-                                     this.getSelfContainerElement()!,
+                                     this.ref,
                                      () => this.invokeOnOpen());
         }
     }
@@ -56,29 +54,24 @@ export default class ScreenContainer extends React.Component<Props, {}> {
 
 
     render() {
-        return <>
-            <div key={this.props.screen.af_componentId}
-                 className={"af-screen-container"}
-                 onFocus={() => this.props.screen.af_onFocus()}
-                 onBlur={() => this.props.screen.af_onLostFocus()}>
+        return <div className={"af-screen-container"}
+                    onFocus={() => this.props.screen.af_onFocus()}
+                    onBlur={() => this.props.screen.af_onLostFocus()}>
 
-                <div className={"title"}>
-                    {this.TitleBar(this.props.screen)}
-                </div>
-
-                <div className={"contents"}
-                     key={this.props.screen.af_componentId}
-                     id={`${ScreenContainer.getSelfContainerElementId(this.props.screen)}`}>
-
-                    {/*Empty on purpose*/}
-                    {/*This is where the screens will be rendered on.*/}
-                    {/*See `componentDidMount` and `componentWillUnmount`*/}
-                    {/*If it is a ReactElement we can embedded it directly*/}
-                    {this.props.screen.isReact && this.props.screen.af_componentRoot()}
-
-                </div>
+            <div className={"title"}>
+                {this.TitleBar(this.props.screen)}
             </div>
-        </>;
+
+            <div className={"contents"} ref={e => this.ref = e!}>
+
+                {/*Empty on purpose*/}
+                {/*This is where the screens will be rendered on.*/}
+                {/*See `componentDidMount` and `componentWillUnmount`*/}
+                {/*If it is a ReactElement we can embedded it directly*/}
+                {this.props.screen.isReact && this.props.screen.af_componentRoot()}
+
+            </div>
+        </div>;
     }
 
 
@@ -88,10 +81,5 @@ export default class ScreenContainer extends React.Component<Props, {}> {
             &nbsp;&nbsp;
             <a href="#" onClick={() => this.props.onClose()}>Close</a>
         </span>;
-    }
-
-
-    private static getSelfContainerElementId(screen: AppFormer.Screen) {
-        return "self-screen-" + screen.af_componentId;
     }
 }

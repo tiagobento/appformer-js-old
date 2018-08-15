@@ -71,41 +71,39 @@ export default class EventsConsolePanel extends React.Component<Props, State> {
 
 
     render() {
-        return <>
-            <div className={"af-events-console"}>
+        return <div className={"af-events-console"}>
 
-                <div className={"title"}>
-                    <span>Events simulation console</span>
-                </div>
-
-                <div className={"contents"}>
-                    {this.state.channel && <>
-
-                        <select value={this.state.channel}
-                                onChange={e => this.setState(actions.setChannel(e.target.value))}>
-
-                            {Object.keys(this.subscriptions()).sort().map(channel => {
-                                return <option key={channel} value={channel}>{channel}</option>;
-                            })}
-
-                        </select>
-
-                        &nbsp;
-
-                        <input onChange={e => this.setState(actions.setEvent(e.target.value))}
-                               placeholder={"Type event value"}
-                               value={this.state.event}/>
-
-                        &nbsp;
-
-                        <button onClick={() => this.sendEvent()}>
-                            Send event!
-                        </button>
-                    </> || <>
-                         <span>No one is listening to events at the moment :(</span>
-                     </>}
-                </div>
+            <div className={"title"}>
+                <span>Events simulation console</span>
             </div>
-        </>;
+
+            <div className={"contents"}>
+                {this.state.channel && <>
+
+                    <select value={this.state.channel}
+                            onChange={e => this.setState(actions.setChannel(e.target.value))}>
+
+                        {Object.keys(this.subscriptions()).sort().map(channel => {
+                            return <option key={channel} value={channel}>{channel}</option>;
+                        })}
+
+                    </select>
+
+                    &nbsp;
+
+                    <input onChange={e => this.setState(actions.setEvent(e.target.value))}
+                           placeholder={"Type event value"}
+                           value={this.state.event}/>
+
+                    &nbsp;
+
+                    <button onClick={() => this.sendEvent()}>
+                        Send event!
+                    </button>
+                </> || <>
+                     <span>No one is listening to events at the moment :(</span>
+                 </>}
+            </div>
+        </div>;
     }
 }
