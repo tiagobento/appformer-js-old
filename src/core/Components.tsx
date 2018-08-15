@@ -24,9 +24,9 @@ export namespace AppFormer {
     export abstract class Perspective {
 
         isReact: boolean = false;
-        af_componentId: Readonly<string>;
-        af_perspectiveScreens: Readonly<string[]>;
-        af_isDefaultPerspective: Readonly<boolean>;
+        af_componentId: string;
+        af_perspectiveScreens: string[];
+        af_isDefaultPerspective: boolean;
 
 
         abstract af_perspectiveRoot(): Element;
@@ -45,8 +45,8 @@ export namespace AppFormer {
     export abstract class Screen {
 
         isReact: boolean = false;
-        af_componentId: Readonly<string>;
-        af_componentTitle: Readonly<string>;
+        af_componentId: string;
+        af_componentTitle: string;
         af_subscriptions: () => Subscriptions; //FIXME: Maybe this one should be a method?
 
         af_onOpen(): void {}

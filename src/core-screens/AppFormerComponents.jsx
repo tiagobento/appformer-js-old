@@ -13,10 +13,10 @@ export class ReactComponentScreen extends AppFormer.Screen {
     constructor() {
         super();
         this.isReact = true;
-        this.af_componentId = "AAA-this-is-the-screen-id";
+        this.af_componentId = "A-react-screen-id";
         this.af_componentTitle = "React Component";
         this.af_subscriptions = () => ({
-            "fooMessage": message => this.onFoo(message),
+            "org.uberfire.shared.TestEvent": testEvent => this.onFoo("An event from server has arrived! " + testEvent),
             "reverseFooMessage": message => this.onFoo(message.split("").reverse().join(""))
         });
     }
@@ -25,13 +25,13 @@ export class ReactComponentScreen extends AppFormer.Screen {
         console.info(`[${this.af_componentId}] is open! :: (Starting to make requests..)`);
 
         Promise.resolve().then(() => {
-            return RPC("org.uberfire.shared.MessageService|hello", []);
+            return RPC("org.uberfire.shared.TestMessagesService|hello", []);
         }).then(msg => {
             console.info(`First call returned (${msg})`);
-            return RPC("org.uberfire.shared.MessageService|hello:java.lang.String", ["foo"]);
+            return RPC("org.uberfire.shared.TestMessagesService|hello:java.lang.String", ["foo"]);
         }).then(msg => {
             console.info(`Second call returned (${msg})`);
-            return RPC("org.uberfire.shared.MessageService|muteHello", []);
+            return RPC("org.uberfire.shared.TestMessagesService|muteHello", []);
         }).then(msg => {
             console.info(`Third call returned (${msg})`);
         }).catch(e => {
@@ -48,10 +48,17 @@ export class ReactComponentScreen extends AppFormer.Screen {
     }
 
     af_componentRoot() {
-        return <DemoApp
-            number={this.af_componentId}
-            onFoo={o => this.onFoo = o}
-        />;
+        return <div>
+
+            <br/>
+            <button className={"btn btn-primary btn-sm"}
+                    onClick={() => RPC("org.uberfire.shared.TestMessagesService|helloFromEvent", [])}>
+                Click me to make server send an event...
+            </button>
+            <br/>
+
+            <DemoApp number={this.af_componentId} onFoo={o => this.onFoo = o}/>
+        </div>;
     }
 
 }
@@ -129,7 +136,7 @@ export class HomePerspective extends AppFormer.Perspective {
     constructor() {
         super();
         this.af_componentId = "home-perspective";
-        this.af_perspectiveScreens = ["string-template-screen", "AAA-this-is-the-screen-id"];
+        this.af_perspectiveScreens = ["string-template-screen", "A-react-screen-id"];
         this.af_isDefaultPerspective = false;
     }
 

@@ -47,13 +47,23 @@ export function register(potentialComponents: any) {
             const Component = potentialComponents[potentialComponent];
 
             if (Component.prototype instanceof AppFormer.Screen) {
+                const component = new Component();
                 console.info(`Registering screen [${Component.prototype.constructor.name}]`);
-                bridge.registerScreen(new Component());
+                bridge.registerScreen(component);
+
+                //FIXME: Is this the best place to put the subscriptions?
+                const subscriptions = component.af_subscriptions() || {};
+                Object.keys(subscriptions).forEach(channel => {
+                    if (subscriptions.hasOwnProperty(channel)) {
+                        bridge.subscribe(channel, subscriptions[channel]);
+                    }
+                });
             }
 
             else if (Component.prototype instanceof AppFormer.Perspective) {
+                const component = new Component();
                 console.info(`Registering perspective [${Component.prototype.constructor.name}]`);
-                bridge.registerPerspective(new Component());
+                bridge.registerPerspective(component);
             }
 
             else {

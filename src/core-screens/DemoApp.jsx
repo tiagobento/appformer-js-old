@@ -5,8 +5,8 @@ export default class DemoApp extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = {count: 0, lastFooMessage: "0"};
-        this.props.onFoo(message => this.setState({lastFooMessage: message}));
+        this.state = {count: 0, lastMessage: "No messages were received yet.."};
+        this.props.onFoo(message => this.setState({lastMessage: message}));
     }
 
     add() {
@@ -35,9 +35,9 @@ export default class DemoApp extends React.Component {
                 <br/>
 
                 <br/>
-                <span><b>Last Foo Message (or reversed): </b></span>
+                <span><b>Last Message: </b></span>
                 <br/>
-                <span>{this.state.lastFooMessage}</span>
+                <span>{this.state.lastMessage}</span>
                 <br/>
 
             </div>

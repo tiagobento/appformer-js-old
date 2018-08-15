@@ -20,12 +20,17 @@ class State {
     screens: AppFormer.Screen[];
     openScreens: AppFormer.Screen[];
     hasAnOpen: (component: AppFormer.Component) => boolean;
+    without: (screenId: string) => State;
 
     static hasAnOpen = (state: State) => (component: AppFormer.Component) => {
         return component instanceof AppFormer.Screen
             ? state.openScreens.indexOf(component) > -1
             : state.currentPerspective === component;
     };
+
+    static without = (state: State) => (screenId: string) => ({
+        ...state, openScreens: state.openScreens.filter(s => s.af_componentId !== screenId),
+    });
 }
 
 
@@ -52,15 +57,15 @@ const actions = {
 
     "openPerspective": (perspective: AppFormer.Perspective) => (state: State): any => {
 
-        let screensToClose = state.openScreens
+        let uncloseableScreens = state.openScreens
             .filter(screen => !perspective.has(screen)) //Filters out screens that will remain open
             .map(screen => ({screen: screen, canBeClosed: screen.af_onMayClose()}))
             .filter(t => !t.canBeClosed)
             .map(t => t.screen.af_componentId);
 
         //FIXME: Using sync "confirm" method is not ideal because it cannot be styled.
-        const msg = `[${screensToClose}] cannot be closed at the moment. Force closing and proceed to ${perspective.af_componentId}?`;
-        if (screensToClose.length > 0 && !confirm(msg)) {
+        const msg = `[${uncloseableScreens}] cannot be closed at the moment. Force closing and proceed to ${perspective.af_componentId}?`;
+        if (uncloseableScreens.length > 0 && !confirm(msg)) {
             return state;
         }
 
@@ -94,13 +99,10 @@ const actions = {
             return state;
         }
 
+        //FIXME: Not checking onMayClose to close the existing screen
         const existingScreenId = container.getAttribute(PerspectiveContainer.AfOpenScreenAttr);
         if (existingScreenId) {
-            //FIXME: Not checking onMayClose to close the existing screen
-            return {
-                openScreens: [...state.openScreens.filter(
-                    s => s.af_componentId !== existingScreenId), screen],
-            };
+            return {openScreens: [...state.without(existingScreenId).openScreens, screen]};
         }
 
         if (!state.hasAnOpen(screen)) {
@@ -120,6 +122,7 @@ export default class Root extends React.Component<Props, State> {
             screens: [],
             openScreens: [],
             hasAnOpen: function (c) { return State.hasAnOpen(this)(c); },
+            without: function (c) { return State.without(this)(c); },
         };
         this.props.exposing(() => this);
     }
@@ -140,10 +143,7 @@ export default class Root extends React.Component<Props, State> {
     }
 
 
-    componentDidUpdate(prevProps: Readonly<Props>,
-                       prevState: Readonly<State>,
-                       snapshot?: any): void {
-
+    componentDidUpdate(pp: Readonly<Props>, ps: Readonly<State>, snapshot?: any): void {
         console.info("=======================");
     }
 
@@ -158,7 +158,6 @@ export default class Root extends React.Component<Props, State> {
 
 
     render() {
-
         return <div className={"af-js-root"}>
 
             {this.Header()}
