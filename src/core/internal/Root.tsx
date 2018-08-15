@@ -32,36 +32,36 @@ class State {
 
 const actions = {
 
-    "registerPerspective": (perspective: AppFormer.Perspective) => (state: State): any => {
-        //FIXME: First default perspective found is the one that wins.
-        return {
-            perspectives: [...state.perspectives, perspective],
-            currentPerspective: state.currentPerspective
-                ? state.currentPerspective
-                : perspective.af_isDefaultPerspective
-                    ? perspective
-                    : undefined,
-            openScreens: perspective.af_isDefaultPerspective
-                ? state.screens.filter((screen) => perspective.has(screen))
-                : state.openScreens,
-        };
+    "registerPerspective": (perspective: AppFormer.Perspective) => (state: State): any => ({
+        perspectives: [...state.perspectives, perspective],
+        currentPerspective: state.currentPerspective
+            ? state.currentPerspective
+            : perspective.af_isDefaultPerspective
+                ? perspective //Last default perspective found is the one that wins.
+                : undefined,
+        openScreens: perspective.af_isDefaultPerspective
+            ? state.screens.filter((screen) => perspective.has(screen))
+            : state.openScreens,
+    }),
+
+
+    "registerScreen": (screen: AppFormer.Screen) => (state: State): any => {
+        return {screens: [...state.screens, screen]};
     },
 
 
     "openPerspective": (perspective: AppFormer.Perspective) => (state: State): any => {
 
-        let closeableScreens = state.openScreens
+        let screensToClose = state.openScreens
             .filter(screen => !perspective.has(screen)) //Filters out screens that will remain open
             .map(screen => ({screen: screen, canBeClosed: screen.af_onMayClose()}))
             .filter(t => !t.canBeClosed)
             .map(t => t.screen.af_componentId);
 
-        if (closeableScreens.length > 0) {
-            //FIXME: Using sync "confirm" method is not ideal because it cannot be styled.
-            const msg = `[${closeableScreens}] cannot be closed at the moment. Force closing and proceed to open ${perspective.af_componentId}?`;
-            if (!confirm(msg)) {
-                return state;
-            }
+        //FIXME: Using sync "confirm" method is not ideal because it cannot be styled.
+        const msg = `[${screensToClose}] cannot be closed at the moment. Force closing and proceed to ${perspective.af_componentId}?`;
+        if (screensToClose.length > 0 && !confirm(msg)) {
+            return state;
         }
 
         return {
@@ -70,28 +70,27 @@ const actions = {
         };
     },
 
-    "registerScreen": (screen: AppFormer.Screen) => (state: State): any => {
-        return {screens: [...state.screens, screen]};
-    },
-
     "closeScreen": (screen: AppFormer.Screen) => (state: State): any => {
         //FIXME: Using sync "confirm" method is not ideal because it cannot be styled.
-        const msg = `Screen ${screen.af_componentId} cannot be closed. Do you want to force it?`;
-        if (screen.af_onMayClose() || confirm(msg)) {
-            return {openScreens: state.openScreens.filter(s => s !== screen)};
-        } else {
+        const msg = `${screen.af_componentId} cannot be closed. Do you want to force it?`;
+        if (!screen.af_onMayClose() && !confirm(msg)) {
             return state;
         }
 
+        return {openScreens: state.openScreens.filter(s => s !== screen)};
     },
 
     "openScreen": (screenId: string) => (state: State): any => {
 
-        const screen = state.screens.filter(x => x.af_componentId === screenId).pop()!;
+        const screen = state.screens.filter(x => x.af_componentId === screenId).pop();
+        if (!screen) {
+            console.error(`No screen found with id ${screenId}.`);
+            return state;
+        }
 
         const container = PerspectiveContainer.findContainerFor(screen, state.currentPerspective!);
         if (!container) {
-            console.error(`Could not render ${screen.af_componentId} because no default container for screens found on perspective ${state.currentPerspective!.af_componentId}. Add a div with id \"default-container-for-screens\" to your perspective and try again.`);
+            console.error(`Could not render ${screen.af_componentId}. No default container for screens found on perspective [${state.currentPerspective!.af_componentId}]. Add a div with id \"default-container-for-screens\" to your perspective and try again.`);
             return state;
         }
 
@@ -100,7 +99,7 @@ const actions = {
             //FIXME: Not checking onMayClose to close the existing screen
             return {
                 openScreens: [...state.openScreens.filter(
-                    x => x.af_componentId !== existingScreenId), screen],
+                    s => s.af_componentId !== existingScreenId), screen],
             };
         }
 
@@ -141,15 +140,12 @@ export default class Root extends React.Component<Props, State> {
     }
 
 
-
-
     componentDidUpdate(prevProps: Readonly<Props>,
                        prevState: Readonly<State>,
                        snapshot?: any): void {
 
         console.info("=======================");
     }
-
 
 
     componentWillUnmount() {
@@ -207,10 +203,7 @@ export default class Root extends React.Component<Props, State> {
 
                         <Link to={screen.af_componentId} key={screen.af_componentId}>
                             <button disabled={this.state.hasAnOpen(screen)}>
-
-                                {screen.af_componentId}
-
-                                {this.state.hasAnOpen(screen) && <Check/>}
+                                {screen.af_componentId} {this.state.hasAnOpen(screen) && <Check/>}
                             </button>
                         </Link>
 

@@ -26,14 +26,12 @@ export default class ScreenContainer extends React.Component<Props, {}> {
         const screen = this.props.screen;
         console.info(`...Rendering ${screen.af_componentId}...`);
 
-        //FIXME: That's kinda ugly..
         if (this.props.screen.isReact) {
             this.invokeOnOpen();
-        } else {
-            this.props.bridge.render(screen.af_componentRoot(),
-                                     this.ref,
-                                     () => this.invokeOnOpen());
+            return;
         }
+
+        this.props.bridge.render(screen.af_componentRoot(), this.ref, () => this.invokeOnOpen());
     }
 
 

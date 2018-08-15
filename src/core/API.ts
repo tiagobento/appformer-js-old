@@ -10,24 +10,27 @@ const bridge = (window as any).appformerGwtBridge || jsBridge.init(() => {
     console.info("Finished mounting AppFormer JS");
 });
 
-export const render = bridge.render || ((component: any, container: HTMLElement, callback = () => {}) => {
+export const render = bridge.render ||
+                      ((component: any, container: HTMLElement, callback = () => {}) => {
 
-    //FIXME: Duplicated!!
+                          //FIXME: Duplicated!!
 
-    if (component instanceof HTMLElement) {
-        container.innerHTML = "";
-        container.appendChild(component);
-        callback();
-    }
+                          if (component instanceof HTMLElement) {
+                              container.innerHTML = "";
+                              container.appendChild(component);
+                              callback();
+                          }
 
-    //FIXME: What's wrong here?
-    else if (typeof component === "string") {
-        container.innerHTML = component;
-        callback();
-    } else {
-        ReactDOM.render(component, container, callback);
-    }
-});
+                          //FIXME: What's wrong here?
+                          else if (typeof component === "string") {
+                              container.innerHTML = component;
+                              callback();
+                          }
+
+                          else {
+                              ReactDOM.render(component, container, callback);
+                          }
+                      });
 
 export const RPC = bridge.RPC;
 
