@@ -50,14 +50,6 @@ export function register(potentialComponents: any) {
                 const component = new Component();
                 console.info(`Registering screen [${Component.prototype.constructor.name}]`);
                 bridge.registerScreen(component);
-
-                //FIXME: Is this the best place to put the subscriptions?
-                const subscriptions = component.af_subscriptions || {};
-                Object.keys(subscriptions).forEach(channel => {
-                    if (subscriptions.hasOwnProperty(channel)) {
-                        bridge.subscribe(channel, subscriptions[channel]);
-                    }
-                });
             }
 
             else if (Component.prototype instanceof AppFormer.Perspective) {

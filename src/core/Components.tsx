@@ -50,7 +50,10 @@ export namespace AppFormer {
         af_componentId: string;
         af_componentTitle: string;
         af_componentService: Service;
-        af_subscriptions: Subscriptions; //FIXME: Maybe this one should be a method?
+        af_subscriptions: Subscriptions = {}; //FIXME: Maybe this one should be a method?
+
+        af_onStartup(): void {}
+
 
         af_onOpen(): void {}
 
@@ -79,31 +82,4 @@ export namespace AppFormer {
             return `container-for-screen-${screen.af_componentId}`;
         }
     }
-}
-
-
-
-export class DefaultPerspective extends AppFormer.Perspective {
-
-    constructor() {
-        super();
-        this.isReact = true;
-        this.af_componentId = "default-perspective";
-        this.af_perspectiveScreens = [];
-        this.af_isDefaultPerspective = true;
-    }
-
-
-    af_perspectiveRoot(): AppFormer.Element {
-        return <div>
-            <div style={{textAlign: "center", padding: "5px"}}>
-                This is the default perspective. It has no screens.
-            </div>
-            <div id={AppFormer.DefaultScreenContainerId}
-                 style={{width: "300px", float: "left"}}>
-
-            </div>
-        </div>;
-    }
-
 }

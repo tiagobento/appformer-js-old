@@ -1,5 +1,6 @@
 import * as Core from "core";
 import * as React from "react";
+import {AppFormer} from "core/Components";
 
 
 
@@ -32,6 +33,32 @@ export class ExampleList extends React.Component<{ name: string, id: string }, {
                     </Link>
                 </li>
             </ul>
+        </div>;
+    }
+}
+
+
+
+export class DefaultPerspective extends AppFormer.Perspective {
+
+    constructor() {
+        super();
+        this.isReact = true;
+        this.af_componentId = "default-perspective";
+        this.af_perspectiveScreens = [];
+        this.af_isDefaultPerspective = true;
+    }
+
+
+    af_perspectiveRoot(): AppFormer.Element {
+        return <div>
+            <div style={{textAlign: "center", padding: "5px"}}>
+                This is the default perspective. It has no screens.
+            </div>
+            <div id={AppFormer.DefaultScreenContainerId}
+                 style={{width: "300px", float: "left"}}>
+
+            </div>
         </div>;
     }
 }

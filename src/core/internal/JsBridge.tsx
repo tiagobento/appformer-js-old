@@ -38,11 +38,6 @@ export default class JsBridge {
     }
 
 
-    subscribe(channel: string, consumer: (event: any) => void) {
-        //No-op for now
-    }
-
-
     render(component: any, container: HTMLElement, callback = () => {}) {
         if (component instanceof HTMLElement) {
             container.innerHTML = "";
