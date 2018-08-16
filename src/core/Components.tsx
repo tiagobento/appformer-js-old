@@ -15,6 +15,8 @@ export namespace AppFormer {
 
     export type Subscriptions = { [channel: string]: (event: any) => void };
 
+    export type Service = { [name: string]: (a: any) => any };
+
     export type Component = Screen | Perspective;
 
     export type Element = React.ReactPortal | React.ReactElement<any> | HTMLElement | string;
@@ -47,7 +49,8 @@ export namespace AppFormer {
         isReact: boolean = false;
         af_componentId: string;
         af_componentTitle: string;
-        af_subscriptions: () => Subscriptions; //FIXME: Maybe this one should be a method?
+        af_componentService: Service;
+        af_subscriptions: Subscriptions; //FIXME: Maybe this one should be a method?
 
         af_onOpen(): void {}
 

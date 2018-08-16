@@ -52,7 +52,7 @@ export function register(potentialComponents: any) {
                 bridge.registerScreen(component);
 
                 //FIXME: Is this the best place to put the subscriptions?
-                const subscriptions = component.af_subscriptions() || {};
+                const subscriptions = component.af_subscriptions || {};
                 Object.keys(subscriptions).forEach(channel => {
                     if (subscriptions.hasOwnProperty(channel)) {
                         bridge.subscribe(channel, subscriptions[channel]);

@@ -37,7 +37,7 @@ export default class EventsConsolePanel extends React.Component<Props, State> {
 
         props.screens
             .filter(s => s.af_subscriptions)
-            .map(s => s.af_subscriptions())
+            .map(s => s.af_subscriptions)
             .forEach(subscription => {
                 for (const channel in subscription) {
                     if (subscription.hasOwnProperty(channel)) {
