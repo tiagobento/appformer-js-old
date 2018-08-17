@@ -1,29 +1,33 @@
-export interface Pojo {
+export interface ErraiBusObject {
     "^EncodedType": string;
     "^ObjectID": string;
+
+
+    __toJson(): string;
 }
 
 
 
-type weirdType = { new(...args: any[]): {} };
-
-
-//Make this decorator have a parameter.
-function portable<T extends weirdType>(constructor: T) {
-    return class extends constructor {
-        _fqcn = "org.uberfire.shared.TestEvent";
-    };
-}
+//FIXME: I think this value is an unique identifier for instances.
+//FIXME: Identify that two objects are the same instance and pass the same value.
+let OBJ_ID = 1;
 
 
 
-@portable
-class Portable<T> {
+export class Portable<T extends Portable<T>> {
 
-    readonly _fqcn?: string;
+    readonly __fqcn: string;
 
-    //FIXME: Overridable, fix that inside the Decorator.
-    readonly serialize?: (() => (T & Pojo)) = () => {
+
+    constructor(self: any, fqcn: string) {
+        if (self) {
+            self.__fqcn = fqcn;
+            Object.assign(this, self);
+        }
+    }
+
+
+    readonly __toErraiBusObject: (() => (T & ErraiBusObject)) = () => {
         const _this = {...(this as any)};
 
         Object.keys(_this).forEach(k => {
@@ -31,16 +35,24 @@ class Portable<T> {
                 delete _this[k];
             }
 
-            else if (_this[k] && _this[k]._fqcn) {
-                _this[k] = _this[k].serialize!();
+            else if (_this[k] && _this[k].__fqcn) {
+                _this[k] = _this[k].__toErraiBusObject();
+            }
+
+            else if (!_this[k]) {
+                _this[k] = null;
             }
         });
 
-        _this["^EncodedType"] = _this._fqcn;
-        _this["^ObjectID"] = "1"; //FIXME: What goes here?
-        delete _this._fqcn;
+        _this["^EncodedType"] = _this.__fqcn;
+        _this["^ObjectID"] = `${OBJ_ID++}`;
+        delete _this.__fqcn;
 
-        return _this;
+        return {
+            ..._this, __toJson() {
+                return JSON.stringify(this);
+            },
+        };
     };
 }
 
@@ -48,16 +60,27 @@ class Portable<T> {
 
 //Generated class
 export class TestEvent extends Portable<TestEvent> {
-    readonly _fqcn?: "org.uberfire.shared.TestEvent";
-
-    foo: string;
+    bar: string;
+    foo: Foo;
     child?: TestEvent;
 
 
-    constructor(self: TestEvent) {
-        super();
-        this.foo = self.foo;
-        this.child = self.child;
+    constructor(self: {
+        bar: string, foo: Foo, child?: TestEvent
+    }) {
+        super(self, "org.uberfire.shared.TestEvent");
+    }
+}
+
+
+
+//Generated class
+export class Foo extends Portable<Foo> {
+    foo: string;
+
+
+    constructor(self: { foo: string }) {
+        super(self, "org.uberfire.shared.Foo");
     }
 }
 

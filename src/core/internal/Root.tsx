@@ -66,10 +66,12 @@ const actions = {
     "openPerspective": (perspective: AppFormer.Perspective) => (state: State): any => {
 
         let uncloseableScreens = state.openScreens
-            .filter(screen => !perspective.has(screen)) //Filters out screens that will remain open
-            .map(screen => ({screen: screen, canBeClosed: screen.af_onMayClose()}))
-            .filter(t => !t.canBeClosed)
-            .map(t => t.screen.af_componentId);
+                                      .filter(screen => !perspective.has(screen)) //Filters out screens that will remain open
+                                      .map(screen => ({
+                                          screen: screen, canBeClosed: screen.af_onMayClose(),
+                                      }))
+                                      .filter(t => !t.canBeClosed)
+                                      .map(t => t.screen.af_componentId);
 
         //FIXME: Using sync "confirm" method is not ideal because it cannot be styled.
         const msg = `[${uncloseableScreens}] cannot be closed at the moment. Force closing and proceed to ${perspective.af_componentId}?`;
@@ -129,8 +131,8 @@ export default class Root extends React.Component<Props, State> {
             perspectives: [],
             screens: [],
             openScreens: [],
-            hasAnOpen: function (c) { return State.hasAnOpen(this)(c); },
-            without: function (c) { return State.without(this)(c); },
+            hasAnOpen(c) { return State.hasAnOpen(this)(c); },
+            without(c) { return State.without(this)(c); },
         };
         this.props.exposing(() => this);
     }
@@ -201,7 +203,7 @@ export default class Root extends React.Component<Props, State> {
                         <br/>
                         <span>Mocked reurn:</span>
                         <br/>
-                        <textarea placeholder={"Type JSON here..."} />
+                        <textarea placeholder={"Type JSON here..."}/>
                     </div>
                 </div>
             </Floating>
@@ -221,11 +223,13 @@ export default class Root extends React.Component<Props, State> {
             const originalRPC = AF.RPC;
 
             // monkey patch 🙊🙉🙈
-            AF.RPC = function (methodSignature: any, _: any[]) {
+            AF.RPC = function (methodSignature: any, json: any[]) {
                 return methodSignature;
             };
 
-            const methods = Object.keys(service).map(x => (service[x] as any)());
+            const methods = Object.keys(service).map(x => (service[x] as any)(({
+                __toErraiBusObject: () => ({__toJson() {}}),
+            })));
             AF.RPC = originalRPC;
             return methods;
         }).reduce(concat, []);
