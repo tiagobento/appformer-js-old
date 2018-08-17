@@ -1,4 +1,4 @@
-import func from 'core/foots';
+import func from 'core/footsx';
 import * as React from 'react';
 
 test('ahuahua', () => {
