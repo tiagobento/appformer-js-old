@@ -1,9 +1,9 @@
-import React from "react";
-import {AppFormer, RPC} from "core"
+import * as React from "react";
+import {AppFormer, RPC} from "core";
 import DemoApp from "core-screens/DemoApp";
-import homePerspectiveTemplate from "core-screens/HomePerspective.html";
-import otherPerspectiveTemplate from "core-screens/other-perspective.html";
-
+import {TestEvent, Pojo} from "core-screens/Model";
+// import homePerspectiveTemplate from "core-screens/HomePerspective.html";
+// import otherPerspectiveTemplate from "core-screens/other-perspective.html";
 
 
 export class InoffensiveNonScreenClass {
@@ -13,6 +13,9 @@ export class InoffensiveNonScreenClass {
 
 
 export class ReactComponentScreen extends AppFormer.Screen {
+
+    onFoo: (e: any) => void;
+
 
     constructor() {
         super();
@@ -27,11 +30,27 @@ export class ReactComponentScreen extends AppFormer.Screen {
         };
 
         this.af_componentService = {
-            sayHello: () => RPC("org.uberfire.shared.TestMessagesService|hello", []),
-            sayHelloToSomething: (something) => RPC("org.uberfire.shared.TestMessagesService|hello:java.lang.String", [something]), // <- String does not need marshalling
-            sayHelloOnServer: () => RPC("org.uberfire.shared.TestMessagesService|muteHello", []),
-            fireServerEvent: () => RPC("org.uberfire.shared.TestMessagesService|helloFromEvent", []),
-            sendTestPojo: (test) => RPC("org.uberfire.shared.TestMessagesService|postTestEvent:org.uberfire.shared.TestEvent", [JSON.stringify(test)]),
+            sayHello: () => {
+                return RPC("org.uberfire.shared.TestMessagesService|hello", []);
+            },
+
+            sayHelloToSomething: (x: string) => {
+                return RPC("org.uberfire.shared.TestMessagesService|hello:java.lang.String", [x]);
+            }, // <- String does not need marshalling
+
+            sayHelloOnServer: () => {
+                return RPC("org.uberfire.shared.TestMessagesService|muteHello", []);
+            },
+
+            fireServerEvent: () => {
+                return RPC("org.uberfire.shared.TestMessagesService|helloFromEvent", []);
+            },
+
+            sendTestPojo: (test: TestEvent & Pojo) => {
+                return RPC(
+                    "org.uberfire.shared.TestMessagesService|postTestEvent:org.uberfire.shared.TestEvent",
+                    [JSON.stringify(test)]);
+            },
         };
     }
 
@@ -42,6 +61,19 @@ export class ReactComponentScreen extends AppFormer.Screen {
 
 
     af_onOpen() {
+
+
+        const testEvent = new TestEvent(({
+            foo: "hello1", child: new TestEvent(({
+                foo: "hello2", child: undefined,
+            })),
+        }));
+
+
+        console.info(testEvent.toPojo!());
+        console.info(testEvent);
+
+
         console.info(`[${this.af_componentId}] is open! :: (Starting to make requests..)`);
 
         Promise.resolve().then(() => {
@@ -54,17 +86,7 @@ export class ReactComponentScreen extends AppFormer.Screen {
             return this.af_componentService.sayHelloOnServer();
         }).then(msg => {
             console.info(`Third call returned (${msg})`);
-            return this.af_componentService.sendTestPojo({
-                "^EncodedType": "org.uberfire.shared.TestEvent",
-                "^ObjectID": "1",
-                foo: "hello1",
-                child: {
-                    "^EncodedType": "org.uberfire.shared.TestEvent",
-                    "^ObjectID": "2",
-                    foo: "hello2",
-                    child: null
-                }
-            });
+            return this.af_componentService.sendTestPojo(testEvent);
         }).then(msg => {
             console.info(`Fourth call returned (${msg})`);
         }).catch(e => {
@@ -94,6 +116,7 @@ export class ReactComponentScreen extends AppFormer.Screen {
 
 
     af_componentRoot() {
+        const UntypedDemoApp = DemoApp as any;
         return <div>
 
             <br/>
@@ -103,7 +126,8 @@ export class ReactComponentScreen extends AppFormer.Screen {
             </button>
             <br/>
 
-            <DemoApp number={this.af_componentId} onFoo={o => this.onFoo = o}/>
+
+            <UntypedDemoApp number={this.af_componentId} onFoo={(x: any) => this.onFoo = x}/>
         </div>;
     }
 
@@ -113,14 +137,19 @@ export class ReactComponentScreen extends AppFormer.Screen {
 
 export class PureDomElementScreen extends AppFormer.Screen {
 
+    span: HTMLElement;
+
+
     constructor() {
         super();
         this.af_componentId = "dom-elements-screen";
         this.af_componentTitle = "DOM Elements Component";
         this.span = document.createElement("span");
         this.af_componentService = {
-            fireServerEvent: () => RPC("org.uberfire.shared.TestMessagesService|helloFromEvent", []),
-        }
+            fireServerEvent: () => {
+                return RPC("org.uberfire.shared.TestMessagesService|helloFromEvent", []);
+            },
+        };
     }
 
 
@@ -163,7 +192,7 @@ export class StringElementScreen extends AppFormer.Screen {
 
 
     af_componentRoot() {
-        return '<p style="color: red"> Hi, I\'m a simple pure HTML String Template</p>';
+        return "<p style=\"color: red\"> Hi, I'm a simple pure HTML String Template</p>";
     }
 }
 
@@ -180,41 +209,41 @@ export class SillyReactScreen extends AppFormer.Screen {
 
 
     af_componentRoot() {
-        return <h1>{`This is just an <h1>`}</h1>
+        return <h1>{`This is just an <h1>`}</h1>;
     }
 }
 
 
 
-export class HomePerspective extends AppFormer.Perspective {
-
-    constructor() {
-        super();
-        this.af_componentId = "home-perspective";
-        this.af_perspectiveScreens = ["string-template-screen", "A-react-screen-id"];
-        this.af_isDefaultPerspective = false;
-    }
-
-
-    af_perspectiveRoot() {
-        return homePerspectiveTemplate;
-    }
-}
-
-
-
-export class OtherPerspective extends AppFormer.Perspective {
-
-    constructor() {
-        super();
-        this.af_componentId = "other-perspective";
-        this.af_perspectiveScreens = ["string-template-screen", "dom-elements-screen"];
-        this.af_isDefaultPerspective = false;
-    }
-
-
-    af_perspectiveRoot() {
-        return otherPerspectiveTemplate;
-    }
-}
+// export class HomePerspective extends AppFormer.Perspective {
+//
+//     constructor() {
+//         super();
+//         this.af_componentId = "home-perspective";
+//         this.af_perspectiveScreens = ["string-template-screen", "A-react-screen-id"];
+//         this.af_isDefaultPerspective = false;
+//     }
+//
+//
+//     af_perspectiveRoot() {
+//         return homePerspectiveTemplate;
+//     }
+// }
+//
+//
+//
+// export class OtherPerspective extends AppFormer.Perspective {
+//
+//     constructor() {
+//         super();
+//         this.af_componentId = "other-perspective";
+//         this.af_perspectiveScreens = ["string-template-screen", "dom-elements-screen"];
+//         this.af_isDefaultPerspective = false;
+//     }
+//
+//
+//     af_perspectiveRoot() {
+//         return otherPerspectiveTemplate;
+//     }
+// }
 

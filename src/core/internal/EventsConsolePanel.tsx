@@ -65,13 +65,18 @@ export default class EventsConsolePanel extends React.Component<Props, State> {
 
     private sendEvent() {
         if (this.state.channel) {
-            this.subscriptions()[this.state.channel!](this.state.event);
+            try {
+                const parse = JSON.parse(this.state.event);
+                this.subscriptions()[this.state.channel!](parse);
+            } catch (e) {
+                console.info(`Invalid event [${this.state.event}]`);
+            }
         }
     }
 
 
     render() {
-        return <div className={"af-events-console"}>
+        return <div className={"af-events-console"} hidden>
 
             <div className={"title"}>
                 <span>Events simulation console</span>
@@ -80,7 +85,9 @@ export default class EventsConsolePanel extends React.Component<Props, State> {
             <div className={"contents"}>
                 {this.state.channel && <>
 
-                    <select value={this.state.channel}
+
+                    <select style={{width: "100%"}}
+                            value={this.state.channel}
                             onChange={e => this.setState(actions.setChannel(e.target.value))}>
 
                         {Object.keys(this.subscriptions()).sort().map(channel => {
@@ -89,17 +96,18 @@ export default class EventsConsolePanel extends React.Component<Props, State> {
 
                     </select>
 
-                    &nbsp;
 
-                    <input onChange={e => this.setState(actions.setEvent(e.target.value))}
-                           placeholder={"Type event value"}
-                           value={this.state.event}/>
-
-                    &nbsp;
-
+                    <br/>
+                    <br/>
                     <button onClick={() => this.sendEvent()}>
                         Send event!
                     </button>
+                    <br/>
+                    <br/>
+
+                    <textarea onChange={e => this.setState(actions.setEvent(e.target.value))}
+                              placeholder={"Type JSON here..."}
+                              value={this.state.event}/>
                 </> || <>
                      <span>No one is listening to events at the moment :(</span>
                  </>}

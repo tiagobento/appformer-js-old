@@ -35,8 +35,8 @@ export const render = bridge.render ||
 export const RPC = bridge.RPC;
 
 
-export function goTo(path: string) {
-    return bridge.goTo(path);
+export function goTo(place: string) {
+    return bridge.goTo(place);
 }
 
 
