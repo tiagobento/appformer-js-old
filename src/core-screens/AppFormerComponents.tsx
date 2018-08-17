@@ -70,7 +70,7 @@ export class ReactComponentScreen extends AppFormer.Screen {
         }));
 
 
-        console.info(testEvent.toPojo!());
+        console.info(testEvent.serialize!());
         console.info(testEvent);
 
 

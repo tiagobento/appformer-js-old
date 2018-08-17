@@ -23,7 +23,7 @@ class Portable<T> {
     readonly _fqcn?: string;
 
     //FIXME: Overridable, fix that inside the Decorator.
-    readonly toPojo?: (() => (T & Pojo)) = () => {
+    readonly serialize?: (() => (T & Pojo)) = () => {
         const _this = {...(this as any)};
 
         Object.keys(_this).forEach(k => {
@@ -32,7 +32,7 @@ class Portable<T> {
             }
 
             else if (_this[k] && _this[k]._fqcn) {
-                _this[k] = _this[k].toPojo!();
+                _this[k] = _this[k].serialize!();
             }
         });
 
