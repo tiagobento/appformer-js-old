@@ -39,10 +39,6 @@ export function goTo(place: string) {
     return bridge.goTo(place);
 }
 
-export function sum(a:number, b:number):number {
-    return a + b;
-}
-
 
 export function register(potentialComponents: any) {
     for (let potentialComponent in potentialComponents) {
