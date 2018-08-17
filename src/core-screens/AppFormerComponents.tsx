@@ -20,7 +20,7 @@ export class ReactComponentScreen extends AppFormer.Screen {
     constructor() {
         super();
         this.isReact = true;
-        this.af_componentId = "A-react-screen-id";
+        this.af_componentId = "A-react-screen";
         this.af_componentTitle = "React Component";
 
         this.af_subscriptions = {
@@ -74,7 +74,6 @@ export class ReactComponentScreen extends AppFormer.Screen {
 
         console.info(testEvent);
         console.info(testEvent.__toErraiBusObject());
-
 
         console.info(`[${this.af_componentId}] is open! :: (Starting to make requests..)`);
 
@@ -222,7 +221,7 @@ export class SillyReactScreen extends AppFormer.Screen {
 //     constructor() {
 //         super();
 //         this.af_componentId = "home-perspective";
-//         this.af_perspectiveScreens = ["string-template-screen", "A-react-screen-id"];
+//         this.af_perspectiveScreens = ["string-template-screen", "A-react-screen"];
 //         this.af_isDefaultPerspective = false;
 //     }
 //
