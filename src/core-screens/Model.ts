@@ -65,9 +65,7 @@ export class TestEvent extends Portable<TestEvent> {
     child?: TestEvent;
 
 
-    constructor(self: {
-        bar: string, foo: Foo, child?: TestEvent
-    }) {
+    constructor(self: { bar: string, foo: Foo, child?: TestEvent }) {
         super(self, "org.uberfire.shared.TestEvent");
     }
 }
