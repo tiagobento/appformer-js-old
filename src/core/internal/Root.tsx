@@ -3,7 +3,7 @@ import {AppFormer} from "core/Components";
 import EventsConsolePanel from "core/internal/EventsConsolePanel";
 import JsBridge from "core/internal/JsBridge";
 import PerspectiveContainer from "core/internal/PerspectiveContainer";
-import {Link} from "core";
+import {Link, Floating} from "core/react/Shorthands";
 
 
 
@@ -54,14 +54,24 @@ const actions = {
         return {screens: [...state.screens, screen]};
     },
 
+    "open": (place: string) => (state: State): any => {
+        const perspective = state.perspectives.filter(s => s.af_componentId === place).pop();
+        if (perspective) {
+            return actions.openPerspective(perspective!)(state);
+        }
+
+        return actions.openScreen(place)(state);
+    },
 
     "openPerspective": (perspective: AppFormer.Perspective) => (state: State): any => {
 
         let uncloseableScreens = state.openScreens
-            .filter(screen => !perspective.has(screen)) //Filters out screens that will remain open
-            .map(screen => ({screen: screen, canBeClosed: screen.af_onMayClose()}))
-            .filter(t => !t.canBeClosed)
-            .map(t => t.screen.af_componentId);
+                                      .filter(screen => !perspective.has(screen)) //Filters out screens that will remain open
+                                      .map(screen => ({
+                                          screen: screen, canBeClosed: screen.af_onMayClose(),
+                                      }))
+                                      .filter(t => !t.canBeClosed)
+                                      .map(t => t.screen.af_componentId);
 
         //FIXME: Using sync "confirm" method is not ideal because it cannot be styled.
         const msg = `[${uncloseableScreens}] cannot be closed at the moment. Force closing and proceed to ${perspective.af_componentId}?`;
@@ -121,8 +131,8 @@ export default class Root extends React.Component<Props, State> {
             perspectives: [],
             screens: [],
             openScreens: [],
-            hasAnOpen: function (c) { return State.hasAnOpen(this)(c); },
-            without: function (c) { return State.without(this)(c); },
+            hasAnOpen(c) { return State.hasAnOpen(this)(c); },
+            without(c) { return State.without(this)(c); },
         };
         this.props.exposing(() => this);
     }
@@ -138,8 +148,8 @@ export default class Root extends React.Component<Props, State> {
     }
 
 
-    openScreen(screenId: string) {
-        this.setState(actions.openScreen(screenId));
+    open(place: string) {
+        this.setState(actions.open(place));
     }
 
 
@@ -158,7 +168,8 @@ export default class Root extends React.Component<Props, State> {
 
 
     render() {
-        return <div className={"af-js-root"}>
+        return <div className={"af-js-root"}
+                    style={{width: "100%", height: "100%", position: "absolute"}}>
 
             {this.Header()}
 
@@ -170,9 +181,60 @@ export default class Root extends React.Component<Props, State> {
                  bridge={this.props.bridge}
                  onCloseScreen={screen => this.setState(actions.closeScreen(screen))}/>}
 
-            <EventsConsolePanel screens={this.state.openScreens}/>
+            <Floating>
+                <EventsConsolePanel screens={this.state.screens}/>
+            </Floating>
+
+            <Floating>
+                <div className={"af-events-console"} hidden>
+
+                    <div className={"title"}>
+                        <span>RPC simulation console</span>
+                    </div>
+
+                    <div className={"contents"}>
+                        <select style={{width: "100%"}}>
+                            {this.getMethods().map((method: string) => {
+                                return <option key={method} value={method}>{method}</option>;
+                            })}
+                        </select>
+
+                        <br/>
+                        <br/>
+                        <span>Mocked reurn:</span>
+                        <br/>
+                        <textarea placeholder={"Type JSON here..."}/>
+                    </div>
+                </div>
+            </Floating>
 
         </div>;
+    }
+
+
+    private getMethods() {
+        const concat = (x: any, y: any) => x.concat(y);
+
+        const methods = (this.state.screens as any).map((screen: any) => {
+
+            const service = screen.af_componentService;
+
+            const AF = (window as any).appformer;
+            const originalRPC = AF.RPC;
+
+            // monkey patch 🙊🙉🙈
+            AF.RPC = function (methodSignature: any, json: any[]) {
+                return methodSignature;
+            };
+
+            const methods = Object.keys(service).map(x => (service[x] as any)(({
+                __toErraiBusObject: () => ({__toJson() {}}),
+            })));
+            AF.RPC = originalRPC;
+            return methods;
+        }).reduce(concat, []);
+
+        return methods.filter((a: any, b: number) => methods.indexOf(a) === b);
     }
 
 
@@ -182,27 +244,23 @@ export default class Root extends React.Component<Props, State> {
         }}>
             <div className={"af-screens-panel"}>
                 <div className={"contents"} style={{backgroundColor: "#2e2e2e"}}>
-                    {this.state.perspectives.map(perspective => (
+                    {this.state.perspectives.map(p => (
 
-                        //FIXME: Implement goTo for perspectives
-                        <button key={perspective.af_componentId}
-                                onClick={() => this.setState(actions.openPerspective(perspective))}
-                                disabled={this.state.hasAnOpen(perspective)}>
-
-                            {perspective.af_componentId}
-
-                            {this.state.hasAnOpen(perspective) && <Check/>}
-                        </button>
+                        <Link to={p.af_componentId} key={p.af_componentId}>
+                            <button disabled={this.state.hasAnOpen(p)}>
+                                {p.af_componentId} {this.state.hasAnOpen(p) && <Check/>}
+                            </button>
+                        </Link>
 
                     ))}
                 </div>
 
                 <div className={"contents"}>
-                    {this.state.screens.map(screen => (
+                    {this.state.screens.map(s => (
 
-                        <Link to={screen.af_componentId} key={screen.af_componentId}>
-                            <button disabled={this.state.hasAnOpen(screen)}>
-                                {screen.af_componentId} {this.state.hasAnOpen(screen) && <Check/>}
+                        <Link to={s.af_componentId} key={s.af_componentId}>
+                            <button disabled={this.state.hasAnOpen(s)}>
+                                {s.af_componentId} {this.state.hasAnOpen(s) && <Check/>}
                             </button>
                         </Link>
 

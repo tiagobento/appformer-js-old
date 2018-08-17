@@ -28,8 +28,8 @@ export default class JsBridge {
     }
 
 
-    goTo(path: string) {
-        this.root().openScreen(path);
+    goTo(place: string) {
+        this.root().open(place);
     }
 
 

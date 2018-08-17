@@ -15,7 +15,7 @@ export namespace AppFormer {
 
     export type Subscriptions = { [channel: string]: (event: any) => void };
 
-    export type Service = { [name: string]: (a: any) => any };
+    export type Service = { [name: string]: any };
 
     export type Component = Screen | Perspective;
 
@@ -49,9 +49,10 @@ export namespace AppFormer {
         isReact: boolean = false;
         af_componentId: string;
         af_componentTitle: string;
-        af_componentService: Service;
+        af_componentService: Service = {};
         af_subscriptions: Subscriptions = {}; //FIXME: Maybe this one should be a method?
 
+        //FIXME: When to call?
         af_onStartup(): void {}
 
 
@@ -72,6 +73,7 @@ export namespace AppFormer {
         af_onClose(): void {}
 
 
+        //FIXME: When to call?
         af_onShutdown(): void {}
 
 
