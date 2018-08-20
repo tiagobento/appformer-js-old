@@ -62,9 +62,9 @@ const actions = {
         const perspective = state.perspectives.filter(s => s.af_componentId === place).pop();
         if (perspective) {
             return actions.openPerspective(perspective!)(state);
+        } else {
+            return actions.openScreen(place)(state);
         }
-
-        return actions.openScreen(place)(state);
     },
 
 
@@ -87,6 +87,7 @@ const actions = {
             openScreens: state.screens.filter(screen => perspective.has(screen)),
         };
     },
+
 
     "closeScreen": (screen: AppFormer.Screen) => (state: State): any => {
         //FIXME: Using sync "confirm" method is not ideal because it cannot be styled.

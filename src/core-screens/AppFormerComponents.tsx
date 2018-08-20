@@ -1,7 +1,10 @@
 import * as React from "react";
-import {AppFormer, RPC} from "core";
+import {AppFormer} from "core";
 import DemoApp from "core-screens/DemoApp";
-import {TestEvent, ErraiBusObject, Foo} from "core-screens/Model";
+import {TestEvent, Foo} from "generated/Model";
+import {Services} from "generated/Services";
+import TestMessagesService = Services.org.uberfire.shared.TestMessagesService;
+
 // import homePerspectiveTemplate from "core-screens/HomePerspective.html";
 // import otherPerspectiveTemplate from "core-screens/other-perspective.html";
 
@@ -30,27 +33,11 @@ export class ReactComponentScreen extends AppFormer.Screen {
         };
 
         this.af_componentService = {
-            sayHello() {
-                return RPC("org.uberfire.shared.TestMessagesService|hello", []);
-            },
-
-            sayHelloToSomething(x: string) {
-                return RPC("org.uberfire.shared.TestMessagesService|hello:java.lang.String", [x]);
-            }, // <- String does not need marshalling
-
-            sayHelloOnServer() {
-                return RPC("org.uberfire.shared.TestMessagesService|muteHello", []);
-            },
-
-            fireServerEvent() {
-                return RPC("org.uberfire.shared.TestMessagesService|helloFromEvent", []);
-            },
-
-            sendTestPojo(testEvent: TestEvent & ErraiBusObject) {
-                return RPC(
-                    "org.uberfire.shared.TestMessagesService|postTestEvent:org.uberfire.shared.TestEvent",
-                    [testEvent.__toErraiBusObject().__toJson()]);
-            },
+            sayHello: TestMessagesService.sayHello,
+            sayHelloToSomething: TestMessagesService.sayHelloToSomething,
+            sayHelloOnServer: TestMessagesService.sayHelloOnServer,
+            fireServerEvent: TestMessagesService.fireServerEvent,
+            sendTestPojo: TestMessagesService.sendTestPojo,
         };
     }
 
@@ -63,17 +50,11 @@ export class ReactComponentScreen extends AppFormer.Screen {
     af_onOpen() {
 
 
-        const testEvent = new TestEvent({
-                                            bar: "hello1",
-                                            foo: new Foo({foo: "a"}),
-                                            child: new TestEvent({
-                                                                     bar: "hello2",
-                                                                     foo: new Foo({foo: "b"}),
-                                                                 }),
-                                        });
-
-        console.info(testEvent);
-        console.info(testEvent.__toErraiBusObject());
+        const testEvent = new TestEvent(({
+            bar: "hello1", foo: new Foo({foo: "a"}), child: new TestEvent(({
+                bar: "hello2", foo: new Foo({foo: "b"}),
+            })),
+        }));
 
         console.info(`[${this.af_componentId}] is open! :: (Starting to make requests..)`);
 
@@ -147,9 +128,7 @@ export class PureDomElementScreen extends AppFormer.Screen {
         this.af_componentTitle = "DOM Elements Component";
         this.span = document.createElement("span");
         this.af_componentService = {
-            fireServerEvent() {
-                return RPC("org.uberfire.shared.TestMessagesService|helloFromEvent", []);
-            },
+            fireServerEvent: TestMessagesService.fireServerEvent,
         };
     }
 

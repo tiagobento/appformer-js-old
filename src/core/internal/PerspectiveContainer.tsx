@@ -47,8 +47,7 @@ export default class PerspectiveContainer extends React.Component<Props, State> 
     }
 
 
-    getSnapshotBeforeUpdate(prevProps: Readonly<Props>,
-                            prevState: Readonly<State>): LastStateSnapshot {
+    getSnapshotBeforeUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>): LastStateSnapshot {
 
         const diff = (a: AppFormer.Screen[], b: AppFormer.Screen[]) => {
             return a.filter((i) => b.indexOf(i) < 0);
@@ -72,9 +71,7 @@ export default class PerspectiveContainer extends React.Component<Props, State> 
     }
 
 
-    componentDidUpdate(prevProps: Readonly<Props>,
-                       prevState: Readonly<State>,
-                       snapshot?: LastStateSnapshot): void {
+    componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: LastStateSnapshot): void {
 
         if (!snapshot!.shouldRenderPerspective) {
             this.renderScreens(snapshot!);
@@ -86,9 +83,8 @@ export default class PerspectiveContainer extends React.Component<Props, State> 
             return;
         }
 
-        this.props.bridge.render(this.props.perspective.af_perspectiveRoot(this.props.root),
-                                 this.ref,
-                                 () => this.renderScreens(snapshot!));
+        this.props.bridge.render(this.props.perspective.af_perspectiveRoot(this.props.root), this.ref);
+        this.renderScreens(snapshot!);
     }
 
 
@@ -129,7 +125,7 @@ export default class PerspectiveContainer extends React.Component<Props, State> 
             if (!newContainer.hasAttribute(a.name)) {
                 exContainer.removeAttribute(a.name);
             } else {
-                exContainer.setAttribute(a.name, newContainer.getAttribute(a.name)! || "");
+                exContainer.setAttribute(a.name, newContainer.getAttribute(a.name) || "");
             }
         });
 
@@ -157,12 +153,6 @@ export default class PerspectiveContainer extends React.Component<Props, State> 
     }
 
 
-    componentWillUnmount(): void {
-        console.info(`...Unmounting ${this.props.perspective.af_componentId}...`);
-        console.info(`Unmounted ${this.props.perspective.af_componentId}.`);
-    }
-
-
     private findContainerForScreen(screen: AppFormer.Screen) {
         return PerspectiveContainer.findScreenContainerInside(screen, this.ref);
     }
@@ -177,8 +167,7 @@ export default class PerspectiveContainer extends React.Component<Props, State> 
             {/*This is where the perspective will be rendered on.*/}
             {/*See `componentDidMount` and `componentWillUnmount`*/}
             {/*If it is a ReactElement we can embedded it directly*/}
-            {this.props.perspective.isReact &&
-             this.props.perspective.af_perspectiveRoot(this.props.root)}
+            {this.props.perspective.isReact && this.props.perspective.af_perspectiveRoot(this.props.root)}
 
         </div>;
     }

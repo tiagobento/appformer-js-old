@@ -19,22 +19,13 @@ export default class ScreenContainer extends React.Component<Props, {}> {
 
 
     componentDidMount(): void {
-        const screen = this.props.screen;
-        console.info(`...Rendering ${screen.af_componentId}...`);
 
-        if (this.props.screen.isReact) {
-            this.invokeOnOpen();
-            return;
+        if (!this.props.screen.isReact) {
+            console.info(`...Rendering ${this.props.screen.af_componentId}...`);
+            this.props.bridge.render(this.props.screen.af_componentRoot(this.props.root), this.ref);
+            console.info(`Rendered ${this.props.screen.af_componentId}`);
         }
 
-        this.props.bridge.render(screen.af_componentRoot(this.props.root),
-                                 this.ref,
-                                 () => this.invokeOnOpen());
-    }
-
-
-    private invokeOnOpen() {
-        console.info(`Rendered ${this.props.screen.af_componentId}`);
         console.info(`...Opening ${this.props.screen.af_componentId}...`);
         this.props.screen.af_onOpen();
         console.info(`Opened ${this.props.screen.af_componentId}.`);
@@ -42,10 +33,9 @@ export default class ScreenContainer extends React.Component<Props, {}> {
 
 
     componentWillUnmount(): void {
-        const screen = this.props.screen;
-        console.info(`...Closing ${screen.af_componentId}...`);
-        screen.af_onClose();
-        console.info(`Closed ${screen.af_componentId}.`);
+        console.info(`...Closing ${this.props.screen.af_componentId}...`);
+        this.props.screen.af_onClose();
+        console.info(`Closed ${this.props.screen.af_componentId}.`);
     }
 
 

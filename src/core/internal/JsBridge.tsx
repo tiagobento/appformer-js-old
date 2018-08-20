@@ -38,14 +38,14 @@ export default class JsBridge {
     }
 
 
-    render(component: any, container: HTMLElement, callback = () => {}) {
+    render(component: AppFormer.Element, container: HTMLElement, callback = () => {}) {
+
         if (component instanceof HTMLElement) {
             container.innerHTML = "";
             container.appendChild(component);
             callback();
         }
 
-        //FIXME: What's wrong here?
         else if (typeof component === "string") {
             container.innerHTML = component;
             callback();
