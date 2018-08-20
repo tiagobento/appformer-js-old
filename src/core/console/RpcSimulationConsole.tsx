@@ -22,7 +22,7 @@ export class RPCConsole extends React.Component<Props, {}> {
           return methodSignature;
         };
 
-        const methods = Object.keys(service).map(x =>
+        const serviceMethods = Object.keys(service).map(x =>
           (service[x] as any)({
             __toErraiBusObject: () => ({
               __toJson() {
@@ -32,7 +32,7 @@ export class RPCConsole extends React.Component<Props, {}> {
           })
         );
         AF.RPC = originalRPC;
-        return methods;
+        return serviceMethods;
       })
       .reduce(concat, []);
 

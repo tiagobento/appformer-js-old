@@ -7,7 +7,7 @@ export default class JsBridge {
   public root: () => Root;
 
   public init(callback: () => void) {
-    const root = <Root exposing={root => (this.root = root)} bridge={this} />;
+    const root = <Root exposing={rootParam => (this.root = rootParam)} bridge={this} />;
     const rootContainer = document.body.children[0] as HTMLElement; // FIXME: Maybe get a Div with a fixed id/class?
     ReactDOM.render(root, rootContainer, callback);
     return this;
