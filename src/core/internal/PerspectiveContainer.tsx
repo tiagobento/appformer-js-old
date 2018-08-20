@@ -119,7 +119,7 @@ export default class PerspectiveContainer extends React.Component<Props, State> 
 
     exContainer.setAttribute(PerspectiveContainer.AfOpenScreenAttr, screen.af_componentId);
 
-    //FIXME: this "replaceWith" method does not work on IE.
+    // FIXME: this "replaceWith" method does not work on IE.
     (newContainer as any).replaceWith(exContainer);
   }
 
@@ -135,7 +135,7 @@ export default class PerspectiveContainer extends React.Component<Props, State> 
 
     // This is very important for React to identify we're dealing with another
     // node when rendering another screen on the same container
-    //FIXME: this "replaceWith" method does not work on IE.
+    // FIXME: this "replaceWith" method does not work on IE.
     (container as any).replaceWith(container.cloneNode(false));
   }
 

@@ -34,7 +34,7 @@ const actions = {
     currentPerspective: state.currentPerspective
       ? state.currentPerspective
       : perspective.af_isDefaultPerspective
-        ? perspective //Last default perspective found is the one that wins.
+        ? perspective // Last default perspective found is the one that wins.
         : undefined,
     openScreens: perspective.af_isDefaultPerspective
       ? state.screens.filter(screen => perspective.has(screen))
@@ -62,12 +62,12 @@ const actions = {
 
   openPerspective: (perspective: AppFormer.Perspective) => (state: State): any => {
     let uncloseableScreens = state.openScreens
-      .filter(screen => !perspective.has(screen)) //Filters out screens that will remain open
+      .filter(screen => !perspective.has(screen)) // Filters out screens that will remain open
       .map(screen => ({ screen: screen, canBeClosed: screen.af_onMayClose() }))
       .filter(t => !t.canBeClosed)
       .map(t => t.screen.af_componentId);
 
-    //FIXME: Using sync "confirm" method is not ideal because it cannot be styled.
+    // FIXME: Using sync "confirm" method is not ideal because it cannot be styled.
     const msg = `[${uncloseableScreens}] cannot be closed at the moment. Force closing and proceed to ${
       perspective.af_componentId
     }?`;
@@ -82,7 +82,7 @@ const actions = {
   },
 
   closeScreen: (screen: AppFormer.Screen) => (state: State): any => {
-    //FIXME: Using sync "confirm" method is not ideal because it cannot be styled.
+    // FIXME: Using sync "confirm" method is not ideal because it cannot be styled.
     const msg = `${screen.af_componentId} cannot be closed. Do you want to force it?`;
     if (!screen.af_onMayClose() && !confirm(msg)) {
       return state;
@@ -110,7 +110,7 @@ const actions = {
 
     const existingScreenId = container.getAttribute(PerspectiveContainer.AfOpenScreenAttr);
     if (existingScreenId) {
-      //FIXME: Not checking onMayClose to close the existing screen
+      // FIXME: Not checking onMayClose to close the existing screen
       return {
         openScreens: [...state.without(existingScreenId).openScreens, screen]
       };

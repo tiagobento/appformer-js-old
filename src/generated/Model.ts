@@ -5,8 +5,8 @@ export interface ErraiBusObject {
   __toJson(): string;
 }
 
-//FIXME: I think this value is an unique identifier for instances.
-//FIXME: Identify that two objects are the same instance and pass the same value.
+// FIXME: I think this value is an unique identifier for instances.
+// FIXME: Identify that two objects are the same instance and pass the same value.
 let OBJ_ID = 1;
 
 export class Portable<T extends Portable<T>> {
@@ -45,7 +45,7 @@ export class Portable<T extends Portable<T>> {
   };
 }
 
-//Generated class
+// Generated class
 export class TestEvent extends Portable<TestEvent> {
   public bar?: string;
   public foo?: Foo;
@@ -56,7 +56,7 @@ export class TestEvent extends Portable<TestEvent> {
   }
 }
 
-//Generated class
+// Generated class
 export class Foo extends Portable<Foo> {
   public foo?: string;
 
