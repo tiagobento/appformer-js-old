@@ -12,8 +12,8 @@ interface State {
 }
 
 const actions = {
-  setChannel: (channel: string) => (state: State) => ({ channel: channel }),
-  setEvent: (event: string) => (state: State) => ({ event: event })
+  setChannel: (channelParam: string) => (state: State) => ({ channel: channelParam }),
+  setEvent: (eventParam: string) => (state: State) => ({ event: eventParam })
 };
 
 export default class EventsSimulationConsole extends React.Component<Props, State> {

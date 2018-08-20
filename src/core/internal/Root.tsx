@@ -61,9 +61,9 @@ const actions = {
   },
 
   openPerspective: (perspective: AppFormer.Perspective) => (state: State): any => {
-    let uncloseableScreens = state.openScreens
+    const uncloseableScreens = state.openScreens
       .filter(screen => !perspective.has(screen)) // Filters out screens that will remain open
-      .map(screen => ({ screen: screen, canBeClosed: screen.af_onMayClose() }))
+      .map(screenParam => ({ screen: screenParam, canBeClosed: screenParam.af_onMayClose() }))
       .filter(t => !t.canBeClosed)
       .map(t => t.screen.af_componentId);
 
