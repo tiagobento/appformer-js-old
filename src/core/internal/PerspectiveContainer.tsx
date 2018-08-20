@@ -21,6 +21,9 @@ interface LastStateSnapshot {
 }
 
 export default class PerspectiveContainer extends React.Component<Props, State> {
+
+  public static AfOpenScreenAttr = "af-open-screen";
+
   public ref: HTMLDivElement;
 
   constructor(props: Props) {
@@ -162,8 +165,6 @@ export default class PerspectiveContainer extends React.Component<Props, State> 
       </div>
     );
   }
-
-  public static AfOpenScreenAttr = "af-open-screen";
 
   private static getSelfContainerElementId(perspective: AppFormer.Perspective) {
     return "self-perspective-" + perspective.af_componentId;
