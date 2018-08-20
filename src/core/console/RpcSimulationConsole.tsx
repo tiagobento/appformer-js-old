@@ -24,7 +24,11 @@ export class RPCConsole extends React.Component<Props, {}> {
 
         const methods = Object.keys(service).map(x =>
           (service[x] as any)({
-            __toErraiBusObject: () => ({ __toJson() {} })
+            __toErraiBusObject: () => ({
+              __toJson() {
+                // noop
+              }
+            })
           })
         );
         AF.RPC = originalRPC;

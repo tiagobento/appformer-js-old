@@ -38,23 +38,33 @@ export namespace AppFormer {
     public af_componentService: Service = {};
     public af_subscriptions: Subscriptions = {}; // FIXME: Maybe this one should be a method?
 
-    // FIXME: When to call?
-    public af_onStartup(): void {}
+    public af_onStartup(): void {
+      // FIXME: When to call?
+    }
 
-    public af_onOpen(): void {}
+    public af_onOpen(): void {
+      // TODO
+    }
 
-    public af_onFocus(): void {}
+    public af_onFocus(): void {
+      // TODO
+    }
 
-    public af_onLostFocus(): void {}
+    public af_onLostFocus(): void {
+      // TODO
+    }
 
     public af_onMayClose(): boolean {
       return true;
     }
 
-    public af_onClose(): void {}
+    public af_onClose(): void {
+      // TODO
+    }
 
-    // FIXME: When to call?
-    public af_onShutdown(): void {}
+    public af_onShutdown(): void {
+      // FIXME: When to call?
+    }
 
     public abstract af_componentRoot(root?: { ss: AppFormer.Screen[]; ps: AppFormer.Perspective[] }): Element;
 

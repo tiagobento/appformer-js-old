@@ -12,7 +12,7 @@ const bridge =
 
 export const render =
   bridge.render ||
-  ((component: any, container: HTMLElement, callback = () => {}) => {
+  ((component: any, container: HTMLElement, callback = (): void => undefined) => {
     // FIXME: Duplicated!!
 
     if (component instanceof HTMLElement) {
