@@ -29,11 +29,7 @@ export default class JsBridge {
     return Promise.reject("Sorry, RPC mocks are not available yet :(");
   }
 
-  render(
-    component: AppFormer.Element,
-    container: HTMLElement,
-    callback = () => {}
-  ) {
+  render(component: AppFormer.Element, container: HTMLElement, callback = () => {}) {
     if (component instanceof HTMLElement) {
       container.innerHTML = "";
       container.appendChild(component);

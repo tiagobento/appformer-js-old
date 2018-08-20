@@ -15,10 +15,7 @@ export default class ScreenContainer extends React.Component<Props, {}> {
   componentDidMount(): void {
     if (!this.props.screen.isReact) {
       console.info(`...Rendering ${this.props.screen.af_componentId}...`);
-      this.props.bridge.render(
-        this.props.screen.af_componentRoot(this.props.root),
-        this.ref
-      );
+      this.props.bridge.render(this.props.screen.af_componentRoot(this.props.root), this.ref);
       console.info(`Rendered ${this.props.screen.af_componentId}`);
     }
 
@@ -40,20 +37,15 @@ export default class ScreenContainer extends React.Component<Props, {}> {
         onFocus={() => this.props.screen.af_onFocus()}
         onBlur={() => this.props.screen.af_onLostFocus()}
       >
-        {this.props.screen.af_componentTitle && (
-          <div className={"title"}>{this.TitleBar(this.props.screen)}</div>
-        )}
+        {this.props.screen.af_componentTitle && <div className={"title"}>{this.TitleBar(this.props.screen)}</div>}
 
         {/*This is where the screens will be rendered on.*/}
         {/*If it is a ReactElement we can embedded it directly*/}
-        {this.props.screen.isReact &&
-          this.props.screen.af_componentRoot(this.props.root)}
+        {this.props.screen.isReact && this.props.screen.af_componentRoot(this.props.root)}
 
         {/*If not, we simply add a container div where the component will be rendered on */}
         {/*See: componentDidMount*/}
-        {!this.props.screen.isReact && (
-          <div ref={e => (this.ref = e!)}>{/*Container*/}</div>
-        )}
+        {!this.props.screen.isReact && <div ref={e => (this.ref = e!)}>{/*Container*/}</div>}
       </div>
     );
   }

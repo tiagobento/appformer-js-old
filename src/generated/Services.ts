@@ -15,26 +15,17 @@ export namespace Services {
     export namespace uberfire {
       export namespace shared {
         export const TestMessagesService = {
-          sayHello: () =>
-            RPC("org.uberfire.shared.TestMessagesService|hello", []),
+          sayHello: () => RPC("org.uberfire.shared.TestMessagesService|hello", []),
 
-          fireServerEvent: () =>
-            RPC("org.uberfire.shared.TestMessagesService|helloFromEvent", []),
+          fireServerEvent: () => RPC("org.uberfire.shared.TestMessagesService|helloFromEvent", []),
 
-          sayHelloOnServer: () =>
-            RPC("org.uberfire.shared.TestMessagesService|muteHello", []),
+          sayHelloOnServer: () => RPC("org.uberfire.shared.TestMessagesService|muteHello", []),
 
           sayHelloToSomething: (a: string) =>
-            RPC(
-              "org.uberfire.shared.TestMessagesService|hello:java.lang.String",
-              [marshall(a)]
-            ),
+            RPC("org.uberfire.shared.TestMessagesService|hello:java.lang.String", [marshall(a)]),
 
           sendTestPojo: (a: TestEvent & ErraiBusObject) =>
-            RPC(
-              "org.uberfire.shared.TestMessagesService|postTestEvent:org.uberfire.shared.TestEvent",
-              [marshall(a)]
-            )
+            RPC("org.uberfire.shared.TestMessagesService|postTestEvent:org.uberfire.shared.TestEvent", [marshall(a)])
         };
       }
     }

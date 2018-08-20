@@ -21,9 +21,7 @@ export class ReactComponentScreen extends AppFormer.Screen {
 
     this.af_subscriptions = {
       "org.uberfire.shared.TestEvent": (testEvent: TestEvent) => {
-        return this.onFoo(
-          `An event from server has arrived! "${testEvent.bar}"`
-        );
+        return this.onFoo(`An event from server has arrived! "${testEvent.bar}"`);
       }
     };
 
@@ -50,9 +48,7 @@ export class ReactComponentScreen extends AppFormer.Screen {
       })
     });
 
-    console.info(
-      `[${this.af_componentId}] is open! :: (Starting to make requests..)`
-    );
+    console.info(`[${this.af_componentId}] is open! :: (Starting to make requests..)`);
 
     Promise.resolve()
       .then(() => {
@@ -99,18 +95,12 @@ export class ReactComponentScreen extends AppFormer.Screen {
     return (
       <div>
         <br />
-        <button
-          className={"btn btn-primary btn-sm"}
-          onClick={() => this.af_componentService.fireServerEvent()}
-        >
+        <button className={"btn btn-primary btn-sm"} onClick={() => this.af_componentService.fireServerEvent()}>
           Click me to make server send an event...
         </button>
         <br />
 
-        <UntypedDemoApp
-          number={this.af_componentId}
-          onFoo={(x: any) => (this.onFoo = x)}
-        />
+        <UntypedDemoApp number={this.af_componentId} onFoo={(x: any) => (this.onFoo = x)} />
       </div>
     );
   }

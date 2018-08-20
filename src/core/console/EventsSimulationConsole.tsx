@@ -16,10 +16,7 @@ const actions = {
   setEvent: (event: string) => (state: State) => ({ event: event })
 };
 
-export default class EventsSimulationConsole extends React.Component<
-  Props,
-  State
-> {
+export default class EventsSimulationConsole extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -86,9 +83,7 @@ export default class EventsSimulationConsole extends React.Component<
               <select
                 style={{ width: "100%" }}
                 value={this.state.channel}
-                onChange={e =>
-                  this.setState(actions.setChannel(e.target.value))
-                }
+                onChange={e => this.setState(actions.setChannel(e.target.value))}
               >
                 {Object.keys(this.subscriptions())
                   .sort()

@@ -52,10 +52,8 @@ export class DockButton extends React.Component<{ title: string }, {}> {
   cont: HTMLElement;
 
   componentDidMount(): void {
-    this.cont.style.height =
-      parseInt(getComputedStyle(this.rot).width!) + 6 + "px";
-    this.cont.style.width =
-      parseInt(getComputedStyle(this.rot).height!) + 4 + "px";
+    this.cont.style.height = parseInt(getComputedStyle(this.rot).width!) + 6 + "px";
+    this.cont.style.width = parseInt(getComputedStyle(this.rot).height!) + 4 + "px";
   }
 
   render() {

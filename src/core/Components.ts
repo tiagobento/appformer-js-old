@@ -15,11 +15,7 @@ export namespace AppFormer {
 
   export type Component = Screen | Perspective;
 
-  export type Element =
-    | React.ReactPortal
-    | React.ReactElement<any>
-    | HTMLElement
-    | string;
+  export type Element = React.ReactPortal | React.ReactElement<any> | HTMLElement | string;
 
   export abstract class Perspective {
     isReact: boolean = false;
@@ -27,10 +23,7 @@ export namespace AppFormer {
     af_perspectiveScreens: string[];
     af_isDefaultPerspective: boolean;
 
-    abstract af_perspectiveRoot(root?: {
-      ss: AppFormer.Screen[];
-      ps: AppFormer.Perspective[];
-    }): Element;
+    abstract af_perspectiveRoot(root?: { ss: AppFormer.Screen[]; ps: AppFormer.Perspective[] }): Element;
 
     public has(screen: AppFormer.Screen | string) {
       const id = typeof screen === "string" ? screen : screen.af_componentId;
@@ -63,10 +56,7 @@ export namespace AppFormer {
     //FIXME: When to call?
     af_onShutdown(): void {}
 
-    abstract af_componentRoot(root?: {
-      ss: AppFormer.Screen[];
-      ps: AppFormer.Perspective[];
-    }): Element;
+    abstract af_componentRoot(root?: { ss: AppFormer.Screen[]; ps: AppFormer.Perspective[] }): Element;
 
     static containerId(screen: AppFormer.Screen) {
       return `container-for-screen-${screen.af_componentId}`;

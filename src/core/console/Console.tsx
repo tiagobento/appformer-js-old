@@ -16,10 +16,7 @@ const actions = {
   })
 };
 
-export default class Console extends React.Component<
-  { screens: AppFormer.Screen[] },
-  State
-> {
+export default class Console extends React.Component<{ screens: AppFormer.Screen[] }, State> {
   constructor(props: { screens: AppFormer.Screen[] }) {
     super(props);
     this.state = { rpcConsole: false, eventsConsole: false };
@@ -28,9 +25,7 @@ export default class Console extends React.Component<
   render() {
     return (
       <div className={"wrapper"}>
-        <header id={"container-for-screen-console-header"}>
-          {/*Container*/}
-        </header>
+        <header id={"container-for-screen-console-header"}>{/*Container*/}</header>
 
         <div id={AppFormer.DefaultScreenContainerId} className={"main"}>
           {/*Container*/}
@@ -45,16 +40,10 @@ export default class Console extends React.Component<
         </aside>
 
         <span style={{ gridColumn: "span 6" }} hidden={!this.state.rpcConsole}>
-          <RPCConsole
-            screens={this.props.screens}
-            onClose={() => this.setState(actions.toggleRpcConsole)}
-          />
+          <RPCConsole screens={this.props.screens} onClose={() => this.setState(actions.toggleRpcConsole)} />
         </span>
 
-        <span
-          style={{ gridColumn: "span 6" }}
-          hidden={!this.state.eventsConsole}
-        >
+        <span style={{ gridColumn: "span 6" }} hidden={!this.state.eventsConsole}>
           <EventsSimulationConsole
             screens={this.props.screens}
             onClose={() => this.setState(actions.toggleEventsConsole)}

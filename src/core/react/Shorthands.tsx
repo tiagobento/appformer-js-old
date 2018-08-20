@@ -8,10 +8,7 @@ export const Link = (props: { to: string; children: any }) => (
 );
 
 //FIXME: This is a temporary component \/
-export class ExampleList extends React.Component<
-  { name: string; id: string },
-  {}
-> {
+export class ExampleList extends React.Component<{ name: string; id: string }, {}> {
   render() {
     return (
       <div>

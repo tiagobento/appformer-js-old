@@ -20,10 +20,7 @@ interface LastStateSnapshot {
   kept: { screen: AppFormer.Screen; container: HTMLElement }[];
 }
 
-export default class PerspectiveContainer extends React.Component<
-  Props,
-  State
-> {
+export default class PerspectiveContainer extends React.Component<Props, State> {
   ref: HTMLDivElement;
 
   constructor(props: Props) {
@@ -39,10 +36,7 @@ export default class PerspectiveContainer extends React.Component<
     });
   }
 
-  getSnapshotBeforeUpdate(
-    prevProps: Readonly<Props>,
-    prevState: Readonly<State>
-  ): LastStateSnapshot {
+  getSnapshotBeforeUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>): LastStateSnapshot {
     const diff = (a: AppFormer.Screen[], b: AppFormer.Screen[]) => {
       return a.filter(i => b.indexOf(i) < 0);
     };
@@ -52,14 +46,8 @@ export default class PerspectiveContainer extends React.Component<
     };
 
     const keptScreens = intersect(this.props.screens, prevProps.screens);
-    const openedScreens = diff(
-      diff(this.props.screens, prevProps.screens),
-      keptScreens
-    );
-    const closedScreens = diff(
-      diff(prevProps.screens, this.props.screens),
-      keptScreens
-    );
+    const openedScreens = diff(diff(this.props.screens, prevProps.screens), keptScreens);
+    const closedScreens = diff(diff(prevProps.screens, this.props.screens), keptScreens);
 
     closedScreens.forEach(screen => this.closeScreen(screen));
 
@@ -73,11 +61,7 @@ export default class PerspectiveContainer extends React.Component<
     };
   }
 
-  componentDidUpdate(
-    prevProps: Readonly<Props>,
-    prevState: Readonly<State>,
-    snapshot?: LastStateSnapshot
-  ): void {
+  componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: LastStateSnapshot): void {
     if (!snapshot!.shouldRenderPerspective) {
       this.renderScreens(snapshot!);
       return;
@@ -88,10 +72,7 @@ export default class PerspectiveContainer extends React.Component<
       return;
     }
 
-    this.props.bridge.render(
-      this.props.perspective.af_perspectiveRoot(this.props.root),
-      this.ref
-    );
+    this.props.bridge.render(this.props.perspective.af_perspectiveRoot(this.props.root), this.ref);
     this.renderScreens(snapshot!);
   }
 
@@ -103,11 +84,7 @@ export default class PerspectiveContainer extends React.Component<
   private openScreen(screen: AppFormer.Screen) {
     const container = this.findContainerForScreen(screen);
     if (!container) {
-      console.error(
-        `[O] A default screen container for ${
-          screen.af_componentId
-        } should exist at this point for sure.`
-      );
+      console.error(`[O] A default screen container for ${screen.af_componentId} should exist at this point for sure.`);
       return;
     }
 
@@ -121,21 +98,14 @@ export default class PerspectiveContainer extends React.Component<
       />
     );
 
-    container.setAttribute(
-      PerspectiveContainer.AfOpenScreenAttr,
-      screen.af_componentId
-    );
+    container.setAttribute(PerspectiveContainer.AfOpenScreenAttr, screen.af_componentId);
     ReactDOM.render(screenContainer, container as HTMLElement);
   }
 
   private keepScreen(screen: AppFormer.Screen, exContainer: HTMLElement) {
     const newContainer = this.findContainerForScreen(screen);
     if (!newContainer) {
-      console.error(
-        `[K] A default screen container for ${
-          screen.af_componentId
-        } should exist at this point for sure.`
-      );
+      console.error(`[K] A default screen container for ${screen.af_componentId} should exist at this point for sure.`);
       return;
     }
 
@@ -143,17 +113,11 @@ export default class PerspectiveContainer extends React.Component<
       if (!newContainer.hasAttribute(a.name)) {
         exContainer.removeAttribute(a.name);
       } else {
-        exContainer.setAttribute(
-          a.name,
-          newContainer.getAttribute(a.name) || ""
-        );
+        exContainer.setAttribute(a.name, newContainer.getAttribute(a.name) || "");
       }
     });
 
-    exContainer.setAttribute(
-      PerspectiveContainer.AfOpenScreenAttr,
-      screen.af_componentId
-    );
+    exContainer.setAttribute(PerspectiveContainer.AfOpenScreenAttr, screen.af_componentId);
 
     //FIXME: this "replaceWith" method does not work on IE.
     (newContainer as any).replaceWith(exContainer);
@@ -162,11 +126,7 @@ export default class PerspectiveContainer extends React.Component<
   private closeScreen(screen: AppFormer.Screen) {
     const container = this.findContainerForScreen(screen);
     if (!container) {
-      console.error(
-        `[C] A screen container for ${
-          screen.af_componentId
-        } should exist at this point for sure.`
-      );
+      console.error(`[C] A screen container for ${screen.af_componentId} should exist at this point for sure.`);
       return;
     }
 
@@ -189,15 +149,12 @@ export default class PerspectiveContainer extends React.Component<
         className={"af-perspective-container"}
         ref={e => (this.ref = e!)}
         key={this.props.perspective.af_componentId}
-        id={PerspectiveContainer.getSelfContainerElementId(
-          this.props.perspective
-        )}
+        id={PerspectiveContainer.getSelfContainerElementId(this.props.perspective)}
       >
         {/*This is where the perspective will be rendered on.*/}
         {/*See `componentDidMount` and `componentWillUnmount`*/}
         {/*If it is a ReactElement we can embedded it directly*/}
-        {this.props.perspective.isReact &&
-          this.props.perspective.af_perspectiveRoot(this.props.root)}
+        {this.props.perspective.isReact && this.props.perspective.af_perspectiveRoot(this.props.root)}
       </div>
     );
   }
@@ -208,23 +165,14 @@ export default class PerspectiveContainer extends React.Component<
     return "self-perspective-" + perspective.af_componentId;
   }
 
-  public static findContainerFor(
-    screen: AppFormer.Screen,
-    perspective: AppFormer.Perspective
-  ) {
-    const ref = document.getElementById(
-      this.getSelfContainerElementId(perspective)
-    )!;
+  public static findContainerFor(screen: AppFormer.Screen, perspective: AppFormer.Perspective) {
+    const ref = document.getElementById(this.getSelfContainerElementId(perspective))!;
     return this.findScreenContainerInside(screen, ref);
   }
 
-  private static findScreenContainerInside(
-    screen: AppFormer.Screen,
-    root: HTMLElement
-  ) {
+  private static findScreenContainerInside(screen: AppFormer.Screen, root: HTMLElement) {
     return (
-      searchTree(root, AppFormer.Screen.containerId(screen)) ||
-      searchTree(root, AppFormer.DefaultScreenContainerId)
+      searchTree(root, AppFormer.Screen.containerId(screen)) || searchTree(root, AppFormer.DefaultScreenContainerId)
     );
   }
 }

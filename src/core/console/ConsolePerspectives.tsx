@@ -7,18 +7,11 @@ export class ConsoleDefaultPerspective extends AppFormer.Perspective {
     super();
     this.isReact = true;
     this.af_componentId = "default-perspective";
-    this.af_perspectiveScreens = [
-      "console-dock",
-      "console-header",
-      "A-react-screen"
-    ];
+    this.af_perspectiveScreens = ["console-dock", "console-header", "A-react-screen"];
     this.af_isDefaultPerspective = true;
   }
 
-  af_perspectiveRoot(root: {
-    ss: AppFormer.Screen[];
-    ps: AppFormer.Perspective[];
-  }): AppFormer.Element {
+  af_perspectiveRoot(root: { ss: AppFormer.Screen[]; ps: AppFormer.Perspective[] }): AppFormer.Element {
     return <Console screens={root.ss} />;
   }
 }

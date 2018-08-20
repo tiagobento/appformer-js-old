@@ -43,15 +43,11 @@ export function register(potentialComponents: any) {
 
       if (Component.prototype instanceof AppFormer.Screen) {
         const component = new Component();
-        console.info(
-          `Registering screen [${Component.prototype.constructor.name}]`
-        );
+        console.info(`Registering screen [${Component.prototype.constructor.name}]`);
         bridge.registerScreen(component);
       } else if (Component.prototype instanceof AppFormer.Perspective) {
         const component = new Component();
-        console.info(
-          `Registering perspective [${Component.prototype.constructor.name}]`
-        );
+        console.info(`Registering perspective [${Component.prototype.constructor.name}]`);
         bridge.registerPerspective(component);
       } else {
         //TODO: Register other kinds of components

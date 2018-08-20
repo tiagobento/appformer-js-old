@@ -34,10 +34,7 @@ export default class DemoApp extends React.Component {
           {" "}
           +
         </button>
-        <button
-          className={"btn btn-primary btn-sm"}
-          onClick={() => this.subtract()}
-        >
+        <button className={"btn btn-primary btn-sm"} onClick={() => this.subtract()}>
           {" "}
           -
         </button>
