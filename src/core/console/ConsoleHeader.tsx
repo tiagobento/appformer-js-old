@@ -22,6 +22,7 @@ export class ConsoleHeader extends AppFormer.Screen {
             backgroundColor: "#333",
             display: "flex",
             alignItems: "center",
+            whiteSpace: "nowrap",
             padding: "0 10px 0 10px",
         }}>
             <div>
