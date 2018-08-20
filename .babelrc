@@ -1,6 +1,0 @@
-
-// Needed for JSX files
-
-{
-  "presets": ["env", "react"]
-}

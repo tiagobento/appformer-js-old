@@ -4,12 +4,6 @@
   "description": "",
   "private": true,
   "license": "Apache-2.0",
-  "babel": {
-    "presets": [
-      "react",
-      "es2015"
-    ]
-  },
   "dependencies": {
     "@types/lodash": "^4.14.110",
     "@types/react": "^16.4.6",
@@ -19,6 +13,7 @@
     "react-dom": "^16.4.1"
   },
   "devDependencies": {
+    "@types/jest": "^23.3.1",
     "babel-core": "^6.26.3",
     "babel-loader": "^7.1.5",
     "babel-preset-env": "^1.7.0",
@@ -27,16 +22,29 @@
     "copy-webpack-plugin": "^4.5.2",
     "html-loader": "^0.5.5",
     "html-webpack-plugin": "^3.2.0",
+    "jest": "^23.5.0",
+    "prettier": "1.14.2",
+    "ts-jest": "^23.1.3",
     "ts-loader": "^4.4.2",
+    "tslint": "^5.11.0",
+    "tslint-config-prettier": "^1.15.0",
+    "tslint-react": "^3.6.0",
     "typescript": "^2.9.2",
     "webpack": "^4.15.1",
     "webpack-cli": "^3.0.8",
     "webpack-dev-server": "^3.1.4"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "tslint -c tslint.json 'src/**/*.{ts,tsx,js,jsx}'",
+    "test": "jest",
     "start": "npx webpack-dev-server --open",
     "build:dev": "webpack",
     "build:prod": "webpack --mode production && mvn clean install -f webjar/pom.xml"
+  },
+  "babel": {
+    "presets": [
+      "env",
+      "react"
+    ]
   }
 }
