@@ -1,9 +1,7 @@
 import * as React from "react";
 import {AppFormer} from "core/Components";
-import EventsConsolePanel from "core/internal/EventsConsolePanel";
 import JsBridge from "core/internal/JsBridge";
 import PerspectiveContainer from "core/internal/PerspectiveContainer";
-import {Link, Floating} from "core/react/Shorthands";
 
 
 
@@ -51,8 +49,14 @@ const actions = {
 
 
     "registerScreen": (screen: AppFormer.Screen) => (state: State): any => {
-        return {screens: [...state.screens, screen]};
+        return {
+            screens: [...state.screens, screen],
+            openScreens: (state.currentPerspective && state.currentPerspective!.has(screen))
+                ? [...state.openScreens, screen]
+                : state.openScreens,
+        };
     },
+
 
     "open": (place: string) => (state: State): any => {
         const perspective = state.perspectives.filter(s => s.af_componentId === place).pop();
@@ -63,15 +67,14 @@ const actions = {
         return actions.openScreen(place)(state);
     },
 
+
     "openPerspective": (perspective: AppFormer.Perspective) => (state: State): any => {
 
         let uncloseableScreens = state.openScreens
-                                      .filter(screen => !perspective.has(screen)) //Filters out screens that will remain open
-                                      .map(screen => ({
-                                          screen: screen, canBeClosed: screen.af_onMayClose(),
-                                      }))
-                                      .filter(t => !t.canBeClosed)
-                                      .map(t => t.screen.af_componentId);
+            .filter(screen => !perspective.has(screen)) //Filters out screens that will remain open
+            .map(screen => ({screen: screen, canBeClosed: screen.af_onMayClose()}))
+            .filter(t => !t.canBeClosed)
+            .map(t => t.screen.af_componentId);
 
         //FIXME: Using sync "confirm" method is not ideal because it cannot be styled.
         const msg = `[${uncloseableScreens}] cannot be closed at the moment. Force closing and proceed to ${perspective.af_componentId}?`;
@@ -95,6 +98,7 @@ const actions = {
         return {openScreens: state.openScreens.filter(s => s !== screen)};
     },
 
+
     "openScreen": (screenId: string) => (state: State): any => {
 
         const screen = state.screens.filter(x => x.af_componentId === screenId).pop();
@@ -109,15 +113,18 @@ const actions = {
             return state;
         }
 
-        //FIXME: Not checking onMayClose to close the existing screen
         const existingScreenId = container.getAttribute(PerspectiveContainer.AfOpenScreenAttr);
         if (existingScreenId) {
+            //FIXME: Not checking onMayClose to close the existing screen
             return {openScreens: [...state.without(existingScreenId).openScreens, screen]};
         }
 
-        if (!state.hasAnOpen(screen)) {
-            return {openScreens: [...state.openScreens, screen]};
+        if (state.hasAnOpen(screen)) {
+            console.info(`Screen ${screen.af_componentId} is already open.`);
+            return;
         }
+
+        return {openScreens: [...state.openScreens, screen]};
     },
 };
 
@@ -126,6 +133,7 @@ export default class Root extends React.Component<Props, State> {
 
     constructor(props: Props) {
         super(props);
+        this.props.exposing(() => this);
         this.state = {
             currentPerspective: undefined,
             perspectives: [],
@@ -134,7 +142,6 @@ export default class Root extends React.Component<Props, State> {
             hasAnOpen(c) { return State.hasAnOpen(this)(c); },
             without(c) { return State.without(this)(c); },
         };
-        this.props.exposing(() => this);
     }
 
 
@@ -168,112 +175,16 @@ export default class Root extends React.Component<Props, State> {
 
 
     render() {
-        return <div className={"af-js-root"}
-                    style={{width: "100%", height: "100%", position: "absolute"}}>
+        return <div className={"af-js-root"}>
 
-            {this.Header()}
-
-            {this.state.currentPerspective &&
-
-             <PerspectiveContainer
-                 perspective={this.state.currentPerspective!}
-                 screens={this.state.openScreens}
-                 bridge={this.props.bridge}
-                 onCloseScreen={screen => this.setState(actions.closeScreen(screen))}/>}
-
-            <Floating>
-                <EventsConsolePanel screens={this.state.screens}/>
-            </Floating>
-
-            <Floating>
-                <div className={"af-events-console"} hidden>
-
-                    <div className={"title"}>
-                        <span>RPC simulation console</span>
-                    </div>
-
-                    <div className={"contents"}>
-                        <select style={{width: "100%"}}>
-                            {this.getMethods().map((method: string) => {
-                                return <option key={method} value={method}>{method}</option>;
-                            })}
-                        </select>
-
-                        <br/>
-                        <br/>
-                        <span>Mocked reurn:</span>
-                        <br/>
-                        <textarea placeholder={"Type JSON here..."}/>
-                    </div>
-                </div>
-            </Floating>
+            {this.state.currentPerspective && <PerspectiveContainer
+                root={{ss: this.state.screens, ps: this.state.perspectives}}
+                perspective={this.state.currentPerspective!}
+                screens={this.state.openScreens}
+                bridge={this.props.bridge}
+                onCloseScreen={screen => this.setState(actions.closeScreen(screen))}
+            />}
 
         </div>;
     }
-
-
-    private getMethods() {
-        const concat = (x: any, y: any) => x.concat(y);
-
-        const methods = (this.state.screens as any).map((screen: any) => {
-
-            const service = screen.af_componentService;
-
-            const AF = (window as any).appformer;
-            const originalRPC = AF.RPC;
-
-            // monkey patch 🙊🙉🙈
-            AF.RPC = function (methodSignature: any, json: any[]) {
-                return methodSignature;
-            };
-
-            const methods = Object.keys(service).map(x => (service[x] as any)(({
-                __toErraiBusObject: () => ({__toJson() {}}),
-            })));
-            AF.RPC = originalRPC;
-            return methods;
-        }).reduce(concat, []);
-
-        return methods.filter((a: any, b: number) => methods.indexOf(a) === b);
-    }
-
-
-    private Header() {
-        return <div style={{
-            position: "fixed", width: "100%", height: "100px",
-        }}>
-            <div className={"af-screens-panel"}>
-                <div className={"contents"} style={{backgroundColor: "#2e2e2e"}}>
-                    {this.state.perspectives.map(p => (
-
-                        <Link to={p.af_componentId} key={p.af_componentId}>
-                            <button disabled={this.state.hasAnOpen(p)}>
-                                {p.af_componentId} {this.state.hasAnOpen(p) && <Check/>}
-                            </button>
-                        </Link>
-
-                    ))}
-                </div>
-
-                <div className={"contents"}>
-                    {this.state.screens.map(s => (
-
-                        <Link to={s.af_componentId} key={s.af_componentId}>
-                            <button disabled={this.state.hasAnOpen(s)}>
-                                {s.af_componentId} {this.state.hasAnOpen(s) && <Check/>}
-                            </button>
-                        </Link>
-
-                    ))}
-                </div>
-            </div>
-        </div>;
-    }
-}
-
-
-function Check() {
-    return <span style={{color: "green"}}>
-        &nbsp;&#10003;
-    </span>;
 }

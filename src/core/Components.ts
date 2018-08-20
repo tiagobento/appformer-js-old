@@ -31,7 +31,7 @@ export namespace AppFormer {
         af_isDefaultPerspective: boolean;
 
 
-        abstract af_perspectiveRoot(): Element;
+        abstract af_perspectiveRoot(root?: { ss: AppFormer.Screen[], ps: AppFormer.Perspective[] }): Element;
 
 
         public has(screen: AppFormer.Screen | string) {
@@ -48,7 +48,7 @@ export namespace AppFormer {
 
         isReact: boolean = false;
         af_componentId: string;
-        af_componentTitle: string;
+        af_componentTitle?: string;
         af_componentService: Service = {};
         af_subscriptions: Subscriptions = {}; //FIXME: Maybe this one should be a method?
 
@@ -77,7 +77,7 @@ export namespace AppFormer {
         af_onShutdown(): void {}
 
 
-        abstract af_componentRoot(): Element;
+        abstract af_componentRoot(root?: { ss: AppFormer.Screen[], ps: AppFormer.Perspective[] }): Element;
 
 
         static containerId(screen: AppFormer.Screen) {

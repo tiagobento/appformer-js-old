@@ -7,6 +7,7 @@ import ScreenContainer from "core/internal/ScreenContainer";
 
 
 interface Props {
+    root: { ss: AppFormer.Screen[], ps: AppFormer.Perspective[] }
     perspective: AppFormer.Perspective;
     screens: AppFormer.Screen[];
     bridge: JsBridge;
@@ -75,7 +76,6 @@ export default class PerspectiveContainer extends React.Component<Props, State> 
                        prevState: Readonly<State>,
                        snapshot?: LastStateSnapshot): void {
 
-
         if (!snapshot!.shouldRenderPerspective) {
             this.renderScreens(snapshot!);
             return;
@@ -86,7 +86,7 @@ export default class PerspectiveContainer extends React.Component<Props, State> 
             return;
         }
 
-        this.props.bridge.render(this.props.perspective.af_perspectiveRoot(),
+        this.props.bridge.render(this.props.perspective.af_perspectiveRoot(this.props.root),
                                  this.ref,
                                  () => this.renderScreens(snapshot!));
     }
@@ -109,6 +109,7 @@ export default class PerspectiveContainer extends React.Component<Props, State> 
             key={screen.af_componentId}
             screen={screen}
             bridge={this.props.bridge}
+            root={this.props.root}
             onClose={() => this.props.onCloseScreen(screen)}
         />;
 
@@ -173,11 +174,11 @@ export default class PerspectiveContainer extends React.Component<Props, State> 
                     key={this.props.perspective.af_componentId}
                     id={PerspectiveContainer.getSelfContainerElementId(this.props.perspective)}>
 
-            {/*Empty on purpose*/}
             {/*This is where the perspective will be rendered on.*/}
             {/*See `componentDidMount` and `componentWillUnmount`*/}
             {/*If it is a ReactElement we can embedded it directly*/}
-            {this.props.perspective.isReact && this.props.perspective.af_perspectiveRoot()}
+            {this.props.perspective.isReact &&
+             this.props.perspective.af_perspectiveRoot(this.props.root)}
 
         </div>;
     }

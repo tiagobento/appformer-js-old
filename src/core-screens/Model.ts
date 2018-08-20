@@ -60,8 +60,8 @@ export class Portable<T extends Portable<T>> {
 
 //Generated class
 export class TestEvent extends Portable<TestEvent> {
-    bar: string;
-    foo: Foo;
+    bar?: string;
+    foo?: Foo;
     child?: TestEvent;
 
 
@@ -74,7 +74,7 @@ export class TestEvent extends Portable<TestEvent> {
 
 //Generated class
 export class Foo extends Portable<Foo> {
-    foo: string;
+    foo?: string;
 
 
     constructor(self: { foo: string }) {

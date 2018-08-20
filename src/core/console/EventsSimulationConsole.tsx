@@ -5,6 +5,7 @@ import * as React from "react";
 
 interface Props {
     screens: AppFormer.Screen[];
+    onClose: () => void;
 }
 
 
@@ -22,11 +23,13 @@ const actions = {
 };
 
 
-export default class EventsConsolePanel extends React.Component<Props, State> {
+export default class EventsSimulationConsole extends React.Component<Props, State> {
 
     constructor(props: Props) {
         super(props);
-        this.state = {event: ""};
+        this.state = {
+            event: "", channel: Object.keys(this.subscriptions()).sort().pop() || undefined,
+        };
     }
 
 
@@ -58,11 +61,6 @@ export default class EventsConsolePanel extends React.Component<Props, State> {
     }
 
 
-    componentWillReceiveProps(nextProps: Readonly<Props>, nextContext: any): void {
-        this.setState({channel: Object.keys(this.subscriptions(nextProps)).sort()[0] || undefined});
-    }
-
-
     private sendEvent() {
         if (this.state.channel) {
             try {
@@ -76,15 +74,16 @@ export default class EventsConsolePanel extends React.Component<Props, State> {
 
 
     render() {
-        return <div className={"af-events-console"} hidden>
+        return <div>
 
             <div className={"title"}>
                 <span>Events simulation console</span>
+                &nbsp;
+                <a href={"#"} onClick={() => this.props.onClose()}>Close</a>
             </div>
 
-            <div className={"contents"}>
+            <div>
                 {this.state.channel && <>
-
 
                     <select style={{width: "100%"}}
                             value={this.state.channel}
@@ -95,7 +94,6 @@ export default class EventsConsolePanel extends React.Component<Props, State> {
                         })}
 
                     </select>
-
 
                     <br/>
                     <br/>

@@ -9,7 +9,7 @@
             background-color: #f3f3f3;
             padding: 0;
             margin: 0;
-            height: 100%;
+            height: 100vh;
         }
 
         body {
@@ -73,7 +73,7 @@
         }
 
         .root {
-            height: 100%;
+            height: 100vh;
         }
 
         .title {
@@ -93,20 +93,22 @@
             color: #e8e8e8;
         }
 
-        .contents {
-            padding: 10px;
-        }
-
         .af-js-root {
             font-family: Helvetica, sans-serif;
             font-weight: lighter;
-            height: 100%;
+            width: 100vw;
+            height: 100vh;
+            position: absolute;
+        }
+
+        .af-perspective-container {
+            height: 100vh;
+            box-shadow: inset 0 0 100px -40px #000;
         }
 
         .af-screen-container {
             width: 100%;
             height: 100%;
-            border: 0.5px solid #ccc;
             background-color: white;
             box-shadow: 0 5px 8px -4px #ccc;
         }
@@ -116,28 +118,33 @@
             font-weight: lighter;
         }
 
-        .af-perspective-container {
-            padding-top: 100px;
+        /*Console*/
+
+        .wrapper {
+            display: grid;
+            grid-column-start: revert;
+            grid-template-columns: repeat(11, 1fr) 50px;
+            grid-template-rows: 50px;
             height: 100%;
-            box-shadow: inset 0 0 100px -40px #000;
         }
 
-        .af-screens-panel {
-            background-color: #444;
-            color: white;
-            margin-bottom: 10px;
+        header {
+            grid-column: span 12;
+            height: 50px;
         }
 
-        .af-events-console {
-            margin: 10px;
-            background-color: #cbcbcc;
-            border: 1px solid #666;
+        aside {
+            grid-column: span 1;
+            width: 50px;
         }
 
-        .af-events-console > h2 {
-            font-weight: lighter;
+        .main {
+            grid-column: span 11;
         }
+
+
     </style>
+    <title><%= htmlWebpackPlugin.options.title %></title>
     <script crossorigin src="https://unpkg.com/react@16/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
     <script crossorigin src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
