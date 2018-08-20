@@ -3,9 +3,9 @@ const {defaults} = require('jest-config');
 module.exports = {
     moduleDirectories: [...defaults.moduleDirectories, 'src'],
     moduleFileExtensions: [...defaults.moduleFileExtensions, 'ts', 'tsx'],
-    testRegex: '(/__tests__/.*|(\\.|/)(test|spec))\\.(js?|jsx?|ts?|tsx?)$',
+    testRegex: '(/__tests__/.*|(\\.|/)test)\\.(jsx?|tsx?)$',
     transform: {
-        '^.+\\.(js?|jsx?)$': 'babel-jest',
-        '^.+\\.(ts?|tsx?)$': 'ts-jest'
+        '^.+\\.jsx?$': 'babel-jest',
+        '^.+\\.tsx?$': 'ts-jest'
     }
 };
