@@ -1,6 +1,8 @@
 import * as Core from "core";
 import * as AppFormerComponents from "core-screens/AppFormerComponents";
-import * as ReactShorthandComponents from "core/react/Shorthands";
+import * as ConsoleComponents from "core/console";
 
-Core.register({...ReactShorthandComponents,...AppFormerComponents});
+
+
+Core.register({...AppFormerComponents, ...ConsoleComponents});
 
