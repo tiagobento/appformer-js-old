@@ -29,7 +29,7 @@ export const render =
 
 export const translate = bridge.translate;
 
-export const RPC = bridge.RPC;
+export const rpc = bridge.rpc;
 
 export function goTo(place: string) {
   return bridge.goTo(place);
