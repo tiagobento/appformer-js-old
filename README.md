@@ -1,5 +1,4 @@
-AppFormer.js
-===
+# AppFormer.js
 
 - `npm start` To run the examples
 - `npm run build:dev` To build a development version

@@ -1,65 +1,69 @@
 import * as React from "react";
-import {AppFormer} from "core/Components";
-
-
+import { AppFormer } from "core/Components";
 
 interface Props {
-    screens: AppFormer.Screen[];
-    onClose: () => void;
+  screens: AppFormer.Screen[];
+  onClose: () => void;
 }
 
-
-
 export class RPCConsole extends React.Component<Props, {}> {
+  private getMethods() {
+    const concat = (x: any, y: any) => x.concat(y);
 
-    private getMethods() {
-        const concat = (x: any, y: any) => x.concat(y);
+    const methods = (this.props.screens as any)
+      .map((screen: any) => {
+        const service = screen.af_componentService;
 
-        const methods = (this.props.screens as any).map((screen: any) => {
+        const AF = (window as any).appformer;
+        const originalRPC = AF.RPC;
 
-            const service = screen.af_componentService;
+        // monkey patch 🙊🙉🙈
+        AF.RPC = function(methodSignature: any, json: any[]) {
+          return methodSignature;
+        };
 
-            const AF = (window as any).appformer;
-            const originalRPC = AF.RPC;
+        const methods = Object.keys(service).map(x =>
+          (service[x] as any)({
+            __toErraiBusObject: () => ({ __toJson() {} })
+          })
+        );
+        AF.RPC = originalRPC;
+        return methods;
+      })
+      .reduce(concat, []);
 
-            // monkey patch 🙊🙉🙈
-            AF.RPC = function (methodSignature: any, json: any[]) {
-                return methodSignature;
-            };
+    return methods.filter((a: any, b: number) => methods.indexOf(a) === b);
+  }
 
-            const methods = Object.keys(service).map(x => (service[x] as any)(({
-                __toErraiBusObject: () => ({__toJson() {}}),
-            })));
-            AF.RPC = originalRPC;
-            return methods;
-        }).reduce(concat, []);
+  render() {
+    return (
+      <div>
+        <div className={"title"}>
+          <span>RPC simulation console</span>
+          &nbsp;
+          <a href={"#"} onClick={() => this.props.onClose()}>
+            Close
+          </a>
+        </div>
 
-        return methods.filter((a: any, b: number) => methods.indexOf(a) === b);
-    }
+        <div>
+          <select style={{ width: "100%" }}>
+            {this.getMethods().map((method: string) => {
+              return (
+                <option key={method} value={method}>
+                  {method}
+                </option>
+              );
+            })}
+          </select>
 
-
-    render() {
-        return <div>
-
-            <div className={"title"}>
-                <span>RPC simulation console</span>
-                &nbsp;
-                <a href={"#"} onClick={() => this.props.onClose()}>Close</a>
-            </div>
-
-            <div>
-                <select style={{width: "100%"}}>
-                    {this.getMethods().map((method: string) => {
-                        return <option key={method} value={method}>{method}</option>;
-                    })}
-                </select>
-
-                <br/>
-                <br/>
-                <span>Mocked return:</span>
-                <br/>
-                <textarea placeholder={"Type JSON here..."}/>
-            </div>
-        </div>;
-    }
+          <br />
+          <br />
+          <span>Mocked return:</span>
+          <br />
+          <textarea placeholder={"Type JSON here..."} />
+        </div>
+      </div>
+    );
+  }
 }
