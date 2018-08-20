@@ -18,7 +18,7 @@ export class RPCConsole extends React.Component<Props, {}> {
         const originalRPC = AF.RPC;
 
         // monkey patch 🙊🙉🙈
-        AF.RPC = function(methodSignature: any, json: any[]) {
+        AF.rpc = function(methodSignature: any, json: any[]) {
           return methodSignature;
         };
 
@@ -27,7 +27,7 @@ export class RPCConsole extends React.Component<Props, {}> {
             __toErraiBusObject: () => ({ __toJson() {} })
           })
         );
-        AF.RPC = originalRPC;
+        AF.rpc = originalRPC;
         return methods;
       })
       .reduce(concat, []);
