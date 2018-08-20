@@ -11,7 +11,7 @@ export class ConsoleDefaultPerspective extends AppFormer.Perspective {
     this.af_isDefaultPerspective = true;
   }
 
-  af_perspectiveRoot(root: { ss: AppFormer.Screen[]; ps: AppFormer.Perspective[] }): AppFormer.Element {
+  public af_perspectiveRoot(root: { ss: AppFormer.Screen[]; ps: AppFormer.Perspective[] }): AppFormer.Element {
     return <Console screens={root.ss} />;
   }
 }

@@ -4,32 +4,32 @@ import { AppFormer } from "core/Components";
 import Root from "core/internal/Root";
 
 export default class JsBridge {
-  root: () => Root;
+  public root: () => Root;
 
-  init(callback: () => void) {
+  public init(callback: () => void) {
     const root = <Root exposing={root => (this.root = root)} bridge={this} />;
     const rootContainer = document.body.children[0] as HTMLElement; //FIXME: Maybe get a Div with a fixed id/class?
     ReactDOM.render(root, rootContainer, callback);
     return this;
   }
 
-  registerScreen(screen: AppFormer.Screen) {
+  public registerScreen(screen: AppFormer.Screen) {
     this.root().registerScreen(screen);
   }
 
-  registerPerspective(perspective: AppFormer.Perspective) {
+  public registerPerspective(perspective: AppFormer.Perspective) {
     this.root().registerPerspective(perspective);
   }
 
-  goTo(place: string) {
+  public goTo(place: string) {
     this.root().open(place);
   }
 
-  RPC(path: string, params: any[]) {
+  public RPC(path: string, params: any[]) {
     return Promise.reject("Sorry, RPC mocks are not available yet :(");
   }
 
-  render(component: AppFormer.Element, container: HTMLElement, callback = () => {}) {
+  public render(component: AppFormer.Element, container: HTMLElement, callback = () => {}) {
     if (component instanceof HTMLElement) {
       container.innerHTML = "";
       container.appendChild(component);

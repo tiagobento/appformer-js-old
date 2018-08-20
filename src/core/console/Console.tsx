@@ -22,7 +22,7 @@ export default class Console extends React.Component<{ screens: AppFormer.Screen
     this.state = { rpcConsole: false, eventsConsole: false };
   }
 
-  render() {
+  public render() {
     return (
       <div className={"wrapper"}>
         <header id={"container-for-screen-console-header"}>{/*Container*/}</header>

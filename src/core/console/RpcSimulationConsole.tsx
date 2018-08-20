@@ -35,7 +35,7 @@ export class RPCConsole extends React.Component<Props, {}> {
     return methods.filter((a: any, b: number) => methods.indexOf(a) === b);
   }
 
-  render() {
+  public render() {
     return (
       <div>
         <div className={"title"}>

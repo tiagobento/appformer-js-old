@@ -9,7 +9,7 @@ export const Link = (props: { to: string; children: any }) => (
 
 //FIXME: This is a temporary component \/
 export class ExampleList extends React.Component<{ name: string; id: string }, {}> {
-  render() {
+  public render() {
     return (
       <div>
         <h4>List of {this.props.name}</h4>

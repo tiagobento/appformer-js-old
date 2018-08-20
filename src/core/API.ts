@@ -13,7 +13,7 @@ const bridge =
 export const render =
   bridge.render ||
   ((component: any, container: HTMLElement, callback = () => {}) => {
-    //FIXME: Duplicated!!
+    // FIXME: Duplicated!!
 
     if (component instanceof HTMLElement) {
       container.innerHTML = "";
@@ -21,7 +21,7 @@ export const render =
       callback();
     }
 
-    //FIXME: What's wrong here?
+    // FIXME: What's wrong here?
     else if (typeof component === "string") {
       container.innerHTML = component;
       callback();
@@ -37,7 +37,7 @@ export function goTo(place: string) {
 }
 
 export function register(potentialComponents: any) {
-  for (let potentialComponent in potentialComponents) {
+  for (const potentialComponent in potentialComponents) {
     if (potentialComponents.hasOwnProperty(potentialComponent)) {
       const Component = potentialComponents[potentialComponent];
 
@@ -50,7 +50,7 @@ export function register(potentialComponents: any) {
         console.info(`Registering perspective [${Component.prototype.constructor.name}]`);
         bridge.registerPerspective(component);
       } else {
-        //TODO: Register other kinds of components
+        // TODO: Register other kinds of components
       }
     }
   }

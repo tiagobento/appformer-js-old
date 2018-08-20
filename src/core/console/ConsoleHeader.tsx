@@ -10,7 +10,7 @@ export class ConsoleHeader extends AppFormer.Screen {
     this.af_componentTitle = undefined;
   }
 
-  af_componentRoot(root?: { ss: AppFormer.Screen[]; ps: AppFormer.Perspective[] }): AppFormer.Element {
+  public af_componentRoot(root?: { ss: AppFormer.Screen[]; ps: AppFormer.Perspective[] }): AppFormer.Element {
     return (
       <div
         style={{

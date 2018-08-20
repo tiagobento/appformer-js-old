@@ -11,7 +11,7 @@ import TestMessagesService = Services.org.uberfire.shared.TestMessagesService;
 export class InoffensiveNonScreenClass {}
 
 export class ReactComponentScreen extends AppFormer.Screen {
-  onFoo: (e: any) => void;
+  public onFoo: (e: any) => void;
 
   constructor() {
     super();
@@ -34,11 +34,11 @@ export class ReactComponentScreen extends AppFormer.Screen {
     };
   }
 
-  af_onStartup() {
+  public af_onStartup() {
     console.info(`Startup ${this.af_componentId}`);
   }
 
-  af_onOpen() {
+  public af_onOpen() {
     const testEvent = new TestEvent({
       bar: "hello1",
       foo: new Foo({ foo: "a" }),
@@ -74,23 +74,23 @@ export class ReactComponentScreen extends AppFormer.Screen {
       });
   }
 
-  af_onFocus() {
+  public af_onFocus() {
     console.info(`Focused on ${this.af_componentId}`);
   }
 
-  af_onLostFocus() {
+  public af_onLostFocus() {
     console.info(`Lost focus on ${this.af_componentId}`);
   }
 
-  af_onClose() {
+  public af_onClose() {
     console.info(`Closed ${this.af_componentId}`);
   }
 
-  af_onShutdown() {
+  public af_onShutdown() {
     console.info(`Shut down ${this.af_componentId}`);
   }
 
-  af_componentRoot() {
+  public af_componentRoot() {
     const UntypedDemoApp = DemoApp as any;
     return (
       <div>
@@ -107,7 +107,7 @@ export class ReactComponentScreen extends AppFormer.Screen {
 }
 
 export class PureDomElementScreen extends AppFormer.Screen {
-  span: HTMLElement;
+  public span: HTMLElement;
 
   constructor() {
     super();
@@ -119,11 +119,11 @@ export class PureDomElementScreen extends AppFormer.Screen {
     };
   }
 
-  af_onMayClose() {
-    return true; //this.span.textContent === "close me!";
+  public af_onMayClose() {
+    return true; // this.span.textContent === "close me!";
   }
 
-  af_componentRoot() {
+  public af_componentRoot() {
     const button = document.createElement("button");
     button.textContent = "This is a HTMLButton element";
     button.onclick = e => this.af_componentService.fireServerEvent();
@@ -147,11 +147,11 @@ export class StringElementScreen extends AppFormer.Screen {
     this.af_componentTitle = "Pure HTML String Component";
   }
 
-  af_onMayClose() {
+  public af_onMayClose() {
     return true;
   }
 
-  af_componentRoot() {
+  public af_componentRoot() {
     return "<p style=\"color: red\"> Hi, I'm a simple pure HTML String Template</p>";
   }
 }
@@ -164,7 +164,7 @@ export class SillyReactScreen extends AppFormer.Screen {
     this.af_componentTitle = "Silly React Component";
   }
 
-  af_componentRoot() {
+  public af_componentRoot() {
     return <h1>{`This is just an <h1>`}</h1>;
   }
 }

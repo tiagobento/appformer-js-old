@@ -21,14 +21,14 @@ interface LastStateSnapshot {
 }
 
 export default class PerspectiveContainer extends React.Component<Props, State> {
-  ref: HTMLDivElement;
+  public ref: HTMLDivElement;
 
   constructor(props: Props) {
     super(props);
     this.state = { ready: false };
   }
 
-  componentDidMount(): void {
+  public componentDidMount(): void {
     this.componentDidUpdate(this.props, this.state, {
       shouldRenderPerspective: true,
       opened: this.props.screens,
@@ -36,7 +36,7 @@ export default class PerspectiveContainer extends React.Component<Props, State> 
     });
   }
 
-  getSnapshotBeforeUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>): LastStateSnapshot {
+  public getSnapshotBeforeUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>): LastStateSnapshot {
     const diff = (a: AppFormer.Screen[], b: AppFormer.Screen[]) => {
       return a.filter(i => b.indexOf(i) < 0);
     };
@@ -61,7 +61,7 @@ export default class PerspectiveContainer extends React.Component<Props, State> 
     };
   }
 
-  componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: LastStateSnapshot): void {
+  public componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: LastStateSnapshot): void {
     if (!snapshot!.shouldRenderPerspective) {
       this.renderScreens(snapshot!);
       return;
@@ -143,7 +143,7 @@ export default class PerspectiveContainer extends React.Component<Props, State> 
     return PerspectiveContainer.findScreenContainerInside(screen, this.ref);
   }
 
-  render() {
+  public render() {
     return (
       <div
         className={"af-perspective-container"}

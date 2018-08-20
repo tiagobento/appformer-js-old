@@ -3,7 +3,18 @@
   "extends": ["tslint:recommended", "tslint-react", "tslint-config-prettier"],
   "jsRules": {},
   "rules": {
-    "jsx-no-multiline-js": false
+    "jsx-no-multiline-js": false,
+    "ordered-imports": false,
+    "object-literal-sort-keys": false,
+    "no-console": false,
+    "interface-name": [true, "never-prefix"],
+    "member-ordering": [
+      true,
+      {
+        "order": ["static-field", "instance-field", "constructor", "instance-method", "static-method"]
+      }
+    ],
+    "variable-name": [true, "ban-keywords", "check-format", "allow-snake-case", "allow-pascal-case"]
   },
   "rulesDirectory": []
 }

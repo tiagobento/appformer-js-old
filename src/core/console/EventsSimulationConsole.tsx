@@ -28,8 +28,8 @@ export default class EventsSimulationConsole extends React.Component<Props, Stat
     };
   }
 
-  subscriptions(props = this.props) {
-    //FIXME: There's probably a much better way to do that without increasing the stack size too much.
+  public subscriptions(props = this.props) {
+    // FIXME: There's probably a much better way to do that without increasing the stack size too much.
 
     let all: AppFormer.Subscriptions = {};
 
@@ -66,7 +66,7 @@ export default class EventsSimulationConsole extends React.Component<Props, Stat
     }
   }
 
-  render() {
+  public render() {
     return (
       <div>
         <div className={"title"}>

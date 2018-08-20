@@ -9,20 +9,20 @@ interface Props {
 }
 
 class State {
-  currentPerspective?: AppFormer.Perspective;
-  perspectives: AppFormer.Perspective[];
-  screens: AppFormer.Screen[];
-  openScreens: AppFormer.Screen[];
-  hasAnOpen: (component: AppFormer.Component) => boolean;
-  without: (screenId: string) => State;
+  public currentPerspective?: AppFormer.Perspective;
+  public perspectives: AppFormer.Perspective[];
+  public screens: AppFormer.Screen[];
+  public openScreens: AppFormer.Screen[];
+  public hasAnOpen: (component: AppFormer.Component) => boolean;
+  public without: (screenId: string) => State;
 
-  static hasAnOpen = (state: State) => (component: AppFormer.Component) => {
+  public static hasAnOpen = (state: State) => (component: AppFormer.Component) => {
     return component instanceof AppFormer.Screen
       ? state.openScreens.indexOf(component) > -1
       : state.currentPerspective === component;
   };
 
-  static without = (state: State) => (screenId: string) => ({
+  public static without = (state: State) => (screenId: string) => ({
     ...state,
     openScreens: state.openScreens.filter(s => s.af_componentId !== screenId)
   });
@@ -143,23 +143,23 @@ export default class Root extends React.Component<Props, State> {
     };
   }
 
-  registerScreen(screen: AppFormer.Screen) {
+  public registerScreen(screen: AppFormer.Screen) {
     this.setState(actions.registerScreen(screen));
   }
 
-  registerPerspective(perspective: AppFormer.Perspective) {
+  public registerPerspective(perspective: AppFormer.Perspective) {
     this.setState(actions.registerPerspective(perspective));
   }
 
-  open(place: string) {
+  public open(place: string) {
     this.setState(actions.open(place));
   }
 
-  componentDidUpdate(pp: Readonly<Props>, ps: Readonly<State>, snapshot?: any): void {
+  public componentDidUpdate(pp: Readonly<Props>, ps: Readonly<State>, snapshot?: any): void {
     console.info("=======================");
   }
 
-  componentWillUnmount() {
+  public componentWillUnmount() {
     this.state.screens.forEach(screen => {
       console.info(`...Shutting down ${screen.af_componentId}...`);
       screen.af_onShutdown();
@@ -167,7 +167,7 @@ export default class Root extends React.Component<Props, State> {
     });
   }
 
-  render() {
+  public render() {
     return (
       <div className={"af-js-root"}>
         {this.state.currentPerspective && (

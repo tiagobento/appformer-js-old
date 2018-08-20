@@ -2,7 +2,7 @@
 //
 //
 //
-//FIXME: All public API methods need a revision. Their names are *temporary*.
+// FIXME: All public API methods need a revision. Their names are *temporary*.
 
 import * as React from "react";
 
@@ -18,12 +18,12 @@ export namespace AppFormer {
   export type Element = React.ReactPortal | React.ReactElement<any> | HTMLElement | string;
 
   export abstract class Perspective {
-    isReact: boolean = false;
-    af_componentId: string;
-    af_perspectiveScreens: string[];
-    af_isDefaultPerspective: boolean;
+    public isReact: boolean = false;
+    public af_componentId: string;
+    public af_perspectiveScreens: string[];
+    public af_isDefaultPerspective: boolean;
 
-    abstract af_perspectiveRoot(root?: { ss: AppFormer.Screen[]; ps: AppFormer.Perspective[] }): Element;
+    public abstract af_perspectiveRoot(root?: { ss: AppFormer.Screen[]; ps: AppFormer.Perspective[] }): Element;
 
     public has(screen: AppFormer.Screen | string) {
       const id = typeof screen === "string" ? screen : screen.af_componentId;
@@ -32,33 +32,33 @@ export namespace AppFormer {
   }
 
   export abstract class Screen {
-    isReact: boolean = false;
-    af_componentId: string;
-    af_componentTitle?: string;
-    af_componentService: Service = {};
-    af_subscriptions: Subscriptions = {}; //FIXME: Maybe this one should be a method?
+    public isReact: boolean = false;
+    public af_componentId: string;
+    public af_componentTitle?: string;
+    public af_componentService: Service = {};
+    public af_subscriptions: Subscriptions = {}; // FIXME: Maybe this one should be a method?
 
-    //FIXME: When to call?
-    af_onStartup(): void {}
+    // FIXME: When to call?
+    public af_onStartup(): void {}
 
-    af_onOpen(): void {}
+    public af_onOpen(): void {}
 
-    af_onFocus(): void {}
+    public af_onFocus(): void {}
 
-    af_onLostFocus(): void {}
+    public af_onLostFocus(): void {}
 
-    af_onMayClose(): boolean {
+    public af_onMayClose(): boolean {
       return true;
     }
 
-    af_onClose(): void {}
+    public af_onClose(): void {}
 
-    //FIXME: When to call?
-    af_onShutdown(): void {}
+    // FIXME: When to call?
+    public af_onShutdown(): void {}
 
-    abstract af_componentRoot(root?: { ss: AppFormer.Screen[]; ps: AppFormer.Perspective[] }): Element;
+    public abstract af_componentRoot(root?: { ss: AppFormer.Screen[]; ps: AppFormer.Perspective[] }): Element;
 
-    static containerId(screen: AppFormer.Screen) {
+    public static containerId(screen: AppFormer.Screen) {
       return `container-for-screen-${screen.af_componentId}`;
     }
   }

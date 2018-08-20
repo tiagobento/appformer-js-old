@@ -10,7 +10,7 @@ export interface ErraiBusObject {
 let OBJ_ID = 1;
 
 export class Portable<T extends Portable<T>> {
-  readonly __fqcn: string;
+  public readonly __fqcn: string;
 
   constructor(self: any, fqcn: string) {
     if (self) {
@@ -19,7 +19,7 @@ export class Portable<T extends Portable<T>> {
     }
   }
 
-  readonly __toErraiBusObject: (() => T & ErraiBusObject) = () => {
+  public readonly __toErraiBusObject: (() => T & ErraiBusObject) = () => {
     const _this = { ...(this as any) };
 
     Object.keys(_this).forEach(k => {
@@ -47,9 +47,9 @@ export class Portable<T extends Portable<T>> {
 
 //Generated class
 export class TestEvent extends Portable<TestEvent> {
-  bar?: string;
-  foo?: Foo;
-  child?: TestEvent;
+  public bar?: string;
+  public foo?: Foo;
+  public child?: TestEvent;
 
   constructor(self: { bar: string; foo: Foo; child?: TestEvent }) {
     super(self, "org.uberfire.shared.TestEvent");
@@ -58,7 +58,7 @@ export class TestEvent extends Portable<TestEvent> {
 
 //Generated class
 export class Foo extends Portable<Foo> {
-  foo?: string;
+  public foo?: string;
 
   constructor(self: { foo: string }) {
     super(self, "org.uberfire.shared.Foo");
