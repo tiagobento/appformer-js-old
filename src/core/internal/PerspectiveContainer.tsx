@@ -61,7 +61,11 @@ export default class PerspectiveContainer extends React.Component<Props, State> 
     };
   }
 
-  public componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: LastStateSnapshot): void {
+  public componentDidUpdate(
+    prevProps: Readonly<Props>,
+    prevState: Readonly<State>,
+    snapshot?: LastStateSnapshot
+  ): void {
     if (!snapshot!.shouldRenderPerspective) {
       this.renderScreens(snapshot!);
       return;
@@ -178,8 +182,9 @@ export default class PerspectiveContainer extends React.Component<Props, State> 
 }
 
 function searchTree(root: HTMLElement, id: string) {
-  let stack = [root],
-    node: any;
+  let node: any;
+
+  const stack = [root];
   stack.push(root);
 
   while (stack.length > 0) {

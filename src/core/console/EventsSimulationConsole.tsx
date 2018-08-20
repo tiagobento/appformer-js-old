@@ -31,7 +31,7 @@ export default class EventsSimulationConsole extends React.Component<Props, Stat
   public subscriptions(props = this.props) {
     // FIXME: There's probably a much better way to do that without increasing the stack size too much.
 
-    let all: AppFormer.Subscriptions = {};
+    const all: AppFormer.Subscriptions = {};
 
     props.screens
       .filter(s => s.af_subscriptions)
