@@ -12,23 +12,22 @@ const bridge =
 
 export const render =
   bridge.render ||
-  ((component: any, container: HTMLElement, callback = () => {}) => {
+  ((component: AppFormer.Element, container: HTMLElement, callback = () => {}) => {
     //FIXME: Duplicated!!
 
     if (component instanceof HTMLElement) {
       container.innerHTML = "";
       container.appendChild(component);
       callback();
-    }
-
-    //FIXME: What's wrong here?
-    else if (typeof component === "string") {
+    } else if (typeof component === "string") {
       container.innerHTML = component;
       callback();
     } else {
-      ReactDOM.render(component, container, callback);
+      ReactDOM.render(component as any, container, callback);
     }
   });
+
+export const translate = bridge.translate;
 
 export const RPC = bridge.RPC;
 
