@@ -14,7 +14,14 @@
         "order": ["static-field", "instance-field", "constructor", "instance-method", "static-method"]
       }
     ],
-    "variable-name": [true, "ban-keywords", "check-format", "allow-snake-case", "allow-pascal-case"]
+    "variable-name": [
+      true,
+      "ban-keywords",
+      "check-format",
+      "allow-snake-case",
+      "allow-pascal-case",
+      "allow-leading-underscore"
+    ]
   },
   "rulesDirectory": []
 }
