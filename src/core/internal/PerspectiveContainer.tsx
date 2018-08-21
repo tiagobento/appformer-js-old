@@ -12,16 +12,21 @@ interface Props {
   onCloseScreen: (screen: AppFormer.Screen) => void;
 }
 
+// tslint:disable-next-line:no-empty-interface
 interface State {}
+
+interface KeptScreen {
+  screen: AppFormer.Screen;
+  container: HTMLElement;
+}
 
 interface LastStateSnapshot {
   shouldRenderPerspective: boolean;
   opened: AppFormer.Screen[];
-  kept: { screen: AppFormer.Screen; container: HTMLElement }[];
+  kept: KeptScreen[];
 }
 
 export default class PerspectiveContainer extends React.Component<Props, State> {
-
   public static AfOpenScreenAttr = "af-open-screen";
 
   public ref: HTMLDivElement;
@@ -193,8 +198,8 @@ function searchTree(root: HTMLElement, id: string) {
     if (node instanceof HTMLElement && (node as HTMLElement).id === id) {
       return node;
     } else if (node.children && node.children.length) {
-      for (let ii = 0; ii < node.children.length; ii += 1) {
-        stack.push(node.children[ii]);
+      for (const child of node.children) {
+        stack.push(child);
       }
     }
   }
