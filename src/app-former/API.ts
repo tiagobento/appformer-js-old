@@ -12,25 +12,24 @@ const bridge =
 
 export const render =
   bridge.render ||
-  ((component: any, container: HTMLElement, callback = (): void => undefined) => {
+  ((component: Components.Element, container: HTMLElement, callback = (): void => undefined) => {
     // FIXME: Duplicated!!
 
     if (component instanceof HTMLElement) {
       container.innerHTML = "";
       container.appendChild(component);
       callback();
-    }
-
-    // FIXME: What's wrong here?
-    else if (typeof component === "string") {
+    } else if (typeof component === "string") {
       container.innerHTML = component;
       callback();
     } else {
-      ReactDOM.render(component, container, callback);
+      ReactDOM.render(component as any, container, callback);
     }
   });
 
-export const RPC = bridge.RPC;
+export const translate = bridge.translate;
+
+export const rpc = bridge.rpc;
 
 export function goTo(place: string) {
   return bridge.goTo(place);

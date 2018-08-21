@@ -18,7 +18,7 @@ export class RPCConsole extends React.Component<Props, {}> {
         const originalRPC = AF.RPC;
 
         // monkey patch 🙊🙉🙈
-        AF.RPC = (methodSignature: any, json: any[]) => methodSignature;
+        AF.rpc = (methodSignature: any, json: any[]) => methodSignature;
 
         const serviceMethods = Object.keys(service).map(x =>
           (service[x] as any)({
@@ -29,7 +29,7 @@ export class RPCConsole extends React.Component<Props, {}> {
             })
           })
         );
-        AF.RPC = originalRPC;
+        AF.rpc = originalRPC;
         return serviceMethods;
       })
       .reduce(concat, []);

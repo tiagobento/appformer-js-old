@@ -25,7 +25,11 @@ export default class JsBridge {
     this.root().open(place);
   }
 
-  public RPC(path: string, params: any[]) {
+  public translate(key: string, ...a: any[]) {
+    return `Translated ${key}`;
+  }
+
+  public rpc(path: string, params: any[]) {
     return Promise.reject("Sorry, RPC mocks are not available yet :(");
   }
 
