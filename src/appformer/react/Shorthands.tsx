@@ -5,7 +5,8 @@ export const Link = (props: { to: string; children: any }) => (
   <span onClick={() => AppFormer.goTo(props.to)}>{props.children}</span>
 );
 
-export const __i18__ = (props: { tkey: string }) => <>{Core.translate(props.tkey)}</>;
+
+export const __i18 = (props: { tkey: string }) => <>{AppFormer.translate(props.tkey)}</>;
 
 interface Props {
   name: string;
@@ -21,7 +22,7 @@ export class ExampleList extends React.Component<Props, {}> {
         <ul>
           <li>Id: {this.props.id}</li>
           <li>
-            <__i18__ tkey={"message.that.should.be.translated"} />
+            <__i18 tkey={"message.that.should.be.translated"} />
           </li>
           <li>
             Oculus (and
