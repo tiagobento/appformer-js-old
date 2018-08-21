@@ -1,8 +1,8 @@
 import * as React from "react";
-import * as Components from "appformer/Components";
+import { Screen } from "appformer/Components";
 
 interface Props {
-  screens: Components.Screen[];
+  screens: Screen[];
   onClose: () => void;
 }
 

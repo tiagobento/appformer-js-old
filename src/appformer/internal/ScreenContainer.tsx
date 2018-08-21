@@ -1,10 +1,10 @@
 import * as React from "react";
-import * as Components from "appformer/Components";
+import { Screen, Perspective, DefaultScreenContainerId } from "appformer/Components";
 import JsBridge from "appformer/internal/JsBridge";
 
 interface Props {
-  root: { ss: Components.Screen[]; ps: Components.Perspective[] };
-  screen: Components.Screen;
+  root: { ss: Screen[]; ps: Perspective[] };
+  screen: Screen;
   onClose: () => void;
   bridge: JsBridge;
 }
@@ -50,7 +50,7 @@ export default class ScreenContainer extends React.Component<Props, {}> {
     );
   }
 
-  private TitleBar(screen: Components.Screen) {
+  private TitleBar(screen: Screen) {
     return (
       <span>
         <span>{screen.af_componentTitle}</span>

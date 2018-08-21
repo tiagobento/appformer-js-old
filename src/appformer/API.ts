@@ -1,5 +1,5 @@
 import * as ReactDOM from "react-dom";
-import * as Components from "appformer/Components";
+import { Screen, Perspective } from "appformer/Components";
 import JsBridge from "appformer/internal/JsBridge";
 
 const jsBridge = new JsBridge();
@@ -12,7 +12,7 @@ const bridge =
 
 export const render =
   bridge.render ||
-  ((component: Components.Element, container: HTMLElement, callback = (): void => undefined) => {
+  ((component: Element, container: HTMLElement, callback = (): void => undefined) => {
     // FIXME: Duplicated!!
 
     if (component instanceof HTMLElement) {
@@ -40,11 +40,11 @@ export function register(potentialComponents: any) {
     if (potentialComponents.hasOwnProperty(potentialComponent)) {
       const Component = potentialComponents[potentialComponent];
 
-      if (Component.prototype instanceof Components.Screen) {
+      if (Component.prototype instanceof Screen) {
         const component = new Component();
         console.info(`Registering screen [${Component.prototype.constructor.name}]`);
         bridge.registerScreen(component);
-      } else if (Component.prototype instanceof Components.Perspective) {
+      } else if (Component.prototype instanceof Perspective) {
         const component = new Component();
         console.info(`Registering perspective [${Component.prototype.constructor.name}]`);
         bridge.registerPerspective(component);

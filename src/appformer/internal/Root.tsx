@@ -1,5 +1,5 @@
 import * as React from "react";
-import * as Components from "appformer/Components";
+import { Screen, Perspective, GenericComponent } from "appformer/Components";
 import JsBridge from "appformer/internal/JsBridge";
 import PerspectiveContainer from "appformer/internal/PerspectiveContainer";
 
@@ -9,15 +9,15 @@ interface Props {
 }
 
 class State {
-  public currentPerspective?: Components.Perspective;
-  public perspectives: Components.Perspective[];
-  public screens: Components.Screen[];
-  public openScreens: Components.Screen[];
-  public hasAnOpen: (component: Components.GenericComponent) => boolean;
+  public currentPerspective?: Perspective;
+  public perspectives: Perspective[];
+  public screens: Screen[];
+  public openScreens: Screen[];
+  public hasAnOpen: (component: GenericComponent) => boolean;
   public without: (screenId: string) => State;
 
-  public static hasAnOpen = (state: State) => (component: Components.GenericComponent) => {
-    return component instanceof Components.Screen
+  public static hasAnOpen = (state: State) => (component: GenericComponent) => {
+    return component instanceof Screen
       ? state.openScreens.indexOf(component) > -1
       : state.currentPerspective === component;
   };
@@ -29,7 +29,7 @@ class State {
 }
 
 const actions = {
-  registerPerspective: (perspective: Components.Perspective) => (state: State): any => ({
+  registerPerspective: (perspective: Perspective) => (state: State): any => ({
     perspectives: [...state.perspectives, perspective],
     currentPerspective: state.currentPerspective
       ? state.currentPerspective
@@ -41,7 +41,7 @@ const actions = {
       : state.openScreens
   }),
 
-  registerScreen: (screen: Components.Screen) => (state: State): any => {
+  registerScreen: (screen: Screen) => (state: State): any => {
     return {
       screens: [...state.screens, screen],
       openScreens:
@@ -60,7 +60,7 @@ const actions = {
     }
   },
 
-  openPerspective: (perspective: Components.Perspective) => (state: State): any => {
+  openPerspective: (perspective: Perspective) => (state: State): any => {
     const uncloseableScreens = state.openScreens
       .filter(screen => !perspective.has(screen)) // Filters out screens that will remain open
       .map(s => ({ screen: s, canBeClosed: s.af_onMayClose() }))
@@ -81,7 +81,7 @@ const actions = {
     };
   },
 
-  closeScreen: (screen: Components.Screen) => (state: State): any => {
+  closeScreen: (screen: Screen) => (state: State): any => {
     // FIXME: Using sync "confirm" method is not ideal because it cannot be styled.
     const msg = `${screen.af_componentId} cannot be closed. Do you want to force it?`;
     if (!screen.af_onMayClose() && !confirm(msg)) {
@@ -143,11 +143,11 @@ export default class Root extends React.Component<Props, State> {
     };
   }
 
-  public registerScreen(screen: Components.Screen) {
+  public registerScreen(screen: Screen) {
     this.setState(actions.registerScreen(screen));
   }
 
-  public registerPerspective(perspective: Components.Perspective) {
+  public registerPerspective(perspective: Perspective) {
     this.setState(actions.registerPerspective(perspective));
   }
 

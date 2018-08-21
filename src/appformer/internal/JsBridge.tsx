@@ -1,6 +1,6 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import * as Components from "appformer/Components";
+import { Perspective, Screen, Element } from "appformer/Components";
 import Root from "appformer/internal/Root";
 
 export default class JsBridge {
@@ -13,11 +13,11 @@ export default class JsBridge {
     return this;
   }
 
-  public registerScreen(screen: Components.Screen) {
+  public registerScreen(screen: Screen) {
     this.root().registerScreen(screen);
   }
 
-  public registerPerspective(perspective: Components.Perspective) {
+  public registerPerspective(perspective: Perspective) {
     this.root().registerPerspective(perspective);
   }
 
@@ -33,7 +33,7 @@ export default class JsBridge {
     return Promise.reject("Sorry, RPC mocks are not available yet :(");
   }
 
-  public render(component: Components.Element, container: HTMLElement, callback = (): void => undefined) {
+  public render(component: Element, container: HTMLElement, callback = (): void => undefined) {
     if (component instanceof HTMLElement) {
       container.innerHTML = "";
       container.appendChild(component);
