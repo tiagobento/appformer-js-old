@@ -5,6 +5,8 @@ export const Link = (props: { to: string; children: any }) => (
   <span onClick={() => AppFormer.goTo(props.to)}>{props.children}</span>
 );
 
+export const __i18__ = (props: { tkey: string }) => <>{Core.translate(props.tkey)}</>;
+
 interface Props {
   name: string;
   id: string;
@@ -18,7 +20,9 @@ export class ExampleList extends React.Component<Props, {}> {
         <h4>List of {this.props.name}</h4>
         <ul>
           <li>Id: {this.props.id}</li>
-          <li>WhatsApp</li>
+          <li>
+            <__i18__ tkey={"message.that.should.be.translated"} />
+          </li>
           <li>
             Oculus (and
             <Link to={"TodoListScreen"}>

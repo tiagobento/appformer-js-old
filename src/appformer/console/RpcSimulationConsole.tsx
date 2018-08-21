@@ -15,12 +15,12 @@ export class RPCConsole extends React.Component<Props, {}> {
         const service = screen.af_componentService;
 
         const AF = (window as any).appformer;
-        const originalRPC = AF.RPC;
+        const originalRPC = AF.rpc;
 
         // monkey patch 🙊🙉🙈
         AF.rpc = (methodSignature: any, json: any[]) => methodSignature;
 
-        const serviceMethods = Object.keys(service).map(x =>
+        const methods2 = Object.keys(service).map(x =>
           (service[x] as any)({
             __toErraiBusObject: () => ({
               __toJson() {
@@ -30,7 +30,7 @@ export class RPCConsole extends React.Component<Props, {}> {
           })
         );
         AF.rpc = originalRPC;
-        return serviceMethods;
+        return methods2;
       })
       .reduce(concat, []);
 
