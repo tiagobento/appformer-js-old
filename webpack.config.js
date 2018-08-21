@@ -5,7 +5,7 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 module.exports = {
   mode: "development",
   entry: {
-    core: "./src/core/index.ts",
+    appformer: "./src/appformer/index.ts",
     "core-screens/screens": "./src/core-screens/index.jsx",
     "core-examples/examples": "./src/core-examples/index.ts"
   },

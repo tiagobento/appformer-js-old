@@ -39,7 +39,7 @@
     "test": "jest",
     "start": "npx webpack-dev-server --open",
     "build:dev": "webpack",
-    "build:prod": "webpack --mode production && mvn clean install -f webjar/pom.xml"
+    "build:prod": "npm run lint && npm run test && webpack --mode production && mvn clean install -f webjar/pom.xml"
   },
   "babel": {
     "presets": [

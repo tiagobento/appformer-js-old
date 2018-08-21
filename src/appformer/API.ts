@@ -1,6 +1,6 @@
 import * as ReactDOM from "react-dom";
-import { AppFormer } from "core/Components";
-import JsBridge from "core/internal/JsBridge";
+import { Screen, Perspective } from "appformer/Components";
+import JsBridge from "appformer/internal/JsBridge";
 
 const jsBridge = new JsBridge();
 
@@ -12,8 +12,8 @@ const bridge =
 
 export const render =
   bridge.render ||
-  ((component: AppFormer.Element, container: HTMLElement, callback = () => {}) => {
-    //FIXME: Duplicated!!
+  ((component: Element, container: HTMLElement, callback = (): void => undefined) => {
+    // FIXME: Duplicated!!
 
     if (component instanceof HTMLElement) {
       container.innerHTML = "";
@@ -38,20 +38,20 @@ export function rpc(a: string, ...b: any[]) {
 }
 
 export function register(potentialComponents: any) {
-  for (let potentialComponent in potentialComponents) {
+  for (const potentialComponent in potentialComponents) {
     if (potentialComponents.hasOwnProperty(potentialComponent)) {
       const Component = potentialComponents[potentialComponent];
 
-      if (Component.prototype instanceof AppFormer.Screen) {
+      if (Component.prototype instanceof Screen) {
         const component = new Component();
         console.info(`Registering screen [${Component.prototype.constructor.name}]`);
         bridge.registerScreen(component);
-      } else if (Component.prototype instanceof AppFormer.Perspective) {
+      } else if (Component.prototype instanceof Perspective) {
         const component = new Component();
         console.info(`Registering perspective [${Component.prototype.constructor.name}]`);
         bridge.registerPerspective(component);
       } else {
-        //TODO: Register other kinds of components
+        // TODO: Register other kinds of components
       }
     }
   }

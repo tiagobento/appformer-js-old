@@ -1,8 +1,8 @@
-import { AppFormer } from "core/Components";
-import { Link } from "core/react/Shorthands";
+import { Screen, Perspective, Element } from "appformer/Components";
+import { Link } from "appformer/react/Shorthands";
 import * as React from "react";
 
-export class ConsoleHeader extends AppFormer.Screen {
+export class ConsoleHeader extends Screen {
   constructor() {
     super();
     this.isReact = true;
@@ -10,7 +10,7 @@ export class ConsoleHeader extends AppFormer.Screen {
     this.af_componentTitle = undefined;
   }
 
-  af_componentRoot(root?: { ss: AppFormer.Screen[]; ps: AppFormer.Perspective[] }): AppFormer.Element {
+  public af_componentRoot(root?: { ss: Screen[]; ps: Perspective[] }): Element {
     return (
       <div
         style={{

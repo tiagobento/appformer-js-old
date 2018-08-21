@@ -1,8 +1,8 @@
-import { AppFormer } from "core/Components";
-import Console from "core/console/Console";
+import { Screen, Perspective, Element } from "appformer/Components";
+import Console from "appformer/console/Console";
 import * as React from "react";
 
-export class ConsoleDefaultPerspective extends AppFormer.Perspective {
+export class ConsoleDefaultPerspective extends Perspective {
   constructor() {
     super();
     this.isReact = true;
@@ -11,7 +11,7 @@ export class ConsoleDefaultPerspective extends AppFormer.Perspective {
     this.af_isDefaultPerspective = true;
   }
 
-  af_perspectiveRoot(root: { ss: AppFormer.Screen[]; ps: AppFormer.Perspective[] }): AppFormer.Element {
+  public af_perspectiveRoot(root: { ss: Screen[]; ps: Perspective[] }): Element {
     return <Console screens={root.ss} />;
   }
 }

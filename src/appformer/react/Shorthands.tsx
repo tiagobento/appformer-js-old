@@ -1,27 +1,27 @@
-import * as Core from "core";
+import * as AppFormer from "appformer";
 import * as React from "react";
 
 export const Link = (props: { to: string; children: any }) => (
-  <span onClick={() => Core.goTo(props.to)}>{props.children}</span>
+  <span onClick={() => AppFormer.goTo(props.to)}>{props.children}</span>
 );
 
-export const __i18__ = (props: { tkey: string }) => <>{Core.translate(props.tkey)}</>;
+export const __i18 = (props: { tkey: string }) => <>{AppFormer.translate(props.tkey)}</>;
 
 interface Props {
   name: string;
   id: string;
 }
 
-//FIXME: This is a temporary component \/
+// FIXME: This is a temporary component \/
 export class ExampleList extends React.Component<Props, {}> {
-  render() {
+  public render() {
     return (
       <div>
         <h4>List of {this.props.name}</h4>
         <ul>
           <li>Id: {this.props.id}</li>
           <li>
-            <__i18__ tkey={"message.that.should.be.translated"} />
+            <__i18 tkey={"message.that.should.be.translated"} />
           </li>
           <li>
             Oculus (and

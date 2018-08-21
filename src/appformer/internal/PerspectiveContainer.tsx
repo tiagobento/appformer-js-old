@@ -1,34 +1,42 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import { AppFormer } from "core/Components";
-import JsBridge from "core/internal/JsBridge";
-import ScreenContainer from "core/internal/ScreenContainer";
+import { Screen, Perspective, DefaultScreenContainerId } from "appformer/Components";
+import JsBridge from "appformer/internal/JsBridge";
+import ScreenContainer from "appformer/internal/ScreenContainer";
 
 interface Props {
-  root: { ss: AppFormer.Screen[]; ps: AppFormer.Perspective[] };
-  perspective: AppFormer.Perspective;
-  screens: AppFormer.Screen[];
+  root: { ss: Screen[]; ps: Perspective[] };
+  perspective: Perspective;
+  screens: Screen[];
   bridge: JsBridge;
-  onCloseScreen: (screen: AppFormer.Screen) => void;
+  onCloseScreen: (screen: Screen) => void;
 }
 
+// tslint:disable-next-line:no-empty-interface
 interface State {}
+
+interface KeptScreen {
+  screen: Screen;
+  container: HTMLElement;
+}
 
 interface LastStateSnapshot {
   shouldRenderPerspective: boolean;
-  opened: AppFormer.Screen[];
-  kept: { screen: AppFormer.Screen; container: HTMLElement }[];
+  opened: Screen[];
+  kept: KeptScreen[];
 }
 
 export default class PerspectiveContainer extends React.Component<Props, State> {
-  ref: HTMLDivElement;
+  public static AfOpenScreenAttr = "af-open-screen";
+
+  public ref: HTMLDivElement;
 
   constructor(props: Props) {
     super(props);
     this.state = { ready: false };
   }
 
-  componentDidMount(): void {
+  public componentDidMount(): void {
     this.componentDidUpdate(this.props, this.state, {
       shouldRenderPerspective: true,
       opened: this.props.screens,
@@ -36,12 +44,12 @@ export default class PerspectiveContainer extends React.Component<Props, State> 
     });
   }
 
-  getSnapshotBeforeUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>): LastStateSnapshot {
-    const diff = (a: AppFormer.Screen[], b: AppFormer.Screen[]) => {
+  public getSnapshotBeforeUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>): LastStateSnapshot {
+    const diff = (a: Screen[], b: Screen[]) => {
       return a.filter(i => b.indexOf(i) < 0);
     };
 
-    const intersect = (a: AppFormer.Screen[], b: AppFormer.Screen[]) => {
+    const intersect = (a: Screen[], b: Screen[]) => {
       return a.filter(i => -1 !== b.indexOf(i));
     };
 
@@ -61,7 +69,11 @@ export default class PerspectiveContainer extends React.Component<Props, State> 
     };
   }
 
-  componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: LastStateSnapshot): void {
+  public componentDidUpdate(
+    prevProps: Readonly<Props>,
+    prevState: Readonly<State>,
+    snapshot?: LastStateSnapshot
+  ): void {
     if (!snapshot!.shouldRenderPerspective) {
       this.renderScreens(snapshot!);
       return;
@@ -81,7 +93,7 @@ export default class PerspectiveContainer extends React.Component<Props, State> 
     snapshot.opened.forEach(screen => this.openScreen(screen));
   }
 
-  private openScreen(screen: AppFormer.Screen) {
+  private openScreen(screen: Screen) {
     const container = this.findContainerForScreen(screen);
     if (!container) {
       console.error(`[O] A default screen container for ${screen.af_componentId} should exist at this point for sure.`);
@@ -102,7 +114,7 @@ export default class PerspectiveContainer extends React.Component<Props, State> 
     ReactDOM.render(screenContainer, container as HTMLElement);
   }
 
-  private keepScreen(screen: AppFormer.Screen, exContainer: HTMLElement) {
+  private keepScreen(screen: Screen, exContainer: HTMLElement) {
     const newContainer = this.findContainerForScreen(screen);
     if (!newContainer) {
       console.error(`[K] A default screen container for ${screen.af_componentId} should exist at this point for sure.`);
@@ -119,11 +131,11 @@ export default class PerspectiveContainer extends React.Component<Props, State> 
 
     exContainer.setAttribute(PerspectiveContainer.AfOpenScreenAttr, screen.af_componentId);
 
-    //FIXME: this "replaceWith" method does not work on IE.
+    // FIXME: this "replaceWith" method does not work on IE.
     (newContainer as any).replaceWith(exContainer);
   }
 
-  private closeScreen(screen: AppFormer.Screen) {
+  private closeScreen(screen: Screen) {
     const container = this.findContainerForScreen(screen);
     if (!container) {
       console.error(`[C] A screen container for ${screen.af_componentId} should exist at this point for sure.`);
@@ -135,15 +147,15 @@ export default class PerspectiveContainer extends React.Component<Props, State> 
 
     // This is very important for React to identify we're dealing with another
     // node when rendering another screen on the same container
-    //FIXME: this "replaceWith" method does not work on IE.
+    // FIXME: this "replaceWith" method does not work on IE.
     (container as any).replaceWith(container.cloneNode(false));
   }
 
-  private findContainerForScreen(screen: AppFormer.Screen) {
+  private findContainerForScreen(screen: Screen) {
     return PerspectiveContainer.findScreenContainerInside(screen, this.ref);
   }
 
-  render() {
+  public render() {
     return (
       <div
         className={"af-perspective-container"}
@@ -159,27 +171,24 @@ export default class PerspectiveContainer extends React.Component<Props, State> 
     );
   }
 
-  public static AfOpenScreenAttr = "af-open-screen";
-
-  private static getSelfContainerElementId(perspective: AppFormer.Perspective) {
+  private static getSelfContainerElementId(perspective: Perspective) {
     return "self-perspective-" + perspective.af_componentId;
   }
 
-  public static findContainerFor(screen: AppFormer.Screen, perspective: AppFormer.Perspective) {
+  public static findContainerFor(screen: Screen, perspective: Perspective) {
     const ref = document.getElementById(this.getSelfContainerElementId(perspective))!;
     return this.findScreenContainerInside(screen, ref);
   }
 
-  private static findScreenContainerInside(screen: AppFormer.Screen, root: HTMLElement) {
-    return (
-      searchTree(root, AppFormer.Screen.containerId(screen)) || searchTree(root, AppFormer.DefaultScreenContainerId)
-    );
+  private static findScreenContainerInside(screen: Screen, root: HTMLElement) {
+    return searchTree(root, Screen.containerId(screen)) || searchTree(root, DefaultScreenContainerId);
   }
 }
 
 function searchTree(root: HTMLElement, id: string) {
-  let stack = [root],
-    node: any;
+  let node: any;
+
+  const stack = [root];
   stack.push(root);
 
   while (stack.length > 0) {
@@ -187,8 +196,8 @@ function searchTree(root: HTMLElement, id: string) {
     if (node instanceof HTMLElement && (node as HTMLElement).id === id) {
       return node;
     } else if (node.children && node.children.length) {
-      for (let ii = 0; ii < node.children.length; ii += 1) {
-        stack.push(node.children[ii]);
+      for (const child of node.children) {
+        stack.push(child);
       }
     }
   }

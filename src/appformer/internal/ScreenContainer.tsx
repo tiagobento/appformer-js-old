@@ -1,10 +1,10 @@
 import * as React from "react";
-import { AppFormer } from "core/Components";
-import JsBridge from "core/internal/JsBridge";
+import { Screen, Perspective, DefaultScreenContainerId } from "appformer/Components";
+import JsBridge from "appformer/internal/JsBridge";
 
 interface Props {
-  root: { ss: AppFormer.Screen[]; ps: AppFormer.Perspective[] };
-  screen: AppFormer.Screen;
+  root: { ss: Screen[]; ps: Perspective[] };
+  screen: Screen;
   onClose: () => void;
   bridge: JsBridge;
 }
@@ -12,7 +12,7 @@ interface Props {
 export default class ScreenContainer extends React.Component<Props, {}> {
   private ref: HTMLDivElement;
 
-  componentDidMount(): void {
+  public componentDidMount(): void {
     if (!this.props.screen.isReact) {
       console.info(`...Rendering ${this.props.screen.af_componentId}...`);
       this.props.bridge.render(this.props.screen.af_componentRoot(this.props.root), this.ref);
@@ -24,13 +24,13 @@ export default class ScreenContainer extends React.Component<Props, {}> {
     console.info(`Opened ${this.props.screen.af_componentId}.`);
   }
 
-  componentWillUnmount(): void {
+  public componentWillUnmount(): void {
     console.info(`...Closing ${this.props.screen.af_componentId}...`);
     this.props.screen.af_onClose();
     console.info(`Closed ${this.props.screen.af_componentId}.`);
   }
 
-  render() {
+  public render() {
     return (
       <div
         className={"af-screen-container"}
@@ -50,7 +50,7 @@ export default class ScreenContainer extends React.Component<Props, {}> {
     );
   }
 
-  private TitleBar(screen: AppFormer.Screen) {
+  private TitleBar(screen: Screen) {
     return (
       <span>
         <span>{screen.af_componentTitle}</span>

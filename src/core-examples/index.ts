@@ -1,5 +1,5 @@
-import * as Core from "core";
+import * as AppFormer from "appformer";
 import * as AppFormerComponents from "core-screens/AppFormerComponents";
-import * as ConsoleComponents from "core/console";
+import * as ConsoleComponents from "appformer/console";
 
-Core.register({ ...AppFormerComponents, ...ConsoleComponents });
+AppFormer.register({ ...AppFormerComponents, ...ConsoleComponents });

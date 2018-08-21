@@ -1,8 +1,8 @@
-import { AppFormer } from "core/Components";
+import { Screen, Subscriptions } from "appformer/Components";
 import * as React from "react";
 
 interface Props {
-  screens: AppFormer.Screen[];
+  screens: Screen[];
   onClose: () => void;
 }
 
@@ -12,8 +12,8 @@ interface State {
 }
 
 const actions = {
-  setChannel: (channel: string) => (state: State) => ({ channel: channel }),
-  setEvent: (event: string) => (state: State) => ({ event: event })
+  setChannel: (c: string) => (state: State) => ({ channel: c }),
+  setEvent: (e: string) => (state: State) => ({ event: e })
 };
 
 export default class EventsSimulationConsole extends React.Component<Props, State> {
@@ -28,10 +28,10 @@ export default class EventsSimulationConsole extends React.Component<Props, Stat
     };
   }
 
-  subscriptions(props = this.props) {
-    //FIXME: There's probably a much better way to do that without increasing the stack size too much.
+  public subscriptions(props = this.props) {
+    // FIXME: There's probably a much better way to do that without increasing the stack size too much.
 
-    let all: AppFormer.Subscriptions = {};
+    const all: Subscriptions = {};
 
     props.screens
       .filter(s => s.af_subscriptions)
@@ -66,7 +66,7 @@ export default class EventsSimulationConsole extends React.Component<Props, Stat
     }
   }
 
-  render() {
+  public render() {
     return (
       <div>
         <div className={"title"}>

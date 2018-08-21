@@ -1,8 +1,8 @@
 import * as React from "react";
-import { AppFormer } from "core/Components";
+import { Screen } from "appformer/Components";
 
 interface Props {
-  screens: AppFormer.Screen[];
+  screens: Screen[];
   onClose: () => void;
 }
 
@@ -18,13 +18,15 @@ export class RPCConsole extends React.Component<Props, {}> {
         const originalRPC = AF.rpc;
 
         // monkey patch 🙊🙉🙈
-        AF.rpc = function(methodSignature: any, json: any[]) {
-          return methodSignature;
-        };
+        AF.rpc = (methodSignature: any, json: any[]) => methodSignature;
 
         const methods2 = Object.keys(service).map(x =>
           (service[x] as any)({
-            __toErraiBusObject: () => ({ __toJson() {} })
+            __toErraiBusObject: () => ({
+              __toJson() {
+                // noop
+              }
+            })
           })
         );
         AF.rpc = originalRPC;
@@ -35,7 +37,7 @@ export class RPCConsole extends React.Component<Props, {}> {
     return methods.filter((a: any, b: number) => methods.indexOf(a) === b);
   }
 
-  render() {
+  public render() {
     return (
       <div>
         <div className={"title"}>

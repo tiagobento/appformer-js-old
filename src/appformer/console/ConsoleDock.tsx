@@ -7,7 +7,7 @@ interface Props {
 }
 
 export default class ConsoleDock extends React.Component<Props, {}> {
-  render() {
+  public render() {
     return (
       <div
         style={{
@@ -48,15 +48,15 @@ export default class ConsoleDock extends React.Component<Props, {}> {
 }
 
 export class DockButton extends React.Component<{ title: string }, {}> {
-  rot: HTMLElement;
-  cont: HTMLElement;
+  public rot: HTMLElement;
+  public cont: HTMLElement;
 
-  componentDidMount(): void {
-    this.cont.style.height = parseInt(getComputedStyle(this.rot).width!) + 6 + "px";
-    this.cont.style.width = parseInt(getComputedStyle(this.rot).height!) + 4 + "px";
+  public componentDidMount(): void {
+    this.cont.style.height = parseInt(getComputedStyle(this.rot).width!, 10) + 6 + "px";
+    this.cont.style.width = parseInt(getComputedStyle(this.rot).height!, 10) + 4 + "px";
   }
 
-  render() {
+  public render() {
     return (
       <div ref={e => (this.cont = e!)}>
         <button

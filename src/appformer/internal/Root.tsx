@@ -1,7 +1,7 @@
 import * as React from "react";
-import { AppFormer } from "core/Components";
-import JsBridge from "core/internal/JsBridge";
-import PerspectiveContainer from "core/internal/PerspectiveContainer";
+import { Screen, Perspective, GenericComponent } from "appformer/Components";
+import JsBridge from "appformer/internal/JsBridge";
+import PerspectiveContainer from "appformer/internal/PerspectiveContainer";
 
 interface Props {
   exposing: (self: () => Root) => void;
@@ -9,39 +9,39 @@ interface Props {
 }
 
 class State {
-  currentPerspective?: AppFormer.Perspective;
-  perspectives: AppFormer.Perspective[];
-  screens: AppFormer.Screen[];
-  openScreens: AppFormer.Screen[];
-  hasAnOpen: (component: AppFormer.Component) => boolean;
-  without: (screenId: string) => State;
+  public currentPerspective?: Perspective;
+  public perspectives: Perspective[];
+  public screens: Screen[];
+  public openScreens: Screen[];
+  public hasAnOpen: (component: GenericComponent) => boolean;
+  public without: (screenId: string) => State;
 
-  static hasAnOpen = (state: State) => (component: AppFormer.Component) => {
-    return component instanceof AppFormer.Screen
+  public static hasAnOpen = (state: State) => (component: GenericComponent) => {
+    return component instanceof Screen
       ? state.openScreens.indexOf(component) > -1
       : state.currentPerspective === component;
   };
 
-  static without = (state: State) => (screenId: string) => ({
+  public static without = (state: State) => (screenId: string) => ({
     ...state,
     openScreens: state.openScreens.filter(s => s.af_componentId !== screenId)
   });
 }
 
 const actions = {
-  registerPerspective: (perspective: AppFormer.Perspective) => (state: State): any => ({
+  registerPerspective: (perspective: Perspective) => (state: State): any => ({
     perspectives: [...state.perspectives, perspective],
     currentPerspective: state.currentPerspective
       ? state.currentPerspective
       : perspective.af_isDefaultPerspective
-        ? perspective //Last default perspective found is the one that wins.
+        ? perspective // Last default perspective found is the one that wins.
         : undefined,
     openScreens: perspective.af_isDefaultPerspective
       ? state.screens.filter(screen => perspective.has(screen))
       : state.openScreens
   }),
 
-  registerScreen: (screen: AppFormer.Screen) => (state: State): any => {
+  registerScreen: (screen: Screen) => (state: State): any => {
     return {
       screens: [...state.screens, screen],
       openScreens:
@@ -60,14 +60,14 @@ const actions = {
     }
   },
 
-  openPerspective: (perspective: AppFormer.Perspective) => (state: State): any => {
-    let uncloseableScreens = state.openScreens
-      .filter(screen => !perspective.has(screen)) //Filters out screens that will remain open
-      .map(screen => ({ screen: screen, canBeClosed: screen.af_onMayClose() }))
+  openPerspective: (perspective: Perspective) => (state: State): any => {
+    const uncloseableScreens = state.openScreens
+      .filter(screen => !perspective.has(screen)) // Filters out screens that will remain open
+      .map(s => ({ screen: s, canBeClosed: s.af_onMayClose() }))
       .filter(t => !t.canBeClosed)
       .map(t => t.screen.af_componentId);
 
-    //FIXME: Using sync "confirm" method is not ideal because it cannot be styled.
+    // FIXME: Using sync "confirm" method is not ideal because it cannot be styled.
     const msg = `[${uncloseableScreens}] cannot be closed at the moment. Force closing and proceed to ${
       perspective.af_componentId
     }?`;
@@ -81,8 +81,8 @@ const actions = {
     };
   },
 
-  closeScreen: (screen: AppFormer.Screen) => (state: State): any => {
-    //FIXME: Using sync "confirm" method is not ideal because it cannot be styled.
+  closeScreen: (screen: Screen) => (state: State): any => {
+    // FIXME: Using sync "confirm" method is not ideal because it cannot be styled.
     const msg = `${screen.af_componentId} cannot be closed. Do you want to force it?`;
     if (!screen.af_onMayClose() && !confirm(msg)) {
       return state;
@@ -110,7 +110,7 @@ const actions = {
 
     const existingScreenId = container.getAttribute(PerspectiveContainer.AfOpenScreenAttr);
     if (existingScreenId) {
-      //FIXME: Not checking onMayClose to close the existing screen
+      // FIXME: Not checking onMayClose to close the existing screen
       return {
         openScreens: [...state.without(existingScreenId).openScreens, screen]
       };
@@ -143,23 +143,23 @@ export default class Root extends React.Component<Props, State> {
     };
   }
 
-  registerScreen(screen: AppFormer.Screen) {
+  public registerScreen(screen: Screen) {
     this.setState(actions.registerScreen(screen));
   }
 
-  registerPerspective(perspective: AppFormer.Perspective) {
+  public registerPerspective(perspective: Perspective) {
     this.setState(actions.registerPerspective(perspective));
   }
 
-  open(place: string) {
+  public open(place: string) {
     this.setState(actions.open(place));
   }
 
-  componentDidUpdate(pp: Readonly<Props>, ps: Readonly<State>, snapshot?: any): void {
+  public componentDidUpdate(pp: Readonly<Props>, ps: Readonly<State>, snapshot?: any): void {
     console.info("=======================");
   }
 
-  componentWillUnmount() {
+  public componentWillUnmount() {
     this.state.screens.forEach(screen => {
       console.info(`...Shutting down ${screen.af_componentId}...`);
       screen.af_onShutdown();
@@ -167,7 +167,7 @@ export default class Root extends React.Component<Props, State> {
     });
   }
 
-  render() {
+  public render() {
     return (
       <div className={"af-js-root"}>
         {this.state.currentPerspective && (

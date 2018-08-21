@@ -1,8 +1,8 @@
 import * as React from "react";
-import { AppFormer } from "core/Components";
-import ConsoleDock from "core/console/ConsoleDock";
-import EventsSimulationConsole from "core/console/EventsSimulationConsole";
-import { RPCConsole } from "core/console/RpcSimulationConsole";
+import { Screen, DefaultScreenContainerId } from "appformer/Components";
+import ConsoleDock from "appformer/console/ConsoleDock";
+import EventsSimulationConsole from "appformer/console/EventsSimulationConsole";
+import { RPCConsole } from "appformer/console/RpcSimulationConsole";
 
 interface State {
   rpcConsole: boolean;
@@ -16,18 +16,18 @@ const actions = {
   })
 };
 
-export default class Console extends React.Component<{ screens: AppFormer.Screen[] }, State> {
-  constructor(props: { screens: AppFormer.Screen[] }) {
+export default class Console extends React.Component<{ screens: Screen[] }, State> {
+  constructor(props: { screens: Screen[] }) {
     super(props);
     this.state = { rpcConsole: false, eventsConsole: false };
   }
 
-  render() {
+  public render() {
     return (
       <div className={"wrapper"}>
         <header id={"container-for-screen-console-header"}>{/*Container*/}</header>
 
-        <div id={AppFormer.DefaultScreenContainerId} className={"main"}>
+        <div id={DefaultScreenContainerId} className={"main"}>
           {/*Container*/}
         </div>
 

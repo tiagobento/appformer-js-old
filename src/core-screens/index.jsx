@@ -1,6 +1,6 @@
 import React from "react";
-import * as Core from "core";
+import * as AppFormer from "appformer";
 import * as components from "./AppFormerComponents";
 
 //Registers the AppFormer components
-Core.register(components);
+AppFormer.register(components);
