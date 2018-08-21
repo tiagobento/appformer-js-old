@@ -1,8 +1,8 @@
-import { AppFormer } from "core/Components";
+import * as Components from "app-former/Components";
 import * as React from "react";
 
 interface Props {
-  screens: AppFormer.Screen[];
+  screens: Components.Screen[];
   onClose: () => void;
 }
 
@@ -31,7 +31,7 @@ export default class EventsSimulationConsole extends React.Component<Props, Stat
   public subscriptions(props = this.props) {
     // FIXME: There's probably a much better way to do that without increasing the stack size too much.
 
-    const all: AppFormer.Subscriptions = {};
+    const all: Components.Subscriptions = {};
 
     props.screens
       .filter(s => s.af_subscriptions)

@@ -1,6 +1,6 @@
 import * as ReactDOM from "react-dom";
-import { AppFormer } from "core/Components";
-import JsBridge from "core/internal/JsBridge";
+import * as Components from "app-former/Components";
+import JsBridge from "app-former/internal/JsBridge";
 
 const jsBridge = new JsBridge();
 
@@ -41,11 +41,11 @@ export function register(potentialComponents: any) {
     if (potentialComponents.hasOwnProperty(potentialComponent)) {
       const Component = potentialComponents[potentialComponent];
 
-      if (Component.prototype instanceof AppFormer.Screen) {
+      if (Component.prototype instanceof Components.Screen) {
         const component = new Component();
         console.info(`Registering screen [${Component.prototype.constructor.name}]`);
         bridge.registerScreen(component);
-      } else if (Component.prototype instanceof AppFormer.Perspective) {
+      } else if (Component.prototype instanceof Components.Perspective) {
         const component = new Component();
         console.info(`Registering perspective [${Component.prototype.constructor.name}]`);
         bridge.registerPerspective(component);

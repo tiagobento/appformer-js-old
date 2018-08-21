@@ -1,7 +1,7 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import { AppFormer } from "core/Components";
-import Root from "core/internal/Root";
+import * as Components from "app-former/Components";
+import Root from "app-former/internal/Root";
 
 export default class JsBridge {
   public root: () => Root;
@@ -13,11 +13,11 @@ export default class JsBridge {
     return this;
   }
 
-  public registerScreen(screen: AppFormer.Screen) {
+  public registerScreen(screen: Components.Screen) {
     this.root().registerScreen(screen);
   }
 
-  public registerPerspective(perspective: AppFormer.Perspective) {
+  public registerPerspective(perspective: Components.Perspective) {
     this.root().registerPerspective(perspective);
   }
 
@@ -29,7 +29,7 @@ export default class JsBridge {
     return Promise.reject("Sorry, RPC mocks are not available yet :(");
   }
 
-  public render(component: AppFormer.Element, container: HTMLElement, callback = (): void => undefined) {
+  public render(component: Components.Element, container: HTMLElement, callback = (): void => undefined) {
     if (component instanceof HTMLElement) {
       container.innerHTML = "";
       container.appendChild(component);

@@ -1,8 +1,8 @@
 import * as React from "react";
-import { AppFormer } from "core/Components";
+import * as Components from "app-former/Components";
 
 interface Props {
-  screens: AppFormer.Screen[];
+  screens: Components.Screen[];
   onClose: () => void;
 }
 

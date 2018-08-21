@@ -1,10 +1,10 @@
 import * as React from "react";
-import { AppFormer } from "core/Components";
-import JsBridge from "core/internal/JsBridge";
+import * as Components from "app-former/Components";
+import JsBridge from "app-former/internal/JsBridge";
 
 interface Props {
-  root: { ss: AppFormer.Screen[]; ps: AppFormer.Perspective[] };
-  screen: AppFormer.Screen;
+  root: { ss: Components.Screen[]; ps: Components.Perspective[] };
+  screen: Components.Screen;
   onClose: () => void;
   bridge: JsBridge;
 }
@@ -50,7 +50,7 @@ export default class ScreenContainer extends React.Component<Props, {}> {
     );
   }
 
-  private TitleBar(screen: AppFormer.Screen) {
+  private TitleBar(screen: Components.Screen) {
     return (
       <span>
         <span>{screen.af_componentTitle}</span>

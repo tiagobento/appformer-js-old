@@ -1,9 +1,8 @@
 import * as React from "react";
-import { AppFormer } from "core";
+import * as AppFormer from "app-former";
 import DemoApp from "core-screens/DemoApp";
-import { TestEvent, Foo } from "generated/Model";
-import { Services } from "generated/Services";
-import TestMessagesService = Services.org.uberfire.shared.TestMessagesService;
+import { Foo, TestEvent } from "generated/Model";
+import * as TestMessagesService from "generated/org/uberfire/shared/TestMessagesService";
 
 // import homePerspectiveTemplate from "core-screens/HomePerspective.html";
 // import otherPerspectiveTemplate from "core-screens/other-perspective.html";

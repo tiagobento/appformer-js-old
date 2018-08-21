@@ -1,9 +1,9 @@
-import * as Core from "core";
+import * as AppFormer from "app-former";
 import * as React from "react";
 
 export const Link = (props: { to: string; children: any }) => (
   <>
-    <span onClick={() => Core.goTo(props.to)}>{props.children}</span>
+    <span onClick={() => AppFormer.goTo(props.to)}>{props.children}</span>
   </>
 );
 

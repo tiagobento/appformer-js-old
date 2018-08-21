@@ -1,5 +1,5 @@
 import React from "react";
-import { ExampleList } from "core";
+import { ExampleList } from "app-former";
 
 export default class DemoApp extends React.Component {
   constructor(props) {
