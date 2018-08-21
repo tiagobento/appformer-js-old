@@ -1,8 +1,8 @@
 import * as React from "react";
-import * as Components from "app-former/Components";
-import ConsoleDock from "app-former/console/ConsoleDock";
-import EventsSimulationConsole from "app-former/console/EventsSimulationConsole";
-import { RPCConsole } from "app-former/console/RpcSimulationConsole";
+import * as Components from "appformer/Components";
+import ConsoleDock from "appformer/console/ConsoleDock";
+import EventsSimulationConsole from "appformer/console/EventsSimulationConsole";
+import { RPCConsole } from "appformer/console/RpcSimulationConsole";
 
 interface State {
   rpcConsole: boolean;

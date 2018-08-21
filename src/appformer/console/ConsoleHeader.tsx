@@ -1,5 +1,5 @@
-import * as Components from "app-former/Components";
-import { Link } from "app-former/react/Shorthands";
+import * as Components from "appformer/Components";
+import { Link } from "appformer/react/Shorthands";
 import * as React from "react";
 
 export class ConsoleHeader extends Components.Screen {

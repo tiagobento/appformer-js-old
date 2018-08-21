@@ -1,7 +1,7 @@
 import * as React from "react";
-import * as Components from "app-former/Components";
-import JsBridge from "app-former/internal/JsBridge";
-import PerspectiveContainer from "app-former/internal/PerspectiveContainer";
+import * as Components from "appformer/Components";
+import JsBridge from "appformer/internal/JsBridge";
+import PerspectiveContainer from "appformer/internal/PerspectiveContainer";
 
 interface Props {
   exposing: (self: () => Root) => void;
@@ -63,7 +63,7 @@ const actions = {
   openPerspective: (perspective: Components.Perspective) => (state: State): any => {
     const uncloseableScreens = state.openScreens
       .filter(screen => !perspective.has(screen)) // Filters out screens that will remain open
-      .map(screenParam => ({ screen: screenParam, canBeClosed: screenParam.af_onMayClose() }))
+      .map(s => ({ screen: s, canBeClosed: s.af_onMayClose() }))
       .filter(t => !t.canBeClosed)
       .map(t => t.screen.af_componentId);
 

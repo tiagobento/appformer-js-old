@@ -1,5 +1,5 @@
 import * as React from "react";
-import * as AppFormer from "app-former";
+import * as AppFormer from "appformer";
 import DemoApp from "core-screens/DemoApp";
 import { Foo, TestEvent } from "generated/Model";
 import * as TestMessagesService from "generated/org/uberfire/shared/TestMessagesService";

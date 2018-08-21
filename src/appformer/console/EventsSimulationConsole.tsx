@@ -1,4 +1,4 @@
-import * as Components from "app-former/Components";
+import * as Components from "appformer/Components";
 import * as React from "react";
 
 interface Props {
@@ -12,8 +12,8 @@ interface State {
 }
 
 const actions = {
-  setChannel: (channelParam: string) => (state: State) => ({ channel: channelParam }),
-  setEvent: (eventParam: string) => (state: State) => ({ event: eventParam })
+  setChannel: (c: string) => (state: State) => ({ channel: c }),
+  setEvent: (e: string) => (state: State) => ({ event: e })
 };
 
 export default class EventsSimulationConsole extends React.Component<Props, State> {

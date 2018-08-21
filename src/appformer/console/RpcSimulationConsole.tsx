@@ -1,5 +1,5 @@
 import * as React from "react";
-import * as Components from "app-former/Components";
+import * as Components from "appformer/Components";
 
 interface Props {
   screens: Components.Screen[];

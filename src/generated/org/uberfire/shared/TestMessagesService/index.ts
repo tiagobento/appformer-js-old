@@ -1,4 +1,4 @@
-import { rpc } from "app-former/index";
+import { rpc } from "appformer/index";
 import { ErraiBusObject, TestEvent } from "generated/Model";
 import { marshall } from "generated/Services";
 

@@ -1,5 +1,5 @@
-import * as Components from "app-former/Components";
-import Console from "app-former/console/Console";
+import * as Components from "appformer/Components";
+import Console from "appformer/console/Console";
 import * as React from "react";
 
 export class ConsoleDefaultPerspective extends Components.Perspective {

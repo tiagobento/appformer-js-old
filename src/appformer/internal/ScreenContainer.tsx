@@ -1,6 +1,6 @@
 import * as React from "react";
-import * as Components from "app-former/Components";
-import JsBridge from "app-former/internal/JsBridge";
+import * as Components from "appformer/Components";
+import JsBridge from "appformer/internal/JsBridge";
 
 interface Props {
   root: { ss: Components.Screen[]; ps: Components.Perspective[] };

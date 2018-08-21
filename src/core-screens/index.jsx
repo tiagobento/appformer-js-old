@@ -1,5 +1,5 @@
 import React from "react";
-import * as AppFormer from "app-former";
+import * as AppFormer from "appformer";
 import * as components from "./AppFormerComponents";
 
 //Registers the AppFormer components

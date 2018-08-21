@@ -1,4 +1,4 @@
-import * as AppFormer from "app-former";
+import * as AppFormer from "appformer";
 import * as React from "react";
 
 export const Link = (props: { to: string; children: any }) => (
