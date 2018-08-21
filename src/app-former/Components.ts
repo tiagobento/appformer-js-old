@@ -8,9 +8,13 @@ import * as React from "react";
 
 export const DefaultScreenContainerId = "default-container-for-screens";
 
-export type Subscriptions = { [channel: string]: (event: any) => void };
+export interface Subscriptions {
+  [channel: string]: (event: any) => void;
+}
 
-export type Service = { [name: string]: any };
+export interface Service {
+  [name: string]: any;
+}
 
 export type GenericComponent = Screen | Perspective;
 
