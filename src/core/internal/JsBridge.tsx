@@ -26,7 +26,7 @@ export default class JsBridge {
   }
 
   translate(key: string, ...a: any[]) {
-    return `Translated ${key}`;
+    return `Translated [${key}]`;
   }
 
   rpc(path: string, params: any[]) {

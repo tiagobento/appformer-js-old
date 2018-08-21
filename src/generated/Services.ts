@@ -1,4 +1,4 @@
-import { rpc } from "core";
+import * as Core from "core";
 import { TestEvent, ErraiBusObject, Portable } from "generated/Model";
 
 function marshall(obj: Portable<any> & ErraiBusObject | string) {
@@ -15,17 +15,19 @@ export namespace Services {
     export namespace uberfire {
       export namespace shared {
         export const TestMessagesService = {
-          sayHello: () => rpc("org.uberfire.shared.TestMessagesService|hello", []),
+          sayHello: () => Core.rpc("org.uberfire.shared.TestMessagesService|hello", []),
 
-          fireServerEvent: () => rpc("org.uberfire.shared.TestMessagesService|helloFromEvent", []),
+          fireServerEvent: () => Core.rpc("org.uberfire.shared.TestMessagesService|helloFromEvent", []),
 
-          sayHelloOnServer: () => rpc("org.uberfire.shared.TestMessagesService|muteHello", []),
+          sayHelloOnServer: () => Core.rpc("org.uberfire.shared.TestMessagesService|muteHello", []),
 
           sayHelloToSomething: (a: string) =>
-            rpc("org.uberfire.shared.TestMessagesService|hello:java.lang.String", [marshall(a)]),
+            Core.rpc("org.uberfire.shared.TestMessagesService|hello:java.lang.String", [marshall(a)]),
 
           sendTestPojo: (a: TestEvent & ErraiBusObject) =>
-            rpc("org.uberfire.shared.TestMessagesService|postTestEvent:org.uberfire.shared.TestEvent", [marshall(a)])
+            Core.rpc("org.uberfire.shared.TestMessagesService|postTestEvent:org.uberfire.shared.TestEvent", [
+              marshall(a)
+            ])
         };
       }
     }

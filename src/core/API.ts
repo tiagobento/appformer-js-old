@@ -29,10 +29,12 @@ export const render =
 
 export const translate = bridge.translate;
 
-export const rpc = bridge.rpc;
-
 export function goTo(place: string) {
   return bridge.goTo(place);
+}
+
+export function rpc(a: string, ...b: any[]) {
+  return bridge.rpc(a, b);
 }
 
 export function register(potentialComponents: any) {
