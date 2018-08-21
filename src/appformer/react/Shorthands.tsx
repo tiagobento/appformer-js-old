@@ -5,7 +5,6 @@ export const Link = (props: { to: string; children: any }) => (
   <span onClick={() => AppFormer.goTo(props.to)}>{props.children}</span>
 );
 
-
 export const __i18 = (props: { tkey: string }) => <>{AppFormer.translate(props.tkey)}</>;
 
 interface Props {

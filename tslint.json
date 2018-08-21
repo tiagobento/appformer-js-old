@@ -23,7 +23,8 @@
       "allow-snake-case",
       "allow-pascal-case",
       "allow-leading-underscore"
-    ]
+    ],
+    "comment-format": false
   },
   "rulesDirectory": []
 }

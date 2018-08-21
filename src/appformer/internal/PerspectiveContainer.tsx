@@ -181,9 +181,7 @@ export default class PerspectiveContainer extends React.Component<Props, State> 
   }
 
   private static findScreenContainerInside(screen: Screen, root: HTMLElement) {
-    return (
-      searchTree(root, Screen.containerId(screen)) || searchTree(root, DefaultScreenContainerId)
-    );
+    return searchTree(root, Screen.containerId(screen)) || searchTree(root, DefaultScreenContainerId);
   }
 }
 
