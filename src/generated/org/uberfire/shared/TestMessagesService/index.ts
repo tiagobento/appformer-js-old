@@ -1,6 +1,6 @@
 import * as AppFormer from "appformer";
-import { ErraiBusObject, TestEvent } from "generated/Model";
-import { marshall } from "generated/Services";
+import { marshall } from "appformer/remote";
+import { TestEvent } from "../model/TestEvent";
 
 export const sayHello = () => AppFormer.rpc("org.uberfire.shared.TestMessagesService|hello", []);
 

@@ -1,7 +1,8 @@
 import * as React from "react";
 import * as AppFormer from "appformer";
 import DemoApp from "core-screens/DemoApp";
-import { Foo, TestEvent } from "generated/Model";
+import { Foo } from "generated/org/uberfire/shared/model/Foo";
+import { TestEvent } from "generated/org/uberfire/shared/model/TestEvent";
 import * as TestMessagesService from "generated/org/uberfire/shared/TestMessagesService";
 
 // import homePerspectiveTemplate from "core-screens/HomePerspective.html";

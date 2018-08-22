@@ -1,4 +1,4 @@
-import { Portable } from "generated/Model";
+import { Portable } from "./model/Portable";
 
 export function marshall(obj: Portable<any> | string) {
   return typeof obj !== "string" ? obj.__toErraiBusObject().__toJson() : obj;

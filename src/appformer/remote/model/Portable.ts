@@ -1,11 +1,11 @@
-export enum SerializationParts {
+export enum ErraiBusObjectParts {
   ENCODED_TYPE = "^EncodedType",
   OBJECT_ID = "^ObjectID"
 }
 
 export interface ErraiBusObject {
-  [SerializationParts.ENCODED_TYPE]: string;
-  [SerializationParts.OBJECT_ID]: string;
+  [ErraiBusObjectParts.ENCODED_TYPE]: string;
+  [ErraiBusObjectParts.OBJECT_ID]: string;
 
   __toJson(): string;
 }
@@ -37,8 +37,8 @@ export class Portable<T extends Portable<T>> {
       }
     });
 
-    _this[SerializationParts.ENCODED_TYPE] = _this.__fqcn;
-    _this[SerializationParts.OBJECT_ID] = `${OBJ_ID++}`;
+    _this[ErraiBusObjectParts.ENCODED_TYPE] = _this.__fqcn;
+    _this[ErraiBusObjectParts.OBJECT_ID] = `${OBJ_ID++}`;
     delete _this.__fqcn;
 
     return {
@@ -48,24 +48,4 @@ export class Portable<T extends Portable<T>> {
       }
     };
   };
-}
-
-// Generated class
-export class TestEvent extends Portable<TestEvent> {
-  public bar?: string;
-  public foo?: Foo;
-  public child?: TestEvent;
-
-  constructor(self: { bar: string; foo: Foo; child?: TestEvent }) {
-    super(self, "org.uberfire.shared.TestEvent");
-  }
-}
-
-// Generated class
-export class Foo extends Portable<Foo> {
-  public foo?: string;
-
-  constructor(self: { foo: string }) {
-    super(self, "org.uberfire.shared.Foo");
-  }
 }
