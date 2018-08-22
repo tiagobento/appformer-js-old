@@ -1,6 +1,11 @@
+export enum SerializationParts {
+  ENCODED_TYPE = "^EncodedType",
+  OBJECT_ID = "^ObjectID"
+}
+
 export interface ErraiBusObject {
-  "^EncodedType": string;
-  "^ObjectID": string;
+  [SerializationParts.ENCODED_TYPE]: string;
+  [SerializationParts.OBJECT_ID]: string;
 
   __toJson(): string;
 }
@@ -32,8 +37,8 @@ export class Portable<T extends Portable<T>> {
       }
     });
 
-    _this["^EncodedType"] = _this.__fqcn;
-    _this["^ObjectID"] = `${OBJ_ID++}`;
+    _this[SerializationParts.ENCODED_TYPE] = _this.__fqcn;
+    _this[SerializationParts.OBJECT_ID] = `${OBJ_ID++}`;
     delete _this.__fqcn;
 
     return {
