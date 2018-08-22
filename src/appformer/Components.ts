@@ -13,7 +13,7 @@ export interface Subscriptions {
 }
 
 export interface Service {
-  [name: string]: any;
+  [name: string]: any; //FIXME: 'any' is a baaad choice
 }
 
 export type GenericComponent = Screen | Perspective;
