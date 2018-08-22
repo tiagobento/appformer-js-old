@@ -11,5 +11,5 @@ export const sayHelloOnServer = () => AppFormer.rpc("org.uberfire.shared.TestMes
 export const sayHelloToSomething = (a: string) =>
   AppFormer.rpc("org.uberfire.shared.TestMessagesService|hello:java.lang.String", [marshall(a)]);
 
-export const sendTestPojo = (a: TestEvent & ErraiBusObject) =>
+export const sendTestPojo = (a: TestEvent) =>
   AppFormer.rpc("org.uberfire.shared.TestMessagesService|postTestEvent:org.uberfire.shared.TestEvent", [marshall(a)]);
