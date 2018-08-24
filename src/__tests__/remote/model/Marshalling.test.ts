@@ -1,4 +1,6 @@
-import { ErraiBusObjectParts, Portable } from "appformer/remote/";
+import { Portable } from "appformer/remote/";
+import * as Marshalling from "appformer/remote/Marshalling";
+import { ErraiBusObjectParts } from "appformer/remote/model/ErraiBusObject";
 
 describe("__toErraiObject", () => {
   const encodedType = ErraiBusObjectParts.ENCODED_TYPE;
@@ -25,7 +27,7 @@ describe("__toErraiObject", () => {
       bestFriend: noAddrPerson
     });
 
-    const output = JSON.parse(JSON.stringify(input.__toErraiBusObject()));
+    const output = JSON.parse(JSON.stringify(Marshalling.toErraiBusObject(input)));
 
     expect(output).toStrictEqual({
       [encodedType]: "org.appformer-js.test.Person",
@@ -53,7 +55,7 @@ describe("__toErraiObject", () => {
     });
 
     // === test
-    const output = JSON.parse(JSON.stringify(input.__toErraiBusObject()));
+    const output = JSON.parse(JSON.stringify(Marshalling.toErraiBusObject(input)));
 
     // === assertion
     const nonPrimitiveTypesObjId = [output[objectId], output.homeAddr[objectId], output.bestFriend[objectId]];
@@ -89,7 +91,7 @@ describe("__toErraiObject", () => {
 
     // == test
 
-    const output = JSON.parse(JSON.stringify(input.__toErraiBusObject()));
+    const output = JSON.parse(JSON.stringify(Marshalling.toErraiBusObject(input)));
 
     // == assertion
 
@@ -112,22 +114,38 @@ describe("__toErraiObject", () => {
 // ==============
 // ============== fixture classes
 
-class Person extends Portable<Person> {
+class Person implements Portable {
+  private readonly _fqcn = class {
+    public static readonly value: () => string = () => {
+      return "org.appformer-js.test.Person";
+    };
+  };
+
+  public readonly fqcn: string = this._fqcn.value();
+
   public name: string;
   public homeAddr?: Address;
   public workAddr?: Address;
   public bestFriend?: Person;
 
   constructor(self: { name: string; homeAddr?: Address; workAddr?: Address; bestFriend?: Person }) {
-    super(self, "org.appformer-js.test.Person");
+    Object.assign(this, self);
   }
 }
 
-class Address extends Portable<Address> {
+class Address implements Portable {
+  private readonly _fqcn = class {
+    public static readonly value: () => string = () => {
+      return "org.appformer-js.test.Address";
+    };
+  };
+
+  public readonly fqcn: string = this._fqcn.value();
+
   public line1: string;
   public line2: string;
 
   constructor(self: { line1: string; line2: string }) {
-    super(self, "org.appformer-js.test.Address");
+    Object.assign(this, self);
   }
 }

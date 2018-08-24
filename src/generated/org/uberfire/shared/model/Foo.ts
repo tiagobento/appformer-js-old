@@ -2,10 +2,18 @@
 
 import { Portable } from "appformer/remote";
 
-export class Foo extends Portable<Foo> {
+export class Foo implements Portable {
+  private readonly _fqcn = class {
+    public static readonly value: () => string = () => {
+      return "org.uberfire.shared.Foo";
+    };
+  };
+
+  public readonly fqcn: string = this._fqcn.value();
+
   public foo?: string;
 
   constructor(self: { foo: string }) {
-    super(self, "org.uberfire.shared.Foo");
+    Object.assign(this, self);
   }
 }
