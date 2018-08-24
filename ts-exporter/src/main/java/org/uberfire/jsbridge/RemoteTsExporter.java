@@ -11,7 +11,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.ProcessingEnvironment;
@@ -25,6 +24,7 @@ import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
 import static java.lang.String.format;
+import static java.util.stream.Collectors.joining;
 import static javax.lang.model.element.ElementKind.PACKAGE;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
@@ -143,7 +143,7 @@ public class RemoteTsExporter extends AbstractProcessor {
         final String args = "any";
         final String imports = portablePojoModule.getDependencies().stream()
                 .map(PortablePojoModule::asTsImportSource)
-                .collect(Collectors.joining("\n"));
+                .collect(joining("\n"));
 
         return format("" +
                               "import { Portable } from \"generated/Model\";" +

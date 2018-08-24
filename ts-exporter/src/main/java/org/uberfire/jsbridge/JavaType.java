@@ -29,6 +29,7 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
 
 import static java.lang.String.format;
+import static java.util.Collections.*;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static org.uberfire.jsbridge.RemoteTsExporter.types;
@@ -144,11 +145,11 @@ public class JavaType {
         }
     }
 
-    public List<ImportableJavaType> getDirectImportableTsTypes() {
+    public List<ImportableJavaType> getDirectImportableNonJdkTypes() {
 
         final Optional<ImportableJavaType> javaImportable = asImportableJavaType();
         if (!javaImportable.isPresent()) {
-            return Collections.emptyList();
+            return emptyList();
         }
 
         //FIXME: What about type arguments of the type arguments?
@@ -156,17 +157,17 @@ public class JavaType {
                 .filter(typeArgument -> !typeArgument.toString().matches("javax?.*"))
                 .map(typeArgument -> new JavaType(typeArgument, type).asImportableJavaType())
                 .filter(Optional::isPresent).map(Optional::get)
-                .collect(Collectors.toList());
+                .collect(toList());
 
         if (type.toString().matches("javax?.*")) {
             if (nonJdkTypeArguments.isEmpty()) {
-                return Collections.emptyList();
+                return emptyList();
             } else {
                 return nonJdkTypeArguments;
             }
         }
 
-        return Stream.concat(javaImportable.map(Stream::of).orElse(Stream.empty()), nonJdkTypeArguments.stream()).collect(toList());
+        return Stream.concat(Stream.of(javaImportable.get()), nonJdkTypeArguments.stream()).collect(toList());
     }
 
     public String getFlatFqcn() {

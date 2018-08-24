@@ -18,8 +18,8 @@ package org.uberfire.jsbridge;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
@@ -56,15 +56,17 @@ public class RemoteInterfaceJavaMethod {
         return new JavaType(executableElement.getReturnType(), _interface.asType());
     }
 
-    public Map<String, JavaType> getParameterJavaTypesByNames() {
+    public LinkedHashMap<String, JavaType> getParameterJavaTypesByNames() {
         return this.executableElement.getParameters().stream().collect(
                 toMap(arg -> arg.getSimpleName().toString(),
-                      arg -> new JavaType(arg.asType(), _interface.asType())));
+                      arg -> new JavaType(arg.asType(), _interface.asType()),
+                      (a, b) -> b, //default map behavior
+                      LinkedHashMap::new));
     }
 
     public List<ImportableJavaType> getParameterDirectTsDependencies() {
         return executableElement.getParameters().stream()
-                .flatMap(arg -> new JavaType(arg.asType(), _interface.asType()).getDirectImportableTsTypes().stream())
+                .flatMap(arg -> new JavaType(arg.asType(), _interface.asType()).getDirectImportableNonJdkTypes().stream())
                 .filter(distinctBy(JavaType::getFlatFqcn))
                 .collect(toList());
     }

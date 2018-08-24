@@ -20,7 +20,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.lang.model.element.Element;
@@ -30,6 +29,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
+import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static org.uberfire.jsbridge.RemoteTsExporter.distinctBy;
 import static org.uberfire.jsbridge.RemoteTsExporter.elements;
@@ -42,15 +42,15 @@ public class ImportableJavaType extends JavaType {
 
     public List<ImportableJavaType> getAllTsImportableTypes(final Set<String> visited) {
 
-        final List<ImportableJavaType> rootLevelTypes = new JavaType(type, owner).getDirectImportableTsTypes();
+        final List<ImportableJavaType> rootLevelTypes = new JavaType(type, owner).getDirectImportableNonJdkTypes();
         if (rootLevelTypes.isEmpty()) {
-            return Collections.emptyList();
+            return emptyList();
         }
 
         // Recursive types, yo!
         final List<String> rootLevelTypeFqcns = rootLevelTypes.stream().map(ImportableJavaType::getFlatFqcn).collect(toList());
         if (visited.containsAll(rootLevelTypeFqcns)) {
-            return Collections.emptyList();
+            return emptyList();
         } else {
             visited.addAll(rootLevelTypeFqcns);
             System.out.println("Getting all dependencies for " + type.toString());
@@ -60,15 +60,22 @@ public class ImportableJavaType extends JavaType {
                 .filter(distinctBy(JavaType::getFlatFqcn))
                 .collect(toList());
 
-        final List<ImportableJavaType> childrenFqcns = rootLevelTypes.stream().flatMap(memberOwner -> {
-            return elements.getAllMembers((TypeElement) ((DeclaredType) memberOwner.type).asElement()).stream()
-                    .map(member -> extractRelevantType(member, memberOwner.type))
-                    .filter(Optional::isPresent).map(Optional::get)
-                    .filter(distinctBy(ImportableJavaType::getFlatFqcn))
-                    .flatMap(dependency -> new ImportableJavaType(dependency.type, owner).getAllTsImportableTypes(visited).stream());
-        }).collect(toList());
+        final List<ImportableJavaType> childrenFqcns = rootLevelTypes.stream()
+                .flatMap(importableJavaType -> extractImportableJavaTypesFromMembers(importableJavaType, visited).stream())
+                .collect(toList());
 
-        return Stream.concat(rootLevelFqcns.stream(), childrenFqcns.stream()).distinct().collect(toList());
+        return Stream.concat(rootLevelFqcns.stream(), childrenFqcns.stream())
+                .distinct()
+                .collect(toList());
+    }
+
+    private List<ImportableJavaType> extractImportableJavaTypesFromMembers(final ImportableJavaType importableJavaType, final Set<String> visited) {
+        return elements.getAllMembers((TypeElement) ((DeclaredType) importableJavaType.type).asElement()).stream()
+                .map(member -> extractRelevantType(member, importableJavaType.type))
+                .filter(Optional::isPresent).map(Optional::get)
+                .filter(distinctBy(ImportableJavaType::getFlatFqcn))
+                .flatMap(dependency -> new ImportableJavaType(dependency.type, owner).getAllTsImportableTypes(visited).stream())
+                .collect(toList());
     }
 
     private Optional<ImportableJavaType> extractRelevantType(final Element member,
