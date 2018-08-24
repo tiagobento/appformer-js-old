@@ -10,10 +10,6 @@ export interface ErraiBusObject {
   __toJson(): string;
 }
 
-// FIXME: I think this value is an unique identifier for instances.
-// FIXME: Identify that two objects are the same instance and pass the same value.
-let OBJ_ID = 1;
-
 export class Portable<T extends Portable<T>> {
   public readonly __fqcn: string;
 
@@ -25,27 +21,47 @@ export class Portable<T extends Portable<T>> {
   }
 
   public readonly __toErraiBusObject: (() => T & ErraiBusObject) = () => {
+    return this.__internalToErraiBusObject();
+  };
+
+  private __internalToErraiBusObject(ctx = new Map(), currObjID = 1): T & ErraiBusObject {
+    if (ctx.get(this) !== undefined) {
+      return ctx.get(this);
+    }
+
     const _this = { ...(this as any) };
 
     Object.keys(_this).forEach(k => {
       if (typeof _this[k] === "function") {
         delete _this[k];
       } else if (_this[k] && _this[k].__fqcn) {
-        _this[k] = _this[k].__toErraiBusObject();
+        _this[k] = _this[k].__internalToErraiBusObject(ctx, currObjID++);
       } else if (!_this[k]) {
         _this[k] = null;
       }
     });
 
     _this[ErraiBusObjectParts.ENCODED_TYPE] = _this.__fqcn;
-    _this[ErraiBusObjectParts.OBJECT_ID] = `${OBJ_ID++}`;
+    _this[ErraiBusObjectParts.OBJECT_ID] = `${currObjID}`;
     delete _this.__fqcn;
 
-    return {
+    const finalBusObject = {
       ..._this,
       __toJson() {
         return JSON.stringify(this);
       }
     };
-  };
+
+    this.cacheBusObject(ctx, finalBusObject);
+
+    return finalBusObject;
+  }
+
+  private cacheBusObject(ctx: Map<Portable<T>, ErraiBusObject>, obj: T & ErraiBusObject) {
+    ctx.set(this, {
+      [ErraiBusObjectParts.ENCODED_TYPE]: obj[ErraiBusObjectParts.ENCODED_TYPE],
+      [ErraiBusObjectParts.OBJECT_ID]: obj[ErraiBusObjectParts.OBJECT_ID],
+      __toJson: obj.__toJson
+    });
+  }
 }

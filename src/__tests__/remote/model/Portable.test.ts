@@ -1,52 +1,110 @@
 import { ErraiBusObjectParts, Portable } from "appformer/remote/";
 
 describe("__toErraiObject", () => {
-  let input: ComplexTypesClass;
-
   const encodedType = ErraiBusObjectParts.ENCODED_TYPE;
   const objectId = ErraiBusObjectParts.OBJECT_ID;
 
+  let noAddrPerson: Person;
+  let addr1: Address;
+
   beforeEach(() => {
-    input = new ComplexTypesClass({
-      simpleField: "bla",
-      complexField: new PrimitiveTypesClass({ strVar: "foo1", numbVar: 1 }),
-      recursiveField: new ComplexTypesClass({
-        simpleField: "ble",
-        complexField: new PrimitiveTypesClass({ strVar: "foo2", numbVar: 2 })
-      })
+    addr1 = new Address({
+      line1: "aaaa",
+      line2: "bbbb"
+    });
+
+    noAddrPerson = new Person({
+      name: "bar"
     });
   });
 
-  test("keep original fields and wrap with control fields", () => {
-    const erraiBusObject = JSON.parse(JSON.stringify(input.__toErraiBusObject()));
+  test("keep original input fields after conversion, including control fields", () => {
+    const input = new Person({
+      name: "foo",
+      homeAddr: addr1,
+      bestFriend: noAddrPerson
+    });
 
-    expect(erraiBusObject).toStrictEqual({
-      [encodedType]: "org.appformer-js.test.ComplexTypesClass",
+    const output = JSON.parse(JSON.stringify(input.__toErraiBusObject()));
+
+    expect(output).toStrictEqual({
+      [encodedType]: "org.appformer-js.test.Person",
       [objectId]: expect.anything(),
-      simpleField: "bla",
-      complexField: {
-        [encodedType]: "org.appformer-js.test.PrimitiveTypesClass",
+      name: "foo",
+      homeAddr: {
+        [encodedType]: "org.appformer-js.test.Address",
         [objectId]: expect.anything(),
-        strVar: "foo1",
-        numbVar: 1
+        line1: "aaaa",
+        line2: "bbbb"
       },
-      recursiveField: {
-        [encodedType]: "org.appformer-js.test.ComplexTypesClass",
+      bestFriend: {
+        [encodedType]: "org.appformer-js.test.Person",
         [objectId]: expect.anything(),
-        simpleField: "ble",
-        complexField: {
-          [encodedType]: "org.appformer-js.test.PrimitiveTypesClass",
-          [objectId]: expect.anything(),
-          strVar: "foo2",
-          numbVar: 2
-        }
+        name: "bar"
       }
     });
   });
 
-  test("assign a different objectID when objects are different and reuse when objects are equals", () => {
-    // TODO
-    expect(1).toBe(1);
+  test("assign an objectId only for non-primitive types and use different objectIds for different objects", () => {
+    const input = new Person({
+      name: "foo",
+      homeAddr: addr1,
+      bestFriend: noAddrPerson
+    });
+
+    // === test
+    const output = JSON.parse(JSON.stringify(input.__toErraiBusObject()));
+
+    // === assertion
+    const nonPrimitiveTypesObjId = [output[objectId], output.homeAddr[objectId], output.bestFriend[objectId]];
+
+    const allObjIds = [
+      output.name[objectId],
+      output.homeAddr.line1[objectId],
+      output.homeAddr.line2[objectId],
+      output.bestFriend.name[objectId],
+      ...nonPrimitiveTypesObjId
+    ];
+
+    const definedObjIds = allObjIds.filter(t => t !== undefined);
+
+    // === only the non-primitive types should have an id and it should be unique
+    expect(definedObjIds).toStrictEqual(nonPrimitiveTypesObjId);
+    expect(Array.from(new Set(definedObjIds))).toStrictEqual(definedObjIds);
+  });
+
+  test("reuse the same objectId when objects are equals", () => {
+    const anotherLine1 = addr1.line1 + "a"; // ensure different obj
+    const anotherAddr = new Address({ line1: anotherLine1, line2: "fdgfg" });
+
+    const input = new Person({
+      name: "foo",
+      homeAddr: addr1,
+      workAddr: addr1, // same Address object
+      bestFriend: new Person({
+        name: "ypjomh",
+        homeAddr: anotherAddr // different Address object
+      })
+    });
+
+    // == test
+
+    const output = JSON.parse(JSON.stringify(input.__toErraiBusObject()));
+
+    // == assertion
+
+    // objectId of the objects that weren't shared
+    const uniqueObjIds = [output[objectId], output.bestFriend[objectId], output.bestFriend.homeAddr[objectId]];
+
+    const fooHomeAddrObjId = output.homeAddr[objectId];
+    const fooWorkAddrObjId = output.workAddr[objectId];
+
+    expect(fooHomeAddrObjId).toEqual(fooWorkAddrObjId); // same object, then same objId
+    expect(uniqueObjIds).not.toContain(fooHomeAddrObjId); // different than any other objId
+
+    // when reusing an existent object, do not include the data fields to optimize the output size
+    expect(output.workAddr.line1).toBeUndefined();
+    expect(output.workAddr.line2).toBeUndefined();
   });
 });
 
@@ -54,21 +112,22 @@ describe("__toErraiObject", () => {
 // ==============
 // ============== fixture classes
 
-class PrimitiveTypesClass extends Portable<PrimitiveTypesClass> {
-  public strVar: string;
-  public numbVar: number;
+class Person extends Portable<Person> {
+  public name: string;
+  public homeAddr?: Address;
+  public workAddr?: Address;
+  public bestFriend?: Person;
 
-  constructor(self: { strVar: string; numbVar: number }) {
-    super(self, "org.appformer-js.test.PrimitiveTypesClass");
+  constructor(self: { name: string; homeAddr?: Address; workAddr?: Address; bestFriend?: Person }) {
+    super(self, "org.appformer-js.test.Person");
   }
 }
 
-class ComplexTypesClass extends Portable<ComplexTypesClass> {
-  public simpleField: string;
-  public complexField: PrimitiveTypesClass;
-  public recursiveField?: ComplexTypesClass;
+class Address extends Portable<Address> {
+  public line1: string;
+  public line2: string;
 
-  constructor(self: { simpleField: string; complexField: PrimitiveTypesClass; recursiveField?: ComplexTypesClass }) {
-    super(self, "org.appformer-js.test.ComplexTypesClass");
+  constructor(self: { line1: string; line2: string }) {
+    super(self, "org.appformer-js.test.Address");
   }
 }
