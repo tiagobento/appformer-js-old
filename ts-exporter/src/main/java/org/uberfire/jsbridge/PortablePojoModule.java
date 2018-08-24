@@ -21,6 +21,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
+
 import static java.lang.String.format;
 import static java.util.stream.Collectors.*;
 import static org.uberfire.jsbridge.RemoteTsExporter.currentMavenModuleName;
@@ -88,5 +91,9 @@ public class PortablePojoModule {
         } catch (final ClassNotFoundException e) {
             return Optional.of(new PortablePojoModule(currentMavenModuleName, importableJavaType));
         }
+    }
+
+    public DeclaredType getType() {
+        return (DeclaredType) importableJavaType.type;
     }
 }

@@ -25,13 +25,13 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static org.uberfire.jsbridge.RemoteTsExporter.distinctBy;
 import static org.uberfire.jsbridge.RemoteTsExporter.elements;
+import static org.uberfire.jsbridge.RemoteTsExporter.types;
 
 public class ImportableJavaType extends JavaType {
 
@@ -43,11 +43,11 @@ public class ImportableJavaType extends JavaType {
         return getAllTsImportableTypes(visited, -1, 0);
     }
 
-    public List<ImportableJavaType> getAllTsImportableTypes(final Set<String> visited, int maxDepth) {
+    public List<ImportableJavaType> getAllTsImportableTypes(final Set<String> visited, final int maxDepth) {
         return getAllTsImportableTypes(visited, maxDepth, 0);
     }
 
-    private List<ImportableJavaType> getAllTsImportableTypes(final Set<String> visited, int maxDepth, int depth) {
+    private List<ImportableJavaType> getAllTsImportableTypes(final Set<String> visited, final int maxDepth, final int depth) {
 
         final List<ImportableJavaType> rootLevelTypes = new JavaType(type, owner).getDirectImportableNonJdkTypes();
         if (rootLevelTypes.isEmpty()) {
@@ -76,24 +76,30 @@ public class ImportableJavaType extends JavaType {
                 .collect(toList());
     }
 
-    private List<ImportableJavaType> extractImportableJavaTypesFromMembers(final ImportableJavaType importableJavaType, final Set<String> visited, int maxDepth, int depth) {
-        return elements.getAllMembers((TypeElement) ((DeclaredType) importableJavaType.type).asElement()).stream()
-                .map(member -> extractRelevantType(member, importableJavaType.type))
+    private List<ImportableJavaType> extractImportableJavaTypesFromMembers(final ImportableJavaType importableJavaType,
+                                                                           final Set<String> visited,
+                                                                           int maxDepth,
+                                                                           int depth) {
+
+        return elements.getAllMembers((TypeElement) types.asElement(importableJavaType.type)).stream()
+                .map(member -> extractNonJdkMemberJavaType(member, importableJavaType.type))
+                .map(javaType -> javaType.flatMap(JavaType::asImportableJavaType))
                 .filter(Optional::isPresent).map(Optional::get)
                 .filter(distinctBy(ImportableJavaType::getFlatFqcn))
-                .flatMap(dependency -> new ImportableJavaType(dependency.type, owner).getAllTsImportableTypes(visited, maxDepth, depth + 1).stream())
+                .map(javaType -> new ImportableJavaType(javaType.type, owner))
+                .flatMap(dependencyJavaType -> dependencyJavaType.getAllTsImportableTypes(visited, maxDepth, depth + 1).stream())
                 .collect(toList());
     }
 
-    private Optional<ImportableJavaType> extractRelevantType(final Element member,
-                                                             final TypeMirror memberOwner) {
+    private Optional<JavaType> extractNonJdkMemberJavaType(final Element member,
+                                                           final TypeMirror memberOwner) {
 
         if (member.getKind().equals(ElementKind.FIELD)) {
-            return new JavaType(member.asType(), memberOwner).asImportableJavaType();
+            return Optional.of(new JavaType(member.asType(), memberOwner));
         }
 
         if (member.getKind().equals(ElementKind.METHOD) && !member.getEnclosingElement().toString().matches("javax?.*")) {
-            return new JavaType(((ExecutableElement) member).getReturnType(), memberOwner).asImportableJavaType();
+            return Optional.of(new JavaType(((ExecutableElement) member).getReturnType(), memberOwner));
         }
 
         return Optional.empty();

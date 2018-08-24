@@ -83,8 +83,20 @@ public class JavaType {
                 if (typeArguments.isEmpty()) {
                     final String fqcn = declaredType.asElement().toString();
                     switch (fqcn) {
+                        case "java.lang.Object":
+                            return "any";
+                        case "java.lang.Boolean":
+                            return "boolean";
                         case "java.lang.String":
                             return "string";
+                        case "java.lang.Integer":
+                        case "java.lang.Byte":
+                        case "java.lang.Double":
+                        case "java.lang.Float":
+                        case "java.lang.Long":
+                        case "java.lang.Number":
+                        case "java.lang.Short":
+                            return "number";
                         default:
                             return fqcn.replace(".", "_");
                     }
@@ -95,14 +107,15 @@ public class JavaType {
                     case "java.util.Map":
                         final String s0 = typeArguments.get(0);
                         final String s1 = typeArguments.get(1);
-                        return format("{[key: %s]: %s}", s0, s1); //FIXME: Use Map<K, V>?
+                        return format("Map<%s, %s>", s0, s1); //FIXME: Use Map<K, V>?
                     case "java.util.Set":
                     case "java.util.HashSet":
                     case "java.util.List":
                     case "java.util.ArrayList":
+                    case "java.util.LinkedList":
                         return typeArguments.get(0) + "[]"; //FIXME: Use Array<T>?
                     default:
-                        return declaredType.toString() + "<" + typeArguments.stream().collect(joining(", ")) + ">";
+                        return declaredType.asElement().toString() + "<" + typeArguments.stream().collect(joining(", ")) + ">";
                 }
             case WILDCARD:
             case PACKAGE:

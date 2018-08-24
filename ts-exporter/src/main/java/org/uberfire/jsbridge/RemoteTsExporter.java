@@ -139,8 +139,16 @@ public class RemoteTsExporter extends AbstractProcessor {
     private String pojoInterfaceToSource(final String simpleName, final PortablePojoModule portablePojoModule) {
 
 
-        final String fields = "";
-        final String args = "any";
+        final String fields = portablePojoModule.getType().asElement().getEnclosedElements().stream()
+                .filter(s -> s.getKind().isField())
+                .map(s -> format("public %s: %s;", s.getSimpleName(), new JavaType(s.asType(), portablePojoModule.getType()).toUniqueTsType()))
+                .collect(joining("\n"));
+
+        final String args = portablePojoModule.getType().asElement().getEnclosedElements().stream()
+                .filter(s -> s.getKind().isField())
+                .map(s -> format("%s: %s", s.getSimpleName(), new JavaType(s.asType(), portablePojoModule.getType()).toUniqueTsType()))
+                .collect(joining(", "));;
+
         final String imports = portablePojoModule.getDependencies().stream()
                 .map(PortablePojoModule::asTsImportSource)
                 .collect(joining("\n"));
@@ -154,7 +162,7 @@ public class RemoteTsExporter extends AbstractProcessor {
                               "\n\n" +
                               "  //Fields will go here:\n %s" +
                               "\n\n" +
-                              "  constructor(self: %s) { super(self, \"%s\"); }" +
+                              "  constructor(self: { %s }) { super(self, \"%s\"); }" +
                               "}",
 
                       imports,
