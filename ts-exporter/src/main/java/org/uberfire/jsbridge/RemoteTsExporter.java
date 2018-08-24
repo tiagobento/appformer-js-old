@@ -2,39 +2,51 @@ package org.uberfire.jsbridge;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
+import javax.annotation.processing.SupportedSourceVersion;
+import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
-import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeMirror;
-import javax.lang.model.type.TypeVariable;
+import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
 
+import static java.lang.String.format;
 import static javax.lang.model.element.ElementKind.PACKAGE;
 
+@SupportedSourceVersion(SourceVersion.RELEASE_8)
 @SupportedAnnotationTypes({"org.jboss.errai.bus.server.annotations.Remote"})
 public class RemoteTsExporter extends AbstractProcessor {
 
-    private static ProcessingEnvironment staticPocessingEnv;
+    public static ProcessingEnvironment staticProcessingEnv;
+    public static Types types;
+    public static Elements elements;
+    public static String currentMavenModuleName;
 
     @Override
     public synchronized void init(final ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
-        RemoteTsExporter.staticPocessingEnv = processingEnv;
+        RemoteTsExporter.staticProcessingEnv = processingEnv;
+        RemoteTsExporter.types = processingEnv.getTypeUtils();
+        RemoteTsExporter.elements = processingEnv.getElementUtils();
     }
 
     public boolean process(final Set<? extends TypeElement> annotations, final RoundEnvironment roundEnv) {
         try {
 
-            if (!Boolean.valueOf(System.getProperty("ts-export"))) {
+            if (!Boolean.getBoolean("ts-export")) {
                 return false;
             }
 
@@ -46,6 +58,8 @@ public class RemoteTsExporter extends AbstractProcessor {
                     .map(roundEnv::getElementsAnnotatedWith)
                     .flatMap(Collection::stream)
                     .forEach(this::generateTypeScriptFile);
+
+            System.out.println("TypeScript files exported successfully.");
         } catch (final Exception e) {
             e.printStackTrace();
         }
@@ -65,11 +79,32 @@ public class RemoteTsExporter extends AbstractProcessor {
             return;
         }
 
-        System.out.println("Generating source for " + ((TypeElement) element).getQualifiedName().toString());
-        final String source = new TsClass((TypeElement) element).toSource();
+        final RpcCallerTsClass rpcCallerTsClass = new RpcCallerTsClass((TypeElement) element);
+        setCurrentModuleName(rpcCallerTsClass);
+        generateRpcFile(rpcCallerTsClass);
 
-        final String targetDir = ((PackageElement) element.getEnclosingElement()).getQualifiedName().toString().replace(".", "/");
-        final Path path = Paths.get(("/tmp/" + targetDir + "/index.ts").replace("/", File.separator));
+        rpcCallerTsClass.getAllDependencies().stream()
+                .filter(distinctBy(PortablePojoModule::getVariableName))
+                .forEach(this::generatePojoFile);
+    }
+
+    private void setCurrentModuleName(final RpcCallerTsClass tsClass) {
+        try {
+            final Field sourceFileField = tsClass.getInterface().getClass().getField("sourcefile");
+            sourceFileField.setAccessible(true);
+            final String[] sourceFileParts = sourceFileField.get(tsClass.getInterface()).toString().split("/src/main/java")[0].split("/");
+            currentMavenModuleName = sourceFileParts[sourceFileParts.length - 1];
+        } catch (final Exception e) {
+            throw new RuntimeException("Error while reading [sourcefile] field from @Remote interface element.", e);
+        }
+    }
+
+    private void generateRpcFile(final RpcCallerTsClass tsClass) {
+        System.out.println("Generating source for " + tsClass.getInterface().getQualifiedName().toString());
+        final String source = tsClass.toSource();
+
+        final String targetDir = tsClass.getInterface().getQualifiedName().toString().replace(".", "/");
+        final Path path = Paths.get(format("/tmp/ts-exporter/%s/%s.ts", currentMavenModuleName, targetDir).replace("/", File.separator));
         System.out.println("Source generated. Saving to " + path.toString());
 
         try {
@@ -81,37 +116,58 @@ public class RemoteTsExporter extends AbstractProcessor {
         }
     }
 
-    private void writeSourceFile(final PackageElement _package, final String source) {
-
-        final String targetDir = _package.getQualifiedName().toString().replace(".", "/");
-        final Path path = Paths.get(("/tmp/" + targetDir + "/index.ts").replace("/", File.separator));
+    private void generatePojoFile(final PortablePojoModule portablePojoModule) {
+        final String stringPath = portablePojoModule.getPath2();
+        final String[] split = stringPath.split("/");
+        final Path path = Paths.get("/tmp/ts-exporter/" + stringPath + ".ts");
+        if (Files.exists(path)) {
+            System.out.println(format("Skipping generation of %s because it already exists", stringPath));
+            return;
+        }
 
         try {
+            final String simpleName = split[split.length - 1];
             Files.createDirectories(path.getParent());
-            Files.write(createFileIfNotExists(path), source.getBytes());
-        } catch (final IOException e) {
+            Files.createFile(path);
+            Files.write(path, pojoInterfaceToSource(simpleName, portablePojoModule).getBytes());
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
+    private String pojoInterfaceToSource(final String simpleName, final PortablePojoModule portablePojoModule) {
+
+        final String fields = "";
+        final String args = "any";
+        final String imports = "";
+
+        return format("" +
+                              "import { Portable } from \"generated/Model\";" +
+                              "\n" +
+                              "%s" +
+                              "\n\n" +
+                              "export default class %s extends Portable<%s>{" +
+                              "\n\n" +
+                              "  //Fields will go here:\n %s" +
+                              "\n\n" +
+                              "  constructor(self: %s) { super(self, \"%s\"); }" +
+                              "}",
+
+                      imports,
+                      simpleName,
+                      simpleName,
+                      fields,
+                      args,
+                      portablePojoModule.getOriginatingFqcn()
+        );
+    }
+
     private Path createFileIfNotExists(final Path path) throws IOException {
-        if (!path.toFile().exists()) {
-            return Files.createFile(path);
-        } else {
-            return path;
-        }
+        return path.toFile().exists() ? path : Files.createFile(path);
     }
 
-    public static Element getTypeElement(final Element e) {
-        return getTypeElement(e.asType());
-    }
-
-    public static Element getTypeElement(final TypeMirror t) {
-        switch (t.getKind()) {
-            case TYPEVAR:
-                return ((TypeVariable) t).asElement();
-            default:
-                return staticPocessingEnv.getTypeUtils().asElement(t);
-        }
+    public static <T> Predicate<T> distinctBy(Function<? super T, ?> keyExtractor) {
+        Set<Object> seen = ConcurrentHashMap.newKeySet();
+        return t -> seen.add(keyExtractor.apply(t));
     }
 }

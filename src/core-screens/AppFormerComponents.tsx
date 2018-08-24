@@ -2,7 +2,9 @@ import * as React from "react";
 import * as AppFormer from "appformer";
 import DemoApp from "core-screens/DemoApp";
 import { Foo, TestEvent } from "generated/Model";
-import * as TestMessagesService from "generated/org/uberfire/shared/TestMessagesService";
+import TestMessagesService from "generated/org/uberfire/shared/TestMessagesService";
+import Path from "output/uberfire-api/org/uberfire/backend/vfs/Path";
+import GlobalsEditorService from "output/drools-wb-globals-editor-api/org/drools/workbench/screens/globals/service/GlobalsEditorService";
 
 // import homePerspectiveTemplate from "core-screens/HomePerspective.html";
 // import otherPerspectiveTemplate from "core-screens/other-perspective.html";
@@ -24,12 +26,19 @@ export class ReactComponentScreen extends AppFormer.Screen {
       }
     };
 
+    const servce = new TestMessagesService();
+    const drlTextLends = new GlobalsEditorService();
+
+    drlTextLends.loadContent({ path: new Path({}) }).then(e => {
+      console.info(e.blergs);
+    });
+
     this.af_componentService = {
-      sayHello: TestMessagesService.sayHello,
-      sayHelloToSomething: TestMessagesService.sayHelloToSomething,
-      sayHelloOnServer: TestMessagesService.sayHelloOnServer,
-      fireServerEvent: TestMessagesService.fireServerEvent,
-      sendTestPojo: TestMessagesService.sendTestPojo
+      sayHello: servce.sayHello,
+      sayHelloToSomething: servce.sayHelloToSomething,
+      sayHelloOnServer: servce.sayHelloOnServer,
+      fireServerEvent: servce.fireServerEvent,
+      sendTestPojo: servce.sendTestPojo
     };
   }
 
@@ -113,8 +122,9 @@ export class PureDomElementScreen extends AppFormer.Screen {
     this.af_componentId = "dom-elements-screen";
     this.af_componentTitle = "DOM Elements Component";
     this.span = document.createElement("span");
+    const sv = new TestMessagesService();
     this.af_componentService = {
-      fireServerEvent: TestMessagesService.fireServerEvent
+      fireServerEvent: sv.fireServerEvent
     };
   }
 
