@@ -54,7 +54,7 @@ public class PortablePojoModule {
     }
 
     public List<PortablePojoModule> getDependencies() {
-        return importableJavaType.getAllTsImportableTypes(new HashSet<>()).stream()
+        return importableJavaType.getAllTsImportableTypes(new HashSet<>(), 1).stream()
                 .map(PortablePojoModule::extractPortablePojoModule)
                 .filter(Optional::isPresent).map(Optional::get)
                 .collect(toList());

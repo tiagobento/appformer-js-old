@@ -16,7 +16,6 @@
 
 package org.uberfire.jsbridge;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -41,13 +40,21 @@ public class ImportableJavaType extends JavaType {
     }
 
     public List<ImportableJavaType> getAllTsImportableTypes(final Set<String> visited) {
+        return getAllTsImportableTypes(visited, -1, 0);
+    }
+
+    public List<ImportableJavaType> getAllTsImportableTypes(final Set<String> visited, int maxDepth) {
+        return getAllTsImportableTypes(visited, maxDepth, 0);
+    }
+
+    private List<ImportableJavaType> getAllTsImportableTypes(final Set<String> visited, int maxDepth, int depth) {
 
         final List<ImportableJavaType> rootLevelTypes = new JavaType(type, owner).getDirectImportableNonJdkTypes();
         if (rootLevelTypes.isEmpty()) {
             return emptyList();
         }
 
-        // Recursive types, yo!
+        // Cyclic dependencies, yo!
         final List<String> rootLevelTypeFqcns = rootLevelTypes.stream().map(ImportableJavaType::getFlatFqcn).collect(toList());
         if (visited.containsAll(rootLevelTypeFqcns)) {
             return emptyList();
@@ -60,8 +67,8 @@ public class ImportableJavaType extends JavaType {
                 .filter(distinctBy(JavaType::getFlatFqcn))
                 .collect(toList());
 
-        final List<ImportableJavaType> childrenFqcns = rootLevelTypes.stream()
-                .flatMap(importableJavaType -> extractImportableJavaTypesFromMembers(importableJavaType, visited).stream())
+        final List<ImportableJavaType> childrenFqcns = (maxDepth != -1 && depth >= maxDepth) ? emptyList() : rootLevelTypes.stream()
+                .flatMap(importableJavaType -> extractImportableJavaTypesFromMembers(importableJavaType, visited, maxDepth, depth).stream())
                 .collect(toList());
 
         return Stream.concat(rootLevelFqcns.stream(), childrenFqcns.stream())
@@ -69,12 +76,12 @@ public class ImportableJavaType extends JavaType {
                 .collect(toList());
     }
 
-    private List<ImportableJavaType> extractImportableJavaTypesFromMembers(final ImportableJavaType importableJavaType, final Set<String> visited) {
+    private List<ImportableJavaType> extractImportableJavaTypesFromMembers(final ImportableJavaType importableJavaType, final Set<String> visited, int maxDepth, int depth) {
         return elements.getAllMembers((TypeElement) ((DeclaredType) importableJavaType.type).asElement()).stream()
                 .map(member -> extractRelevantType(member, importableJavaType.type))
                 .filter(Optional::isPresent).map(Optional::get)
                 .filter(distinctBy(ImportableJavaType::getFlatFqcn))
-                .flatMap(dependency -> new ImportableJavaType(dependency.type, owner).getAllTsImportableTypes(visited).stream())
+                .flatMap(dependency -> new ImportableJavaType(dependency.type, owner).getAllTsImportableTypes(visited, maxDepth, depth + 1).stream())
                 .collect(toList());
     }
 
