@@ -16,29 +16,77 @@
 
 package org.uberfire.jsbridge;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static java.lang.String.format;
+import static java.util.stream.Collectors.*;
+import static org.uberfire.jsbridge.RemoteTsExporter.currentMavenModuleName;
+
 public class PortablePojoModule {
 
-    private final String originatingFqcn;
-    private final String name;
+    private final ImportableJavaType importableJavaType;
+    private final String moduleName;
 
-    public PortablePojoModule(final String originatingFqcn, final String name) {
-        this.originatingFqcn = originatingFqcn;
-        this.name = name;
+    private PortablePojoModule(final String moduleName,
+                               final ImportableJavaType importableJavaType) {
+
+        this.importableJavaType = importableJavaType;
+        this.moduleName = moduleName;
     }
 
-    public String getPath1() {
-        return "output/" + name + "/" + originatingFqcn.replace(".", "/");
+    private String getPath1() {
+        return "output/" + moduleName + "/" + importableJavaType.getFlatFqcn().replace(".", "/");
     }
 
     public String getPath2() {
-        return name + "/" + originatingFqcn.replace(".", "/");
+        return moduleName + "/" + importableJavaType.getFlatFqcn().replace(".", "/");
     }
 
     public String getOriginatingFqcn() {
-        return originatingFqcn;
+        return importableJavaType.getFlatFqcn();
     }
 
     public String getVariableName() {
-        return originatingFqcn.replace(".", "_");
+        return importableJavaType.getFlatFqcn().replace(".", "_");
+    }
+
+    public List<PortablePojoModule> getDependencies() {
+        return importableJavaType.getAllTsImportableTypes(new HashSet<>()).stream()
+                .map(PortablePojoModule::extractPortablePojoModule)
+                .filter(Optional::isPresent).map(Optional::get)
+                .collect(toList());
+    }
+
+    public String asTsImportSource() {
+        return format("import %s from \"%s\";",
+                      getVariableName(),
+                      getPath1());
+    }
+
+    public static Optional<PortablePojoModule> extractPortablePojoModule(final ImportableJavaType importableJavaType) {
+        try {
+            final Class<?> clazz = Class.forName(importableJavaType.getFlatFqcn());
+            if (clazz.getPackage().getName().startsWith("java")) {
+                return Optional.empty();
+            }
+
+            final String path = clazz.getResource('/' + clazz.getName().replace('.', '/') + ".class").toString();
+
+            // Nice RegEx explanation:
+            // 1. Begin with a slash => (/)
+            // 2. Followed by a sequence containing letters or dashes => [\\w-]+ (the plus sign indicates that this sequence must have at least one character.)
+            // 3. Followed by a single dash => (-)
+            // 4. Followed by a sequence of digits and dots => [\\d.]+ (notice the plus sign!)
+            // 5. Followed by pretty much anything => (.*)
+            // 6. Followed by ".jar!" => \\.jar!
+            final String[] split = path.split("(/)[\\w-]+(-)[\\d.]+(.*)\\.jar!")[0].split("/");
+
+            return Optional.of(new PortablePojoModule(split[split.length - 2], importableJavaType));
+        } catch (final ClassNotFoundException e) {
+            return Optional.of(new PortablePojoModule(currentMavenModuleName, importableJavaType));
+        }
     }
 }

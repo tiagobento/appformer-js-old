@@ -30,7 +30,7 @@ export class ReactComponentScreen extends AppFormer.Screen {
     const drlTextLends = new GlobalsEditorService();
 
     drlTextLends.loadContent({ path: new Path({}) }).then(e => {
-      console.info(e.blergs);
+      console.info(e);
     });
 
     this.af_componentService = {

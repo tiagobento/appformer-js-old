@@ -30,30 +30,36 @@ import static java.lang.String.format;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
+import static javax.lang.model.element.ElementKind.METHOD;
 import static org.uberfire.jsbridge.RemoteTsExporter.types;
 
 public class RpcCallerTsClass {
 
     private final TypeElement _interface;
     private final Lazy<List<RpcCallerTsMethod>> tsMethods;
-    private final Lazy<List<RemoteInterfaceJavaMethod>> javaMethods;
 
     private static final List<String> RESERVED_WORDS = Arrays.asList("delete", "copy");
 
-    public RpcCallerTsClass(TypeElement _interface) {
+    public RpcCallerTsClass(final TypeElement _interface) {
         this._interface = _interface;
-        this.javaMethods = new Lazy<>(() -> getAllJavaMethods(_interface));
-        this.tsMethods = new Lazy<>(() -> javaMethods.get().stream().map(m -> new RpcCallerTsMethod(_interface, m)).collect(toList()));
+        this.tsMethods = new Lazy<>(this::getAllTsMethods);
+    }
+
+    private List<RpcCallerTsMethod> getAllTsMethods() {
+        return getAllJavaMethods(_interface).stream()
+                .map(javaMethod -> new RpcCallerTsMethod(_interface, javaMethod))
+                .collect(toList());
     }
 
     private List<RemoteInterfaceJavaMethod> getJavaMethods(final TypeElement _interface) {
         return _interface.getEnclosedElements().stream()
-                .filter(member -> member.getKind().equals(ElementKind.METHOD))
+                .filter(member -> member.getKind().equals(METHOD))
                 .map(member -> (ExecutableElement) member)
                 .map(executableElement -> new RemoteInterfaceJavaMethod(this._interface, executableElement))
                 .collect(toList());
     }
 
+    //TODO: Use elements.getAllMembers
     private List<RemoteInterfaceJavaMethod> getAllJavaMethods(final TypeElement _interface) {
         final List<RemoteInterfaceJavaMethod> methods = new ArrayList<>();
 
@@ -93,7 +99,7 @@ public class RpcCallerTsClass {
 
     private String tsImports() {
         return getAllDependencies().stream()
-                .map(this::toPojoImportStatementSource)
+                .map(PortablePojoModule::asTsImportSource)
                 .distinct()
                 .collect(joining("\n"));
     }
@@ -116,12 +122,6 @@ public class RpcCallerTsClass {
         return methods.stream()
                 .map(tsMethod -> new RpcCallerTsMethod(tsMethod, tsMethod.getName() + i.getAndIncrement()))
                 .collect(toList());
-    }
-
-    private String toPojoImportStatementSource(final PortablePojoModule pojoModule) {
-        return format("import %s from \"%s\";",
-                      pojoModule.getVariableName(),
-                      pojoModule.getPath1());
     }
 
     public TypeElement getInterface() {
