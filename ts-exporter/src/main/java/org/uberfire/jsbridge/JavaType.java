@@ -84,6 +84,8 @@ public class JavaType {
                     switch (fqcn) {
                         case "java.lang.Object":
                             return "any";
+                        case "java.util.Date":
+                            return "any /* date */"; //FIXME: Opinionate?
                         case "java.lang.Boolean":
                             return "boolean";
                         case "java.lang.String":
