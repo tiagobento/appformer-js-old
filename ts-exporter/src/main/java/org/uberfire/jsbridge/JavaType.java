@@ -61,7 +61,7 @@ public class JavaType {
             case VOID:
                 return "void";
             case NULL:
-                return "null";
+                return "null"; //FIXME: undefined?
             case ARRAY:
                 return format("%s[]", toUniqueTsType(((ArrayType) type).getComponentType()));
             case CHAR:
@@ -82,7 +82,7 @@ public class JavaType {
                     final String fqcn = declaredType.asElement().toString();
                     switch (fqcn) {
                         case "java.lang.Object":
-                            return "any";
+                            return "any /* object */";
                         case "java.util.Date":
                             return "any /* date */"; //FIXME: Opinionate?
                         case "java.lang.Boolean":
@@ -126,7 +126,7 @@ public class JavaType {
                 } else if (wildcardType.getSuperBound() != null) {
                     return toUniqueTsType(wildcardType.getSuperBound());
                 } else {
-                    return "any";
+                    return "any /* wildcard */";
                 }
             case PACKAGE:
             case NONE:
@@ -136,7 +136,7 @@ public class JavaType {
             case EXECUTABLE:
             case INTERSECTION:
             default:
-                return "any";
+                return "any /* unknown */";
         }
     }
 
@@ -159,16 +159,17 @@ public class JavaType {
 
     public List<ImportableJavaType> getDirectImportableNonJdkTypes() {
 
-        final Optional<ImportableJavaType> javaImportable = asImportableJavaType();
-        if (!javaImportable.isPresent()) {
+        final Optional<ImportableJavaType> asImportableJavaType = asImportableJavaType();
+        if (!asImportableJavaType.isPresent()) {
             return emptyList();
         }
 
         //FIXME: What about type arguments of the type arguments?
-        final List<ImportableJavaType> nonJdkTypeArguments = ((DeclaredType) javaImportable.get().type).getTypeArguments().stream()
-                .filter(typeArgument -> !typeArgument.toString().matches("^javax?.*"))
+        final List<ImportableJavaType> nonJdkTypeArguments = ((DeclaredType) asImportableJavaType.get().type).getTypeArguments().stream()
                 .map(typeArgument -> new JavaType(typeArgument, type).asImportableJavaType())
                 .filter(Optional::isPresent).map(Optional::get)
+                .flatMap(importableJavaType -> importableJavaType.getDirectImportableNonJdkTypes().stream())
+                .filter(typeArgument -> !typeArgument.toString().matches("^javax?.*"))
                 .collect(toList());
 
         if (type.toString().matches("^javax?.*")) {
@@ -179,7 +180,7 @@ public class JavaType {
             }
         }
 
-        return Stream.concat(Stream.of(javaImportable.get()), nonJdkTypeArguments.stream()).collect(toList());
+        return Stream.concat(Stream.of(asImportableJavaType.get()), nonJdkTypeArguments.stream()).collect(toList());
     }
 
     public String getFlatFqcn() {
