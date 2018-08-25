@@ -140,6 +140,7 @@ public class RemoteTsExporter extends AbstractProcessor {
 
     private String pojoInterfaceToSource(final String simpleName, final PortablePojoModule portablePojoModule) {
 
+        //FIXME: Generate Enum/Interface/AbstractClasses as well.
 
         final String fields = portablePojoModule.getType().asElement().getEnclosedElements().stream()
                 .filter(s -> s.getKind().isField())

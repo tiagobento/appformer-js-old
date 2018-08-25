@@ -58,36 +58,30 @@ public class ImportableJavaType extends JavaType {
         final List<String> rootLevelTypeFqcns = rootLevelTypes.stream().map(ImportableJavaType::getFlatFqcn).collect(toList());
         if (visited.containsAll(rootLevelTypeFqcns)) {
             return emptyList();
-        } else {
-            visited.addAll(rootLevelTypeFqcns);
-            System.out.println("Getting all dependencies for " + type.toString());
         }
 
-        final List<ImportableJavaType> rootLevelFqcns = rootLevelTypes.stream()
-                .filter(distinctBy(JavaType::getFlatFqcn))
+        visited.addAll(rootLevelTypeFqcns);
+        System.out.println("Getting all dependencies for " + type.toString());
+
+        final List<ImportableJavaType> childrenImportableTypes = (maxDepth != -1 && depth >= maxDepth) ? emptyList() : rootLevelTypes.stream()
+                .flatMap(t -> extractImportableJavaTypesFromMembers(t, visited, maxDepth, depth).stream())
                 .collect(toList());
 
-        final List<ImportableJavaType> childrenFqcns = (maxDepth != -1 && depth >= maxDepth) ? emptyList() : rootLevelTypes.stream()
-                .flatMap(importableJavaType -> extractImportableJavaTypesFromMembers(importableJavaType, visited, maxDepth, depth).stream())
-                .collect(toList());
-
-        return Stream.concat(rootLevelFqcns.stream(), childrenFqcns.stream())
-                .distinct()
+        return Stream.concat(rootLevelTypes.stream(), childrenImportableTypes.stream())
+                .filter(distinctBy(ImportableJavaType::getFlatFqcn))
                 .collect(toList());
     }
 
     private List<ImportableJavaType> extractImportableJavaTypesFromMembers(final ImportableJavaType importableJavaType,
                                                                            final Set<String> visited,
-                                                                           int maxDepth,
-                                                                           int depth) {
+                                                                           final int maxDepth,
+                                                                           final int depth) {
 
         return elements.getAllMembers((TypeElement) types.asElement(importableJavaType.type)).stream()
                 .map(member -> extractNonJdkMemberJavaType(member, importableJavaType.type))
-                .map(javaType -> javaType.flatMap(JavaType::asImportableJavaType))
+                .map(t -> t.flatMap(JavaType::asImportableJavaType))
                 .filter(Optional::isPresent).map(Optional::get)
-                .filter(distinctBy(ImportableJavaType::getFlatFqcn))
-                .map(javaType -> new ImportableJavaType(javaType.type, owner))
-                .flatMap(dependencyImportableJavaType -> dependencyImportableJavaType.getAllTsImportableTypes(visited, maxDepth, depth + 1).stream())
+                .flatMap(t -> t.getAllTsImportableTypes(visited, maxDepth, depth + 1).stream())
                 .collect(toList());
     }
 

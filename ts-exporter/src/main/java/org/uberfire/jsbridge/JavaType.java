@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import javax.lang.model.element.ElementKind;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
@@ -152,12 +151,7 @@ public class JavaType {
                     return Optional.of(new ImportableJavaType(((TypeVariable) type).getUpperBound(), owner));
                 }
             case DECLARED:
-                if (((DeclaredType) type).asElement().getKind().equals(ElementKind.ENUM)) {
-                    //FIXME: How to deal with enums?
-                    return Optional.empty();
-                } else {
-                    return Optional.of(new ImportableJavaType(type, owner));
-                }
+                return Optional.of(new ImportableJavaType(type, owner));
             default:
                 return Optional.empty();
         }
