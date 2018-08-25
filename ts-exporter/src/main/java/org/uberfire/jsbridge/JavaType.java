@@ -164,7 +164,6 @@ public class JavaType {
             return emptyList();
         }
 
-        //FIXME: What about type arguments of the type arguments?
         final List<ImportableJavaType> nonJdkTypeArguments = ((DeclaredType) asImportableJavaType.get().type).getTypeArguments().stream()
                 .map(typeArgument -> new JavaType(typeArgument, type).asImportableJavaType())
                 .filter(Optional::isPresent).map(Optional::get)

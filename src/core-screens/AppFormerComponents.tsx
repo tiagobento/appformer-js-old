@@ -28,8 +28,9 @@ export class ReactComponentScreen extends AppFormer.Screen {
 
     const servce = new TestMessagesService();
     const drlTextLends = new GlobalsEditorService();
+    const MyPathImpl = class implements Path {};
 
-    drlTextLends.loadContent({ path: new Path({}) }).then(e => {
+    drlTextLends.loadContent({ path: new MyPathImpl() }).then(e => {
       console.info(e);
     });
 

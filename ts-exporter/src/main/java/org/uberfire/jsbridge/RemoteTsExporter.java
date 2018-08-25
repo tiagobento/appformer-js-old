@@ -19,13 +19,15 @@ import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
-import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
+import static javax.lang.model.element.ElementKind.ENUM;
+import static javax.lang.model.element.ElementKind.ENUM_CONSTANT;
+import static javax.lang.model.element.ElementKind.INTERFACE;
 import static javax.lang.model.element.ElementKind.PACKAGE;
 import static javax.lang.model.element.Modifier.*;
 
@@ -73,12 +75,12 @@ public class RemoteTsExporter extends AbstractProcessor {
     private void generateTypeScriptFile(final Element element) {
 
         if (!element.getKind().isInterface()) {
-            System.out.println(element.getSimpleName() + "is not an Interface. That's not supported.");
+            System.out.println(element.getSimpleName() + " is not an Interface. That's not supported.");
             return;
         }
 
         if (!element.getEnclosingElement().getKind().equals(PACKAGE)) {
-            System.out.println(element.getSimpleName() + "is probably an inner Class. That's not supported.");
+            System.out.println(element.getSimpleName() + " is probably an inner Class. That's not supported.");
             return;
         }
 
@@ -86,7 +88,7 @@ public class RemoteTsExporter extends AbstractProcessor {
         setCurrentModuleName(rpcCallerTsClass);
         generateRpcFile(rpcCallerTsClass);
 
-        rpcCallerTsClass.getAllDependencies().stream()
+        rpcCallerTsClass.getAllPojoDependencies().stream()
                 .filter(distinctBy(PortablePojoModule::getVariableName))
                 .forEach(this::generatePojoFile);
     }
@@ -141,6 +143,19 @@ public class RemoteTsExporter extends AbstractProcessor {
     private String pojoInterfaceToSource(final String simpleName, final PortablePojoModule portablePojoModule) {
 
         //FIXME: Generate Enum/Interface/AbstractClasses as well.
+
+        if (portablePojoModule.getType().asElement().getKind().equals(INTERFACE)) {
+            return format("export default interface %s {\n}", simpleName);
+        }
+
+        if (portablePojoModule.getType().asElement().getKind().equals(ENUM)) {
+            final String enumFields = portablePojoModule.getType().asElement().getEnclosedElements().stream()
+                    .filter(s -> s.getKind().equals(ENUM_CONSTANT))
+                    .map(Element::getSimpleName)
+                    .collect(joining(", "));
+
+            return format("enum %s { %s }\n\nexport default %s;", simpleName, enumFields, simpleName);
+        }
 
         final String fields = portablePojoModule.getType().asElement().getEnclosedElements().stream()
                 .filter(s -> s.getKind().isField())

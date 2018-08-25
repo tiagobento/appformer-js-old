@@ -21,6 +21,7 @@ import java.util.function.Supplier;
 public class Lazy<T> {
 
     private final Supplier<T> factory;
+    private long timeTook;
     private T ref;
 
     public Lazy(final Supplier<T> factory) {
@@ -29,9 +30,12 @@ public class Lazy<T> {
 
     public synchronized T get() {
         if (ref == null) {
-            System.out.println("Initializing something...");
+            final long start = System.currentTimeMillis();
             ref = factory.get();
+            timeTook = System.currentTimeMillis() - start;
         }
+
+        System.out.println("Lazy just saved " + timeTook + "ms!");
         return ref;
     }
 }

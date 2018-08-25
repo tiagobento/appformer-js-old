@@ -26,6 +26,7 @@ import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
+import static javax.lang.model.element.ElementKind.CLASS;
 
 public class RpcCallerTsMethod {
 
@@ -77,7 +78,8 @@ public class RpcCallerTsMethod {
 
     private String factoriesOracle() {
         return javaMethod.getAllTsDependenciesOfReturnType().stream()
-                .collect(toMap(fqcn -> fqcn, PortablePojoModule::extractPortablePojoModule))
+                .filter(s -> s.getType().asElement().getKind().equals(CLASS))
+                .collect(toMap(impotableJavaType -> impotableJavaType, PortablePojoModule::extractPortablePojoModule))
                 .entrySet().stream()
                 .map(e -> e.getValue().map(module -> oracleEntrySource(module.getVariableName(), e.getKey().getFlatFqcn())))
                 .filter(Optional::isPresent).map(Optional::get)
@@ -89,6 +91,7 @@ public class RpcCallerTsMethod {
     }
 
     private String oracleEntrySource(final String variableName, final String moduleName) {
+        //FIXME: What about interfaces and abstract classes?
         return format("\"%s\": (self: any) => new %s(self)", moduleName, variableName);
     }
 

@@ -22,7 +22,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 
@@ -37,15 +36,17 @@ public class RpcCallerTsClass {
 
     private final TypeElement _interface;
     private final Lazy<List<RpcCallerTsMethod>> tsMethods;
+    private final Lazy<List<PortablePojoModule>> allPojoDependencies;
 
     private static final List<String> RESERVED_WORDS = Arrays.asList("delete", "copy");
 
     public RpcCallerTsClass(final TypeElement _interface) {
         this._interface = _interface;
-        this.tsMethods = new Lazy<>(this::getAllTsMethods);
+        this.tsMethods = new Lazy<>(this::initAllTsMethods);
+        this.allPojoDependencies = new Lazy<>(this::initAllPojoDependencies);
     }
 
-    private List<RpcCallerTsMethod> getAllTsMethods() {
+    private List<RpcCallerTsMethod> initAllTsMethods() {
         return getAllJavaMethods(_interface).stream()
                 .map(javaMethod -> new RpcCallerTsMethod(_interface, javaMethod))
                 .collect(toList());
@@ -54,8 +55,7 @@ public class RpcCallerTsClass {
     private List<RemoteInterfaceJavaMethod> getJavaMethods(final TypeElement _interface) {
         return _interface.getEnclosedElements().stream()
                 .filter(member -> member.getKind().equals(METHOD))
-                .map(member -> (ExecutableElement) member)
-                .map(executableElement -> new RemoteInterfaceJavaMethod(this._interface, executableElement))
+                .map(member -> new RemoteInterfaceJavaMethod(this._interface, (ExecutableElement) member))
                 .collect(toList());
     }
 
@@ -71,6 +71,13 @@ public class RpcCallerTsClass {
         return methods;
     }
 
+    private List<PortablePojoModule> initAllPojoDependencies() {
+        return tsMethods.get().stream()
+                .map(RpcCallerTsMethod::getAllDependencies)
+                .flatMap(Collection::stream)
+                .collect(toList());
+    }
+
     String toSource() {
 
         return format("" +
@@ -83,13 +90,13 @@ public class RpcCallerTsClass {
                               "}" +
                               "\n",
 
-                      tsImports(),
+                      tsImportsSources(),
                       _interface.getSimpleName().toString(),
-                      tsMethods()
+                      tsMethodsSources()
         );
     }
 
-    private String tsMethods() {
+    private String tsMethodsSources() {
         return tsMethods.get().stream()
                 .collect(groupingBy(RpcCallerTsMethod::getName)).entrySet().stream()
                 .flatMap(e -> resolveOverloadsAndReservedWords(e.getKey(), e.getValue()).stream())
@@ -97,18 +104,15 @@ public class RpcCallerTsClass {
                 .collect(joining("\n"));
     }
 
-    private String tsImports() {
-        return getAllDependencies().stream()
+    private String tsImportsSources() {
+        return allPojoDependencies.get().stream()
                 .map(PortablePojoModule::asTsImportSource)
                 .distinct()
                 .collect(joining("\n"));
     }
 
-    public List<PortablePojoModule> getAllDependencies() {
-        return tsMethods.get().stream()
-                .map(RpcCallerTsMethod::getAllDependencies)
-                .flatMap(Collection::stream)
-                .collect(toList());
+    public List<PortablePojoModule> getAllPojoDependencies() {
+        return allPojoDependencies.get();
     }
 
     private List<RpcCallerTsMethod> resolveOverloadsAndReservedWords(final String name,

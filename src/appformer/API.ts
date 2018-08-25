@@ -38,7 +38,7 @@ export function unmarshall(a: any, fqcn: { [fqcn: string]: (args: any) => Portab
   return JSON.parse(a); //TODO: Implement
 }
 
-export function marshall(obj: Array<Portable<any>> | Portable<any> | string | undefined) {
+export function marshall(obj: Array<Portable<any>> | Portable<any> | string | undefined | any) {
   return !obj
     ? obj
     : typeof obj === "string"
