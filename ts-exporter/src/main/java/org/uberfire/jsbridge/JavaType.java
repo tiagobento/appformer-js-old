@@ -16,20 +16,19 @@
 
 package org.uberfire.jsbridge;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.lang.model.element.ElementKind;
+import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
+import javax.lang.model.type.WildcardType;
 
 import static java.lang.String.format;
-import static java.util.Collections.*;
+import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static org.uberfire.jsbridge.RemoteTsExporter.types;
@@ -65,7 +64,7 @@ public class JavaType {
             case NULL:
                 return "null";
             case ARRAY:
-                return "any[]"; //FIXME: Return component type
+                return format("%s[]", toUniqueTsType(((ArrayType) type).getComponentType()));
             case CHAR:
                 return "string";
             case BOOLEAN:
@@ -107,17 +106,27 @@ public class JavaType {
                     case "java.util.Map":
                         final String s0 = typeArguments.get(0);
                         final String s1 = typeArguments.get(1);
-                        return format("Map<%s, %s>", s0, s1); //FIXME: Use Map<K, V>?
+                        return format("Map<%s, %s>", s0, s1);
                     case "java.util.Set":
                     case "java.util.HashSet":
                     case "java.util.List":
                     case "java.util.ArrayList":
                     case "java.util.LinkedList":
-                        return typeArguments.get(0) + "[]"; //FIXME: Use Array<T>?
+                        return format("%s[]", typeArguments.get(0));
                     default:
-                        return declaredType.asElement().toString() + "<" + typeArguments.stream().collect(joining(", ")) + ">";
+                        return format("%s<%s>",
+                                      declaredType.asElement().toString().replace(".", "_"),
+                                      typeArguments.stream().collect(joining(", ")));
                 }
             case WILDCARD:
+                final WildcardType wildcardType = (WildcardType) type;
+                if (wildcardType.getExtendsBound() != null) {
+                    return toUniqueTsType(wildcardType.getExtendsBound());
+                } else if (wildcardType.getSuperBound() != null) {
+                    return toUniqueTsType(wildcardType.getSuperBound());
+                } else {
+                    return "any";
+                }
             case PACKAGE:
             case NONE:
             case ERROR:
@@ -132,19 +141,13 @@ public class JavaType {
 
     public Optional<ImportableJavaType> asImportableJavaType() {
         switch (type.getKind()) {
+            case ARRAY:
+                return new JavaType(((ArrayType) type).getComponentType(), owner).asImportableJavaType();
             case TYPEVAR:
                 try {
-                    TypeMirror newType = types.asMemberOf((DeclaredType) owner, types.asElement(this.type));
-                    if (!newType.getKind().equals(TypeKind.DECLARED)) {
-                    System.out.println(newType + " is not Declared1!!!!!");
-                    }
-                    return Optional.of(new ImportableJavaType(newType, owner));
+                    return Optional.of(new ImportableJavaType(types.asMemberOf((DeclaredType) owner, types.asElement(type)), owner));
                 } catch (final Exception e) {
-                    TypeMirror upperBound = ((TypeVariable) type).getUpperBound();
-                    if (!upperBound.getKind().equals(TypeKind.DECLARED)) {
-                        System.out.println(upperBound + " is not Declared!2!!!!");
-                    }
-                    return Optional.of(new ImportableJavaType(upperBound, owner));
+                    return Optional.of(new ImportableJavaType(((TypeVariable) type).getUpperBound(), owner));
                 }
             case DECLARED:
                 if (((DeclaredType) type).asElement().getKind().equals(ElementKind.ENUM)) {
@@ -167,12 +170,12 @@ public class JavaType {
 
         //FIXME: What about type arguments of the type arguments?
         final List<ImportableJavaType> nonJdkTypeArguments = ((DeclaredType) javaImportable.get().type).getTypeArguments().stream()
-                .filter(typeArgument -> !typeArgument.toString().matches("javax?.*"))
+                .filter(typeArgument -> !typeArgument.toString().matches("^javax?.*"))
                 .map(typeArgument -> new JavaType(typeArgument, type).asImportableJavaType())
                 .filter(Optional::isPresent).map(Optional::get)
                 .collect(toList());
 
-        if (type.toString().matches("javax?.*")) {
+        if (type.toString().matches("^javax?.*")) {
             if (nonJdkTypeArguments.isEmpty()) {
                 return emptyList();
             } else {

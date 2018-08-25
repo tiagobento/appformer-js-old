@@ -19,6 +19,7 @@ import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
@@ -26,6 +27,7 @@ import javax.lang.model.util.Types;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 import static javax.lang.model.element.ElementKind.PACKAGE;
+import static javax.lang.model.element.Modifier.*;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @SupportedAnnotationTypes({"org.jboss.errai.bus.server.annotations.Remote"})
@@ -141,11 +143,13 @@ public class RemoteTsExporter extends AbstractProcessor {
 
         final String fields = portablePojoModule.getType().asElement().getEnclosedElements().stream()
                 .filter(s -> s.getKind().isField())
+                .filter(s -> !s.getModifiers().contains(STATIC))
                 .map(s -> format("public %s: %s;", s.getSimpleName(), new JavaType(s.asType(), portablePojoModule.getType()).toUniqueTsType()))
                 .collect(joining("\n"));
 
         final String args = portablePojoModule.getType().asElement().getEnclosedElements().stream()
                 .filter(s -> s.getKind().isField())
+                .filter(s -> !s.getModifiers().contains(STATIC))
                 .map(s -> format("%s: %s", s.getSimpleName(), new JavaType(s.asType(), portablePojoModule.getType()).toUniqueTsType()))
                 .collect(joining(", "));;
 
@@ -160,9 +164,14 @@ public class RemoteTsExporter extends AbstractProcessor {
                               "\n\n" +
                               "export default class %s extends Portable<%s>{" +
                               "\n\n" +
-                              "  //Fields will go here:\n %s" +
+                              "%s" +
                               "\n\n" +
-                              "  constructor(self: { %s }) { super(self, \"%s\"); }" +
+                              "  constructor(self: { %s }) {" +
+                              "\n" +
+                              "    super(self, \"%s\"); " +
+                              "\n" +
+                              "  }" +
+                              "\n" +
                               "}",
 
                       imports,

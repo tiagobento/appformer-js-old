@@ -87,7 +87,7 @@ public class ImportableJavaType extends JavaType {
                 .filter(Optional::isPresent).map(Optional::get)
                 .filter(distinctBy(ImportableJavaType::getFlatFqcn))
                 .map(javaType -> new ImportableJavaType(javaType.type, owner))
-                .flatMap(dependencyJavaType -> dependencyJavaType.getAllTsImportableTypes(visited, maxDepth, depth + 1).stream())
+                .flatMap(dependencyImportableJavaType -> dependencyImportableJavaType.getAllTsImportableTypes(visited, maxDepth, depth + 1).stream())
                 .collect(toList());
     }
 
