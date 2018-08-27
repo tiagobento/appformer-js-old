@@ -22,6 +22,7 @@ import java.util.stream.Stream;
 
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
 import javax.lang.model.type.WildcardType;
@@ -70,7 +71,12 @@ public class JavaType {
                 return "boolean";
             case TYPEVAR:
                 try {
-                    return toUniqueTsType(types.asMemberOf((DeclaredType) owner, types.asElement(type)));
+                    TypeMirror reslvedType = types.asMemberOf((DeclaredType) owner, types.asElement(type));
+                    if (reslvedType.getKind().equals(TypeKind.TYPEVAR)) {
+                        return reslvedType.toString();
+                    } else {
+                        return toUniqueTsType(reslvedType);
+                    }
                 } catch (final Exception e) {
                     return toUniqueTsType(((TypeVariable) type).getUpperBound());
                 }

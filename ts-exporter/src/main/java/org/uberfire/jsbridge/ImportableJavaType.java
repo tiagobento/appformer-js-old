@@ -40,6 +40,11 @@ public class ImportableJavaType extends JavaType {
         super(type, owner);
     }
 
+    @Override
+    public Optional<ImportableJavaType> asImportableJavaType() {
+        return Optional.of(this);
+    }
+
     public List<ImportableJavaType> getAllTsImportableTypes(final Set<String> visited) {
         return getAllTsImportableTypes(visited, -1, 0);
     }
@@ -93,9 +98,9 @@ public class ImportableJavaType extends JavaType {
             return Optional.of(new JavaType(member.asType(), memberOwner));
         }
 
-        if (member.getKind().equals(ElementKind.METHOD) && !member.getEnclosingElement().toString().matches("javax?.*")) {
-            return Optional.of(new JavaType(((ExecutableElement) member).getReturnType(), memberOwner));
-        }
+//        if (member.getKind().equals(ElementKind.METHOD) && !member.getEnclosingElement().toString().matches("javax?.*")) {
+//            return Optional.of(new JavaType(((ExecutableElement) member).getReturnType(), memberOwner));
+//        }
 
         return Optional.empty();
     }

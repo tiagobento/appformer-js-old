@@ -79,7 +79,7 @@ public class RpcCallerTsMethod {
     private String factoriesOracle() {
         return javaMethod.getAllTsDependenciesOfReturnType().stream()
                 .filter(s -> s.getType().asElement().getKind().equals(CLASS))
-                .collect(toMap(impotableJavaType -> impotableJavaType, PortablePojoModule::extractPortablePojoModule))
+                .collect(toMap(importableJavaType -> importableJavaType, PortablePojoModule::extractPortablePojoModule))
                 .entrySet().stream()
                 .map(e -> e.getValue().map(module -> oracleEntrySource(module.getVariableName(), e.getKey().getFlatFqcn())))
                 .filter(Optional::isPresent).map(Optional::get)
@@ -97,6 +97,8 @@ public class RpcCallerTsMethod {
 
     public Set<PortablePojoModule> getAllDependencies() {
         return Stream.concat(javaMethod.getParameterDirectTsDependencies().stream(), javaMethod.getAllTsDependenciesOfReturnType().stream())
+                .map(s -> new JavaType(s.getType().asElement().asType(), s.getType().asElement().asType()).asImportableJavaType())
+                .filter(Optional::isPresent).map(Optional::get)
                 .map(PortablePojoModule::extractPortablePojoModule)
                 .filter(Optional::isPresent).map(Optional::get)
                 .collect(toSet());

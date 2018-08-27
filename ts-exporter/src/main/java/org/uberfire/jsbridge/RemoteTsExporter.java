@@ -7,10 +7,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.ProcessingEnvironment;
@@ -20,16 +22,19 @@ import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.ElementKind.ENUM;
 import static javax.lang.model.element.ElementKind.ENUM_CONSTANT;
 import static javax.lang.model.element.ElementKind.INTERFACE;
 import static javax.lang.model.element.ElementKind.PACKAGE;
-import static javax.lang.model.element.Modifier.*;
+import static javax.lang.model.element.Modifier.ABSTRACT;
+import static javax.lang.model.element.Modifier.STATIC;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @SupportedAnnotationTypes({"org.jboss.errai.bus.server.annotations.Remote"})
@@ -123,7 +128,6 @@ public class RemoteTsExporter extends AbstractProcessor {
 
     private void generatePojoFile(final PortablePojoModule portablePojoModule) {
         final String stringPath = portablePojoModule.getPath2();
-        final String[] split = stringPath.split("/");
         final Path path = Paths.get("/tmp/ts-exporter/" + stringPath + ".ts");
         if (Files.exists(path)) {
             System.out.println(format("Skipping generation of %s because it already exists", stringPath));
@@ -131,25 +135,39 @@ public class RemoteTsExporter extends AbstractProcessor {
         }
 
         try {
-            final String simpleName = split[split.length - 1];
             Files.createDirectories(path.getParent());
             Files.createFile(path);
-            Files.write(path, pojoInterfaceToSource(simpleName, portablePojoModule).getBytes());
+            Files.write(path, pojoInterfaceToSource(portablePojoModule).getBytes());
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private String pojoInterfaceToSource(final String simpleName, final PortablePojoModule portablePojoModule) {
+    private String pojoInterfaceToSource(final PortablePojoModule portablePojoModule) {
+        final ImportStore IMPORT_STORE = new ImportStore();
 
-        //FIXME: Generate Enum/Interface/AbstractClasses as well.
+        final DeclaredType declaredType = portablePojoModule.getType();
+        final TypeElement typeElement = (TypeElement) declaredType.asElement();
 
-        if (portablePojoModule.getType().asElement().getKind().equals(INTERFACE)) {
-            return format("export default interface %s {\n}", simpleName);
+        final String fqcn = new JavaType(declaredType, declaredType).toUniqueTsType();
+        final String simpleName = fqcn.substring(fqcn.indexOf(typeElement.getSimpleName().toString()));
+
+        final List<JavaType> interfacesImplemented = typeElement.getInterfaces().stream()
+                .map(t -> new JavaType(t, declaredType))
+                .filter(t -> !t.getFlatFqcn().matches("^javax?.*"))
+                .collect(toList());
+
+        if (typeElement.getKind().equals(INTERFACE)) {
+
+            final String _implements = interfacesImplemented.isEmpty()
+                    ? ""
+                    : "implements " + interfacesImplemented.stream().peek(IMPORT_STORE::importing).map(JavaType::toUniqueTsType).collect(joining(", "));
+
+            return format("export default interface %s %s {\n}", simpleName, _implements);
         }
 
-        if (portablePojoModule.getType().asElement().getKind().equals(ENUM)) {
-            final String enumFields = portablePojoModule.getType().asElement().getEnclosedElements().stream()
+        if (typeElement.getKind().equals(ENUM)) {
+            final String enumFields = typeElement.getEnclosedElements().stream()
                     .filter(s -> s.getKind().equals(ENUM_CONSTANT))
                     .map(Element::getSimpleName)
                     .collect(joining(", "));
@@ -160,43 +178,81 @@ public class RemoteTsExporter extends AbstractProcessor {
         final String fields = portablePojoModule.getType().asElement().getEnclosedElements().stream()
                 .filter(s -> s.getKind().isField())
                 .filter(s -> !s.getModifiers().contains(STATIC))
-                .map(s -> format("public %s: %s;", s.getSimpleName(), new JavaType(s.asType(), portablePojoModule.getType()).toUniqueTsType()))
+                .map(s -> format("  public readonly %s?: %s;", s.getSimpleName(), IMPORT_STORE.importing(new JavaType(s.asType(), declaredType)).toUniqueTsType()))
                 .collect(joining("\n"));
 
-        final String args = portablePojoModule.getType().asElement().getEnclosedElements().stream()
-                .filter(s -> s.getKind().isField())
-                .filter(s -> !s.getModifiers().contains(STATIC))
-                .map(s -> format("%s: %s", s.getSimpleName(), new JavaType(s.asType(), portablePojoModule.getType()).toUniqueTsType()))
-                .collect(joining(", "));;
+        final String constructorArgs = getConstructorArgs(IMPORT_STORE, typeElement);
 
-        final String imports = portablePojoModule.getDependencies().stream()
-                .map(PortablePojoModule::asTsImportSource)
-                .collect(joining("\n"));
+        final String superCall = typeElement.getSuperclass().toString().matches("^javax?.*")
+                ? ""
+                : "super({...self.inherited});";
+
+        final String _implements = interfacesImplemented.isEmpty()
+                ? format("implements Portable<%s>", simpleName)
+                : "implements " + interfacesImplemented.stream().peek(IMPORT_STORE::importing).map(JavaType::toUniqueTsType).collect(joining(", ")) + format(", Portable<%s>", simpleName);
+
+        final String _extends = typeElement.getSuperclass().toString().matches("^javax?.*")
+                ? ""
+                : "extends " + IMPORT_STORE.importing(new JavaType(typeElement.getSuperclass(), declaredType)).toUniqueTsType();
+
+        final String hierarchy = _extends + " " + _implements;
+        final String abstractOrNot = typeElement.getModifiers().contains(ABSTRACT) ? "abstract" : "";
+
+        //Has to be the last 'cause that's where imports are done being added.
+        final String imports = IMPORT_STORE.getImportStatements();
+
+        IMPORT_STORE.getImports().forEach(this::generatePojoFile);
 
         return format("" +
                               "import { Portable } from \"generated/Model\";" +
                               "\n" +
                               "%s" +
-                              "\n\n" +
-                              "export default class %s extends Portable<%s>{" +
-                              "\n\n" +
+                              "\n" +
+                              "\n" +
+                              "export default %s class %s %s {" +
+                              "\n" +
+                              "\n" +
+                              "  protected readonly _fqcn: string = \"%s\";" +
+                              "\n" +
+                              "\n" +
                               "%s" +
-                              "\n\n" +
+                              "\n" +
+                              "\n" +
                               "  constructor(self: { %s }) {" +
                               "\n" +
-                              "    super(self, \"%s\"); " +
+                              "    %s" +
+                              "\n" +
+                              "    Object.assign(this, self); " +
                               "\n" +
                               "  }" +
                               "\n" +
                               "}",
 
                       imports,
+                      abstractOrNot,
                       simpleName,
-                      simpleName,
+                      hierarchy,
+                      portablePojoModule.getOriginatingFqcn(),
                       fields,
-                      args,
-                      portablePojoModule.getOriginatingFqcn()
+                      constructorArgs,
+                      superCall
         );
+
+    }
+
+    private String getConstructorArgs(final ImportStore dependencies, final TypeElement typeElement) {
+
+        final List<String> fields = typeElement.getEnclosedElements().stream()
+                .filter(s -> s.getKind().isField())
+                .filter(s -> !s.getModifiers().contains(STATIC))
+                .map(s -> format("%s?: %s", s.getSimpleName(), dependencies.importing(new JavaType(s.asType(), typeElement.asType())).toUniqueTsType()))
+                .collect(toList());
+
+        return Stream.concat(fields.stream(),
+                             typeElement.getSuperclass().toString().equals("java.lang.Object")
+                                     ? Stream.empty()
+                                     : Stream.of("inherited?: {" + getConstructorArgs(dependencies, (TypeElement) ((DeclaredType) typeElement.getSuperclass()).asElement()) + "}"))
+                .collect(joining(", "));
     }
 
     private Path createFileIfNotExists(final Path path) throws IOException {

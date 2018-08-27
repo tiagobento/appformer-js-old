@@ -3,8 +3,6 @@ import * as AppFormer from "appformer";
 import DemoApp from "core-screens/DemoApp";
 import { Foo, TestEvent } from "generated/Model";
 import TestMessagesService from "generated/org/uberfire/shared/TestMessagesService";
-import Path from "output/uberfire-api/org/uberfire/backend/vfs/Path";
-import GlobalsEditorService from "output/drools-wb-globals-editor-api/org/drools/workbench/screens/globals/service/GlobalsEditorService";
 
 // import homePerspectiveTemplate from "core-screens/HomePerspective.html";
 // import otherPerspectiveTemplate from "core-screens/other-perspective.html";
@@ -26,21 +24,21 @@ export class ReactComponentScreen extends AppFormer.Screen {
       }
     };
 
-    const servce = new TestMessagesService();
-    const drlTextLends = new GlobalsEditorService();
-    const MyPathImpl = class implements Path {};
+    // const servce = new TestMessagesService();
+    // const drlTextLends = new GlobalsEditorService();
+    // const MyPathImpl = class implements Path {};
+    //
+    // drlTextLends.loadContent({ path: new MyPathImpl() }).then(e => {
+    //   console.info(e);
+    // });
 
-    drlTextLends.loadContent({ path: new MyPathImpl() }).then(e => {
-      console.info(e);
-    });
-
-    this.af_componentService = {
-      sayHello: servce.sayHello,
-      sayHelloToSomething: servce.sayHelloToSomething,
-      sayHelloOnServer: servce.sayHelloOnServer,
-      fireServerEvent: servce.fireServerEvent,
-      sendTestPojo: servce.sendTestPojo
-    };
+    // this.af_componentService = {
+    //   sayHello: servce.sayHello,
+    //   sayHelloToSomething: servce.sayHelloToSomething,
+    //   sayHelloOnServer: servce.sayHelloOnServer,
+    //   fireServerEvent: servce.fireServerEvent,
+    //   sendTestPojo: servce.sendTestPojo
+    // };
   }
 
   public af_onStartup() {

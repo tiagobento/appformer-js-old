@@ -1,5 +1,5 @@
 import { rpc, marshall } from "appformer";
-import { ErraiBusObject, TestEvent } from "generated/Model";
+import { TestEvent } from "generated/Model";
 
 export default class TestMessagesService {
   public sayHello() {
@@ -18,7 +18,7 @@ export default class TestMessagesService {
     return rpc("org.uberfire.shared.TestMessagesService|hello:java.lang.String", [marshall(a)]);
   }
 
-  public sendTestPojo(a: TestEvent & ErraiBusObject) {
+  public sendTestPojo(a: TestEvent) {
     return rpc("org.uberfire.shared.TestMessagesService|postTestEvent:org.uberfire.shared.TestEvent", [marshall(a)]);
   }
 }
