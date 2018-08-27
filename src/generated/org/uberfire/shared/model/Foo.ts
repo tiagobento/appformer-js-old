@@ -14,8 +14,4 @@ export class Foo implements Portable {
   constructor(self: { foo: string }) {
     Object.assign(this, self);
   }
-
-  public getFqcn() {
-    return this._fqcn;
-  }
 }

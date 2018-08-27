@@ -1,3 +1,4 @@
+// tslint:disable-next-line
 export interface Portable {
-  getFqcn(): { value: () => string; prototype: {}; new (): {} };
+  // this is here for typing purposes only
 }
