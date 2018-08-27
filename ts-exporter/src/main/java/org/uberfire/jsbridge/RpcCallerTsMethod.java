@@ -20,9 +20,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 
 import static java.lang.String.format;
+import static java.lang.reflect.Modifier.ABSTRACT;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
@@ -78,7 +81,7 @@ public class RpcCallerTsMethod {
 
     private String factoriesOracle() {
         return javaMethod.getAllTsDependenciesOfReturnType().stream()
-                .filter(s -> s.getType().asElement().getKind().equals(CLASS))
+                .filter(s -> s.getType().asElement().getKind().equals(CLASS) && !s.getType().asElement().getModifiers().contains(Modifier.ABSTRACT))
                 .collect(toMap(importableJavaType -> importableJavaType, PortablePojoModule::extractPortablePojoModule))
                 .entrySet().stream()
                 .map(e -> e.getValue().map(module -> oracleEntrySource(module.getVariableName(), e.getKey().getFlatFqcn())))

@@ -156,6 +156,15 @@ public class JavaType {
                 } catch (final Exception e) {
                     return Optional.of(new ImportableJavaType(((TypeVariable) type).getUpperBound(), owner));
                 }
+            case WILDCARD:
+                    final WildcardType wildcardType = (WildcardType) type;
+                    if (wildcardType.getExtendsBound() != null) {
+                        return new JavaType(wildcardType.getExtendsBound(), owner).asImportableJavaType();
+                    } else if (wildcardType.getSuperBound() != null) {
+                        return new JavaType(wildcardType.getSuperBound(), owner).asImportableJavaType();
+                    } else {
+                        return Optional.empty();
+                    }
             case DECLARED:
                 return Optional.of(new ImportableJavaType(type, owner));
             default:

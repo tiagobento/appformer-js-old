@@ -149,7 +149,7 @@ public class RemoteTsExporter extends AbstractProcessor {
         final DeclaredType declaredType = portablePojoModule.getType();
         final TypeElement typeElement = (TypeElement) declaredType.asElement();
 
-        final String fqcn = new JavaType(declaredType, declaredType).toUniqueTsType();
+        final String fqcn = new JavaType(typeElement.asType(), typeElement.asType()).toUniqueTsType();
         final String simpleName = fqcn.substring(fqcn.indexOf(typeElement.getSimpleName().toString()));
 
         final List<JavaType> interfacesImplemented = typeElement.getInterfaces().stream()
@@ -161,12 +161,16 @@ public class RemoteTsExporter extends AbstractProcessor {
 
             final String _implements = interfacesImplemented.isEmpty()
                     ? ""
-                    : "implements " + interfacesImplemented.stream().peek(IMPORT_STORE::importing).map(JavaType::toUniqueTsType).collect(joining(", "));
+                    : "extends " + interfacesImplemented.stream().peek(IMPORT_STORE::importing).map(JavaType::toUniqueTsType).collect(joining(", "));
 
-            return format("export default interface %s %s {\n}", simpleName, _implements);
+
+            IMPORT_STORE.getImports().forEach(this::generatePojoFile);
+            
+            return format("%s\n\nexport default interface %s %s {\n}", IMPORT_STORE.getImportStatements(), simpleName, _implements);
         }
 
         if (typeElement.getKind().equals(ENUM)) {
+            //FIXME: Enum extending interfaces?
             final String enumFields = typeElement.getEnclosedElements().stream()
                     .filter(s -> s.getKind().equals(ENUM_CONSTANT))
                     .map(Element::getSimpleName)
