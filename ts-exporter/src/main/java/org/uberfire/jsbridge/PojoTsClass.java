@@ -49,16 +49,16 @@ public class PojoTsClass {
         final String fqcn = new JavaType(element.asType(), element.asType()).toUniqueTsType();
         final String simpleName = fqcn.substring(fqcn.indexOf(element.getSimpleName().toString()));
 
-        final List<JavaType> interfacesImplemented = element.getInterfaces().stream()
+        final List<JavaType> implementedInterfaces = element.getInterfaces().stream()
                 .map(t -> new JavaType(t, type))
                 .filter(t -> !t.getFlatFqcn().matches("^javax?.*"))
                 .collect(toList());
 
         if (element.getKind().equals(INTERFACE)) {
 
-            final String _implements = interfacesImplemented.isEmpty()
+            final String _implements = implementedInterfaces.isEmpty()
                     ? ""
-                    : "extends " + interfacesImplemented.stream().peek(importStore::importing).map(JavaType::toUniqueTsType).collect(joining(", "));
+                    : "extends " + implementedInterfaces.stream().peek(importStore::importing).map(JavaType::toUniqueTsType).collect(joining(", "));
 
             //Has to be the last
             final String imports = importStore.getImportStatements();
@@ -82,15 +82,15 @@ public class PojoTsClass {
                 .map(s -> format("  public readonly %s?: %s;", s.getSimpleName(), importStore.importing(new JavaType(s.asType(), type)).toUniqueTsType()))
                 .collect(joining("\n"));
 
-        final String constructorArgs = getConstructorArgs(importStore, element);
+        final String constructorArgs = getConstructorArgs(element);
 
         final String superCall = element.getSuperclass().toString().matches("^javax?.*")
                 ? ""
                 : "super({...self.inherited});";
 
-        final String _implements = interfacesImplemented.isEmpty()
+        final String _implements = implementedInterfaces.isEmpty()
                 ? format("implements Portable<%s>", simpleName)
-                : "implements " + interfacesImplemented.stream().peek(importStore::importing).map(JavaType::toUniqueTsType).collect(joining(", ")) + format(", Portable<%s>", simpleName);
+                : "implements " + implementedInterfaces.stream().peek(importStore::importing).map(JavaType::toUniqueTsType).collect(joining(", ")) + format(", Portable<%s>", simpleName);
 
         final String _extends = element.getSuperclass().toString().matches("^javax?.*")
                 ? ""
@@ -138,19 +138,22 @@ public class PojoTsClass {
         );
     }
 
-    private String getConstructorArgs(final ImportStore dependencies, final TypeElement typeElement) {
+    private String getConstructorArgs(final TypeElement typeElement) {
 
         final List<String> fields = typeElement.getEnclosedElements().stream()
-                .filter(s -> s.getKind().isField())
-                .filter(s -> !s.getModifiers().contains(STATIC))
-                .map(s -> format("%s?: %s", s.getSimpleName(), dependencies.importing(new JavaType(s.asType(), typeElement.asType())).toUniqueTsType()))
+                .filter(f -> f.getKind().isField())
+                .filter(f -> !f.getModifiers().contains(STATIC))
+                .map(f -> format("%s?: %s", f.getSimpleName(), importStore.importing(new JavaType(f.asType(), typeElement.asType())).toUniqueTsType()))
                 .collect(toList());
 
-        return Stream.concat(fields.stream(),
-                             typeElement.getSuperclass().toString().equals("java.lang.Object")
-                                     ? Stream.empty()
-                                     : Stream.of("inherited?: {" + getConstructorArgs(dependencies, (TypeElement) ((DeclaredType) typeElement.getSuperclass()).asElement()) + "}"))
-                .collect(joining(", "));
+        if (typeElement.getSuperclass().toString().equals("java.lang.Object")) {
+            return fields.stream().collect(joining(", "));
+        }
+
+        final TypeElement superclassTypeElement = (TypeElement) ((DeclaredType) typeElement.getSuperclass()).asElement();
+        final String inheritedFields = getConstructorArgs(superclassTypeElement);
+
+        return Stream.concat(fields.stream(), Stream.of("inherited?: {" + inheritedFields + "}")).collect(joining(", "));
     }
 
     public List<PortablePojoModule> getDependencies() {

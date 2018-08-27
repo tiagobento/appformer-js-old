@@ -26,12 +26,17 @@ export class ReactComponentScreen extends AppFormer.Screen {
 
     // const servce = new TestMessagesService();
     // const drlTextLends = new GlobalsEditorService();
-    // const MyPathImpl = class implements Path {};
+    // const MyPathImpl = class implements Path {
+    //     public readonly path: string;
+    //     constructor(s: string) {
+    //         this.path = s;
+    //     }
+    // };
     //
-    // drlTextLends.loadContent({ path: new MyPathImpl() }).then(e => {
+    // drlTextLends.loadContent({ path: new MyPathImpl("/tmp/test") }).then(e => {
     //   console.info(e);
     // });
-
+    //
     // this.af_componentService = {
     //   sayHello: servce.sayHello,
     //   sayHelloToSomething: servce.sayHelloToSomething,

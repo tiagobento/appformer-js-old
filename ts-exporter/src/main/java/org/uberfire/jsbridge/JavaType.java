@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
@@ -31,6 +32,7 @@ import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
+import static javax.lang.model.type.TypeKind.*;
 import static org.uberfire.jsbridge.RemoteTsExporter.types;
 
 public class JavaType {
@@ -71,11 +73,18 @@ public class JavaType {
                 return "boolean";
             case TYPEVAR:
                 try {
-                    TypeMirror reslvedType = types.asMemberOf((DeclaredType) owner, types.asElement(type));
-                    if (reslvedType.getKind().equals(TypeKind.TYPEVAR)) {
-                        return reslvedType.toString();
+                    final TypeMirror resolvedType = types.asMemberOf((DeclaredType) owner, types.asElement(type));
+                    if (resolvedType.getKind().equals(TYPEVAR)) {
+                        final TypeVariable typeVariable = (TypeVariable) resolvedType;
+                        if (typeVariable.getUpperBound() != null) {
+                            return resolvedType.toString() + " extends " + toUniqueTsType(typeVariable.getUpperBound());
+                        } else if (typeVariable.getLowerBound() != null) {
+                            return toUniqueTsType(typeVariable.getLowerBound());
+                        } else {
+                        return resolvedType.toString();
+                        }
                     } else {
-                        return toUniqueTsType(reslvedType);
+                        return toUniqueTsType(resolvedType);
                     }
                 } catch (final Exception e) {
                     return toUniqueTsType(((TypeVariable) type).getUpperBound());
