@@ -115,11 +115,7 @@ describe("__toErraiObject", () => {
 // ============== fixture classes
 
 class Person implements Portable {
-  private readonly _fqcn = class {
-    public static readonly value: () => string = () => {
-      return "org.appformer-js.test.Person";
-    };
-  };
+  protected readonly _fqcn = "org.appformer-js.test.Person";
 
   public name: string;
   public homeAddr?: Address;
@@ -132,11 +128,7 @@ class Person implements Portable {
 }
 
 class Address implements Portable {
-  private readonly _fqcn = class {
-    public static readonly value: () => string = () => {
-      return "org.appformer-js.test.Address";
-    };
-  };
+  protected readonly _fqcn = "org.appformer-js.test.Address";
 
   public line1: string;
   public line2: string;

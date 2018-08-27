@@ -3,11 +3,7 @@
 import { Portable } from "appformer/remote";
 
 export class Foo implements Portable {
-  private readonly _fqcn = class {
-    public static readonly value: () => string = () => {
-      return "org.uberfire.shared.Foo";
-    };
-  };
+  protected readonly _fqcn = "org.uberfire.shared.Foo";
 
   public foo?: string;
 

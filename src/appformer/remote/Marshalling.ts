@@ -20,16 +20,16 @@ export function toErraiBusObject(input: any, ctx = new Map(), currObjID = 1) {
   Object.keys(_this).forEach(k => {
     if (typeof _this[k] === "function") {
       delete _this[k];
-    } else if (_this[k] && _this[k].fqcn) {
+    } else if (_this[k] && _this[k]._fqcn) {
       _this[k] = toErraiBusObject(_this[k], ctx, currObjID++);
     } else if (!_this[k]) {
       _this[k] = null;
     }
   });
 
-  _this[ErraiBusObjectParts.ENCODED_TYPE] = _this.fqcn;
+  _this[ErraiBusObjectParts.ENCODED_TYPE] = _this._fqcn;
   _this[ErraiBusObjectParts.OBJECT_ID] = `${currObjID}`;
-  delete _this.fqcn;
+  delete _this._fqcn;
 
   const finalBusObject = {
     ..._this,
