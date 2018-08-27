@@ -18,7 +18,6 @@ package org.uberfire.jsbridge;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -36,19 +35,19 @@ public class RpcCallerTsClass {
 
     private final TypeElement _interface;
     private final Lazy<List<RpcCallerTsMethod>> tsMethods;
-    private final Lazy<List<PortablePojoModule>> allPojoDependencies;
+    private final ImportStore importStore;
 
     private static final List<String> RESERVED_WORDS = Arrays.asList("delete", "copy");
 
     public RpcCallerTsClass(final TypeElement _interface) {
         this._interface = _interface;
         this.tsMethods = new Lazy<>(this::initAllTsMethods);
-        this.allPojoDependencies = new Lazy<>(this::initAllPojoDependencies);
+        this.importStore = new ImportStore();
     }
 
     private List<RpcCallerTsMethod> initAllTsMethods() {
         return getAllJavaMethods(_interface).stream()
-                .map(javaMethod -> new RpcCallerTsMethod(_interface, javaMethod))
+                .map(javaMethod -> new RpcCallerTsMethod(_interface, importStore, javaMethod))
                 .collect(toList());
     }
 
@@ -71,14 +70,13 @@ public class RpcCallerTsClass {
         return methods;
     }
 
-    private List<PortablePojoModule> initAllPojoDependencies() {
-        return tsMethods.get().stream()
-                .map(RpcCallerTsMethod::getAllDependencies)
-                .flatMap(Collection::stream)
-                .collect(toList());
-    }
-
     String toSource() {
+
+        final String methods = methods();
+        final String simpleName = simpleName();
+
+        //Has to be the last
+        final String imports = imports();
 
         return format("" +
                               "import {rpc, marshall, unmarshall} from \"appformer/API\";\n" +
@@ -90,13 +88,17 @@ public class RpcCallerTsClass {
                               "}" +
                               "\n",
 
-                      tsImportsSources(),
-                      _interface.getSimpleName().toString(),
-                      tsMethodsSources()
+                      imports,
+                      simpleName,
+                      methods
         );
     }
 
-    private String tsMethodsSources() {
+    private String simpleName() {
+        return _interface.getSimpleName().toString();
+    }
+
+    private String methods() {
         return tsMethods.get().stream()
                 .collect(groupingBy(RpcCallerTsMethod::getName)).entrySet().stream()
                 .flatMap(e -> resolveOverloadsAndReservedWords(e.getKey(), e.getValue()).stream())
@@ -104,15 +106,15 @@ public class RpcCallerTsClass {
                 .collect(joining("\n"));
     }
 
-    private String tsImportsSources() {
-        return allPojoDependencies.get().stream()
+    private String imports() {
+        return importStore.getImports().stream()
                 .map(PortablePojoModule::asTsImportSource)
                 .distinct()
                 .collect(joining("\n"));
     }
 
-    public List<PortablePojoModule> getAllPojoDependencies() {
-        return allPojoDependencies.get();
+    public List<PortablePojoModule> getAllDependencies() {
+        return importStore.getImports();
     }
 
     private List<RpcCallerTsMethod> resolveOverloadsAndReservedWords(final String name,
@@ -131,4 +133,6 @@ public class RpcCallerTsClass {
     public TypeElement getInterface() {
         return _interface;
     }
+
+
 }

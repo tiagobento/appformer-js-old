@@ -63,17 +63,4 @@ public class RemoteInterfaceJavaMethod {
                       (a, b) -> b, //default map behavior
                       LinkedHashMap::new));
     }
-
-    public List<ImportableJavaType> getParameterDirectTsDependencies() {
-        return executableElement.getParameters().stream()
-                .flatMap(arg -> new JavaType(arg.asType(), _interface.asType()).getDirectImportableNonJdkTypes().stream())
-                .filter(distinctBy(JavaType::getFlatFqcn))
-                .collect(toList());
-    }
-
-    public List<ImportableJavaType> getAllTsDependenciesOfReturnType() {
-        return new JavaType(executableElement.getReturnType(), _interface.asType()).asImportableJavaType()
-                .map(importableJavaType -> importableJavaType.getAllTsImportableTypes(new HashSet<>()))
-                .orElseGet(Collections::emptyList);
-    }
 }

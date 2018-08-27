@@ -16,16 +16,11 @@
 
 package org.uberfire.jsbridge;
 
-import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeMirror;
 
 import static java.lang.String.format;
-import static java.util.stream.Collectors.*;
 import static org.uberfire.jsbridge.RemoteTsExporter.currentMavenModuleName;
 
 public class PortablePojoModule {
@@ -40,11 +35,11 @@ public class PortablePojoModule {
         this.moduleName = moduleName;
     }
 
-    private String getPath1() {
+    private String getTemporaryPathToCodegen() {
         return "output/" + moduleName + "/" + importableJavaType.getFlatFqcn().replace(".", "/");
     }
 
-    public String getPath2() {
+    public String getPath() {
         return moduleName + "/" + importableJavaType.getFlatFqcn().replace(".", "/");
     }
 
@@ -56,17 +51,10 @@ public class PortablePojoModule {
         return importableJavaType.getFlatFqcn().replace(".", "_");
     }
 
-    public List<PortablePojoModule> getDependencies() {
-        return importableJavaType.getAllTsImportableTypes(new HashSet<>(), 1).stream()
-                .map(PortablePojoModule::extractPortablePojoModule)
-                .filter(Optional::isPresent).map(Optional::get)
-                .collect(toList());
-    }
-
     public String asTsImportSource() {
         return format("import %s from \"%s\";",
                       getVariableName(),
-                      getPath1());
+                      getTemporaryPathToCodegen());
     }
 
     public static Optional<PortablePojoModule> extractPortablePojoModule(final ImportableJavaType importableJavaType) {

@@ -32,17 +32,17 @@ public class ImportStore {
         return type;
     }
 
-    public String getImportStatements() {
-        return getImports().stream()
-                .map(PortablePojoModule::asTsImportSource)
-                .distinct()
-                .collect(joining("\n"));
-    }
-
     public List<PortablePojoModule> getImports() {
         return dependencies.stream().flatMap(javaType -> javaType.getDirectImportableNonJdkTypes().stream())
                 .map(PortablePojoModule::extractPortablePojoModule)
                 .filter(Optional::isPresent).map(Optional::get)
                 .collect(toList());
+    }
+
+    public String getImportStatements() {
+        return getImports().stream()
+                .map(PortablePojoModule::asTsImportSource)
+                .distinct()
+                .collect(joining("\n"));
     }
 }

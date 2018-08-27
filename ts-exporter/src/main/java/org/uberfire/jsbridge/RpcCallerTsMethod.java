@@ -34,6 +34,7 @@ import static javax.lang.model.element.ElementKind.CLASS;
 public class RpcCallerTsMethod {
 
     private final TypeElement _interface;
+    private final ImportStore importStore;
     private final RemoteInterfaceJavaMethod javaMethod;
     private final String name;
 
@@ -42,13 +43,16 @@ public class RpcCallerTsMethod {
 
         this._interface = tsMethod._interface;
         this.javaMethod = tsMethod.javaMethod;
+        this.importStore = tsMethod.importStore;
         this.name = name;
     }
 
     public RpcCallerTsMethod(final TypeElement _interface,
+                             final ImportStore importStore,
                              final RemoteInterfaceJavaMethod javaMethod) {
 
         this._interface = _interface;
+        this.importStore = importStore;
         this.javaMethod = javaMethod;
         this.name = javaMethod.getName();
     }
@@ -65,7 +69,7 @@ public class RpcCallerTsMethod {
 
     private String params() {
         return javaMethod.getParameterJavaTypesByNames().entrySet().stream()
-                .map(e -> format("%s: %s", e.getKey(), e.getValue().toUniqueTsType()))
+                .map(e -> format("%s: %s", e.getKey(), importStore.importing(e.getValue()).toUniqueTsType()))
                 .collect(joining(", "));
     }
 
@@ -80,30 +84,11 @@ public class RpcCallerTsMethod {
     }
 
     private String factoriesOracle() {
-        return javaMethod.getAllTsDependenciesOfReturnType().stream()
-                .filter(s -> s.getType().asElement().getKind().equals(CLASS) && !s.getType().asElement().getModifiers().contains(Modifier.ABSTRACT))
-                .collect(toMap(importableJavaType -> importableJavaType, PortablePojoModule::extractPortablePojoModule))
-                .entrySet().stream()
-                .map(e -> e.getValue().map(module -> oracleEntrySource(module.getVariableName(), e.getKey().getFlatFqcn())))
-                .filter(Optional::isPresent).map(Optional::get)
-                .collect(joining(",\n"));
+        //TODO: discover whole dependency/hierarchy tree of return type.
+        return "";
     }
 
     private String returnType() {
-        return javaMethod.getReturnType().toUniqueTsType();
-    }
-
-    private String oracleEntrySource(final String variableName, final String moduleName) {
-        //FIXME: What about interfaces and abstract classes?
-        return format("\"%s\": (self: any) => new %s(self)", moduleName, variableName);
-    }
-
-    public Set<PortablePojoModule> getAllDependencies() {
-        return Stream.concat(javaMethod.getParameterDirectTsDependencies().stream(), javaMethod.getAllTsDependenciesOfReturnType().stream())
-                .map(s -> new JavaType(s.getType().asElement().asType(), s.getType().asElement().asType()).asImportableJavaType())
-                .filter(Optional::isPresent).map(Optional::get)
-                .map(PortablePojoModule::extractPortablePojoModule)
-                .filter(Optional::isPresent).map(Optional::get)
-                .collect(toSet());
+        return importStore.importing(javaMethod.getReturnType()).toUniqueTsType();
     }
 }
