@@ -9,11 +9,13 @@ export class Foo implements Portable {
     };
   };
 
-  public readonly fqcn: string = this._fqcn.value();
-
   public foo?: string;
 
   constructor(self: { foo: string }) {
     Object.assign(this, self);
+  }
+
+  public getFqcn() {
+    return this._fqcn;
   }
 }

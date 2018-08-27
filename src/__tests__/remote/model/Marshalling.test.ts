@@ -121,8 +121,6 @@ class Person implements Portable {
     };
   };
 
-  public readonly fqcn: string = this._fqcn.value();
-
   public name: string;
   public homeAddr?: Address;
   public workAddr?: Address;
@@ -130,6 +128,10 @@ class Person implements Portable {
 
   constructor(self: { name: string; homeAddr?: Address; workAddr?: Address; bestFriend?: Person }) {
     Object.assign(this, self);
+  }
+
+  public getFqcn() {
+    return this._fqcn;
   }
 }
 
@@ -140,12 +142,14 @@ class Address implements Portable {
     };
   };
 
-  public readonly fqcn: string = this._fqcn.value();
-
   public line1: string;
   public line2: string;
 
   constructor(self: { line1: string; line2: string }) {
     Object.assign(this, self);
+  }
+
+  public getFqcn() {
+    return this._fqcn;
   }
 }
