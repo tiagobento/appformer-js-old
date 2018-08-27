@@ -43,38 +43,26 @@ public class PojoTsClass {
     }
 
     public String toSource() {
-        final DeclaredType type = portablePojoModule.getType();
-        final TypeElement element = (TypeElement) type.asElement();
 
-        final String fqcn = new JavaType(element.asType(), element.asType()).toUniqueTsType();
-        final String simpleName = fqcn.substring(fqcn.indexOf(element.getSimpleName().toString()));
-
-        final List<JavaType> implementedInterfaces = element.getInterfaces().stream()
-                .map(t -> new JavaType(t, type))
-                .filter(t -> !t.getFlatFqcn().matches("^javax?.*"))
-                .collect(toList());
+        final Element element = portablePojoModule.getType().asElement();
 
         if (element.getKind().equals(INTERFACE)) {
-
-            final String _implements = implementedInterfaces.isEmpty()
-                    ? ""
-                    : "extends " + implementedInterfaces.stream().peek(importStore::importing).map(JavaType::toUniqueTsType).collect(joining(", "));
-
-            //Has to be the last
-            final String imports = importStore.getImportStatements();
-
-            return format("%s\n\nexport default interface %s %s {\n}", imports, simpleName, _implements);
+            return generateInterface();
         }
 
         if (element.getKind().equals(ENUM)) {
-            //FIXME: Enum extending interfaces?
-            final String enumFields = element.getEnclosedElements().stream()
-                    .filter(s -> s.getKind().equals(ENUM_CONSTANT))
-                    .map(Element::getSimpleName)
-                    .collect(joining(", "));
-
-            return format("enum %s { %s }\n\nexport default %s;", simpleName, enumFields, simpleName);
+            return generateEnum();
         }
+
+        return generateClass();
+    }
+
+    private String generateClass() {
+        final DeclaredType type = portablePojoModule.getType();
+        final TypeElement element = (TypeElement) type.asElement();
+        final String simpleName = extractSimpleName(element);
+
+        final List<JavaType> implementedInterfaces = extractInterfaces();
 
         final String fields = element.getEnclosedElements().stream()
                 .filter(s -> s.getKind().isField())
@@ -82,7 +70,7 @@ public class PojoTsClass {
                 .map(s -> format("  public readonly %s?: %s;", s.getSimpleName(), importStore.importing(new JavaType(s.asType(), type)).toUniqueTsType()))
                 .collect(joining("\n"));
 
-        final String constructorArgs = getConstructorArgs(element);
+        final String constructorArgs = extractConstructorArgs(element);
 
         final String superCall = element.getSuperclass().toString().matches("^javax?.*")
                 ? ""
@@ -138,7 +126,67 @@ public class PojoTsClass {
         );
     }
 
-    private String getConstructorArgs(final TypeElement typeElement) {
+    private String generateEnum() {
+        final TypeElement element = (TypeElement) portablePojoModule.getType().asElement();
+        final String simpleName = extractSimpleName(element);
+
+        //FIXME: Enum extending interfaces?
+        final String enumFields = element.getEnclosedElements().stream()
+                .filter(s -> s.getKind().equals(ENUM_CONSTANT))
+                .map(Element::getSimpleName)
+                .collect(joining(", "));
+
+        return format("" +
+                              "enum %s { %s }" +
+                              "\n" +
+                              "\n" +
+                              "export default %s;",
+
+                      simpleName,
+                      enumFields,
+                      simpleName);
+    }
+
+    private String generateInterface() {
+        final List<JavaType> implementedInterfaces = extractInterfaces();
+        final DeclaredType type = portablePojoModule.getType();
+        final TypeElement element = (TypeElement) type.asElement();
+        final String simpleName = extractSimpleName(element);
+        final String _implements = implementedInterfaces.isEmpty()
+                ? ""
+                : "extends " + implementedInterfaces.stream().peek(importStore::importing).map(JavaType::toUniqueTsType).collect(joining(", "));
+
+        //Has to be the last
+        final String imports = importStore.getImportStatements();
+
+        return format("" +
+                              "%s" +
+                              "\n" +
+                              "\n" +
+                              "export default interface %s %s {" +
+                              "\n" +
+                              "}",
+
+                      imports,
+                      simpleName,
+                      _implements);
+    }
+
+    private List<JavaType> extractInterfaces() {
+        final DeclaredType type = portablePojoModule.getType();
+        final TypeElement element = (TypeElement) type.asElement();
+        return element.getInterfaces().stream()
+                .map(t -> new JavaType(t, type))
+                .filter(t -> !t.getFlatFqcn().matches("^javax?.*"))
+                .collect(toList());
+    }
+
+    private String extractSimpleName(final TypeElement element) {
+        final String fqcn = new JavaType(element.asType(), element.asType()).toUniqueTsType();
+        return fqcn.substring(fqcn.indexOf(element.getSimpleName().toString()));
+    }
+
+    private String extractConstructorArgs(final TypeElement typeElement) {
 
         final List<String> fields = typeElement.getEnclosedElements().stream()
                 .filter(f -> f.getKind().isField())
@@ -150,9 +198,7 @@ public class PojoTsClass {
             return fields.stream().collect(joining(", "));
         }
 
-        final TypeElement superclassTypeElement = (TypeElement) ((DeclaredType) typeElement.getSuperclass()).asElement();
-        final String inheritedFields = getConstructorArgs(superclassTypeElement);
-
+        final String inheritedFields = extractConstructorArgs((TypeElement) ((DeclaredType) typeElement.getSuperclass()).asElement());
         return Stream.concat(fields.stream(), Stream.of("inherited?: {" + inheritedFields + "}")).collect(joining(", "));
     }
 
