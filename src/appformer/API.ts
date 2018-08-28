@@ -1,7 +1,7 @@
 import * as ReactDOM from "react-dom";
 import { Screen, Perspective } from "appformer/Components";
 import JsBridge from "appformer/internal/JsBridge";
-import { Portable } from "generated/Model";
+import { Portable } from "generated__temporary__/Model";
 
 const jsBridge = new JsBridge();
 

@@ -6,8 +6,8 @@ module.exports = {
   mode: "development",
   entry: {
     appformer: "./src/appformer/index.ts",
-    "core-screens/screens": "./src/core-screens/index.jsx",
-    "core-examples/examples": "./src/core-examples/index.ts"
+    "showcase/showcase-components": "./src/showcase-components/index.jsx",
+    "showcase/showcase": "./src/showcase/index.ts"
   },
   externals: {
     // 'core': "core", //FIXME: Do we want to exclude core from the build?
@@ -21,11 +21,11 @@ module.exports = {
   },
   devtool: "inline-source-map",
   devServer: {
-    contentBase: path.join(__dirname, "./dist/core-examples"),
+    contentBase: path.join(__dirname, "./dist/showcase"),
     compress: true,
     port: 9000,
     historyApiFallback: {
-      index: "/core-examples/index.html"
+      index: "/showcase/index.html"
     }
   },
   module: {
@@ -53,9 +53,9 @@ module.exports = {
     new CleanWebpackPlugin(["dist"]),
     new HtmlWebpackPlugin({
       title: "AppFormer.js :: Core Screens",
-      filename: "core-examples/index.html",
-      chunks: ["core-examples/examples"],
-      template: "./src/core-examples/index.template.html"
+      filename: "showcase/index.html",
+      chunks: ["showcase/showcase"],
+      template: "./src/showcase/index.template.html"
     })
   ]
 };

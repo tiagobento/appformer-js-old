@@ -3,10 +3,16 @@ package org.uberfire.jsbridge;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Optional;
+import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -24,14 +30,12 @@ import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
 import static java.lang.String.format;
-import static java.util.stream.Collectors.joining;
 import static javax.lang.model.element.ElementKind.PACKAGE;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @SupportedAnnotationTypes({"org.jboss.errai.bus.server.annotations.Remote"})
 public class RemoteTsExporter extends AbstractProcessor {
 
-    public static ProcessingEnvironment staticProcessingEnv;
     public static Types types;
     public static Elements elements;
     public static String currentMavenModuleName;
@@ -39,7 +43,6 @@ public class RemoteTsExporter extends AbstractProcessor {
     @Override
     public synchronized void init(final ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
-        RemoteTsExporter.staticProcessingEnv = processingEnv;
         RemoteTsExporter.types = processingEnv.getTypeUtils();
         RemoteTsExporter.elements = processingEnv.getElementUtils();
     }
@@ -84,9 +87,37 @@ public class RemoteTsExporter extends AbstractProcessor {
         setCurrentModuleName(rpcCallerTsClass);
         generateRemoteRpcTsClassFile(rpcCallerTsClass);
 
-        rpcCallerTsClass.getAllDependencies().stream()
+        rpcCallerTsClass.getDependencies().stream()
                 .filter(distinctBy(PortablePojoModule::getVariableName))
                 .forEach(this::generatePojoTsClassFile);
+
+        try {
+            final Enumeration<URL> resources = this.getClass().getClassLoader().getResources("META-INF/ErraiApp.properties");
+            Collections.list(resources).stream()
+                    .map(this::loadPropertiesFile)
+                    .map(properties -> Optional.ofNullable(properties.getProperty("errai.marshalling.serializableTypes")))
+                    .filter(Optional::isPresent).map(Optional::get)
+                    .flatMap(serializableTypes -> Arrays.stream(serializableTypes.split(" \n?")))
+                    .map(String::trim)
+                    .map(fqcn -> elements.getTypeElement(fqcn.replace("$", ".")))
+                    .map(typeElement -> new JavaType(typeElement.asType(), typeElement.asType()).asImportableJavaType())
+                    .map(javaType -> javaType.flatMap(PortablePojoModule::extractPortablePojoModule))
+                    .filter(Optional::isPresent).map(Optional::get)
+                    .peek(s -> System.out.println("WW!!: generating pojo " + s.getType()))
+                    .forEach(this::generatePojoTsClassFile);
+        } catch (final IOException e) {
+            System.out.println("Failed to read ErraiApp.properties files");
+        }
+    }
+
+    private Properties loadPropertiesFile(final URL fileUrl) {
+        final Properties properties = new Properties();
+        try {
+            properties.load(fileUrl.openStream());
+        } catch (final IOException e) {
+            System.out.println("Failed to read ErraiApp.properties files");
+        }
+        return properties;
     }
 
     private void setCurrentModuleName(final RpcCallerTsClass tsClass) {
@@ -141,7 +172,7 @@ public class RemoteTsExporter extends AbstractProcessor {
         return path.toFile().exists() ? path : Files.createFile(path);
     }
 
-    public static <T> Predicate<T> distinctBy(Function<? super T, ?> keyExtractor) {
+    public static <T> Predicate<T> distinctBy(final Function<? super T, ?> keyExtractor) {
         Set<Object> seen = ConcurrentHashMap.newKeySet();
         return t -> seen.add(keyExtractor.apply(t));
     }

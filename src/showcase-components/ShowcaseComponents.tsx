@@ -1,11 +1,11 @@
 import * as React from "react";
 import * as AppFormer from "appformer";
-import DemoApp from "core-screens/DemoApp";
-import { Foo, TestEvent } from "generated/Model";
-import TestMessagesService from "generated/org/uberfire/shared/TestMessagesService";
+import ShowcaseReactComponent from "showcase-components/DemoReactComponent";
+import { Foo, TestEvent } from "generated__temporary__/Model";
+import TestMessagesService from "generated__temporary__/org/uberfire/shared/TestMessagesService";
 
-// import homePerspectiveTemplate from "core-screens/HomePerspective.html";
-// import otherPerspectiveTemplate from "core-screens/other-perspective.html";
+// import homePerspectiveTemplate from "showcase-components/HomePerspective.html";
+// import otherPerspectiveTemplate from "showcase-components/other-perspective.html";
 
 export class InoffensiveNonScreenClass {}
 
@@ -103,7 +103,7 @@ export class ReactComponentScreen extends AppFormer.Screen {
   }
 
   public af_componentRoot() {
-    const UntypedDemoApp = DemoApp as any;
+    const Component = ShowcaseReactComponent as any;
     return (
       <div>
         <br />
@@ -112,7 +112,7 @@ export class ReactComponentScreen extends AppFormer.Screen {
         </button>
         <br />
 
-        <UntypedDemoApp number={this.af_componentId} onFoo={(x: any) => (this.onFoo = x)} />
+        <Component number={this.af_componentId} onFoo={(x: any) => (this.onFoo = x)} />
       </div>
     );
   }

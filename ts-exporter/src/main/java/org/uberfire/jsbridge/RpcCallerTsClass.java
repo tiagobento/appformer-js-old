@@ -107,13 +107,10 @@ public class RpcCallerTsClass {
     }
 
     private String imports() {
-        return importStore.getImports().stream()
-                .map(PortablePojoModule::asTsImportSource)
-                .distinct()
-                .collect(joining("\n"));
+        return importStore.getImportStatements();
     }
 
-    public List<PortablePojoModule> getAllDependencies() {
+    public List<PortablePojoModule> getDependencies() {
         return importStore.getImports();
     }
 

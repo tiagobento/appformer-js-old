@@ -1,5 +1,5 @@
 import { rpc, marshall } from "appformer";
-import { TestEvent } from "generated/Model";
+import { TestEvent } from "generated__temporary__/Model";
 
 export default class TestMessagesService {
   public sayHello() {
