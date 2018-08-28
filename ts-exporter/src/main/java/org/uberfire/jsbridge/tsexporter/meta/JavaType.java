@@ -16,6 +16,7 @@
 
 package org.uberfire.jsbridge.tsexporter.meta;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,6 +31,10 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static javax.lang.model.type.TypeKind.TYPEVAR;
 import static org.uberfire.jsbridge.tsexporter.Main.types;
+import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.DEFAULT;
+import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.EXTENDS;
+import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.FIELD;
+import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.PARAMETER;
 
 public class JavaType {
 
@@ -44,11 +49,25 @@ public class JavaType {
         this.owner = owner;
     }
 
-    public String toUniqueTsType() {
-        return toUniqueTsType(type);
+    public enum TsTypeTarget {
+        FIELD,
+        EXTENDS,
+        PARAMETER,
+        DEFAULT;
     }
 
-    private String toUniqueTsType(final TypeMirror type) {
+    public String toUniqueTsType() {
+        return toUniqueTsType(type, DEFAULT);
+    }
+
+
+    public String toUniqueTsType(final TsTypeTarget tsTypeTarget) {
+        return toUniqueTsType(type, tsTypeTarget);
+    }
+
+    private String toUniqueTsType(final TypeMirror type,
+                                  final TsTypeTarget tsTypeTarget) {
+
         switch (type.getKind()) {
             case INT:
             case BYTE:
@@ -62,7 +81,7 @@ public class JavaType {
             case NULL:
                 return "null"; //FIXME: undefined?
             case ARRAY:
-                return format("%s[]", toUniqueTsType(((ArrayType) type).getComponentType()));
+                return format("%s[]", toUniqueTsType(((ArrayType) type).getComponentType(), tsTypeTarget));
             case CHAR:
                 return "string";
             case BOOLEAN:
@@ -73,21 +92,25 @@ public class JavaType {
                     if (resolvedType.getKind().equals(TYPEVAR)) {
                         final TypeVariable typeVariable = (TypeVariable) resolvedType;
                         if (typeVariable.getUpperBound() != null) {
-                            return resolvedType.toString() + " extends " + toUniqueTsType(typeVariable.getUpperBound());
+                            if (Arrays.asList(FIELD, EXTENDS, PARAMETER).contains(tsTypeTarget)) {
+                                return resolvedType.toString();
+                            } else {
+                                return resolvedType.toString() + " extends " + toUniqueTsType(typeVariable.getUpperBound(), tsTypeTarget);
+                            }
                         } else if (typeVariable.getLowerBound() != null) {
-                            return toUniqueTsType(typeVariable.getLowerBound());
+                            return toUniqueTsType(typeVariable.getLowerBound(), tsTypeTarget);
                         } else {
                             return resolvedType.toString();
                         }
                     } else {
-                        return toUniqueTsType(resolvedType);
+                        return toUniqueTsType(resolvedType, tsTypeTarget);
                     }
                 } catch (final Exception e) {
-                    return toUniqueTsType(((TypeVariable) type).getUpperBound());
+                    return toUniqueTsType(((TypeVariable) type).getUpperBound(), tsTypeTarget);
                 }
             case DECLARED:
                 final DeclaredType declaredType = (DeclaredType) type;
-                final List<String> typeArguments = declaredType.getTypeArguments().stream().map(this::toUniqueTsType).collect(toList());
+                final List<String> typeArguments = declaredType.getTypeArguments().stream().map(s -> toUniqueTsType(s, tsTypeTarget)).collect(toList());
 
                 if (typeArguments.isEmpty()) {
                     final String fqcn = declaredType.asElement().toString();
@@ -114,6 +137,12 @@ public class JavaType {
                 }
 
                 switch (declaredType.asElement().toString()) {
+                    case "java.lang.Class":
+                        return "any /* class */";
+                    case "java.util.Map.Entry":
+                        return "any /* map entry */";
+                    case "java.util.HashMap.Node":
+                        return "any /* map node */";
                     case "java.util.HashMap":
                     case "java.util.Map":
                         final String s0 = typeArguments.get(0);
@@ -124,6 +153,7 @@ public class JavaType {
                     case "java.util.List":
                     case "java.util.ArrayList":
                     case "java.util.LinkedList":
+                    case "java.util.Collection":
                         return format("%s[]", typeArguments.get(0));
                     default:
                         return format("%s<%s>",
@@ -133,9 +163,9 @@ public class JavaType {
             case WILDCARD:
                 final WildcardType wildcardType = (WildcardType) type;
                 if (wildcardType.getExtendsBound() != null) {
-                    return toUniqueTsType(wildcardType.getExtendsBound());
+                    return toUniqueTsType(wildcardType.getExtendsBound(), tsTypeTarget);
                 } else if (wildcardType.getSuperBound() != null) {
-                    return toUniqueTsType(wildcardType.getSuperBound());
+                    return toUniqueTsType(wildcardType.getSuperBound(), tsTypeTarget);
                 } else {
                     return "any /* wildcard */";
                 }
@@ -191,5 +221,9 @@ public class JavaType {
 
     public String getFlatFqcn() {
         return types.asElement(type).toString();
+    }
+
+    public TypeMirror getType() {
+        return type;
     }
 }

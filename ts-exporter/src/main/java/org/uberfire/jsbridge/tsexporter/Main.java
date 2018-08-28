@@ -154,10 +154,10 @@ public class Main extends AbstractProcessor {
         }
     }
 
-    private void generatePojoTsClassFile(final ImportableTsType portablePojoModule) {
-        final PojoTsClass pojoTsClass = new PojoTsClass(portablePojoModule);
+    private void generatePojoTsClassFile(final ImportableTsType importableTsType) {
+        final PojoTsClass pojoTsClass = new PojoTsClass(importableTsType);
 
-        final String relativePath = portablePojoModule.getPath();
+        final String relativePath = importableTsType.getPath();
         final Path path = Paths.get("/tmp/ts-exporter/" + relativePath + ".ts");
         if (Files.exists(path)) {
             System.out.println(format("Skipping generation of %s because it already exists", relativePath));
