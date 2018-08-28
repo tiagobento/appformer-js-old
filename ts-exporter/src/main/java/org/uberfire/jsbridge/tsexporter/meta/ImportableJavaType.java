@@ -134,7 +134,7 @@ public class ImportableJavaType extends JavaType {
     public List<ImportableTsType> getDirectImportableTsTypes() {
 
         final List<ImportableTsType> importableTsArgumentTypes = getType().getTypeArguments().stream()
-                .map(typeArgument -> new JavaType(typeArgument, type).asImportableJavaType())
+                .map(typeArgument -> new JavaType(typeArgument, owner).asImportableJavaType())
                 .filter(Optional::isPresent).map(Optional::get)
                 .flatMap(importableJavaType -> importableJavaType.getDirectImportableTsTypes().stream())
                 .collect(toList());
