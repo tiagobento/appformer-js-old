@@ -86,7 +86,7 @@ public class PojoTsClass {
         final String constructorArgs = extractConstructorArgs(element);
 
         final String superCall = importableSuperclassTsType.map(t -> "super({...self.inherited});").orElse("");
-        final String _extends = importableSuperclassTsType.map(t -> "extends " + importStore.importing(t).toUniqueTsType()).orElse("");
+        final String _extends = importableSuperclassTsType.map(t -> "extends " + importStore.importing(t).toUniqueTsType(EXTENDS)).orElse("");
 
         final String _implements = implementedInterfaces.isEmpty()
                 ? format("implements Portable<%s>", extractSimpleName(element, EXTENDS))
@@ -162,7 +162,7 @@ public class PojoTsClass {
         final String simpleName = extractSimpleName(element, DEFAULT);
         final String _implements = implementedInterfaces.isEmpty()
                 ? ""
-                : "extends " + implementedInterfaces.stream().peek(importStore::importing).map(JavaType::toUniqueTsType).collect(joining(", "));
+                : "extends " + implementedInterfaces.stream().peek(importStore::importing).map(javaType -> javaType.toUniqueTsType(EXTENDS)).collect(joining(", "));
 
         //Has to be the last
         final String imports = importStore.getImportStatements();

@@ -25,6 +25,7 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 
 import org.uberfire.jsbridge.tsexporter.meta.ImportableTsType;
+import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 import org.uberfire.jsbridge.tsexporter.util.ImportStore;
 import org.uberfire.jsbridge.tsexporter.util.Lazy;
 
@@ -99,7 +100,8 @@ public class RpcCallerTsClass {
     }
 
     private String simpleName() {
-        return _interface.getSimpleName().toString();
+        final String fqcn = importStore.importing(new JavaType(_interface.asType(), _interface.asType())).toUniqueTsType();
+        return fqcn.substring(fqcn.indexOf(_interface.getSimpleName().toString()));
     }
 
     private String methods() {
@@ -134,6 +136,4 @@ public class RpcCallerTsClass {
     public TypeElement getInterface() {
         return _interface;
     }
-
-
 }

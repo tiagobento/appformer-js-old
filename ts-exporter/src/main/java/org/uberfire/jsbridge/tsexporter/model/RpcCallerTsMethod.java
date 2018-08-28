@@ -18,11 +18,13 @@ package org.uberfire.jsbridge.tsexporter.model;
 
 import javax.lang.model.element.TypeElement;
 
+import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 import org.uberfire.jsbridge.tsexporter.util.ImportStore;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
+import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.*;
 
 public class RpcCallerTsMethod {
 
@@ -79,7 +81,7 @@ public class RpcCallerTsMethod {
 
     private String params() {
         return javaMethod.getParameterJavaTypesByNames().entrySet().stream()
-                .map(e -> format("%s: %s", e.getKey(), importStore.importing(e.getValue()).toUniqueTsType()))
+                .map(e -> format("%s: %s", e.getKey(), importStore.importing(e.getValue()).toUniqueTsType(PARAMETER)))
                 .collect(joining(", "));
     }
 
@@ -99,6 +101,6 @@ public class RpcCallerTsMethod {
     }
 
     private String returnType() {
-        return importStore.importing(javaMethod.getReturnType()).toUniqueTsType();
+        return importStore.importing(javaMethod.getReturnType()).toUniqueTsType(EXTENDS);
     }
 }
