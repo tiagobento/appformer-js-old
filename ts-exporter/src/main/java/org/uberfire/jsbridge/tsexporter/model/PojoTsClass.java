@@ -17,12 +17,14 @@
 package org.uberfire.jsbridge.tsexporter.model;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 
+import org.uberfire.jsbridge.tsexporter.meta.ImportableJavaType;
 import org.uberfire.jsbridge.tsexporter.meta.ImportableTsType;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 import org.uberfire.jsbridge.tsexporter.util.ImportStore;
@@ -66,6 +68,10 @@ public class PojoTsClass {
         final TypeElement element = (TypeElement) type.asElement();
         final String simpleName = extractSimpleName(element);
 
+        final Optional<ImportableTsType> importableSuperclassTsType = new JavaType(element.getSuperclass(), type)
+                .asImportableJavaType()
+                .flatMap(ImportableJavaType::asImportableTsType);
+
         final List<JavaType> implementedInterfaces = extractInterfaces();
 
         final String fields = element.getEnclosedElements().stream()
@@ -76,17 +82,12 @@ public class PojoTsClass {
 
         final String constructorArgs = extractConstructorArgs(element);
 
-        final String superCall = element.getSuperclass().toString().matches("^javax?.*")
-                ? ""
-                : "super({...self.inherited});";
+        final String superCall = importableSuperclassTsType.map(t -> "super({...self.inherited});").orElse("");
+        final String _extends = importableSuperclassTsType.map(t -> "extends " + importStore.importing(t).toUniqueTsType()).orElse("");
 
         final String _implements = implementedInterfaces.isEmpty()
                 ? format("implements Portable<%s>", simpleName)
                 : "implements " + implementedInterfaces.stream().peek(importStore::importing).map(JavaType::toUniqueTsType).collect(joining(", ")) + format(", Portable<%s>", simpleName);
-
-        final String _extends = element.getSuperclass().toString().matches("^javax?.*")
-                ? ""
-                : "extends " + importStore.importing(new JavaType(element.getSuperclass(), type)).toUniqueTsType();
 
         final String hierarchy = _extends + " " + _implements;
         final String abstractOrNot = element.getModifiers().contains(ABSTRACT) ? "abstract" : "";
@@ -180,8 +181,9 @@ public class PojoTsClass {
         final DeclaredType type = portablePojoModule.getType();
         final TypeElement element = (TypeElement) type.asElement();
         return element.getInterfaces().stream()
-                .map(t -> new JavaType(t, type))
-                .filter(t -> !t.getFlatFqcn().matches("^javax?.*"))
+                .map(t -> new JavaType(t, type).asImportableJavaType())
+                .map(t -> t.flatMap(ImportableJavaType::asImportableTsType))
+                .filter(Optional::isPresent).map(Optional::get)
                 .collect(toList());
     }
 

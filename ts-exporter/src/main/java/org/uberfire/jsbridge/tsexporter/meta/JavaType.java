@@ -179,31 +179,6 @@ public class JavaType {
         }
     }
 
-    public List<ImportableJavaType> getDirectImportableNonJdkTypes() {
-
-        final Optional<ImportableJavaType> asImportableJavaType = asImportableJavaType();
-        if (!asImportableJavaType.isPresent()) {
-            return emptyList();
-        }
-
-        final List<ImportableJavaType> nonJdkTypeArguments = ((DeclaredType) asImportableJavaType.get().type).getTypeArguments().stream()
-                .map(typeArgument -> new JavaType(typeArgument, type).asImportableJavaType())
-                .filter(Optional::isPresent).map(Optional::get)
-                .flatMap(importableJavaType -> importableJavaType.getDirectImportableNonJdkTypes().stream())
-                .filter(typeArgument -> !typeArgument.toString().matches("^javax?.*"))
-                .collect(toList());
-
-        if (type.toString().matches("^javax?.*")) {
-            if (nonJdkTypeArguments.isEmpty()) {
-                return emptyList();
-            } else {
-                return nonJdkTypeArguments;
-            }
-        }
-
-        return Stream.concat(Stream.of(asImportableJavaType.get()), nonJdkTypeArguments.stream()).collect(toList());
-    }
-
     public String getFlatFqcn() {
         return types.asElement(type).toString();
     }

@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.uberfire.jsbridge.tsexporter.meta.ImportableJavaType;
 import org.uberfire.jsbridge.tsexporter.meta.ImportableTsType;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 
@@ -37,9 +36,10 @@ public class ImportStore {
     }
 
     public List<ImportableTsType> getImports() {
-        return dependencies.stream().flatMap(javaType -> javaType.getDirectImportableNonJdkTypes().stream())
-                .map(ImportableJavaType::asImportableTsType)
+        return dependencies.stream()
+                .map(JavaType::asImportableJavaType)
                 .filter(Optional::isPresent).map(Optional::get)
+                .flatMap(importableJavaType -> importableJavaType.getDirectImportableTsTypes().stream())
                 .collect(toList());
     }
 

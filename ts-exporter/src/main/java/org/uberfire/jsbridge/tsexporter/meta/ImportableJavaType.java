@@ -55,7 +55,7 @@ public class ImportableJavaType extends JavaType {
 
     private List<ImportableJavaType> getAllTsImportableTypes(final Set<String> visited, final int maxDepth, final int depth) {
 
-        final List<ImportableJavaType> rootLevelTypes = new JavaType(type, owner).getDirectImportableNonJdkTypes();
+        final List<ImportableTsType> rootLevelTypes = getDirectImportableTsTypes();
         if (rootLevelTypes.isEmpty()) {
             return emptyList();
         }
@@ -105,14 +105,14 @@ public class ImportableJavaType extends JavaType {
         return Optional.empty();
     }
 
-
     public Optional<ImportableTsType> asImportableTsType() {
         try {
-            final Class<?> clazz = Class.forName(getFlatFqcn());
-            if (clazz.getPackage().getName().startsWith("java")) {
+
+            if (getFlatFqcn().matches("^javax?.*")) {
                 return Optional.empty();
             }
 
+            final Class<?> clazz = Class.forName(getFlatFqcn());
             final String path = clazz.getResource('/' + clazz.getName().replace('.', '/') + ".class").toString();
 
             // Nice RegEx explanation:
@@ -128,6 +128,18 @@ public class ImportableJavaType extends JavaType {
         } catch (final ClassNotFoundException e) {
             return Optional.of(new ImportableTsType(currentMavenModuleName, this));
         }
+    }
+
+    public List<ImportableTsType> getDirectImportableTsTypes() {
+
+        final List<ImportableTsType> importableTsArgumentTypes = getType().getTypeArguments().stream()
+                .map(typeArgument -> new JavaType(typeArgument, type).asImportableJavaType())
+                .filter(Optional::isPresent).map(Optional::get)
+                .flatMap(importableJavaType -> importableJavaType.getDirectImportableTsTypes().stream())
+                .collect(toList());
+
+        return Stream.concat(asImportableTsType().map(Stream::of).orElse(Stream.empty()),
+                             importableTsArgumentTypes.stream()).collect(toList());
     }
 
     public DeclaredType getType() {
