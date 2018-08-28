@@ -36,8 +36,9 @@ import static org.uberfire.jsbridge.tsexporter.Main.types;
 
 public class ImportableJavaType extends JavaType {
 
-    public ImportableJavaType(final TypeMirror type, final TypeMirror owner) {
-        super(type, owner);
+
+    public ImportableJavaType(final JavaType javaType) {
+        super(javaType.type, javaType.owner);
     }
 
     @Override

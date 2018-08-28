@@ -27,7 +27,7 @@ public class ImportableTsType extends ImportableJavaType {
     public ImportableTsType(final String moduleName,
                             final ImportableJavaType importableJavaType) {
 
-        super(importableJavaType.type, importableJavaType.owner);
+        super(importableJavaType);
         this.moduleName = moduleName;
     }
 

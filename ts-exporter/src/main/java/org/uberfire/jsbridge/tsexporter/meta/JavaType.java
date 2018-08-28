@@ -18,7 +18,6 @@ package org.uberfire.jsbridge.tsexporter.meta;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
@@ -27,10 +26,9 @@ import javax.lang.model.type.TypeVariable;
 import javax.lang.model.type.WildcardType;
 
 import static java.lang.String.format;
-import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
-import static javax.lang.model.type.TypeKind.*;
+import static javax.lang.model.type.TypeKind.TYPEVAR;
 import static org.uberfire.jsbridge.tsexporter.Main.types;
 
 public class JavaType {
@@ -79,7 +77,7 @@ public class JavaType {
                         } else if (typeVariable.getLowerBound() != null) {
                             return toUniqueTsType(typeVariable.getLowerBound());
                         } else {
-                        return resolvedType.toString();
+                            return resolvedType.toString();
                         }
                     } else {
                         return toUniqueTsType(resolvedType);
@@ -159,21 +157,33 @@ public class JavaType {
                 return new JavaType(((ArrayType) type).getComponentType(), owner).asImportableJavaType();
             case TYPEVAR:
                 try {
-                    return Optional.of(new ImportableJavaType(types.asMemberOf((DeclaredType) owner, types.asElement(type)), owner));
+                    final TypeMirror resolvedType = types.asMemberOf((DeclaredType) owner, types.asElement(this.type));
+                    if (resolvedType.getKind().equals(TYPEVAR)) {
+                        final TypeVariable typeVariable = (TypeVariable) resolvedType;
+                        if (typeVariable.getUpperBound() != null) {
+                            return new JavaType(typeVariable.getUpperBound(), owner).asImportableJavaType();
+                        } else if (typeVariable.getLowerBound() != null) {
+                            return new JavaType(typeVariable.getLowerBound(), owner).asImportableJavaType();
+                        } else {
+                            return Optional.empty();
+                        }
+                    } else {
+                        return new JavaType(resolvedType, owner).asImportableJavaType();
+                    }
                 } catch (final Exception e) {
-                    return Optional.of(new ImportableJavaType(((TypeVariable) type).getUpperBound(), owner));
+                    return new JavaType(((TypeVariable) type).getUpperBound(), owner).asImportableJavaType();
                 }
             case WILDCARD:
-                    final WildcardType wildcardType = (WildcardType) type;
-                    if (wildcardType.getExtendsBound() != null) {
-                        return new JavaType(wildcardType.getExtendsBound(), owner).asImportableJavaType();
-                    } else if (wildcardType.getSuperBound() != null) {
-                        return new JavaType(wildcardType.getSuperBound(), owner).asImportableJavaType();
-                    } else {
-                        return Optional.empty();
-                    }
+                final WildcardType wildcardType = (WildcardType) type;
+                if (wildcardType.getExtendsBound() != null) {
+                    return new JavaType(wildcardType.getExtendsBound(), owner).asImportableJavaType();
+                } else if (wildcardType.getSuperBound() != null) {
+                    return new JavaType(wildcardType.getSuperBound(), owner).asImportableJavaType();
+                } else {
+                    return Optional.empty();
+                }
             case DECLARED:
-                return Optional.of(new ImportableJavaType(type, owner));
+                return Optional.of(new ImportableJavaType(this));
             default:
                 return Optional.empty();
         }
