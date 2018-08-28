@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-package org.uberfire.jsbridge;
+package org.uberfire.jsbridge.tsexporter.util;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import org.uberfire.jsbridge.tsexporter.meta.ImportableJavaType;
+import org.uberfire.jsbridge.tsexporter.meta.ImportableTsType;
+import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -32,16 +36,16 @@ public class ImportStore {
         return type;
     }
 
-    public List<PortablePojoModule> getImports() {
+    public List<ImportableTsType> getImports() {
         return dependencies.stream().flatMap(javaType -> javaType.getDirectImportableNonJdkTypes().stream())
-                .map(PortablePojoModule::extractPortablePojoModule)
+                .map(ImportableJavaType::asImportableTsType)
                 .filter(Optional::isPresent).map(Optional::get)
                 .collect(toList());
     }
 
     public String getImportStatements() {
         return getImports().stream()
-                .map(PortablePojoModule::asTsImportSource)
+                .map(ImportableTsType::asTsImportSource)
                 .distinct()
                 .collect(joining("\n"));
     }

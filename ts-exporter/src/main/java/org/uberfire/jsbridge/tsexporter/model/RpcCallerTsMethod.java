@@ -14,28 +14,21 @@
  * limitations under the License.
  */
 
-package org.uberfire.jsbridge;
+package org.uberfire.jsbridge.tsexporter.model;
 
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Stream;
-
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 
+import org.uberfire.jsbridge.tsexporter.util.ImportStore;
+
 import static java.lang.String.format;
-import static java.lang.reflect.Modifier.ABSTRACT;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
-import static java.util.stream.Collectors.toSet;
-import static javax.lang.model.element.ElementKind.CLASS;
 
 public class RpcCallerTsMethod {
 
     private final TypeElement _interface;
     private final ImportStore importStore;
-    private final RemoteInterfaceJavaMethod javaMethod;
+    private final RpcJavaMethod javaMethod;
     private final String name;
 
     public RpcCallerTsMethod(final RpcCallerTsMethod tsMethod,
@@ -49,7 +42,7 @@ public class RpcCallerTsMethod {
 
     public RpcCallerTsMethod(final TypeElement _interface,
                              final ImportStore importStore,
-                             final RemoteInterfaceJavaMethod javaMethod) {
+                             final RpcJavaMethod javaMethod) {
 
         this._interface = _interface;
         this.importStore = importStore;
@@ -59,8 +52,25 @@ public class RpcCallerTsMethod {
 
     public String toSource() {
         System.out.println("Generating " + javaMethod.getName() + " for " + _interface.getQualifiedName().toString());
-        return format("public %s(args: { %s }) { return rpc(%s, [%s]).then((json: string) => unmarshall(json, {%s}) as %s); }",
-                      getName(), params(), erraiBusPath(), rpcCallParams(), factoriesOracle(), returnType());
+        return format("" +
+                              "public %s(args: { %s }) {" +
+                              "\n" +
+                              "  return rpc(%s, [%s])" +
+                              "\n" +
+                              "         .then((json: string) => { " +
+                              "\n" +
+                              "           return unmarshall(json, {%s}) as %s; " +
+                              "\n" +
+                              "         }); " +
+                              "\n" +
+                              "}",
+
+                      getName(),
+                      params(),
+                      erraiBusPath(),
+                      rpcCallParams(),
+                      factoriesOracle(),
+                      returnType());
     }
 
     public String getName() {

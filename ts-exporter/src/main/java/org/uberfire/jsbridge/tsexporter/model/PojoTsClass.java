@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.uberfire.jsbridge;
+package org.uberfire.jsbridge.tsexporter.model;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -22,6 +22,10 @@ import java.util.stream.Stream;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
+
+import org.uberfire.jsbridge.tsexporter.meta.ImportableTsType;
+import org.uberfire.jsbridge.tsexporter.meta.JavaType;
+import org.uberfire.jsbridge.tsexporter.util.ImportStore;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
@@ -34,10 +38,10 @@ import static javax.lang.model.element.Modifier.STATIC;
 
 public class PojoTsClass {
 
-    private final PortablePojoModule portablePojoModule;
+    private final ImportableTsType portablePojoModule;
     private final ImportStore importStore;
 
-    public PojoTsClass(final PortablePojoModule portablePojoModule) {
+    public PojoTsClass(final ImportableTsType portablePojoModule) {
         this.portablePojoModule = portablePojoModule;
         this.importStore = new ImportStore();
     }
@@ -91,7 +95,7 @@ public class PojoTsClass {
         final String imports = importStore.getImportStatements();
 
         return format("" +
-                              "import { Portable } from \"generated/Model\";" +
+                              "import { Portable } from \"generated__temporary__/Model\";" +
                               "\n" +
                               "%s" +
                               "\n" +
@@ -119,7 +123,7 @@ public class PojoTsClass {
                       abstractOrNot,
                       simpleName,
                       hierarchy,
-                      portablePojoModule.getOriginatingFqcn(),
+                      portablePojoModule.getFlatFqcn(),
                       fields,
                       constructorArgs,
                       superCall
@@ -202,7 +206,7 @@ public class PojoTsClass {
         return Stream.concat(fields.stream(), Stream.of("inherited?: {" + inheritedFields + "}")).collect(joining(", "));
     }
 
-    public List<PortablePojoModule> getDependencies() {
+    public List<ImportableTsType> getDependencies() {
         return importStore.getImports();
     }
 }

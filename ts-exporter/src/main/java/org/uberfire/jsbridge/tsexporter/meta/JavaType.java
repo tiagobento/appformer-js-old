@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-package org.uberfire.jsbridge;
+package org.uberfire.jsbridge.tsexporter.meta;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
 import javax.lang.model.type.WildcardType;
@@ -33,7 +31,7 @@ import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static javax.lang.model.type.TypeKind.*;
-import static org.uberfire.jsbridge.RemoteTsExporter.types;
+import static org.uberfire.jsbridge.tsexporter.Main.types;
 
 public class JavaType {
 

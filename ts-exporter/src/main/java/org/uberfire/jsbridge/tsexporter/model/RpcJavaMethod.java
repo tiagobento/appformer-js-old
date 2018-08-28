@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-package org.uberfire.jsbridge;
+package org.uberfire.jsbridge.tsexporter.model;
 
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -25,17 +23,18 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 
+import org.uberfire.jsbridge.tsexporter.meta.JavaType;
+
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
-import static org.uberfire.jsbridge.RemoteTsExporter.distinctBy;
 
-public class RemoteInterfaceJavaMethod {
+public class RpcJavaMethod {
 
     private final ExecutableElement executableElement;
     private final TypeElement _interface;
 
-    public RemoteInterfaceJavaMethod(final TypeElement _interface, final ExecutableElement executableElement) {
+    public RpcJavaMethod(final TypeElement _interface, final ExecutableElement executableElement) {
         this.executableElement = executableElement;
         this._interface = _interface;
     }
@@ -61,6 +60,6 @@ public class RemoteInterfaceJavaMethod {
                 toMap(arg -> arg.getSimpleName().toString(),
                       arg -> new JavaType(arg.asType(), _interface.asType()),
                       (a, b) -> b, //default map behavior
-                      LinkedHashMap::new));
+                      LinkedHashMap::new)); //order is important!
     }
 }

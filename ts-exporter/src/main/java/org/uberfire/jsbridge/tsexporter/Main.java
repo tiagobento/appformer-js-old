@@ -1,4 +1,4 @@
-package org.uberfire.jsbridge;
+package org.uberfire.jsbridge.tsexporter;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,12 +29,18 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
+import org.uberfire.jsbridge.tsexporter.meta.ImportableJavaType;
+import org.uberfire.jsbridge.tsexporter.meta.ImportableTsType;
+import org.uberfire.jsbridge.tsexporter.meta.JavaType;
+import org.uberfire.jsbridge.tsexporter.model.PojoTsClass;
+import org.uberfire.jsbridge.tsexporter.model.RpcCallerTsClass;
+
 import static java.lang.String.format;
 import static javax.lang.model.element.ElementKind.PACKAGE;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @SupportedAnnotationTypes({"org.jboss.errai.bus.server.annotations.Remote"})
-public class RemoteTsExporter extends AbstractProcessor {
+public class Main extends AbstractProcessor {
 
     public static Types types;
     public static Elements elements;
@@ -43,8 +49,8 @@ public class RemoteTsExporter extends AbstractProcessor {
     @Override
     public synchronized void init(final ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
-        RemoteTsExporter.types = processingEnv.getTypeUtils();
-        RemoteTsExporter.elements = processingEnv.getElementUtils();
+        Main.types = processingEnv.getTypeUtils();
+        Main.elements = processingEnv.getElementUtils();
     }
 
     public boolean process(final Set<? extends TypeElement> annotations, final RoundEnvironment roundEnv) {
@@ -88,26 +94,26 @@ public class RemoteTsExporter extends AbstractProcessor {
         generateRemoteRpcTsClassFile(rpcCallerTsClass);
 
         rpcCallerTsClass.getDependencies().stream()
-                .filter(distinctBy(PortablePojoModule::getVariableName))
+                .filter(distinctBy(ImportableTsType::getFlatFqcn))
                 .forEach(this::generatePojoTsClassFile);
 
-        try {
-            final Enumeration<URL> resources = this.getClass().getClassLoader().getResources("META-INF/ErraiApp.properties");
-            Collections.list(resources).stream()
-                    .map(this::loadPropertiesFile)
-                    .map(properties -> Optional.ofNullable(properties.getProperty("errai.marshalling.serializableTypes")))
-                    .filter(Optional::isPresent).map(Optional::get)
-                    .flatMap(serializableTypes -> Arrays.stream(serializableTypes.split(" \n?")))
-                    .map(String::trim)
-                    .map(fqcn -> elements.getTypeElement(fqcn.replace("$", ".")))
-                    .map(typeElement -> new JavaType(typeElement.asType(), typeElement.asType()).asImportableJavaType())
-                    .map(javaType -> javaType.flatMap(PortablePojoModule::extractPortablePojoModule))
-                    .filter(Optional::isPresent).map(Optional::get)
-                    .peek(s -> System.out.println("WW!!: generating pojo " + s.getType()))
-                    .forEach(this::generatePojoTsClassFile);
-        } catch (final IOException e) {
-            System.out.println("Failed to read ErraiApp.properties files");
-        }
+//        try {
+//            final Enumeration<URL> resources = this.getClass().getClassLoader().getResources("META-INF/ErraiApp.properties");
+//            Collections.list(resources).stream()
+//                    .map(this::loadPropertiesFile)
+//                    .map(properties -> Optional.ofNullable(properties.getProperty("errai.marshalling.serializableTypes")))
+//                    .filter(Optional::isPresent).map(Optional::get)
+//                    .flatMap(serializableTypes -> Arrays.stream(serializableTypes.split(" \n?")))
+//                    .map(String::trim)
+//                    .map(fqcn -> elements.getTypeElement(fqcn.replace("$", ".")))
+//                    .map(typeElement -> new JavaType(typeElement.asType(), typeElement.asType()).asImportableJavaType())
+//                    .map(javaType -> javaType.flatMap(ImportableJavaType::asImportableTsType))
+//                    .filter(Optional::isPresent).map(Optional::get)
+//                    .peek(s -> System.out.println("WW!!: generating pojo " + s.getType()))
+//                    .forEach(this::generatePojoTsClassFile);
+//        } catch (final IOException e) {
+//            System.out.println("Failed to read ErraiApp.properties files");
+//        }
     }
 
     private Properties loadPropertiesFile(final URL fileUrl) {
@@ -148,7 +154,7 @@ public class RemoteTsExporter extends AbstractProcessor {
         }
     }
 
-    private void generatePojoTsClassFile(final PortablePojoModule portablePojoModule) {
+    private void generatePojoTsClassFile(final ImportableTsType portablePojoModule) {
         final PojoTsClass pojoTsClass = new PojoTsClass(portablePojoModule);
 
         final String relativePath = portablePojoModule.getPath();

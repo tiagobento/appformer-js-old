@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.uberfire.jsbridge;
+package org.uberfire.jsbridge.tsexporter.meta;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,16 +23,16 @@ import java.util.stream.Stream;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
-import static org.uberfire.jsbridge.RemoteTsExporter.distinctBy;
-import static org.uberfire.jsbridge.RemoteTsExporter.elements;
-import static org.uberfire.jsbridge.RemoteTsExporter.types;
+import static org.uberfire.jsbridge.tsexporter.Main.currentMavenModuleName;
+import static org.uberfire.jsbridge.tsexporter.Main.distinctBy;
+import static org.uberfire.jsbridge.tsexporter.Main.elements;
+import static org.uberfire.jsbridge.tsexporter.Main.types;
 
 public class ImportableJavaType extends JavaType {
 
@@ -103,6 +103,31 @@ public class ImportableJavaType extends JavaType {
 //        }
 
         return Optional.empty();
+    }
+
+
+    public Optional<ImportableTsType> asImportableTsType() {
+        try {
+            final Class<?> clazz = Class.forName(getFlatFqcn());
+            if (clazz.getPackage().getName().startsWith("java")) {
+                return Optional.empty();
+            }
+
+            final String path = clazz.getResource('/' + clazz.getName().replace('.', '/') + ".class").toString();
+
+            // Nice RegEx explanation:
+            // 1. Begin with a slash => (/)
+            // 2. Followed by a sequence containing letters or dashes => [\\w-]+ (the plus sign indicates that this sequence must have at least one character.)
+            // 3. Followed by a single dash => (-)
+            // 4. Followed by a sequence of digits and dots => [\\d.]+ (notice the plus sign!)
+            // 5. Followed by pretty much anything => (.*)
+            // 6. Followed by ".jar!" => \\.jar!
+            final String[] split = path.split("(/)[\\w-]+(-)[\\d.]+(.*)\\.jar!")[0].split("/");
+
+            return Optional.of(new ImportableTsType(split[split.length - 2], this));
+        } catch (final ClassNotFoundException e) {
+            return Optional.of(new ImportableTsType(currentMavenModuleName, this));
+        }
     }
 
     public DeclaredType getType() {

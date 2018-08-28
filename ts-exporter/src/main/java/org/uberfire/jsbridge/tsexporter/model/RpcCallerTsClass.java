@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.uberfire.jsbridge;
+package org.uberfire.jsbridge.tsexporter.model;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,12 +24,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 
+import org.uberfire.jsbridge.tsexporter.meta.ImportableTsType;
+import org.uberfire.jsbridge.tsexporter.util.ImportStore;
+import org.uberfire.jsbridge.tsexporter.util.Lazy;
+
 import static java.lang.String.format;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.ElementKind.METHOD;
-import static org.uberfire.jsbridge.RemoteTsExporter.types;
+import static org.uberfire.jsbridge.tsexporter.Main.types;
 
 public class RpcCallerTsClass {
 
@@ -51,16 +55,16 @@ public class RpcCallerTsClass {
                 .collect(toList());
     }
 
-    private List<RemoteInterfaceJavaMethod> getJavaMethods(final TypeElement _interface) {
+    private List<RpcJavaMethod> getJavaMethods(final TypeElement _interface) {
         return _interface.getEnclosedElements().stream()
                 .filter(member -> member.getKind().equals(METHOD))
-                .map(member -> new RemoteInterfaceJavaMethod(this._interface, (ExecutableElement) member))
+                .map(member -> new RpcJavaMethod(this._interface, (ExecutableElement) member))
                 .collect(toList());
     }
 
     //TODO: Use elements.getAllMembers
-    private List<RemoteInterfaceJavaMethod> getAllJavaMethods(final TypeElement _interface) {
-        final List<RemoteInterfaceJavaMethod> methods = new ArrayList<>();
+    private List<RpcJavaMethod> getAllJavaMethods(final TypeElement _interface) {
+        final List<RpcJavaMethod> methods = new ArrayList<>();
 
         methods.addAll(getJavaMethods(_interface));
         methods.addAll(_interface.getInterfaces().stream()
@@ -70,7 +74,7 @@ public class RpcCallerTsClass {
         return methods;
     }
 
-    String toSource() {
+    public String toSource() {
 
         final String methods = methods();
         final String simpleName = simpleName();
@@ -110,7 +114,7 @@ public class RpcCallerTsClass {
         return importStore.getImportStatements();
     }
 
-    public List<PortablePojoModule> getDependencies() {
+    public List<ImportableTsType> getDependencies() {
         return importStore.getImports();
     }
 
