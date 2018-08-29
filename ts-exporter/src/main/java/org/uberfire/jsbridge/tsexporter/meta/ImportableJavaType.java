@@ -16,7 +16,10 @@
 
 package org.uberfire.jsbridge.tsexporter.meta;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -56,7 +59,7 @@ public class ImportableJavaType extends JavaType {
 
     private List<ImportableJavaType> getAllTsImportableTypes(final Set<String> visited, final int maxDepth, final int depth) {
 
-        final List<ImportableTsType> rootLevelTypes = getDirectImportableTsTypes();
+        final List<ImportableTsType> rootLevelTypes = getDirectImportableTsTypes(new HashMap<>());
         if (rootLevelTypes.isEmpty()) {
             return emptyList();
         }
@@ -131,16 +134,23 @@ public class ImportableJavaType extends JavaType {
         }
     }
 
-    public List<ImportableTsType> getDirectImportableTsTypes() {
+
+    public List<ImportableTsType> getDirectImportableTsTypes(final Map<String, List<ImportableTsType>> visited) {
+        if (visited.containsKey(getType().toString())) {
+            return visited.get(getType().toString());
+        }
 
         final List<ImportableTsType> importableTsArgumentTypes = getType().getTypeArguments().stream()
                 .map(typeArgument -> new JavaType(typeArgument, owner).asImportableJavaType())
                 .filter(Optional::isPresent).map(Optional::get)
-                .flatMap(importableJavaType -> importableJavaType.getDirectImportableTsTypes().stream())
+                .peek(t -> visited.put(getType().toString(), t.asImportableTsType().map(Collections::singletonList).orElse(emptyList())))
+                .flatMap(importableJavaType -> importableJavaType.getDirectImportableTsTypes(visited).stream())
                 .collect(toList());
 
-        return Stream.concat(asImportableTsType().map(Stream::of).orElse(Stream.empty()),
-                             importableTsArgumentTypes.stream()).collect(toList());
+        final List<ImportableTsType> ret = Stream.concat(asImportableTsType().map(Stream::of).orElse(Stream.empty()),
+                                                       importableTsArgumentTypes.stream()).collect(toList());
+        visited.put(getType().toString(), ret);
+        return ret;
     }
 
     public DeclaredType getType() {

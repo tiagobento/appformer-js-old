@@ -23,8 +23,8 @@ import org.uberfire.jsbridge.tsexporter.util.ImportStore;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toMap;
-import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.*;
+import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.EXTENDS;
+import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.PARAMETER;
 
 public class RpcCallerTsMethod {
 
@@ -53,7 +53,7 @@ public class RpcCallerTsMethod {
     }
 
     public String toSource() {
-        System.out.println("Generating " + javaMethod.getName() + " for " + _interface.getQualifiedName().toString());
+        System.out.println("Generating " + javaMethod + " for " + _interface.getQualifiedName().toString());
         return format("" +
                               "public %s(args: { %s }) {" +
                               "\n" +
@@ -67,7 +67,7 @@ public class RpcCallerTsMethod {
                               "\n" +
                               "}",
 
-                      getName(),
+                      name + new JavaType(javaMethod.getType(), _interface.asType()).toUniqueTsType(),
                       params(),
                       erraiBusPath(),
                       rpcCallParams(),

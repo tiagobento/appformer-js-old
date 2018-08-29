@@ -17,12 +17,15 @@
 package org.uberfire.jsbridge.tsexporter.meta;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
 import javax.lang.model.type.WildcardType;
@@ -60,15 +63,16 @@ public class JavaType {
     }
 
     public String toUniqueTsType() {
-        return toUniqueTsType(type, DEFAULT);
+        return toUniqueTsType(DEFAULT);
     }
 
     public String toUniqueTsType(final TsTypeTarget tsTypeTarget) {
-        return toUniqueTsType(type, tsTypeTarget);
+        return toUniqueTsType(type, tsTypeTarget, new HashMap<>());
     }
 
     private String toUniqueTsType(final TypeMirror type,
-                                  final TsTypeTarget tsTypeTarget) {
+                                  final TsTypeTarget tsTypeTarget,
+                                  final Map<String, String> visitedTypeArguments) {
 
         switch (type.getKind()) {
             case INT:
@@ -83,70 +87,52 @@ public class JavaType {
             case NULL:
                 return "null"; //FIXME: undefined?
             case ARRAY:
-                return format("%s[]", toUniqueTsType(((ArrayType) type).getComponentType(), tsTypeTarget));
+                return format("%s[]", toUniqueTsType(((ArrayType) type).getComponentType(), tsTypeTarget, visitedTypeArguments));
             case CHAR:
                 return "string";
             case BOOLEAN:
                 return "boolean";
             case TYPEVAR:
+                final TypeMirror resolvedType;
                 try {
-                    final TypeMirror resolvedType = types.asMemberOf((DeclaredType) owner, types.asElement(type));
-                    if (resolvedType.getKind().equals(TYPEVAR)) {
-                        final TypeVariable typeVariable = (TypeVariable) resolvedType;
-                        if (typeVariable.getUpperBound() != null) {
-                            if (Arrays.asList(FIELD, EXTENDS, PARAMETER).contains(tsTypeTarget)) {
-                                return resolvedType.toString();
-                            } else {
-                                return resolvedType.toString() + " extends " + toUniqueTsType(typeVariable.getUpperBound(), tsTypeTarget);
-                            }
-                        } else if (typeVariable.getLowerBound() != null) {
-                            return toUniqueTsType(typeVariable.getLowerBound(), tsTypeTarget);
-                        } else {
-                            return resolvedType.toString();
-                        }
-                    } else {
-                        return toUniqueTsType(resolvedType, tsTypeTarget);
-                    }
+                    resolvedType = types.asMemberOf((DeclaredType) owner, types.asElement(type));
                 } catch (final Exception e) {
-                    return toUniqueTsType(((TypeVariable) type).getUpperBound(), tsTypeTarget);
+                    final String translatedTypeArgument = translateUnresolvableTypeArgument((TypeVariable) type, tsTypeTarget, visitedTypeArguments);
+                    visitedTypeArguments.put(type.toString(), translatedTypeArgument);
+                    return translatedTypeArgument;
+                }
+
+                if (resolvedType.getKind().equals(TYPEVAR)) {
+                    final String translatedTypeArgument = translateUnresolvableTypeArgument((TypeVariable) resolvedType, tsTypeTarget, visitedTypeArguments);
+                    visitedTypeArguments.put(resolvedType.toString(), translatedTypeArgument);
+                    return translatedTypeArgument;
+                } else {
+                    return toUniqueTsType(resolvedType, tsTypeTarget, visitedTypeArguments);
                 }
             case DECLARED:
                 final DeclaredType declaredType = (DeclaredType) type;
-                final List<String> typeArguments = declaredType.getTypeArguments().stream().map(s -> toUniqueTsType(s, tsTypeTarget)).collect(toList());
+                final String fqcn = declaredType.asElement().toString();
+                final List<String> typeArguments = extractTranslatedTypeArguments(declaredType, tsTypeTarget, visitedTypeArguments);
 
-                if (typeArguments.isEmpty()) {
-                    final String fqcn = declaredType.asElement().toString();
-                    switch (fqcn) {
-                        case "java.lang.Object":
-                            return "any /* object */";
-                        case "java.util.Date":
-                            return "any /* date */"; //FIXME: Opinionate?
-                        case "java.lang.Boolean":
-                            return "boolean";
-                        case "java.lang.String":
-                            return "string";
-                        case "java.lang.Integer":
-                        case "java.lang.Byte":
-                        case "java.lang.Double":
-                        case "java.lang.Float":
-                        case "java.lang.Long":
-                        case "java.lang.Number":
-                        case "java.lang.Short":
-                            return "number";
-                        default:
-                            final TypeElement vanillaTypeElement = Main.elements.getTypeElement(declaredType.asElement().toString());
-                            if (vanillaTypeElement != null && !vanillaTypeElement.getTypeParameters().isEmpty()) {
-                                return fqcn.replace(".", "_") +
-                                        "<" +
-                                        vanillaTypeElement.getTypeParameters().stream().map(s -> "any").collect(joining(", "))
-                                        + ">";
-                            } else {
-                                return fqcn.replace(".", "_");
-                            }
-                    }
-                }
-
-                switch (declaredType.asElement().toString()) {
+                switch (fqcn) {
+                    case "java.lang.Object":
+                        return "any /* object */";
+                    case "java.util.Date":
+                        return "any /* date */"; //FIXME: Opinionate?
+                    case "java.lang.Throwable":
+                        return "any /* throwable */";
+                    case "java.lang.Boolean":
+                        return "boolean";
+                    case "java.lang.String":
+                        return "string";
+                    case "java.lang.Integer":
+                    case "java.lang.Byte":
+                    case "java.lang.Double":
+                    case "java.lang.Float":
+                    case "java.lang.Long":
+                    case "java.lang.Number":
+                    case "java.lang.Short":
+                        return "number";
                     case "java.lang.Class":
                         return "any /* class */";
                     case "java.util.Map.Entry":
@@ -166,29 +152,56 @@ public class JavaType {
                     case "java.util.Collection":
                         return format("%s[]", typeArguments.get(0));
                     default:
-                        return format("%s<%s>",
-                                      declaredType.asElement().toString().replace(".", "_"),
-                                      typeArguments.stream().collect(joining(", ")));
+                        if (typeArguments.isEmpty()) {
+                            return fqcn.replace(".", "_");
+                        } else {
+                            return format("%s<%s>",
+                                          fqcn.replace(".", "_"),
+                                          typeArguments.stream().collect(joining(", ")));
+                        }
                 }
             case WILDCARD:
                 final WildcardType wildcardType = (WildcardType) type;
                 if (wildcardType.getExtendsBound() != null) {
-                    return toUniqueTsType(wildcardType.getExtendsBound(), tsTypeTarget);
+                    return toUniqueTsType(wildcardType.getExtendsBound(), tsTypeTarget, visitedTypeArguments);
                 } else if (wildcardType.getSuperBound() != null) {
-                    return toUniqueTsType(wildcardType.getSuperBound(), tsTypeTarget);
+                    return toUniqueTsType(wildcardType.getSuperBound(), tsTypeTarget, visitedTypeArguments);
                 } else {
                     return "any /* wildcard */";
                 }
+            case EXECUTABLE:
+                final ExecutableType executableType = (ExecutableType) type;
+                //FIXME: Resolve type arguments.
+                return executableType.getTypeVariables().isEmpty() ? "" : "<" + executableType.getTypeVariables().stream().map(s -> s.asElement().getSimpleName().toString()).collect(joining(", ")) + ">";
             case PACKAGE:
             case NONE:
             case ERROR:
             case OTHER:
             case UNION:
-            case EXECUTABLE:
             case INTERSECTION:
             default:
                 return "any /* unknown */";
         }
+    }
+
+    private List<String> extractTranslatedTypeArguments(final DeclaredType declaredType,
+                                                        final TsTypeTarget tsTypeTarget,
+                                                        final Map<String, String> visitedTypeArguments) {
+
+        final List<String> typeArguments = declaredType.getTypeArguments().stream()
+                .map(typeArgument -> toUniqueTsType(typeArgument, tsTypeTarget, visitedTypeArguments))
+                .collect(toList());
+
+        if (!typeArguments.isEmpty()) {
+            return typeArguments;
+        }
+
+        final TypeElement vanillaTypeElement = Main.elements.getTypeElement(declaredType.asElement().toString());
+        if (vanillaTypeElement != null && !vanillaTypeElement.getTypeParameters().isEmpty()) {
+            return vanillaTypeElement.getTypeParameters().stream().map(s -> "any").collect(toList());
+        }
+
+        return typeArguments;
     }
 
     public Optional<ImportableJavaType> asImportableJavaType() {
@@ -226,6 +239,27 @@ public class JavaType {
                 return Optional.of(new ImportableJavaType(this));
             default:
                 return Optional.empty();
+        }
+    }
+
+    private String translateUnresolvableTypeArgument(final TypeVariable typeVariable,
+                                                     final TsTypeTarget tsTypeTarget,
+                                                     final Map<String, String> visitedTypeArguments) {
+
+        if (visitedTypeArguments.containsKey(typeVariable.toString())) {
+            return visitedTypeArguments.get(typeVariable.toString());
+        }
+
+        if (typeVariable.getUpperBound() != null) {
+            if (Arrays.asList(FIELD, EXTENDS, PARAMETER).contains(tsTypeTarget)) {
+                return typeVariable.toString();
+            } else {
+                return typeVariable.toString() + " extends " + toUniqueTsType(typeVariable.getUpperBound(), tsTypeTarget, visitedTypeArguments);
+            }
+        } else if (typeVariable.getLowerBound() != null) {
+            return toUniqueTsType(typeVariable.getLowerBound(), tsTypeTarget, visitedTypeArguments);
+        } else {
+            return typeVariable.toString();
         }
     }
 

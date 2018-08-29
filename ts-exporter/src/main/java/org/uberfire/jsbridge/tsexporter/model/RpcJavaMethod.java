@@ -18,11 +18,14 @@ package org.uberfire.jsbridge.tsexporter.model;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Optional;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeMirror;
 
+import org.uberfire.jsbridge.tsexporter.Main;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 
 import static java.util.stream.Collectors.joining;
@@ -42,6 +45,8 @@ public class RpcJavaMethod {
     public String toErraiBusPath() {
         final List<String> parameterFqcns = executableElement.getParameters().stream()
                 .map(Element::asType)
+                .map(s -> Optional.ofNullable(Main.types.asElement(s)))
+                .filter(Optional::isPresent).map(Optional::get)
                 .map(Object::toString)
                 .collect(toList());
         return executableElement.getSimpleName() + ":" + parameterFqcns.stream().collect(joining(":"));
@@ -61,5 +66,14 @@ public class RpcJavaMethod {
                       arg -> new JavaType(arg.asType(), _interface.asType()),
                       (a, b) -> b, //default map behavior
                       LinkedHashMap::new)); //order is important!
+    }
+
+    @Override
+    public String toString() {
+        return executableElement.toString();
+    }
+
+    public TypeMirror getType() {
+        return executableElement.asType();
     }
 }

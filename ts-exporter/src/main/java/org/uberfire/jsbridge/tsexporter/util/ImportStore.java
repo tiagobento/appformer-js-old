@@ -17,7 +17,9 @@
 package org.uberfire.jsbridge.tsexporter.util;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.uberfire.jsbridge.tsexporter.Main;
@@ -38,10 +40,11 @@ public class ImportStore {
     }
 
     public List<ImportableTsType> getImports() {
+        final Map<String, List<ImportableTsType>> objectObjectHashMap = new HashMap<>();
         return dependencies.stream()
                 .map(JavaType::asImportableJavaType)
                 .filter(Optional::isPresent).map(Optional::get)
-                .flatMap(importableJavaType -> importableJavaType.getDirectImportableTsTypes().stream())
+                .flatMap(importableJavaType -> importableJavaType.getDirectImportableTsTypes(objectObjectHashMap).stream())
                 .map(s -> Main.elements.getTypeElement(s.getFlatFqcn()).asType())
                 .map(unownedType -> new JavaType(unownedType, unownedType).asImportableJavaType())
                 .filter(Optional::isPresent).map(Optional::get)
