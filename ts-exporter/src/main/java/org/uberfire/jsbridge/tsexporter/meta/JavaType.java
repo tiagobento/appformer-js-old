@@ -20,11 +20,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
 import javax.lang.model.type.WildcardType;
+
+import org.uberfire.jsbridge.tsexporter.Main;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
@@ -59,7 +62,6 @@ public class JavaType {
     public String toUniqueTsType() {
         return toUniqueTsType(type, DEFAULT);
     }
-
 
     public String toUniqueTsType(final TsTypeTarget tsTypeTarget) {
         return toUniqueTsType(type, tsTypeTarget);
@@ -132,7 +134,15 @@ public class JavaType {
                         case "java.lang.Short":
                             return "number";
                         default:
-                            return fqcn.replace(".", "_");
+                            final TypeElement vanillaTypeElement = Main.elements.getTypeElement(declaredType.asElement().toString());
+                            if (vanillaTypeElement != null && !vanillaTypeElement.getTypeParameters().isEmpty()) {
+                                return fqcn.replace(".", "_") +
+                                        "<" +
+                                        vanillaTypeElement.getTypeParameters().stream().map(s -> "any").collect(joining(", "))
+                                        + ">";
+                            } else {
+                                return fqcn.replace(".", "_");
+                            }
                     }
                 }
 
