@@ -7,11 +7,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,9 +25,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
-import org.uberfire.jsbridge.tsexporter.meta.ImportableJavaType;
 import org.uberfire.jsbridge.tsexporter.meta.ImportableTsType;
-import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 import org.uberfire.jsbridge.tsexporter.model.PojoTsClass;
 import org.uberfire.jsbridge.tsexporter.model.RpcCallerTsClass;
 

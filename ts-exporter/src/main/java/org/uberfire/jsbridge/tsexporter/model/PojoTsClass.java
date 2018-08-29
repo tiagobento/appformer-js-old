@@ -37,9 +37,8 @@ import static javax.lang.model.element.ElementKind.ENUM_CONSTANT;
 import static javax.lang.model.element.ElementKind.INTERFACE;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.STATIC;
-import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.DEFAULT;
-import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.EXTENDS;
-import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.PARAMETER;
+import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_DECLARATION;
+import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_USE;
 
 public class PojoTsClass {
 
@@ -69,7 +68,7 @@ public class PojoTsClass {
     private String generateClass() {
         final DeclaredType type = importableTsType.getType();
         final TypeElement element = (TypeElement) type.asElement();
-        final String simpleName = extractSimpleName(element, DEFAULT);
+        final String simpleName = extractSimpleName(element, TYPE_ARGUMENT_DECLARATION);
 
         final Optional<ImportableTsType> importableSuperclassTsType = new JavaType(element.getSuperclass(), type)
                 .asImportableJavaType()
@@ -80,17 +79,17 @@ public class PojoTsClass {
         final String fields = element.getEnclosedElements().stream()
                 .filter(s -> s.getKind().isField())
                 .filter(s -> !s.getModifiers().contains(STATIC))
-                .map(s -> format("  public readonly %s?: %s;", s.getSimpleName(), importStore.importing(new JavaType(s.asType(), type)).toUniqueTsType(JavaType.TsTypeTarget.FIELD)))
+                .map(s -> format("  public readonly %s?: %s;", s.getSimpleName(), importStore.importing(new JavaType(s.asType(), type)).toUniqueTsType(TYPE_ARGUMENT_USE)))
                 .collect(joining("\n"));
 
         final String constructorArgs = extractConstructorArgs(element);
 
         final String superCall = importableSuperclassTsType.map(t -> "super({...self.inherited});").orElse("");
-        final String _extends = importableSuperclassTsType.map(t -> "extends " + importStore.importing(t).toUniqueTsType(EXTENDS)).orElse("");
+        final String _extends = importableSuperclassTsType.map(t -> "extends " + importStore.importing(t).toUniqueTsType(TYPE_ARGUMENT_USE)).orElse("");
 
         final String _implements = implementedInterfaces.isEmpty()
-                ? format("implements Portable<%s>", extractSimpleName(element, EXTENDS))
-                : "implements " + implementedInterfaces.stream().peek(importStore::importing).map(javaType -> javaType.toUniqueTsType(EXTENDS)).collect(joining(", ")) + format(", Portable<%s>", extractSimpleName(element, EXTENDS));
+                ? format("implements Portable<%s>", extractSimpleName(element, TYPE_ARGUMENT_USE))
+                : "implements " + implementedInterfaces.stream().peek(importStore::importing).map(javaType -> javaType.toUniqueTsType(TYPE_ARGUMENT_USE)).collect(joining(", ")) + format(", Portable<%s>", extractSimpleName(element, TYPE_ARGUMENT_USE));
 
         final String hierarchy = _extends + " " + _implements;
         final String abstractOrNot = element.getModifiers().contains(ABSTRACT) ? "abstract" : "";
@@ -136,7 +135,7 @@ public class PojoTsClass {
 
     private String generateEnum() {
         final TypeElement element = (TypeElement) importableTsType.getType().asElement();
-        final String simpleName = extractSimpleName(element, DEFAULT);
+        final String simpleName = extractSimpleName(element, TYPE_ARGUMENT_DECLARATION);
 
         //FIXME: Enum extending interfaces?
         final String enumFields = element.getEnclosedElements().stream()
@@ -159,10 +158,10 @@ public class PojoTsClass {
         final List<JavaType> implementedInterfaces = extractInterfaces();
         final DeclaredType type = importableTsType.getType();
         final TypeElement element = (TypeElement) type.asElement();
-        final String simpleName = extractSimpleName(element, DEFAULT);
+        final String simpleName = extractSimpleName(element, TYPE_ARGUMENT_DECLARATION);
         final String _implements = implementedInterfaces.isEmpty()
                 ? ""
-                : "extends " + implementedInterfaces.stream().peek(importStore::importing).map(javaType -> javaType.toUniqueTsType(EXTENDS)).collect(joining(", "));
+                : "extends " + implementedInterfaces.stream().peek(importStore::importing).map(javaType -> javaType.toUniqueTsType(TYPE_ARGUMENT_USE)).collect(joining(", "));
 
         //Has to be the last
         final String imports = importStore.getImportStatements();
@@ -200,7 +199,7 @@ public class PojoTsClass {
         final List<String> fields = typeElement.getEnclosedElements().stream()
                 .filter(f -> f.getKind().isField())
                 .filter(f -> !f.getModifiers().contains(STATIC))
-                .map(f -> format("%s?: %s", f.getSimpleName(), importStore.importing(new JavaType(f.asType(), importableTsType.getType())).toUniqueTsType(PARAMETER)))
+                .map(f -> format("%s?: %s", f.getSimpleName(), importStore.importing(new JavaType(f.asType(), importableTsType.getType())).toUniqueTsType(TYPE_ARGUMENT_USE)))
                 .collect(toList());
 
         if (typeElement.getSuperclass().toString().equals("java.lang.Object")) {

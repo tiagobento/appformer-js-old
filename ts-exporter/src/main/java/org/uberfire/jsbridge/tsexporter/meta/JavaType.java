@@ -16,7 +16,6 @@
 
 package org.uberfire.jsbridge.tsexporter.meta;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,10 +36,8 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static javax.lang.model.type.TypeKind.TYPEVAR;
 import static org.uberfire.jsbridge.tsexporter.Main.types;
-import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.DEFAULT;
-import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.EXTENDS;
-import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.FIELD;
-import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.PARAMETER;
+import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_DECLARATION;
+import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_USE;
 
 public class JavaType {
 
@@ -56,14 +53,12 @@ public class JavaType {
     }
 
     public enum TsTypeTarget {
-        FIELD,
-        EXTENDS,
-        PARAMETER,
-        DEFAULT;
+        TYPE_ARGUMENT_USE,
+        TYPE_ARGUMENT_DECLARATION;
     }
 
     public String toUniqueTsType() {
-        return toUniqueTsType(DEFAULT);
+        return toUniqueTsType(TYPE_ARGUMENT_DECLARATION);
     }
 
     public String toUniqueTsType(final TsTypeTarget tsTypeTarget) {
@@ -120,7 +115,9 @@ public class JavaType {
                     case "java.util.Date":
                         return "any /* date */"; //FIXME: Opinionate?
                     case "java.lang.Throwable":
-                        return "any /* throwable */";
+                        return "any /* throwable */"; //FIXME: ???
+                    case "javax.enterprise.event.Event":
+                        return "any /* javax event */"; //FIXME: ???
                     case "java.lang.Boolean":
                         return "boolean";
                     case "java.lang.String":
@@ -141,9 +138,7 @@ public class JavaType {
                         return "any /* map node */";
                     case "java.util.HashMap":
                     case "java.util.Map":
-                        final String s0 = typeArguments.get(0);
-                        final String s1 = typeArguments.get(1);
-                        return format("Map<%s, %s>", s0, s1);
+                        return format("Map<%s, %s>", typeArguments.get(0), typeArguments.get(1));
                     case "java.util.Set":
                     case "java.util.HashSet":
                     case "java.util.List":
@@ -171,8 +166,10 @@ public class JavaType {
                 }
             case EXECUTABLE:
                 final ExecutableType executableType = (ExecutableType) type;
-                //FIXME: Resolve type arguments.
-                return executableType.getTypeVariables().isEmpty() ? "" : "<" + executableType.getTypeVariables().stream().map(s -> s.asElement().getSimpleName().toString()).collect(joining(", ")) + ">";
+                final String translatedTypeArguments = executableType.getTypeVariables().stream()
+                        .map(typeArgument -> toUniqueTsType(typeArgument, tsTypeTarget, visitedTypeArguments))
+                        .collect(joining(", "));
+                return executableType.getTypeVariables().isEmpty() ? "" : "<" + translatedTypeArguments + ">";
             case PACKAGE:
             case NONE:
             case ERROR:
@@ -202,6 +199,27 @@ public class JavaType {
         }
 
         return typeArguments;
+    }
+
+    private String translateUnresolvableTypeArgument(final TypeVariable typeVariable,
+                                                     final TsTypeTarget tsTypeTarget,
+                                                     final Map<String, String> visitedTypeArguments) {
+
+        if (visitedTypeArguments.containsKey(typeVariable.toString())) {
+            return visitedTypeArguments.get(typeVariable.toString());
+        }
+
+        if (typeVariable.getUpperBound() != null) {
+            if (tsTypeTarget.equals(TYPE_ARGUMENT_DECLARATION)) {
+                return typeVariable.toString() + " extends " + toUniqueTsType(typeVariable.getUpperBound(), TYPE_ARGUMENT_USE, visitedTypeArguments);
+            } else {
+                return typeVariable.toString();
+            }
+        } else if (typeVariable.getLowerBound() != null) {
+            return toUniqueTsType(typeVariable.getLowerBound(), tsTypeTarget, visitedTypeArguments);
+        } else {
+            return typeVariable.toString();
+        }
     }
 
     public Optional<ImportableJavaType> asImportableJavaType() {
@@ -239,27 +257,6 @@ public class JavaType {
                 return Optional.of(new ImportableJavaType(this));
             default:
                 return Optional.empty();
-        }
-    }
-
-    private String translateUnresolvableTypeArgument(final TypeVariable typeVariable,
-                                                     final TsTypeTarget tsTypeTarget,
-                                                     final Map<String, String> visitedTypeArguments) {
-
-        if (visitedTypeArguments.containsKey(typeVariable.toString())) {
-            return visitedTypeArguments.get(typeVariable.toString());
-        }
-
-        if (typeVariable.getUpperBound() != null) {
-            if (Arrays.asList(FIELD, EXTENDS, PARAMETER).contains(tsTypeTarget)) {
-                return typeVariable.toString();
-            } else {
-                return typeVariable.toString() + " extends " + toUniqueTsType(typeVariable.getUpperBound(), tsTypeTarget, visitedTypeArguments);
-            }
-        } else if (typeVariable.getLowerBound() != null) {
-            return toUniqueTsType(typeVariable.getLowerBound(), tsTypeTarget, visitedTypeArguments);
-        } else {
-            return typeVariable.toString();
         }
     }
 
