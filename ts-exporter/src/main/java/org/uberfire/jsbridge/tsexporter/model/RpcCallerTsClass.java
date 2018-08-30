@@ -100,7 +100,7 @@ public class RpcCallerTsClass {
     }
 
     private String simpleName() {
-        final String fqcn = importStore.importing(new JavaType(_interface.asType(), _interface.asType())).toUniqueTsType();
+        final String fqcn = importStore.importing(new JavaType(_interface.asType())).toUniqueTsType();
         return fqcn.substring(fqcn.indexOf(_interface.getSimpleName().toString()));
     }
 

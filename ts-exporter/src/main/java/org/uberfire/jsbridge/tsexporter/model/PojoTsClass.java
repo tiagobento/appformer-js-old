@@ -190,7 +190,7 @@ public class PojoTsClass {
     }
 
     private String extractSimpleName(final TypeElement element, final JavaType.TsTypeTarget tsTypeTarget) {
-        final String fqcn = importStore.importing(new JavaType(element.asType(), element.asType())).toUniqueTsType(tsTypeTarget);
+        final String fqcn = importStore.importing(new JavaType(element.asType())).toUniqueTsType(tsTypeTarget);
         return fqcn.substring(fqcn.indexOf(element.getSimpleName().toString()));
     }
 

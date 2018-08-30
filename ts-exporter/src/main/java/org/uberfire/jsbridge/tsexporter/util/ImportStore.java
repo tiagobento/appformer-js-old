@@ -40,13 +40,13 @@ public class ImportStore {
     }
 
     public List<ImportableTsType> getImports() {
-        final Map<String, List<ImportableTsType>> objectObjectHashMap = new HashMap<>();
+        final Map<String, List<ImportableTsType>> visited = new HashMap<>();
         return dependencies.stream()
                 .map(JavaType::asImportableJavaType)
                 .filter(Optional::isPresent).map(Optional::get)
-                .flatMap(importableJavaType -> importableJavaType.getDirectImportableTsTypes(objectObjectHashMap).stream())
+                .flatMap(importableJavaType -> importableJavaType.getDirectImportableTsTypes(visited).stream())
                 .map(s -> Main.elements.getTypeElement(s.getFlatFqcn()).asType())
-                .map(unownedType -> new JavaType(unownedType, unownedType).asImportableJavaType())
+                .map(unownedType -> new JavaType(unownedType).asImportableJavaType())
                 .filter(Optional::isPresent).map(Optional::get)
                 .map(ImportableJavaType::asImportableTsType)
                 .filter(Optional::isPresent).map(Optional::get)

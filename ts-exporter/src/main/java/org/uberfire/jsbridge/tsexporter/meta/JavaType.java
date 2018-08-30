@@ -17,7 +17,6 @@
 package org.uberfire.jsbridge.tsexporter.meta;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import javax.lang.model.element.TypeElement;
@@ -41,8 +40,14 @@ import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_A
 
 public class JavaType {
 
+    static boolean simpleNames = false;
+
     protected final TypeMirror type;
     protected final TypeMirror owner;
+
+    public JavaType(final TypeMirror type) {
+        this(type, type);
+    }
 
     public JavaType(final TypeMirror type, final TypeMirror owner) {
         if (type == null || owner == null) {
@@ -80,12 +85,12 @@ public class JavaType {
                 return "void";
             case NULL:
                 return "null"; //FIXME: undefined?
-            case ARRAY:
-                return format("%s[]", toUniqueTsType(((ArrayType) type).getComponentType(), tsTypeTarget));
             case CHAR:
                 return "string";
             case BOOLEAN:
                 return "boolean";
+            case ARRAY:
+                return format("%s[]", toUniqueTsType(((ArrayType) type).getComponentType(), tsTypeTarget));
             case TYPEVAR:
                 final TypeMirror resolvedType;
                 try {
@@ -142,20 +147,16 @@ public class JavaType {
                     case "java.util.Collection":
                         return format("%s[]", typeArguments.get(0));
                     default:
-                        if (typeArguments.isEmpty()) {
-                            return fqcn.replace(".", "_");
-                        } else {
-                            return format("%s<%s>",
-                                          fqcn.replace(".", "_"),
-                                          typeArguments.stream().collect(joining(", ")));
-                        }
+                        return format("%s%s",
+                                      !simpleNames ? fqcn.replace(".", "_") : declaredType.asElement().getSimpleName(),
+                                      typeArguments.isEmpty() ? "" : ("<" + typeArguments.stream().collect(joining(", "))) + ">");
                 }
             case WILDCARD:
                 final WildcardType wildcardType = (WildcardType) type;
                 if (wildcardType.getExtendsBound() != null) {
                     return toUniqueTsType(wildcardType.getExtendsBound(), tsTypeTarget);
                 } else if (wildcardType.getSuperBound() != null) {
-                    return toUniqueTsType(wildcardType.getSuperBound(), tsTypeTarget);
+                    return format("Partial<%s>", toUniqueTsType(wildcardType.getSuperBound(), tsTypeTarget));
                 } else {
                     return "any /* wildcard */";
                 }
@@ -200,14 +201,20 @@ public class JavaType {
 
         if (!typeVariable.getUpperBound().getKind().equals(NULL)) {
             if (tsTypeTarget.equals(TYPE_ARGUMENT_DECLARATION)) {
-                return typeVariable.toString() + " extends " + toUniqueTsType(typeVariable.getUpperBound(), TYPE_ARGUMENT_USE);
+                if (!typeVariable.getUpperBound().toString().equals("java.lang.Object")) {
+                    return typeVariable.toString() + " extends " + toUniqueTsType(typeVariable.getUpperBound(), TYPE_ARGUMENT_USE);
+                } else {
+                    return typeVariable.toString();
+                }
             } else {
                 return typeVariable.toString();
             }
-        } else if (!typeVariable.getLowerBound().getKind().equals(NULL)) {
-            return toUniqueTsType(typeVariable.getLowerBound(), tsTypeTarget);
         } else {
-            return typeVariable.toString();
+            if (!typeVariable.getLowerBound().getKind().equals(NULL)) {
+                return toUniqueTsType(typeVariable.getLowerBound(), tsTypeTarget);
+            } else {
+                return typeVariable.toString();
+            }
         }
     }
 

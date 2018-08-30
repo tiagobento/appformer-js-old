@@ -11,6 +11,21 @@
     <name>AppFormer JS :: TS Exporter</name>
     <description>TypeScript exporter for AppFormer.js</description>
 
+    <dependencies>
+        <dependency>
+            <groupId>com.google.testing.compile</groupId>
+            <artifactId>compile-testing</artifactId>
+            <version>0.15</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <artifactId>guava</artifactId>
+            <groupId>com.google.guava</groupId>
+            <version>15.0</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
 
     <build>
         <plugins>

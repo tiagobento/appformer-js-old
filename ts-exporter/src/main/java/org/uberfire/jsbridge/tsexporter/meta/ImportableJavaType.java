@@ -39,8 +39,7 @@ import static org.uberfire.jsbridge.tsexporter.Main.types;
 
 public class ImportableJavaType extends JavaType {
 
-
-    public ImportableJavaType(final JavaType javaType) {
+    ImportableJavaType(final JavaType javaType) {
         super(javaType.type, javaType.owner);
     }
 
@@ -134,7 +133,6 @@ public class ImportableJavaType extends JavaType {
         }
     }
 
-
     public List<ImportableTsType> getDirectImportableTsTypes(final Map<String, List<ImportableTsType>> visited) {
         if (visited.containsKey(getType().toString())) {
             return visited.get(getType().toString());
@@ -148,7 +146,7 @@ public class ImportableJavaType extends JavaType {
                 .collect(toList());
 
         final List<ImportableTsType> ret = Stream.concat(asImportableTsType().map(Stream::of).orElse(Stream.empty()),
-                                                       importableTsArgumentTypes.stream()).collect(toList());
+                                                         importableTsArgumentTypes.stream()).collect(toList());
         visited.put(getType().toString(), ret);
         return ret;
     }
