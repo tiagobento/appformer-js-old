@@ -1,11 +1,12 @@
 import { Portable } from "./model/Portable";
-import { ErraiMarshaller, MarshallerProvider } from "./ErraiMarshaller";
+import { ErraiMarshaller } from "./ErraiMarshaller";
+import { MarshallerProvider } from "./MarshallerProvider";
 
 export function marshall(obj: Portable | string) {
   MarshallerProvider.initialize();
   const erraiMarshaller = new ErraiMarshaller({ marshallerProvider: new MarshallerProvider() });
 
-  return typeof obj !== "string" ? JSON.stringify(erraiMarshaller.marshall(obj)) : obj;
+  return JSON.stringify(erraiMarshaller.marshall(obj));
 }
 
 // TODO: Implement to return an object from the Model file

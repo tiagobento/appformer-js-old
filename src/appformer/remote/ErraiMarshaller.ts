@@ -16,6 +16,21 @@ export class ErraiMarshaller {
       return cachedObject;
     }
 
+    const rootFqcn = (input as any)._fqcn;
+    if (!rootFqcn) {
+      // convert native JS types to a default Java type implementation
+      const wrappedType = JavaWrapper.wrapIfNeeded(input);
+      if (wrappedType) {
+        const marshaller = MarshallerProvider.getFor((wrappedType as any)._fqcn);
+        return marshaller.marshall(wrappedType, ctx);
+      }
+    }
+
+    if (JavaWrapper.isJavaType(rootFqcn)) {
+      const marshaller = MarshallerProvider.getFor(rootFqcn);
+      return marshaller.marshall(input, ctx);
+    }
+
     const _this = { ...(input as any) };
 
     Object.keys(_this).forEach(k => {
@@ -35,7 +50,7 @@ export class ErraiMarshaller {
         // convert native JS types to a default Java type implementation
         const wrappedType = JavaWrapper.wrapIfNeeded(_this[k]);
         if (wrappedType) {
-          const marshaller = MarshallerProvider.getFor(_this[k]._fqcn);
+          const marshaller = MarshallerProvider.getFor((wrappedType as any)._fqcn);
           _this[k] = marshaller.marshall(wrappedType, ctx);
         }
 
@@ -43,7 +58,7 @@ export class ErraiMarshaller {
       }
     });
 
-    _this[ErraiObjectConstants.ENCODED_TYPE] = _this._fqcn;
+    _this[ErraiObjectConstants.ENCODED_TYPE] = rootFqcn;
     _this[ErraiObjectConstants.OBJECT_ID] = `${ctx.newObjectId()}`;
     delete _this._fqcn;
 

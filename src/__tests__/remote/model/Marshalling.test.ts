@@ -15,7 +15,6 @@ import { JavaHashSet } from "../../../appformer/internal/model/numbers/JavaHashS
 import { JavaHashMap } from "../../../appformer/internal/model/numbers/JavaHashMap";
 import { JavaBoolean } from "../../../appformer/internal/model/numbers/JavaBoolean";
 import { JavaString } from "../../../appformer/internal/model/numbers/JavaString";
-import { MarshallerProvider } from "../../../appformer/remote/ErraiMarshaller";
 import JavaHashMapMarshaller from "../../../appformer/remote/JavaHashMapMarshaller";
 import JavaHashSetMarshaller from "../../../appformer/remote/JavaHashSetMarshaller";
 import JavaArrayListMarshaller from "../../../appformer/remote/JavaArrayListMarshaller";
@@ -29,15 +28,20 @@ import JavaIntegerMarshaller from "../../../appformer/remote/JavaIntegerMarshall
 import JavaFloatMarshaller from "../../../appformer/remote/JavaFloatMarshaller";
 import JavaDoubleMarshaller from "../../../appformer/remote/JavaDoubleMarshaller";
 import JavaByteMarshaller from "../../../appformer/remote/JavaByteMarshaller";
+import { MarshallerProvider } from "../../../appformer/remote/MarshallerProvider";
 
 describe("marshall", () => {
   const encodedType = ErraiObjectConstants.ENCODED_TYPE;
   const objectId = ErraiObjectConstants.OBJECT_ID;
+  const numVal = ErraiObjectConstants.NUM_VAL;
+  const value = ErraiObjectConstants.VALUE;
 
   let noAddrPerson: Person;
   let addr1: Address;
 
   beforeEach(() => {
+    MarshallerProvider.initialize();
+
     addr1 = new Address({
       line1: "aaaa",
       line2: "bbbb"
@@ -240,6 +244,136 @@ describe("marshall", () => {
 
     expect(() => MarshallerProvider.getFor("foo")).toThrowError(Error);
   });
+
+  test("list serialization", () => {
+    const input = new Pojo({
+      l1: [new JavaByte("1"), new JavaByte("2"), new JavaByte("3"), new JavaByte("4")],
+      l2: [new JavaDouble("1.1"), new JavaDouble("2.2"), new JavaDouble("3.3"), new JavaDouble("4.4")],
+      l3: [new JavaFloat("1.1"), new JavaFloat("2.2"), new JavaFloat("3.3"), new JavaFloat("4.4")],
+      l4: [new JavaInteger("1"), new JavaInteger("2"), new JavaInteger("3"), new JavaInteger("4")],
+      l5: [new JavaLong("1"), new JavaLong("2"), new JavaLong("3"), new JavaLong("4")],
+      l6: [new JavaShort("1"), new JavaShort("2"), new JavaShort("3"), new JavaShort("4")],
+      l7: [new JavaBigDecimal("1.1"), new JavaBigDecimal("2.2"), new JavaBigDecimal("3.3"), new JavaBigDecimal("4.4")],
+      l8: [new JavaBigInteger("1"), new JavaBigInteger("2"), new JavaBigInteger("3"), new JavaBigInteger("4")],
+      l9: ["str1", "str2", "str3"]
+    });
+
+    const output = JSON.parse(Marshalling.marshall(input));
+
+    const a = 2; // TODO assertion
+  });
+
+  test("root string", () => {
+    const input = "hey";
+
+    const output = JSON.parse(Marshalling.marshall(input));
+
+    expect(output).toBe(input);
+  });
+
+  test("root byte", () => {
+    const input = new JavaByte("1");
+
+    const output = JSON.parse(Marshalling.marshall(input));
+
+    expect(output).toBe(input.get());
+  });
+
+  test("root double", () => {
+    const input = new JavaDouble("1.1");
+
+    const output = JSON.parse(Marshalling.marshall(input));
+
+    expect(output).toBe(input.get());
+  });
+
+  test("root float", () => {
+    const input = new JavaFloat("1.1");
+
+    const output = JSON.parse(Marshalling.marshall(input));
+
+    expect(output).toBe(input.get());
+  });
+
+  test("root integer", () => {
+    const input = new JavaInteger("1");
+
+    const output = JSON.parse(Marshalling.marshall(input));
+
+    expect(output).toBe(input.get());
+  });
+
+  test("root long", () => {
+    const input = new JavaLong("1");
+
+    const output = JSON.parse(Marshalling.marshall(input));
+
+    expect(output).toEqual({
+      [encodedType]: "java.lang.Long",
+      [objectId]: "-1",
+      [numVal]: "1"
+    });
+  });
+
+  test("root short", () => {
+    const input = new JavaShort("1");
+
+    const output = JSON.parse(Marshalling.marshall(input));
+
+    expect(output).toBe(input.get());
+  });
+
+  test("root BigDecimal", () => {
+    const input = new JavaBigDecimal("1.1");
+
+    const output = JSON.parse(Marshalling.marshall(input));
+
+    expect(output).toEqual({
+      [encodedType]: "java.math.BigDecimal",
+      [objectId]: "-1",
+      [value]: "1.1"
+    });
+  });
+
+  test("root BigInteger", () => {
+    const input = new JavaBigInteger("1");
+
+    const output = JSON.parse(Marshalling.marshall(input));
+
+    expect(output).toEqual({
+      [encodedType]: "java.math.BigInteger",
+      [objectId]: "-1",
+      [value]: "1"
+    });
+  });
+
+  test("root array", () => {
+    const input = [new JavaInteger("1"), new JavaInteger("2"), new JavaInteger("3")];
+
+    const output = JSON.parse(Marshalling.marshall(input));
+
+    expect(output).toEqual({
+      [encodedType]: "java.util.ArrayList",
+      [objectId]: expect.anything(),
+      [value]: [
+        {
+          [encodedType]: "java.lang.Integer",
+          [objectId]: "-1",
+          [numVal]: 1
+        },
+        {
+          [encodedType]: "java.lang.Integer",
+          [objectId]: "-1",
+          [numVal]: 2
+        },
+        {
+          [encodedType]: "java.lang.Integer",
+          [objectId]: "-1",
+          [numVal]: 3
+        }
+      ]
+    });
+  });
 });
 
 // ==============
@@ -273,28 +407,39 @@ class Address implements Portable {
 class Pojo implements Portable {
   protected readonly _fqcn = "org.appformer-js.test.Pojo";
 
-  public line1: string;
-  public line2: string;
-  public n1: JavaByte;
-  public n2: JavaDouble;
-  public n3: JavaFloat;
-  public n4: JavaInteger;
-  public n5: JavaLong;
-  public n6: JavaShort;
-  public n7: JavaBigDecimal;
-  public n8: JavaBigInteger;
+  public line1?: string;
+  public line2?: string;
+  public n1?: JavaByte;
+  public n2?: JavaDouble;
+  public n3?: JavaFloat;
+  public n4?: JavaInteger;
+  public n5?: JavaLong;
+  public n6?: JavaShort;
+  public n7?: JavaBigDecimal;
+  public n8?: JavaBigInteger;
+  public l1?: number[];
 
   constructor(self: {
-    line1: string;
-    line2: string;
-    n1: JavaByte;
-    n2: JavaDouble;
-    n3: JavaFloat;
-    n4: JavaInteger;
-    n5: JavaLong;
-    n6: JavaShort;
-    n7: JavaBigDecimal;
-    n8: JavaBigInteger;
+    line1?: string;
+    line2?: string;
+    n1?: JavaByte;
+    n2?: JavaDouble;
+    n3?: JavaFloat;
+    n4?: JavaInteger;
+    n5?: JavaLong;
+    n6?: JavaShort;
+    n7?: JavaBigDecimal;
+    n8?: JavaBigInteger;
+
+    l1?: JavaByte[];
+    l2?: JavaDouble[];
+    l3?: JavaFloat[];
+    l4?: JavaInteger[];
+    l5?: JavaLong[];
+    l6?: JavaShort[];
+    l7?: JavaBigDecimal[];
+    l8?: JavaBigInteger[];
+    l9?: string[];
   }) {
     Object.assign(this, self);
   }

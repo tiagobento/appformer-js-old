@@ -1,7 +1,7 @@
 import Marshaller from "./Marshaller";
 import { ErraiObject, ErraiObjectConstants } from "./model/ErraiObject";
 import { JavaBigDecimal } from "../internal/model/numbers/JavaBigDecimal";
-import { MarshallingContext } from "./ErraiMarshaller";
+import { MarshallingContext } from "./MarshallingContext";
 
 export default class JavaBigDecimalMarshaller implements Marshaller<JavaBigDecimal, ErraiObject> {
   public marshall(input: JavaBigDecimal, ctx: MarshallingContext): ErraiObject {
