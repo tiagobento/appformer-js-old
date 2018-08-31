@@ -1,8 +1,7 @@
 // Generated class
+import Portable from "appformer/internal/model/Portable";
 
-import { Portable } from "appformer/remote";
-
-export class Foo implements Portable {
+export default class Foo implements Portable {
   protected readonly _fqcn = "org.uberfire.shared.Foo";
 
   public foo?: string;

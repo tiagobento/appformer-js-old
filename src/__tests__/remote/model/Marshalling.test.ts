@@ -1,34 +1,34 @@
-import { Portable } from "appformer/remote/";
-import * as Marshalling from "appformer/remote/Marshalling";
-import { ErraiObjectConstants } from "appformer/remote/model/ErraiObject";
-import { JavaLong } from "../../../appformer/internal/model/numbers/JavaLong";
-import { JavaInteger } from "../../../appformer/internal/model/numbers/JavaInteger";
-import { JavaBigDecimal } from "../../../appformer/internal/model/numbers/JavaBigDecimal";
-import { JavaByte } from "../../../appformer/internal/model/numbers/JavaByte";
-import { JavaDouble } from "../../../appformer/internal/model/numbers/JavaDouble";
-import { JavaFloat } from "../../../appformer/internal/model/numbers/JavaFloat";
-import { JavaShort } from "../../../appformer/internal/model/numbers/JavaShort";
-import { JavaBigInteger } from "../../../appformer/internal/model/numbers/JavaBigInteger";
-import { JavaWrapper } from "../../../appformer/internal/model/numbers/JavaWrapper";
-import { JavaArrayList } from "../../../appformer/internal/model/numbers/JavaArrayList";
-import { JavaHashSet } from "../../../appformer/internal/model/numbers/JavaHashSet";
-import { JavaHashMap } from "../../../appformer/internal/model/numbers/JavaHashMap";
-import { JavaBoolean } from "../../../appformer/internal/model/numbers/JavaBoolean";
-import { JavaString } from "../../../appformer/internal/model/numbers/JavaString";
-import JavaHashMapMarshaller from "../../../appformer/remote/JavaHashMapMarshaller";
-import JavaHashSetMarshaller from "../../../appformer/remote/JavaHashSetMarshaller";
-import JavaArrayListMarshaller from "../../../appformer/remote/JavaArrayListMarshaller";
-import JavaBigIntegerMarshaller from "../../../appformer/remote/JavaBigIntegerMarshaller";
-import JavaBigDecimalMarshaller from "../../../appformer/remote/JavaBigDecimalMarshaller";
-import JavaStringMarshaller from "../../../appformer/remote/JavaStringMarshaller";
-import JavaBooleanMarshaller from "../../../appformer/remote/JavaBooleanMarshaller";
-import JavaShortMarshaller from "../../../appformer/remote/JavaShortMarshaller";
-import JavaLongMarshaller from "../../../appformer/remote/JavaLongMarshaller";
-import JavaIntegerMarshaller from "../../../appformer/remote/JavaIntegerMarshaller";
-import JavaFloatMarshaller from "../../../appformer/remote/JavaFloatMarshaller";
-import JavaDoubleMarshaller from "../../../appformer/remote/JavaDoubleMarshaller";
-import JavaByteMarshaller from "../../../appformer/remote/JavaByteMarshaller";
-import { MarshallerProvider } from "../../../appformer/remote/MarshallerProvider";
+import JavaIntegerMarshaller from "appformer/marshalling/marshallers/JavaIntegerMarshaller";
+import JavaLongMarshaller from "appformer/marshalling/marshallers/JavaLongMarshaller";
+import ErraiObjectConstants from "appformer/marshalling/model/ErraiObjectConstants";
+import MarshallerProvider from "appformer/marshalling/MarshallerProvider";
+import JavaByte from "appformer/java-wrapper/JavaByte";
+import JavaDouble from "appformer/java-wrapper/JavaDouble";
+import JavaFloat from "appformer/java-wrapper/JavaFloat";
+import JavaInteger from "appformer/java-wrapper/JavaInteger";
+import JavaLong from "appformer/java-wrapper/JavaLong";
+import JavaShort from "appformer/java-wrapper/JavaShort";
+import JavaBigDecimal from "appformer/java-wrapper/JavaBigDecimal";
+import JavaBigInteger from "appformer/java-wrapper/JavaBigInteger";
+import JavaWrapper from "appformer/java-wrapper/JavaWrapper";
+import JavaArrayList from "appformer/java-wrapper/JavaArrayList";
+import JavaHashSet from "appformer/java-wrapper/JavaHashSet";
+import JavaHashMap from "appformer/java-wrapper/JavaHashMap";
+import JavaBoolean from "appformer/java-wrapper/JavaBoolean";
+import JavaString from "appformer/java-wrapper/JavaString";
+import JavaByteMarshaller from "appformer/marshalling/marshallers/JavaByteMarshaller";
+import JavaDoubleMarshaller from "appformer/marshalling/marshallers/JavaDoubleMarshaller";
+import JavaFloatMarshaller from "appformer/marshalling/marshallers/JavaFloatMarshaller";
+import JavaShortMarshaller from "appformer/marshalling/marshallers/JavaShortMarshaller";
+import JavaBooleanMarshaller from "appformer/marshalling/marshallers/JavaBooleanMarshaller";
+import JavaStringMarshaller from "appformer/marshalling/marshallers/JavaStringMarshaller";
+import JavaBigDecimalMarshaller from "appformer/marshalling/marshallers/JavaBigDecimalMarshaller";
+import JavaBigIntegerMarshaller from "appformer/marshalling/marshallers/JavaBigIntegerMarshaller";
+import JavaArrayListMarshaller from "appformer/marshalling/marshallers/JavaArrayListMarshaller";
+import JavaHashMapMarshaller from "appformer/marshalling/marshallers/JavaHashMapMarshaller";
+import JavaHashSetMarshaller from "appformer/marshalling/marshallers/JavaHashSetMarshaller";
+import Portable from "appformer/internal/model/Portable";
+import { marshall } from "appformer/marshalling";
 
 describe("marshall", () => {
   const encodedType = ErraiObjectConstants.ENCODED_TYPE;
@@ -59,7 +59,7 @@ describe("marshall", () => {
       bestFriend: noAddrPerson
     });
 
-    const output = JSON.parse(Marshalling.marshall(input));
+    const output = JSON.parse(marshall(input));
 
     expect(output).toStrictEqual({
       [encodedType]: "org.appformer-js.test.Person",
@@ -87,7 +87,7 @@ describe("marshall", () => {
     });
 
     // === test
-    const output = JSON.parse(Marshalling.marshall(input));
+    const output = JSON.parse(marshall(input));
 
     // === assertion
     const nonPrimitiveTypesObjId = [output[objectId], output.homeAddr[objectId], output.bestFriend[objectId]];
@@ -123,7 +123,7 @@ describe("marshall", () => {
 
     // == test
 
-    const output = JSON.parse(Marshalling.marshall(input));
+    const output = JSON.parse(marshall(input));
 
     // == assertion
 
@@ -155,7 +155,7 @@ describe("marshall", () => {
       n8: new JavaBigInteger("8")
     });
 
-    const output = JSON.parse(Marshalling.marshall(pojo));
+    const output = JSON.parse(marshall(pojo));
     expect(output).toStrictEqual({
       [encodedType]: "org.appformer-js.test.Pojo",
       [objectId]: expect.anything(),
@@ -258,7 +258,7 @@ describe("marshall", () => {
       l9: ["str1", "str2", "str3"]
     });
 
-    const output = JSON.parse(Marshalling.marshall(input));
+    const output = JSON.parse(marshall(input));
 
     const a = 2; // TODO assertion
   });
@@ -281,7 +281,7 @@ describe("marshall", () => {
       s9: new Set(["str1", "str2", "str3"])
     });
 
-    const output = JSON.parse(Marshalling.marshall(input));
+    const output = JSON.parse(marshall(input));
 
     const a = 2; // TODO assertion
   });
@@ -289,7 +289,7 @@ describe("marshall", () => {
   test("root string", () => {
     const input = "hey";
 
-    const output = JSON.parse(Marshalling.marshall(input));
+    const output = JSON.parse(marshall(input));
 
     expect(output).toBe(input);
   });
@@ -297,7 +297,7 @@ describe("marshall", () => {
   test("root byte", () => {
     const input = new JavaByte("1");
 
-    const output = JSON.parse(Marshalling.marshall(input));
+    const output = JSON.parse(marshall(input));
 
     expect(output).toBe(input.get());
   });
@@ -305,7 +305,7 @@ describe("marshall", () => {
   test("root double", () => {
     const input = new JavaDouble("1.1");
 
-    const output = JSON.parse(Marshalling.marshall(input));
+    const output = JSON.parse(marshall(input));
 
     expect(output).toBe(input.get());
   });
@@ -313,7 +313,7 @@ describe("marshall", () => {
   test("root float", () => {
     const input = new JavaFloat("1.1");
 
-    const output = JSON.parse(Marshalling.marshall(input));
+    const output = JSON.parse(marshall(input));
 
     expect(output).toBe(input.get());
   });
@@ -321,7 +321,7 @@ describe("marshall", () => {
   test("root integer", () => {
     const input = new JavaInteger("1");
 
-    const output = JSON.parse(Marshalling.marshall(input));
+    const output = JSON.parse(marshall(input));
 
     expect(output).toBe(input.get());
   });
@@ -329,7 +329,7 @@ describe("marshall", () => {
   test("root long", () => {
     const input = new JavaLong("1");
 
-    const output = JSON.parse(Marshalling.marshall(input));
+    const output = JSON.parse(marshall(input));
 
     expect(output).toEqual({
       [encodedType]: "java.lang.Long",
@@ -341,7 +341,7 @@ describe("marshall", () => {
   test("root short", () => {
     const input = new JavaShort("1");
 
-    const output = JSON.parse(Marshalling.marshall(input));
+    const output = JSON.parse(marshall(input));
 
     expect(output).toBe(input.get());
   });
@@ -349,7 +349,7 @@ describe("marshall", () => {
   test("root BigDecimal", () => {
     const input = new JavaBigDecimal("1.1");
 
-    const output = JSON.parse(Marshalling.marshall(input));
+    const output = JSON.parse(marshall(input));
 
     expect(output).toEqual({
       [encodedType]: "java.math.BigDecimal",
@@ -361,7 +361,7 @@ describe("marshall", () => {
   test("root BigInteger", () => {
     const input = new JavaBigInteger("1");
 
-    const output = JSON.parse(Marshalling.marshall(input));
+    const output = JSON.parse(marshall(input));
 
     expect(output).toEqual({
       [encodedType]: "java.math.BigInteger",
@@ -373,7 +373,7 @@ describe("marshall", () => {
   test("root array", () => {
     const input = [new JavaInteger("1"), new JavaInteger("2"), new JavaInteger("3")];
 
-    const output = JSON.parse(Marshalling.marshall(input));
+    const output = JSON.parse(marshall(input));
 
     expect(output).toEqual({
       [encodedType]: "java.util.ArrayList",
@@ -401,7 +401,7 @@ describe("marshall", () => {
   test("root set", () => {
     const input = new Set([new JavaInteger("1"), new JavaInteger("2"), new JavaInteger("3")]);
 
-    const output = JSON.parse(Marshalling.marshall(input));
+    const output = JSON.parse(marshall(input));
 
     expect(output).toEqual({
       [encodedType]: "java.util.HashSet",
