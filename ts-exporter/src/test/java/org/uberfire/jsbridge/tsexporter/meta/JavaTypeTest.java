@@ -80,90 +80,41 @@ public class JavaTypeTest {
         assertEquals("any[][]", translate(array(erased(type(List.class)))));
     }
 
-    private abstract class Circle<T extends Circle<T>> {
-
-        T field1;
-        Circle<T> field2;
-
-        abstract void get1(T t);
-
-        abstract <U> void get2(T t, U u);
-
-        abstract <U extends T> void get3(T t, U u);
-
-        abstract <U extends T, S extends U> void get4(T t, U u, S s);
-
-        abstract <U extends T, S extends List<? extends T>> void get5(T t, U u, S s);
-
-        abstract <U extends T, S extends Circle<T>> void get6(T t, U u, S s);
-
-        abstract <U extends T, S extends Circle<T>> void get7(T t, U u, S s);
-    }
-
-    private abstract class Cylinder extends Circle<Cylinder> {
-
-    }
-
-    private abstract class Sphere<J> extends Circle<Sphere<J>> {
-
-    }
-
     @Test
     public void testTypeVar() {
-        assertEquals("Circle<T extends Circle<T>>", translate(type(Circle.class)));
-        assertEquals("Circle<T>", translate(TYPE_ARGUMENT_USE, type(Circle.class)));
-        assertEquals("T extends Circle<T>", translate(member("field1", type(Circle.class))));
-        assertEquals("T", translate(TYPE_ARGUMENT_USE, member("field1", type(Circle.class))));
-        assertEquals("Circle<T extends Circle<T>>", translate(member("field2", type(Circle.class))));
-        assertEquals("Circle<T>", translate(TYPE_ARGUMENT_USE, member("field2", type(Circle.class))));
-        assertEquals("T", translate(TYPE_ARGUMENT_USE, param(0, member("get1", type(Circle.class)))));
-        assertEquals("T", translate(TYPE_ARGUMENT_USE, param(0, member("get2", type(Circle.class)))));
-        assertEquals("U", translate(TYPE_ARGUMENT_USE, param(1, member("get2", type(Circle.class)))));
+        assertEquals("Circle<T extends Circle<T>>", translate(type(TestingUtils.Circle.class)));
+        assertEquals("Circle<T>", translate(TYPE_ARGUMENT_USE, type(TestingUtils.Circle.class)));
+        assertEquals("T extends Circle<T>", translate(member("field1", type(TestingUtils.Circle.class))));
+        assertEquals("T", translate(TYPE_ARGUMENT_USE, member("field1", type(TestingUtils.Circle.class))));
+        assertEquals("Circle<T extends Circle<T>>", translate(member("field2", type(TestingUtils.Circle.class))));
+        assertEquals("Circle<T>", translate(TYPE_ARGUMENT_USE, member("field2", type(TestingUtils.Circle.class))));
+        assertEquals("T", translate(TYPE_ARGUMENT_USE, param(0, member("get1", type(TestingUtils.Circle.class)))));
+        assertEquals("T", translate(TYPE_ARGUMENT_USE, param(0, member("get2", type(TestingUtils.Circle.class)))));
+        assertEquals("U", translate(TYPE_ARGUMENT_USE, param(1, member("get2", type(TestingUtils.Circle.class)))));
 
-        assertEquals("Cylinder", translate(type(Cylinder.class)));
-        assertEquals("Cylinder", translate(TYPE_ARGUMENT_USE, type(Cylinder.class)));
-        assertEquals("Circle<Cylinder>", translate(((TypeElement) type(Cylinder.class).asElement()).getSuperclass()));
-        assertEquals("Circle<Cylinder>", translate(TYPE_ARGUMENT_USE, ((TypeElement) type(Cylinder.class).asElement()).getSuperclass()));
-        assertEquals("Cylinder", translate(member("field1", type(Cylinder.class))));
-        assertEquals("Cylinder", translate(TYPE_ARGUMENT_USE, member("field1", type(Cylinder.class))));
-        assertEquals("Circle<Cylinder>", translate(member("field2", type(Cylinder.class))));
-        assertEquals("Circle<Cylinder>", translate(TYPE_ARGUMENT_USE, member("field2", type(Cylinder.class))));
-        assertEquals("Cylinder", translate(TYPE_ARGUMENT_USE, param(0, member("get1", type(Cylinder.class)))));
-        assertEquals("Cylinder", translate(TYPE_ARGUMENT_USE, param(0, member("get2", type(Cylinder.class)))));
-        assertEquals("U", translate(TYPE_ARGUMENT_USE, param(1, member("get2", type(Cylinder.class)))));
+        assertEquals("Cylinder", translate(type(TestingUtils.Cylinder.class)));
+        assertEquals("Cylinder", translate(TYPE_ARGUMENT_USE, type(TestingUtils.Cylinder.class)));
+        assertEquals("Circle<Cylinder>", translate(((TypeElement) type(TestingUtils.Cylinder.class).asElement()).getSuperclass()));
+        assertEquals("Circle<Cylinder>", translate(TYPE_ARGUMENT_USE, ((TypeElement) type(TestingUtils.Cylinder.class).asElement()).getSuperclass()));
+        assertEquals("Cylinder", translate(member("field1", type(TestingUtils.Cylinder.class))));
+        assertEquals("Cylinder", translate(TYPE_ARGUMENT_USE, member("field1", type(TestingUtils.Cylinder.class))));
+        assertEquals("Circle<Cylinder>", translate(member("field2", type(TestingUtils.Cylinder.class))));
+        assertEquals("Circle<Cylinder>", translate(TYPE_ARGUMENT_USE, member("field2", type(TestingUtils.Cylinder.class))));
+        assertEquals("Cylinder", translate(TYPE_ARGUMENT_USE, param(0, member("get1", type(TestingUtils.Cylinder.class)))));
+        assertEquals("Cylinder", translate(TYPE_ARGUMENT_USE, param(0, member("get2", type(TestingUtils.Cylinder.class)))));
+        assertEquals("U", translate(TYPE_ARGUMENT_USE, param(1, member("get2", type(TestingUtils.Cylinder.class)))));
 
-        assertEquals("Sphere<J>", translate(type(Sphere.class)));
-        assertEquals("Sphere<J>", translate(TYPE_ARGUMENT_USE, type(Sphere.class)));
-        assertEquals("Circle<Sphere<J>>", translate(((TypeElement) type(Sphere.class).asElement()).getSuperclass()));
-        assertEquals("Circle<Sphere<J>>", translate(TYPE_ARGUMENT_USE, ((TypeElement) type(Sphere.class).asElement()).getSuperclass()));
-        assertEquals("Sphere<J>", translate(member("field1", type(Sphere.class))));
-        assertEquals("Sphere<J>", translate(TYPE_ARGUMENT_USE, member("field1", type(Sphere.class))));
-        assertEquals("Circle<Sphere<J>>", translate(member("field2", type(Sphere.class))));
-        assertEquals("Circle<Sphere<J>>", translate(TYPE_ARGUMENT_USE, member("field2", type(Sphere.class))));
-        assertEquals("Sphere<J>", translate(TYPE_ARGUMENT_USE, param(0, member("get1", type(Sphere.class)))));
-        assertEquals("Sphere<J>", translate(TYPE_ARGUMENT_USE, param(0, member("get2", type(Sphere.class)))));
-        assertEquals("U", translate(TYPE_ARGUMENT_USE, param(1, member("get2", type(Sphere.class)))));
-    }
-
-    private abstract class DeclaredTypes {
-
-        Map<String, String> map;
-        List<String> list;
-        ArrayList<String> arrayList;
-        LinkedList<String> linkedList;
-        Set<String> set;
-        HashSet<String> hashSet;
-        TreeSet<String> treeSet;
-        Collection<String> collection;
-        Class<String> clazz;
-        Optional<String> optional;
-    }
-
-    private static class Foo {
-
-        private static class Bar {
-
-        }
+        assertEquals("Sphere<J>", translate(type(TestingUtils.Sphere.class)));
+        assertEquals("Sphere<J>", translate(TYPE_ARGUMENT_USE, type(TestingUtils.Sphere.class)));
+        assertEquals("Circle<Sphere<J>>", translate(((TypeElement) type(TestingUtils.Sphere.class).asElement()).getSuperclass()));
+        assertEquals("Circle<Sphere<J>>", translate(TYPE_ARGUMENT_USE, ((TypeElement) type(TestingUtils.Sphere.class).asElement()).getSuperclass()));
+        assertEquals("Sphere<J>", translate(member("field1", type(TestingUtils.Sphere.class))));
+        assertEquals("Sphere<J>", translate(TYPE_ARGUMENT_USE, member("field1", type(TestingUtils.Sphere.class))));
+        assertEquals("Circle<Sphere<J>>", translate(member("field2", type(TestingUtils.Sphere.class))));
+        assertEquals("Circle<Sphere<J>>", translate(TYPE_ARGUMENT_USE, member("field2", type(TestingUtils.Sphere.class))));
+        assertEquals("Sphere<J>", translate(TYPE_ARGUMENT_USE, param(0, member("get1", type(TestingUtils.Sphere.class)))));
+        assertEquals("Sphere<J>", translate(TYPE_ARGUMENT_USE, param(0, member("get2", type(TestingUtils.Sphere.class)))));
+        assertEquals("U", translate(TYPE_ARGUMENT_USE, param(1, member("get2", type(TestingUtils.Sphere.class)))));
     }
 
     @Test
@@ -200,20 +151,20 @@ public class JavaTypeTest {
         assertEquals("any[]", translate(erased(type(ArrayList.class))));
         assertEquals("any[]", translate(erased(type(LinkedList.class))));
         assertEquals("any[]", translate(erased(type(Collection.class))));
-        assertEquals("Foo", translate(type(Foo.class)));
-        assertEquals("Bar", translate(type(Foo.Bar.class)));
-        assertEquals("Circle<any>", translate(erased(type(Circle.class))));
+        assertEquals("Foo", translate(type(TestingUtils.Foo.class)));
+        assertEquals("Bar", translate(type(TestingUtils.Foo.Bar.class)));
+        assertEquals("Circle<any>", translate(erased(type(TestingUtils.Circle.class))));
         assertEquals("any", translate(erased(type(Optional.class))));
 
-        assertEquals("string[]", translate(member("set", type(DeclaredTypes.class))));
-        assertEquals("string[]", translate(member("hashSet", type(DeclaredTypes.class))));
-        assertEquals("string[]", translate(member("treeSet", type(DeclaredTypes.class))));
-        assertEquals("string[]", translate(member("list", type(DeclaredTypes.class))));
-        assertEquals("string[]", translate(member("arrayList", type(DeclaredTypes.class))));
-        assertEquals("string[]", translate(member("linkedList", type(DeclaredTypes.class))));
-        assertEquals("string[]", translate(member("collection", type(DeclaredTypes.class))));
-        assertEquals("any /* class */", translate(member("clazz", type(DeclaredTypes.class))));
-        assertEquals("string", translate(member("optional", type(DeclaredTypes.class))));
+        assertEquals("string[]", translate(member("set", type(TestingUtils.DeclaredTypes.class))));
+        assertEquals("string[]", translate(member("hashSet", type(TestingUtils.DeclaredTypes.class))));
+        assertEquals("string[]", translate(member("treeSet", type(TestingUtils.DeclaredTypes.class))));
+        assertEquals("string[]", translate(member("list", type(TestingUtils.DeclaredTypes.class))));
+        assertEquals("string[]", translate(member("arrayList", type(TestingUtils.DeclaredTypes.class))));
+        assertEquals("string[]", translate(member("linkedList", type(TestingUtils.DeclaredTypes.class))));
+        assertEquals("string[]", translate(member("collection", type(TestingUtils.DeclaredTypes.class))));
+        assertEquals("any /* class */", translate(member("clazz", type(TestingUtils.DeclaredTypes.class))));
+        assertEquals("string", translate(member("optional", type(TestingUtils.DeclaredTypes.class))));
     }
 
     @Test
@@ -226,44 +177,44 @@ public class JavaTypeTest {
 
     @Test
     public void testExecutable() {
-        assertEquals("", translate(member("get1", type(Circle.class))));
-        assertEquals("", translate(TYPE_ARGUMENT_USE, member("get1", type(Circle.class))));
-        assertEquals("<U>", translate(member("get2", type(Circle.class))));
-        assertEquals("<U>", translate(TYPE_ARGUMENT_USE, member("get2", type(Circle.class))));
-        assertEquals("<U extends T>", translate(member("get3", type(Circle.class))));
-        assertEquals("<U>", translate(TYPE_ARGUMENT_USE, member("get3", type(Circle.class))));
-        assertEquals("<U extends T, S extends U>", translate(member("get4", type(Circle.class))));
-        assertEquals("<U, S>", translate(TYPE_ARGUMENT_USE, member("get4", type(Circle.class))));
-        assertEquals("<U extends T, S extends T[]>", translate(member("get5", type(Circle.class))));
-        assertEquals("<U, S>", translate(TYPE_ARGUMENT_USE, member("get5", type(Circle.class))));
-        assertEquals("<U extends T, S extends Circle<T>>", translate(member("get6", type(Circle.class))));
-        assertEquals("<U, S>", translate(TYPE_ARGUMENT_USE, member("get6", type(Circle.class))));
+        assertEquals("", translate(member("get1", type(TestingUtils.Circle.class))));
+        assertEquals("", translate(TYPE_ARGUMENT_USE, member("get1", type(TestingUtils.Circle.class))));
+        assertEquals("<U>", translate(member("get2", type(TestingUtils.Circle.class))));
+        assertEquals("<U>", translate(TYPE_ARGUMENT_USE, member("get2", type(TestingUtils.Circle.class))));
+        assertEquals("<U extends T>", translate(member("get3", type(TestingUtils.Circle.class))));
+        assertEquals("<U>", translate(TYPE_ARGUMENT_USE, member("get3", type(TestingUtils.Circle.class))));
+        assertEquals("<U extends T, S extends U>", translate(member("get4", type(TestingUtils.Circle.class))));
+        assertEquals("<U, S>", translate(TYPE_ARGUMENT_USE, member("get4", type(TestingUtils.Circle.class))));
+        assertEquals("<U extends T, S extends T[]>", translate(member("get5", type(TestingUtils.Circle.class))));
+        assertEquals("<U, S>", translate(TYPE_ARGUMENT_USE, member("get5", type(TestingUtils.Circle.class))));
+        assertEquals("<U extends T, S extends Circle<T>>", translate(member("get6", type(TestingUtils.Circle.class))));
+        assertEquals("<U, S>", translate(TYPE_ARGUMENT_USE, member("get6", type(TestingUtils.Circle.class))));
 
-        assertEquals("", translate(member("get1", type(Cylinder.class))));
-        assertEquals("", translate(TYPE_ARGUMENT_USE, member("get1", type(Cylinder.class))));
-        assertEquals("<U>", translate(member("get2", type(Cylinder.class))));
-        assertEquals("<U>", translate(TYPE_ARGUMENT_USE, member("get2", type(Cylinder.class))));
-        assertEquals("<U extends Cylinder>", translate(member("get3", type(Cylinder.class))));
-        assertEquals("<U>", translate(TYPE_ARGUMENT_USE, member("get3", type(Cylinder.class))));
-        assertEquals("<U extends Cylinder, S extends U>", translate(member("get4", type(Cylinder.class))));
-        assertEquals("<U, S>", translate(TYPE_ARGUMENT_USE, member("get4", type(Cylinder.class))));
-        assertEquals("<U extends Cylinder, S extends Cylinder[]>", translate(member("get5", type(Cylinder.class))));
-        assertEquals("<U, S>", translate(TYPE_ARGUMENT_USE, member("get5", type(Cylinder.class))));
-        assertEquals("<U extends Cylinder, S extends Circle<Cylinder>>", translate(member("get6", type(Cylinder.class))));
-        assertEquals("<U, S>", translate(TYPE_ARGUMENT_USE, member("get6", type(Cylinder.class))));
+        assertEquals("", translate(member("get1", type(TestingUtils.Cylinder.class))));
+        assertEquals("", translate(TYPE_ARGUMENT_USE, member("get1", type(TestingUtils.Cylinder.class))));
+        assertEquals("<U>", translate(member("get2", type(TestingUtils.Cylinder.class))));
+        assertEquals("<U>", translate(TYPE_ARGUMENT_USE, member("get2", type(TestingUtils.Cylinder.class))));
+        assertEquals("<U extends Cylinder>", translate(member("get3", type(TestingUtils.Cylinder.class))));
+        assertEquals("<U>", translate(TYPE_ARGUMENT_USE, member("get3", type(TestingUtils.Cylinder.class))));
+        assertEquals("<U extends Cylinder, S extends U>", translate(member("get4", type(TestingUtils.Cylinder.class))));
+        assertEquals("<U, S>", translate(TYPE_ARGUMENT_USE, member("get4", type(TestingUtils.Cylinder.class))));
+        assertEquals("<U extends Cylinder, S extends Cylinder[]>", translate(member("get5", type(TestingUtils.Cylinder.class))));
+        assertEquals("<U, S>", translate(TYPE_ARGUMENT_USE, member("get5", type(TestingUtils.Cylinder.class))));
+        assertEquals("<U extends Cylinder, S extends Circle<Cylinder>>", translate(member("get6", type(TestingUtils.Cylinder.class))));
+        assertEquals("<U, S>", translate(TYPE_ARGUMENT_USE, member("get6", type(TestingUtils.Cylinder.class))));
 
-        assertEquals("", translate(member("get1", type(Sphere.class))));
-        assertEquals("", translate(TYPE_ARGUMENT_USE, member("get1", type(Sphere.class))));
-        assertEquals("<U>", translate(member("get2", type(Sphere.class))));
-        assertEquals("<U>", translate(TYPE_ARGUMENT_USE, member("get2", type(Sphere.class))));
-        assertEquals("<U extends Sphere<J>>", translate(member("get3", type(Sphere.class))));
-        assertEquals("<U>", translate(TYPE_ARGUMENT_USE, member("get3", type(Sphere.class))));
-        assertEquals("<U extends Sphere<J>, S extends U>", translate(member("get4", type(Sphere.class))));
-        assertEquals("<U, S>", translate(TYPE_ARGUMENT_USE, member("get4", type(Sphere.class))));
-        assertEquals("<U extends Sphere<J>, S extends Sphere<J>[]>", translate(member("get5", type(Sphere.class))));
-        assertEquals("<U, S>", translate(TYPE_ARGUMENT_USE, member("get5", type(Sphere.class))));
-        assertEquals("<U extends Sphere<J>, S extends Circle<Sphere<J>>>", translate(member("get6", type(Sphere.class))));
-        assertEquals("<U, S>", translate(TYPE_ARGUMENT_USE, member("get6", type(Sphere.class))));
+        assertEquals("", translate(member("get1", type(TestingUtils.Sphere.class))));
+        assertEquals("", translate(TYPE_ARGUMENT_USE, member("get1", type(TestingUtils.Sphere.class))));
+        assertEquals("<U>", translate(member("get2", type(TestingUtils.Sphere.class))));
+        assertEquals("<U>", translate(TYPE_ARGUMENT_USE, member("get2", type(TestingUtils.Sphere.class))));
+        assertEquals("<U extends Sphere<J>>", translate(member("get3", type(TestingUtils.Sphere.class))));
+        assertEquals("<U>", translate(TYPE_ARGUMENT_USE, member("get3", type(TestingUtils.Sphere.class))));
+        assertEquals("<U extends Sphere<J>, S extends U>", translate(member("get4", type(TestingUtils.Sphere.class))));
+        assertEquals("<U, S>", translate(TYPE_ARGUMENT_USE, member("get4", type(TestingUtils.Sphere.class))));
+        assertEquals("<U extends Sphere<J>, S extends Sphere<J>[]>", translate(member("get5", type(TestingUtils.Sphere.class))));
+        assertEquals("<U, S>", translate(TYPE_ARGUMENT_USE, member("get5", type(TestingUtils.Sphere.class))));
+        assertEquals("<U extends Sphere<J>, S extends Circle<Sphere<J>>>", translate(member("get6", type(TestingUtils.Sphere.class))));
+        assertEquals("<U, S>", translate(TYPE_ARGUMENT_USE, member("get6", type(TestingUtils.Sphere.class))));
     }
 
     private String translate(final TypeMirror type) {

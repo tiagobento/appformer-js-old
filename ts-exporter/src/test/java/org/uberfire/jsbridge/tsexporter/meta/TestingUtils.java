@@ -16,6 +16,16 @@
 
 package org.uberfire.jsbridge.tsexporter.meta;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
+
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
@@ -73,5 +83,54 @@ public class TestingUtils {
 
     public static JavaType param(final int i, final JavaType owner) {
         return new JavaType(((ExecutableType) owner.getType()).getParameterTypes().get(i), owner.owner);
+    }
+
+    static class Foo {
+
+        public static class Bar {
+
+        }
+    }
+
+    public abstract static class DeclaredTypes {
+
+        Map<String, String> map;
+        List<String> list;
+        ArrayList<String> arrayList;
+        LinkedList<String> linkedList;
+        Set<String> set;
+        HashSet<String> hashSet;
+        TreeSet<String> treeSet;
+        Collection<String> collection;
+        Class<String> clazz;
+        Optional<String> optional;
+    }
+
+    public abstract static class Circle<T extends Circle<T>> {
+
+        T field1;
+        Circle<T> field2;
+
+        abstract void get1(T t);
+
+        abstract <U> void get2(T t, U u);
+
+        abstract <U extends T> void get3(T t, U u);
+
+        abstract <U extends T, S extends U> void get4(T t, U u, S s);
+
+        abstract <U extends T, S extends List<? extends T>> void get5(T t, U u, S s);
+
+        abstract <U extends T, S extends Circle<T>> void get6(T t, U u, S s);
+
+        abstract <U extends T, S extends Circle<T>> void get7(T t, U u, S s);
+    }
+
+    public abstract static class Cylinder extends Circle<Cylinder> {
+
+    }
+
+    public abstract static class Sphere<J> extends Circle<Sphere<J>> {
+
     }
 }
