@@ -10,9 +10,9 @@ import JavaBooleanMarshaller from "./JavaBooleanMarshaller";
 import JavaStringMarshaller from "./JavaStringMarshaller";
 import JavaBigDecimalMarshaller from "./JavaBigDecimalMarshaller";
 import JavaBigIntegerMarshaller from "./JavaBigIntegerMarshaller";
-import JavaArrayListMarshaller from "./JavaArrayListMarshaller";
 import JavaHashSetMarshaller from "./JavaHashSetMarshaller";
 import JavaHashMapMarshaller from "./JavaHashMapMarshaller";
+import JavaArrayListMarshaller from "./JavaArrayListMarshaller";
 
 export class MarshallerProvider {
   private static marshallersByJavaType: Map<string, Marshaller<any, any>>;

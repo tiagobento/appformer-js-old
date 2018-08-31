@@ -1,6 +1,6 @@
-import { JavaWrapper } from "./JavaWrapper";
+import JavaCollection from "./JavaCollection";
 
-export class JavaArrayList implements JavaWrapper<any[]> {
+export class JavaArrayList implements JavaCollection<any[]> {
   private readonly _fqcn = "java.util.ArrayList";
 
   private readonly _value: any[];

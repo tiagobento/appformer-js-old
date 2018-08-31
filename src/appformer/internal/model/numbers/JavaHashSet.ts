@@ -1,6 +1,6 @@
-import { JavaWrapper } from "./JavaWrapper";
+import JavaCollection from "./JavaCollection";
 
-export class JavaHashSet implements JavaWrapper<Set<any>> {
+export class JavaHashSet implements JavaCollection<Set<any>> {
   private readonly _fqcn = "java.util.HashSet";
 
   private readonly _value: Set<any>;

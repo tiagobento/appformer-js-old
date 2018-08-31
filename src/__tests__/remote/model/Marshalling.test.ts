@@ -263,6 +263,29 @@ describe("marshall", () => {
     const a = 2; // TODO assertion
   });
 
+  test("set serialization", () => {
+    const input = new Pojo({
+      s1: new Set([new JavaByte("1"), new JavaByte("2"), new JavaByte("3"), new JavaByte("4")]),
+      s2: new Set([new JavaDouble("1.1"), new JavaDouble("2.2"), new JavaDouble("3.3"), new JavaDouble("4.4")]),
+      s3: new Set([new JavaFloat("1.1"), new JavaFloat("2.2"), new JavaFloat("3.3"), new JavaFloat("4.4")]),
+      s4: new Set([new JavaInteger("1"), new JavaInteger("2"), new JavaInteger("3"), new JavaInteger("4")]),
+      s5: new Set([new JavaLong("1"), new JavaLong("2"), new JavaLong("3"), new JavaLong("4")]),
+      s6: new Set([new JavaShort("1"), new JavaShort("2"), new JavaShort("3"), new JavaShort("4")]),
+      s7: new Set([
+        new JavaBigDecimal("1.1"),
+        new JavaBigDecimal("2.2"),
+        new JavaBigDecimal("3.3"),
+        new JavaBigDecimal("4.4")
+      ]),
+      s8: new Set([new JavaBigInteger("1"), new JavaBigInteger("2"), new JavaBigInteger("3"), new JavaBigInteger("4")]),
+      s9: new Set(["str1", "str2", "str3"])
+    });
+
+    const output = JSON.parse(Marshalling.marshall(input));
+
+    const a = 2; // TODO assertion
+  });
+
   test("root string", () => {
     const input = "hey";
 
@@ -374,6 +397,34 @@ describe("marshall", () => {
       ]
     });
   });
+
+  test("root set", () => {
+    const input = new Set([new JavaInteger("1"), new JavaInteger("2"), new JavaInteger("3")]);
+
+    const output = JSON.parse(Marshalling.marshall(input));
+
+    expect(output).toEqual({
+      [encodedType]: "java.util.HashSet",
+      [objectId]: expect.anything(),
+      [value]: [
+        {
+          [encodedType]: "java.lang.Integer",
+          [objectId]: "-1",
+          [numVal]: 1
+        },
+        {
+          [encodedType]: "java.lang.Integer",
+          [objectId]: "-1",
+          [numVal]: 2
+        },
+        {
+          [encodedType]: "java.lang.Integer",
+          [objectId]: "-1",
+          [numVal]: 3
+        }
+      ]
+    });
+  });
 });
 
 // ==============
@@ -440,6 +491,16 @@ class Pojo implements Portable {
     l7?: JavaBigDecimal[];
     l8?: JavaBigInteger[];
     l9?: string[];
+
+    s1?: Set<JavaByte>;
+    s2?: Set<JavaDouble>;
+    s3?: Set<JavaFloat>;
+    s4?: Set<JavaInteger>;
+    s5?: Set<JavaLong>;
+    s6?: Set<JavaShort>;
+    s7?: Set<JavaBigDecimal>;
+    s8?: Set<JavaBigInteger>;
+    s9?: Set<string>;
   }) {
     Object.assign(this, self);
   }
