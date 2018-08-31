@@ -23,7 +23,7 @@ import org.uberfire.jsbridge.tsexporter.util.ImportStore;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
-import static org.uberfire.jsbridge.tsexporter.Main.lines;
+import static org.uberfire.jsbridge.tsexporter.Utils.lines;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_USE;
 
 public class RpcCallerTsMethod {

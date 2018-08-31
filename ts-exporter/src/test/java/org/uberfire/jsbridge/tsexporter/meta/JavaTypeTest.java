@@ -187,6 +187,7 @@ public class JavaTypeTest {
         assertEquals("number", translate(type(BigDecimal.class)));
         assertEquals("number", translate(type(OptionalInt.class)));
         assertEquals("any /* class */", translate(type(Class.class)));
+        assertEquals("any /* enum_ */", translate(type(Enum.class)));
         assertEquals("any /* map entry */", translate(type(Map.Entry.class)));
         //TODO: HashMap.Node: It's protected! How?
         assertEquals("Map<any, any>", translate(erased(type(HashMap.class))));

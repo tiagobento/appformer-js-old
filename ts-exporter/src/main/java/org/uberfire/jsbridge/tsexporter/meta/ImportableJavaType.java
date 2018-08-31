@@ -17,11 +17,9 @@
 package org.uberfire.jsbridge.tsexporter.meta;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Stream;
 
 import javax.lang.model.element.TypeElement;
@@ -29,11 +27,8 @@ import javax.lang.model.type.DeclaredType;
 
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
-import static javax.lang.model.element.ElementKind.FIELD;
-import static org.uberfire.jsbridge.tsexporter.Main.distinctBy;
-import static org.uberfire.jsbridge.tsexporter.Main.elements;
-import static org.uberfire.jsbridge.tsexporter.Main.getModuleName;
-import static org.uberfire.jsbridge.tsexporter.Main.types;
+import static java.util.stream.Stream.empty;
+import static org.uberfire.jsbridge.tsexporter.Utils.getModuleName;
 
 public class ImportableJavaType extends JavaType {
 
@@ -84,7 +79,7 @@ public class ImportableJavaType extends JavaType {
                 .collect(toList());
 
         final List<ImportableTsType> ret =
-                Stream.concat(asImportableTsType().map(Stream::of).orElse(Stream.empty()),
+                Stream.concat(asImportableTsType().map(Stream::of).orElse(empty()),
                               importableTsArgumentTypes.stream()).collect(toList());
 
         visited.put(getType().toString(), ret);

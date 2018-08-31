@@ -34,8 +34,8 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.ElementKind.METHOD;
-import static org.uberfire.jsbridge.tsexporter.Main.lines;
 import static org.uberfire.jsbridge.tsexporter.Main.types;
+import static org.uberfire.jsbridge.tsexporter.Utils.lines;
 
 public class RpcCallerTsClass {
 

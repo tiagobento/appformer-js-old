@@ -9,8 +9,13 @@ import TestMessagesService from "generated__temporary__/org/uberfire/shared/Test
 
 export class InoffensiveNonScreenClass {}
 
+enum Asd {
+    A2,
+}
+
 export class ReactComponentScreen extends AppFormer.Screen {
   public onFoo: (e: any) => void;
+
 
   constructor() {
     super();

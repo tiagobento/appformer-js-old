@@ -137,6 +137,8 @@ public class JavaType {
                     case "java.math.BigDecimal":
                     case "java.util.OptionalInt":
                         return "number";
+                    case "java.lang.Enum":
+                        return "any /* enum_ */";
                     case "java.lang.Class":
                         return "any /* class */";
                     case "java.util.Map.Entry":

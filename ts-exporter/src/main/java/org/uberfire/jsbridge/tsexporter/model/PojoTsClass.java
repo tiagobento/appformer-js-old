@@ -38,7 +38,7 @@ import static javax.lang.model.element.ElementKind.ENUM_CONSTANT;
 import static javax.lang.model.element.ElementKind.INTERFACE;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.STATIC;
-import static org.uberfire.jsbridge.tsexporter.Main.lines;
+import static org.uberfire.jsbridge.tsexporter.Utils.lines;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_DECLARATION;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_USE;
 
@@ -81,20 +81,17 @@ public class PojoTsClass {
         final String fields = element.getEnclosedElements().stream()
                 .filter(s -> s.getKind().isField())
                 .filter(s -> !s.getModifiers().contains(STATIC))
-                .map(s -> format("  public readonly %s?: %s;", s.getSimpleName(), importStore.importing(new JavaType(s.asType(), type)).toUniqueTsType(TYPE_ARGUMENT_USE)))
+                .filter(s -> !s.asType().toString().contains("java.util.function"))
+                .map(s -> format("public readonly %s?: %s;", s.getSimpleName(), importStore.importing(new JavaType(s.asType(), type)).toUniqueTsType(TYPE_ARGUMENT_USE)))
                 .collect(joining("\n"));
 
         final String constructorArgs = extractConstructorArgs(element);
 
-        final String superCall = importableSuperclassTsType.map(t -> "super({...self.inherited});").orElse("");
         final String _extends = importableSuperclassTsType.map(t -> "extends " + importStore.importing(t).toUniqueTsType(TYPE_ARGUMENT_USE)).orElse("");
 
         final String _implements = implementedInterfaces.isEmpty()
                 ? format("implements Portable<%s>", extractSimpleName(element, TYPE_ARGUMENT_USE))
                 : "implements " + implementedInterfaces.stream().peek(importStore::importing).map(javaType -> javaType.toUniqueTsType(TYPE_ARGUMENT_USE)).collect(joining(", ")) + format(", Portable<%s>", extractSimpleName(element, TYPE_ARGUMENT_USE));
-
-        final String hierarchy = _extends + " " + _implements;
-        final String abstractOrNot = element.getModifiers().contains(ABSTRACT) ? "abstract" : "";
 
         //Has to be the last.
         final String imports = importStore.getImportStatements();
@@ -116,13 +113,13 @@ public class PojoTsClass {
                             "}"),
 
                       imports,
-                      abstractOrNot,
+                      element.getModifiers().contains(ABSTRACT) ? "abstract" : "",
                       simpleName,
-                      hierarchy,
+                      _extends + " " + _implements,
                       importableTsType.getCanonicalFqcn(),
                       fields,
                       constructorArgs,
-                      superCall
+                      importableSuperclassTsType.map(t -> "super({...self.inherited});").orElse("")
         );
     }
 
@@ -189,6 +186,7 @@ public class PojoTsClass {
         final List<String> fields = typeElement.getEnclosedElements().stream()
                 .filter(f -> f.getKind().isField())
                 .filter(f -> !f.getModifiers().contains(STATIC))
+                .filter(s -> !s.asType().toString().contains("java.util.function"))
                 .map(f -> format("%s?: %s", f.getSimpleName(), importStore.importing(new JavaType(f.asType(), importableTsType.getType())).toUniqueTsType(TYPE_ARGUMENT_USE)))
                 .collect(toList());
 
