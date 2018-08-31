@@ -43,13 +43,12 @@ public class RpcJavaMethod {
     }
 
     public String toErraiBusPath() {
-        final List<String> parameterFqcns = executableElement.getParameters().stream()
+        return executableElement.getSimpleName() + ":" + executableElement.getParameters().stream()
                 .map(Element::asType)
                 .map(s -> Optional.ofNullable(Main.types.asElement(s)))
                 .filter(Optional::isPresent).map(Optional::get)
                 .map(Object::toString)
-                .collect(toList());
-        return executableElement.getSimpleName() + ":" + parameterFqcns.stream().collect(joining(":"));
+                .collect(toList()).stream().collect(joining(":"));
     }
 
     public String getName() {
