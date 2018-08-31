@@ -1,4 +1,4 @@
-import Marshaller from "appformer/marshalling/marshallers/Marshaller";
+import Marshaller from "appformer/marshalling/Marshaller";
 import JavaShort from "appformer/java-wrapper/JavaShort";
 import MarshallingContext from "appformer/marshalling/MarshallingContext";
 

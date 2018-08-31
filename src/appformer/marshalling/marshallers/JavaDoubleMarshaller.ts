@@ -1,4 +1,4 @@
-import Marshaller from "./Marshaller";
+import Marshaller from "../Marshaller";
 import JavaDouble from "../../java-wrapper/JavaDouble";
 import MarshallingContext from "../MarshallingContext";
 

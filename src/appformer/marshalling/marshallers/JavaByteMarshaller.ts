@@ -1,4 +1,4 @@
-import Marshaller from "./Marshaller";
+import Marshaller from "../Marshaller";
 import JavaByte from "../../java-wrapper/JavaByte";
 import MarshallingContext from "../MarshallingContext";
 

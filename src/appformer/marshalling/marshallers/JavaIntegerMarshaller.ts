@@ -1,5 +1,5 @@
 import MarshallingContext from "appformer/marshalling/MarshallingContext";
-import Marshaller from "appformer/marshalling/marshallers/Marshaller";
+import Marshaller from "appformer/marshalling/Marshaller";
 import JavaInteger from "appformer/java-wrapper/JavaInteger";
 
 export default class JavaIntegerMarshaller implements Marshaller<JavaInteger, number> {

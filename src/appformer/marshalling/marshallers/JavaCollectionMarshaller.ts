@@ -1,11 +1,10 @@
-import Marshaller from "./Marshaller";
-import JavaCollection from "../../java-wrapper/JavaCollection";
-import JavaNumber from "../../java-wrapper/JavaNumber";
-import ErraiObject from "../model/ErraiObject";
-import MarshallingContext from "../MarshallingContext";
-import ErraiObjectConstants from "../model/ErraiObjectConstants";
-import MarshallerProvider from "../MarshallerProvider";
-import ErraiMarshaller from "./ErraiMarshaller";
+import Marshaller from "appformer/marshalling/Marshaller";
+import JavaCollection from "appformer/java-wrapper/JavaCollection";
+import ErraiObject from "appformer/marshalling/model/ErraiObject";
+import MarshallingContext from "appformer/marshalling/MarshallingContext";
+import ErraiObjectConstants from "appformer/marshalling/model/ErraiObjectConstants";
+import MarshallerProvider from "appformer/marshalling/MarshallerProvider";
+import JavaNumber from "appformer/java-wrapper/JavaNumber";
 
 export default class JavaCollectionMarshaller<T extends Iterable<any>>
   implements Marshaller<JavaCollection<T>, ErraiObject> {
@@ -25,22 +24,24 @@ export default class JavaCollectionMarshaller<T extends Iterable<any>>
   }
 
   private marshallInnerElement(value: any, ctx: MarshallingContext): ErraiObject {
-    // FIXME: not nice
-    const provider = new MarshallerProvider();
-    const marshaller = new ErraiMarshaller({ marshallerProvider: provider });
+    const marshaller = MarshallerProvider.getFor(value);
+    const marshaledValue = marshaller.marshall(value, ctx);
 
     if (value instanceof JavaNumber) {
-      const fqcn = (value as any)._fqcn;
-      const customMarshaller = MarshallerProvider.getFor(fqcn);
-      const marshalledValue = customMarshaller.marshall(value, ctx);
-
-      return {
-        [ErraiObjectConstants.ENCODED_TYPE]: fqcn,
-        [ErraiObjectConstants.OBJECT_ID]: "-1",
-        [ErraiObjectConstants.NUM_VAL]: marshalledValue
-      };
+      // This is mandatory in order to comply with errai-marshalling protocol.
+      // When it founds a number inside a collection, the number is wrapped
+      // inside a ErraiObject envelope
+      return this.erraiObjectFromNumber(value, marshaledValue);
     }
 
     return marshaller.marshall(value, ctx);
+  }
+
+  private erraiObjectFromNumber(value: any, marshaledValue: any) {
+    return {
+      [ErraiObjectConstants.ENCODED_TYPE]: (value as any)._fqcn,
+      [ErraiObjectConstants.OBJECT_ID]: "-1",
+      [ErraiObjectConstants.NUM_VAL]: marshaledValue
+    };
   }
 }

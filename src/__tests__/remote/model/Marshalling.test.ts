@@ -29,6 +29,7 @@ import JavaHashMapMarshaller from "appformer/marshalling/marshallers/JavaHashMap
 import JavaHashSetMarshaller from "appformer/marshalling/marshallers/JavaHashSetMarshaller";
 import Portable from "appformer/internal/model/Portable";
 import { marshall } from "appformer/marshalling";
+import DefaultMarshaller from "appformer/marshalling/marshallers/DefaultMarshaller";
 
 describe("marshall", () => {
   const encodedType = ErraiObjectConstants.ENCODED_TYPE;
@@ -228,21 +229,24 @@ describe("marshall", () => {
 
   test("getFor", () => {
     MarshallerProvider.initialize();
-    expect(MarshallerProvider.getFor("java.lang.Byte")).toEqual(new JavaByteMarshaller());
-    expect(MarshallerProvider.getFor("java.lang.Double")).toEqual(new JavaDoubleMarshaller());
-    expect(MarshallerProvider.getFor("java.lang.Float")).toEqual(new JavaFloatMarshaller());
-    expect(MarshallerProvider.getFor("java.lang.Integer")).toEqual(new JavaIntegerMarshaller());
-    expect(MarshallerProvider.getFor("java.lang.Long")).toEqual(new JavaLongMarshaller());
-    expect(MarshallerProvider.getFor("java.lang.Short")).toEqual(new JavaShortMarshaller());
-    expect(MarshallerProvider.getFor("java.lang.Boolean")).toEqual(new JavaBooleanMarshaller());
-    expect(MarshallerProvider.getFor("java.lang.String")).toEqual(new JavaStringMarshaller());
-    expect(MarshallerProvider.getFor("java.math.BigDecimal")).toEqual(new JavaBigDecimalMarshaller());
-    expect(MarshallerProvider.getFor("java.math.BigInteger")).toEqual(new JavaBigIntegerMarshaller());
-    expect(MarshallerProvider.getFor("java.util.ArrayList")).toEqual(new JavaArrayListMarshaller());
-    expect(MarshallerProvider.getFor("java.util.HashSet")).toEqual(new JavaHashSetMarshaller());
-    expect(MarshallerProvider.getFor("java.util.HashMap")).toEqual(new JavaHashMapMarshaller());
+    expect(MarshallerProvider.getFor(new JavaByte("1"))).toEqual(new JavaByteMarshaller());
+    expect(MarshallerProvider.getFor(new JavaDouble("1.2"))).toEqual(new JavaDoubleMarshaller());
+    expect(MarshallerProvider.getFor(new JavaFloat("1.1"))).toEqual(new JavaFloatMarshaller());
+    expect(MarshallerProvider.getFor(new JavaInteger("1"))).toEqual(new JavaIntegerMarshaller());
+    expect(MarshallerProvider.getFor(new JavaLong("1"))).toEqual(new JavaLongMarshaller());
+    expect(MarshallerProvider.getFor(new JavaShort("1"))).toEqual(new JavaShortMarshaller());
+    expect(MarshallerProvider.getFor(new JavaBoolean(true))).toEqual(new JavaBooleanMarshaller());
+    expect(MarshallerProvider.getFor(new JavaString("str"))).toEqual(new JavaStringMarshaller());
+    expect(MarshallerProvider.getFor(new JavaBigDecimal("1.1"))).toEqual(new JavaBigDecimalMarshaller());
+    expect(MarshallerProvider.getFor(new JavaBigInteger("1"))).toEqual(new JavaBigIntegerMarshaller());
+    expect(MarshallerProvider.getFor(new JavaArrayList([1, 2, 3]))).toEqual(new JavaArrayListMarshaller());
+    expect(MarshallerProvider.getFor(new JavaHashSet(new Set([1, 2, 3])))).toEqual(new JavaHashSetMarshaller());
+    expect(MarshallerProvider.getFor(new JavaHashMap(new Map([["foo", "bar"]])))).toEqual(new JavaHashMapMarshaller());
 
-    expect(() => MarshallerProvider.getFor("foo")).toThrowError(Error);
+    expect(MarshallerProvider.getFor(new NonPortable("bar"))).toEqual(new DefaultMarshaller()); // no fqcn
+    expect(MarshallerProvider.getFor(new Address({ line1: "l1", line2: "l2" }))).toEqual(new DefaultMarshaller()); // custom fqcn
+
+    // TODO how to test a java type without marshaller?
   });
 
   test("list serialization", () => {
@@ -503,5 +507,17 @@ class Pojo implements Portable {
     s9?: Set<string>;
   }) {
     Object.assign(this, self);
+  }
+}
+
+class NonPortable {
+  private readonly _foo: string;
+
+  constructor(foo: string) {
+    this._foo = foo;
+  }
+
+  public foo(): string {
+    return this._foo;
   }
 }

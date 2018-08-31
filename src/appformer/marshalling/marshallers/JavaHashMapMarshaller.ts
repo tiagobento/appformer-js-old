@@ -1,4 +1,4 @@
-import Marshaller from "./Marshaller";
+import Marshaller from "../Marshaller";
 import JavaHashMap from "../../java-wrapper/JavaHashMap";
 import MarshallingContext from "../MarshallingContext";
 import ErraiObject from "../model/ErraiObject";

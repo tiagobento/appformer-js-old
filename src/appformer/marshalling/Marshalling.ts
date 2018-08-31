@@ -1,12 +1,10 @@
 import Portable from "appformer/internal/model/Portable";
 import MarshallerProvider from "appformer/marshalling/MarshallerProvider";
-import ErraiMarshaller from "appformer/marshalling/marshallers/ErraiMarshaller";
+import MarshallingContext from "appformer/marshalling/MarshallingContext";
 
-export function marshall(obj: Portable | string) {
-  MarshallerProvider.initialize();
-  const erraiMarshaller = new ErraiMarshaller({ marshallerProvider: new MarshallerProvider() });
-
-  return JSON.stringify(erraiMarshaller.marshall(obj));
+export function marshall(obj: Portable) {
+  const marshaller = MarshallerProvider.getFor(obj);
+  return JSON.stringify(marshaller.marshall(obj, new MarshallingContext()));
 }
 
 // TODO: Implement to return an object from the Model file

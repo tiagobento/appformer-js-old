@@ -5,30 +5,27 @@ import JavaBoolean from "appformer/java-wrapper/JavaBoolean";
 import JavaString from "appformer/java-wrapper/JavaString";
 
 export default abstract class JavaWrapper<T> {
+  private static wrappingFuncForType: Map<(obj: any) => boolean, (obj: any) => JavaWrapper<any>> = new Map([
+    [JavaWrapper.isArray, (obj: any) => new JavaArrayList(obj) as JavaWrapper<any>],
+    [JavaWrapper.isSet, (obj: any) => new JavaHashSet(obj) as JavaWrapper<any>],
+    [JavaWrapper.isMap, (obj: any) => new JavaHashMap(obj) as JavaWrapper<any>],
+    [JavaWrapper.isBoolean, (obj: any) => new JavaBoolean(obj) as JavaWrapper<any>],
+    [JavaWrapper.isString, (obj: any) => new JavaString(obj) as JavaWrapper<any>]
+  ]);
+
   public abstract get(): T;
 
+  public static needsWrapping(obj: any): boolean {
+    return this.getWrappingFunction(obj) !== undefined;
+  }
+
   public static wrapIfNeeded(obj: any): JavaWrapper<any> | undefined {
-    if (obj instanceof Array) {
-      return new JavaArrayList(obj);
+    const func = this.getWrappingFunction(obj);
+    if (!func) {
+      return undefined;
     }
 
-    if (obj instanceof Set) {
-      return new JavaHashSet(obj);
-    }
-
-    if (obj instanceof Map) {
-      return new JavaHashMap(obj);
-    }
-
-    if (obj instanceof Boolean || typeof obj === "boolean") {
-      return new JavaBoolean(obj as boolean);
-    }
-
-    if (obj instanceof String || typeof obj === "string") {
-      return new JavaString(obj as string);
-    }
-
-    return undefined;
+    return func(obj);
   }
 
   public static isJavaType(fqcn: string): boolean {
@@ -38,6 +35,43 @@ export default abstract class JavaWrapper<T> {
       }
     }
     return false;
+  }
+
+  private static getWrappingFunction(obj: any): ((obj: any) => JavaWrapper<any>) | undefined {
+    //tslint:disable-next-line
+    let result: ((obj: any) => JavaWrapper<any>) | undefined = undefined;
+
+    this.wrappingFuncForType.forEach((wrapFunction, typeFilterFunction) => {
+      if (result) {
+        return;
+      }
+
+      if (typeFilterFunction(obj)) {
+        result = wrapFunction;
+      }
+    });
+
+    return result;
+  }
+
+  private static isArray(obj: any): boolean {
+    return obj instanceof Array;
+  }
+
+  private static isSet(obj: any): boolean {
+    return obj instanceof Set;
+  }
+
+  private static isMap(obj: any): boolean {
+    return obj instanceof Map;
+  }
+
+  private static isBoolean(obj: any): boolean {
+    return obj instanceof Boolean || typeof obj === "boolean";
+  }
+
+  private static isString(obj: any): boolean {
+    return obj instanceof String || typeof obj === "string";
   }
 }
 
