@@ -14,15 +14,23 @@ export default class DefaultMarshaller implements Marshaller<any, ErraiObject> {
 
     const rootFqcn = (input as any)._fqcn;
     if (!rootFqcn) {
-      // convert native JS types to a default Java type implementation
+      // the input may be of primitive type, if it is a Java-wrappable type,
+      // we need to wrap it before marshalling
       if (JavaWrapper.needsWrapping(input)) {
-        return this.marshallWrappableType(input, ctx);
+        return DefaultMarshaller.marshallWrappableType(input, ctx);
       }
     }
 
+    // Input has fqcn, so, it represents a Java type. We need to check if it
+    // is a primitive Java type or not, because this marshaller handles only
+    // custom types (i.e. Portable).
+
     if (JavaWrapper.isJavaType(rootFqcn)) {
       const marshaller = MarshallerProvider.getFor(input);
-      return marshaller.marshall(input, ctx);
+      const marshaledObject = marshaller.marshall(input, ctx);
+
+      ctx.recordObject(input, marshaledObject);
+      return marshaledObject;
     }
 
     const _this = this.marshallCustomObject(input, ctx, rootFqcn);
@@ -45,7 +53,7 @@ export default class DefaultMarshaller implements Marshaller<any, ErraiObject> {
         _this[k] = marshaller.marshall(_this[k], ctx);
       } else {
         if (JavaWrapper.needsWrapping(_this[k])) {
-          return this.marshallWrappableType(_this[k], ctx);
+          return DefaultMarshaller.marshallWrappableType(_this[k], ctx);
         }
 
         // nothing to do, will marshall field as is
@@ -58,7 +66,7 @@ export default class DefaultMarshaller implements Marshaller<any, ErraiObject> {
     return _this;
   }
 
-  private marshallWrappableType(input: any, ctx: MarshallingContext): any {
+  private static marshallWrappableType(input: any, ctx: MarshallingContext): any {
     // convert native JS types to a default Java type implementation
     const wrappedType = JavaWrapper.wrapIfNeeded(input);
 
