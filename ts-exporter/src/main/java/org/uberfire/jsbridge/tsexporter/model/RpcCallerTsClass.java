@@ -34,6 +34,7 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.ElementKind.METHOD;
+import static org.uberfire.jsbridge.tsexporter.Main.lines;
 import static org.uberfire.jsbridge.tsexporter.Main.types;
 
 public class RpcCallerTsClass {
@@ -83,15 +84,13 @@ public class RpcCallerTsClass {
         //Has to be the last
         final String imports = imports();
 
-        return format("" +
-                              "import {rpc, marshall, unmarshall} from \"appformer/API\";\n" +
-                              "%s" +
-                              "\n\n" +
-                              "export default class %s {\n" +
-                              "%s" +
-                              "\n" +
-                              "}" +
-                              "\n",
+        return format(lines("",
+                            "import {rpc, marshall, unmarshall} from 'appformer/API';",
+                            "%s",
+                            "",
+                            "export default class %s {",
+                            "%s",
+                            "}"),
 
                       imports,
                       simpleName,

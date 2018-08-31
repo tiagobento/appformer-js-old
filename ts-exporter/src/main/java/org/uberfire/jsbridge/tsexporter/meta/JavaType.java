@@ -27,6 +27,7 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
 import javax.lang.model.type.WildcardType;
 
+import com.sun.tools.javac.code.Symbol;
 import org.uberfire.jsbridge.tsexporter.Main;
 
 import static java.lang.String.format;
@@ -114,6 +115,8 @@ public class JavaType {
                         return "any /* object */";
                     case "java.util.Date":
                         return "any /* date */"; //FIXME: Opinionate?
+                    case "java.lang.StackTraceElement":
+                        return "any /* stack trace element */";
                     case "java.lang.Throwable":
                         return "any /* throwable */"; //FIXME: ???
                     case "javax.enterprise.event.Event":
@@ -121,6 +124,7 @@ public class JavaType {
                     case "java.lang.Boolean":
                         return "boolean";
                     case "java.lang.String":
+                    case "java.lang.Character":
                         return "string";
                     case "java.lang.Integer":
                     case "java.lang.Byte":
@@ -129,6 +133,9 @@ public class JavaType {
                     case "java.lang.Long":
                     case "java.lang.Number":
                     case "java.lang.Short":
+                    case "java.math.BigInteger":
+                    case "java.math.BigDecimal":
+                    case "java.util.OptionalInt":
                         return "number";
                     case "java.lang.Class":
                         return "any /* class */";
@@ -137,15 +144,19 @@ public class JavaType {
                     case "java.util.HashMap.Node":
                         return "any /* map node */";
                     case "java.util.HashMap":
+                    case "java.util.TreeMap":
                     case "java.util.Map":
                         return format("Map<%s, %s>", typeArguments.get(0), typeArguments.get(1));
                     case "java.util.Set":
                     case "java.util.HashSet":
+                    case "java.util.TreeSet":
                     case "java.util.List":
                     case "java.util.ArrayList":
                     case "java.util.LinkedList":
                     case "java.util.Collection":
                         return format("%s[]", typeArguments.get(0));
+                    case "java.util.Optional":
+                        return typeArguments.get(0);
                     default:
                         return format("%s%s",
                                       !simpleNames ? fqcn.replace(".", "_") : declaredType.asElement().getSimpleName(),
@@ -256,8 +267,12 @@ public class JavaType {
         }
     }
 
-    public String getFlatFqcn() {
+    public String getCanonicalFqcn() {
         return types.asElement(type).toString();
+    }
+
+    public String getFlatFqcn() {
+        return ((Symbol) ((DeclaredType) type).asElement()).flatName().toString();
     }
 
     public TypeMirror getType() {

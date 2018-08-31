@@ -37,16 +37,16 @@ public class ImportableTsType extends ImportableJavaType {
     }
 
     private String getTemporaryPathToCodegen() {
-        return "output/" + moduleName + "/" + getFlatFqcn().replace(".", "/");
+        return "output/" + moduleName + "/" + getCanonicalFqcn().replace(".", "/");
     }
 
     public String getPath() {
-        return moduleName + "/" + getFlatFqcn().replace(".", "/");
+        return moduleName + "/" + getCanonicalFqcn().replace(".", "/");
     }
 
     public String asTsImportSource() {
-        return format("import %s from \"%s\";",
-                      getFlatFqcn().replace(".", "_"),
+        return format("import %s from '%s';",
+                      getCanonicalFqcn().replace(".", "_"),
                       getTemporaryPathToCodegen());
     }
 }

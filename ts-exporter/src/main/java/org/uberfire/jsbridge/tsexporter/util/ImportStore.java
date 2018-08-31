@@ -45,7 +45,7 @@ public class ImportStore {
                 .map(JavaType::asImportableJavaType)
                 .filter(Optional::isPresent).map(Optional::get)
                 .flatMap(importableJavaType -> importableJavaType.getDirectImportableTsTypes(visited).stream())
-                .map(s -> Main.elements.getTypeElement(s.getFlatFqcn()).asType())
+                .map(s -> Main.elements.getTypeElement(s.getCanonicalFqcn()).asType())
                 .map(unownedType -> new JavaType(unownedType).asImportableJavaType())
                 .filter(Optional::isPresent).map(Optional::get)
                 .map(ImportableJavaType::asImportableTsType)

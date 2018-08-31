@@ -1,5 +1,7 @@
 package org.uberfire.jsbridge.tsexporter.meta;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -8,7 +10,11 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
@@ -147,8 +153,10 @@ public class JavaTypeTest {
         LinkedList<String> linkedList;
         Set<String> set;
         HashSet<String> hashSet;
+        TreeSet<String> treeSet;
         Collection<String> collection;
         Class<String> clazz;
+        Optional<String> optional;
     }
 
     private static class Foo {
@@ -162,9 +170,11 @@ public class JavaTypeTest {
     public void testDeclared() {
         assertEquals("any /* object */", translate(type(Object.class)));
         assertEquals("any /* date */", translate(type(Date.class)));
+        assertEquals("any /* stack trace element */", translate(type(StackTraceElement.class)));
         assertEquals("any /* throwable */", translate(type(Throwable.class)));
         //TODO: javax.enterprise.event.Event: WHY?
         assertEquals("boolean", translate(type(Boolean.class)));
+        assertEquals("string", translate(type(Character.class)));
         assertEquals("string", translate(type(String.class)));
         assertEquals("number", translate(type(Integer.class)));
         assertEquals("number", translate(type(Byte.class)));
@@ -173,13 +183,18 @@ public class JavaTypeTest {
         assertEquals("number", translate(type(Long.class)));
         assertEquals("number", translate(type(Number.class)));
         assertEquals("number", translate(type(Short.class)));
+        assertEquals("number", translate(type(BigInteger.class)));
+        assertEquals("number", translate(type(BigDecimal.class)));
+        assertEquals("number", translate(type(OptionalInt.class)));
         assertEquals("any /* class */", translate(type(Class.class)));
         assertEquals("any /* map entry */", translate(type(Map.Entry.class)));
         //TODO: HashMap.Node: It's protected! How?
         assertEquals("Map<any, any>", translate(erased(type(HashMap.class))));
+        assertEquals("Map<any, any>", translate(erased(type(TreeMap.class))));
         assertEquals("Map<any, any>", translate(erased(type(Map.class))));
         assertEquals("any[]", translate(erased(type(Set.class))));
         assertEquals("any[]", translate(erased(type(HashSet.class))));
+        assertEquals("any[]", translate(erased(type(TreeSet.class))));
         assertEquals("any[]", translate(erased(type(List.class))));
         assertEquals("any[]", translate(erased(type(ArrayList.class))));
         assertEquals("any[]", translate(erased(type(LinkedList.class))));
@@ -187,14 +202,17 @@ public class JavaTypeTest {
         assertEquals("Foo", translate(type(Foo.class)));
         assertEquals("Bar", translate(type(Foo.Bar.class)));
         assertEquals("Circle<any>", translate(erased(type(Circle.class))));
+        assertEquals("any", translate(erased(type(Optional.class))));
 
         assertEquals("string[]", translate(member("set", type(DeclaredTypes.class))));
         assertEquals("string[]", translate(member("hashSet", type(DeclaredTypes.class))));
+        assertEquals("string[]", translate(member("treeSet", type(DeclaredTypes.class))));
         assertEquals("string[]", translate(member("list", type(DeclaredTypes.class))));
         assertEquals("string[]", translate(member("arrayList", type(DeclaredTypes.class))));
         assertEquals("string[]", translate(member("linkedList", type(DeclaredTypes.class))));
         assertEquals("string[]", translate(member("collection", type(DeclaredTypes.class))));
         assertEquals("any /* class */", translate(member("clazz", type(DeclaredTypes.class))));
+        assertEquals("string", translate(member("optional", type(DeclaredTypes.class))));
     }
 
     @Test

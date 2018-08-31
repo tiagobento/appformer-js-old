@@ -27,6 +27,7 @@ import javax.lang.model.type.DeclaredType;
 import org.uberfire.jsbridge.tsexporter.meta.ImportableJavaType;
 import org.uberfire.jsbridge.tsexporter.meta.ImportableTsType;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType;
+import org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget;
 import org.uberfire.jsbridge.tsexporter.util.ImportStore;
 
 import static java.lang.String.format;
@@ -37,6 +38,7 @@ import static javax.lang.model.element.ElementKind.ENUM_CONSTANT;
 import static javax.lang.model.element.ElementKind.INTERFACE;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.STATIC;
+import static org.uberfire.jsbridge.tsexporter.Main.lines;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_DECLARATION;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_USE;
 
@@ -97,36 +99,27 @@ public class PojoTsClass {
         //Has to be the last.
         final String imports = importStore.getImportStatements();
 
-        return format("" +
-                              "import { Portable } from \"generated__temporary__/Model\";" +
-                              "\n" +
-                              "%s" +
-                              "\n" +
-                              "\n" +
-                              "export default %s class %s %s {" +
-                              "\n" +
-                              "\n" +
-                              "  protected readonly _fqcn: string = \"%s\";" +
-                              "\n" +
-                              "\n" +
-                              "%s" +
-                              "\n" +
-                              "\n" +
-                              "  constructor(self: { %s }) {" +
-                              "\n" +
-                              "    %s" +
-                              "\n" +
-                              "    Object.assign(this, self); " +
-                              "\n" +
-                              "  }" +
-                              "\n" +
-                              "}",
+        return format(lines("",
+                            "import { Portable } from 'generated__temporary__/Model';",
+                            "%s",
+                            "",
+                            "export default %s class %s %s {",
+                            "",
+                            "  protected readonly _fqcn: string = '%s';",
+                            "",
+                            "%s",
+                            "",
+                            "  constructor(self: { %s }) {",
+                            "    %s",
+                            "    Object.assign(this, self); ",
+                            "  }",
+                            "}"),
 
                       imports,
                       abstractOrNot,
                       simpleName,
                       hierarchy,
-                      importableTsType.getFlatFqcn(),
+                      importableTsType.getCanonicalFqcn(),
                       fields,
                       constructorArgs,
                       superCall
@@ -143,11 +136,10 @@ public class PojoTsClass {
                 .map(Element::getSimpleName)
                 .collect(joining(", "));
 
-        return format("" +
-                              "enum %s { %s }" +
-                              "\n" +
-                              "\n" +
-                              "export default %s;",
+        return format(lines("",
+                            "enum %s { %s }",
+                            "",
+                            "export default %s;"),
 
                       simpleName,
                       enumFields,
@@ -159,20 +151,18 @@ public class PojoTsClass {
         final DeclaredType type = importableTsType.getType();
         final TypeElement element = (TypeElement) type.asElement();
         final String simpleName = extractSimpleName(element, TYPE_ARGUMENT_DECLARATION);
-        final String _implements = implementedInterfaces.isEmpty()
-                ? ""
-                : "extends " + implementedInterfaces.stream().peek(importStore::importing).map(javaType -> javaType.toUniqueTsType(TYPE_ARGUMENT_USE)).collect(joining(", "));
+        final String _implements = !implementedInterfaces.isEmpty()
+                ? "extends " + implementedInterfaces.stream().peek(importStore::importing).map(javaType -> javaType.toUniqueTsType(TYPE_ARGUMENT_USE)).collect(joining(", "))
+                : "";
 
         //Has to be the last
         final String imports = importStore.getImportStatements();
 
-        return format("" +
-                              "%s" +
-                              "\n" +
-                              "\n" +
-                              "export default interface %s %s {" +
-                              "\n" +
-                              "}",
+        return format(lines("",
+                            "%s",
+                            "",
+                            "export default interface %s %s {",
+                            "}"),
 
                       imports,
                       simpleName,
@@ -189,7 +179,7 @@ public class PojoTsClass {
                 .collect(toList());
     }
 
-    private String extractSimpleName(final TypeElement element, final JavaType.TsTypeTarget tsTypeTarget) {
+    private String extractSimpleName(final TypeElement element, final TsTypeTarget tsTypeTarget) {
         final String fqcn = importStore.importing(new JavaType(element.asType())).toUniqueTsType(tsTypeTarget);
         return fqcn.substring(fqcn.indexOf(element.getSimpleName().toString()));
     }

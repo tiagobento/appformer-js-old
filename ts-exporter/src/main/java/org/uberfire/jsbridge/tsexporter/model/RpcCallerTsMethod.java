@@ -23,6 +23,7 @@ import org.uberfire.jsbridge.tsexporter.util.ImportStore;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
+import static org.uberfire.jsbridge.tsexporter.Main.lines;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_USE;
 
 public class RpcCallerTsMethod {
@@ -53,18 +54,14 @@ public class RpcCallerTsMethod {
 
     public String toSource() {
         System.out.println("Generating " + javaMethod + " for " + _interface.getQualifiedName().toString());
-        return format("" +
-                              "public %s(args: { %s }) {" +
-                              "\n" +
-                              "  return rpc(%s, [%s])" +
-                              "\n" +
-                              "         .then((json: string) => { " +
-                              "\n" +
-                              "           return unmarshall(json, {%s}) as %s; " +
-                              "\n" +
-                              "         }); " +
-                              "\n" +
-                              "}",
+        return format(lines("",
+                            "public %s(args: { %s }) {",
+                            "  return rpc(%s, [%s])",
+                            "         .then((json: string) => { ",
+                            "           return unmarshall(json, {%s}) as %s; ",
+                            "         }); ",
+                            "}",
+                            ""),
 
                       name + new JavaType(javaMethod.getType(), _interface.asType()).toUniqueTsType(),
                       params(),

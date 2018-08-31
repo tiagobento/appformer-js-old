@@ -24,17 +24,15 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeMirror;
 
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
-import static org.uberfire.jsbridge.tsexporter.Main.currentMavenModuleName;
+import static javax.lang.model.element.ElementKind.FIELD;
 import static org.uberfire.jsbridge.tsexporter.Main.distinctBy;
 import static org.uberfire.jsbridge.tsexporter.Main.elements;
+import static org.uberfire.jsbridge.tsexporter.Main.getModuleName;
 import static org.uberfire.jsbridge.tsexporter.Main.types;
 
 public class ImportableJavaType extends JavaType {
@@ -48,70 +46,10 @@ public class ImportableJavaType extends JavaType {
         return Optional.of(this);
     }
 
-    public List<ImportableJavaType> getAllTsImportableTypes(final Set<String> visited) {
-        return getAllTsImportableTypes(visited, -1, 0);
-    }
-
-    public List<ImportableJavaType> getAllTsImportableTypes(final Set<String> visited, final int maxDepth) {
-        return getAllTsImportableTypes(visited, maxDepth, 0);
-    }
-
-    private List<ImportableJavaType> getAllTsImportableTypes(final Set<String> visited, final int maxDepth, final int depth) {
-
-        final List<ImportableTsType> rootLevelTypes = getDirectImportableTsTypes(new HashMap<>());
-        if (rootLevelTypes.isEmpty()) {
-            return emptyList();
-        }
-
-        // Cyclic dependencies, yo!
-        final List<String> rootLevelTypeFqcns = rootLevelTypes.stream().map(ImportableJavaType::getFlatFqcn).collect(toList());
-        if (visited.containsAll(rootLevelTypeFqcns)) {
-            return emptyList();
-        }
-
-        visited.addAll(rootLevelTypeFqcns);
-        System.out.println("Getting all dependencies for " + type.toString());
-
-        final List<ImportableJavaType> childrenImportableTypes = (maxDepth != -1 && depth >= maxDepth) ? emptyList() : rootLevelTypes.stream()
-                .flatMap(t -> extractImportableJavaTypesFromMembers(t, visited, maxDepth, depth).stream())
-                .collect(toList());
-
-        return Stream.concat(rootLevelTypes.stream(), childrenImportableTypes.stream())
-                .filter(distinctBy(ImportableJavaType::getFlatFqcn))
-                .collect(toList());
-    }
-
-    private List<ImportableJavaType> extractImportableJavaTypesFromMembers(final ImportableJavaType importableJavaType,
-                                                                           final Set<String> visited,
-                                                                           final int maxDepth,
-                                                                           final int depth) {
-
-        return elements.getAllMembers((TypeElement) types.asElement(importableJavaType.type)).stream()
-                .map(member -> extractNonJdkMemberJavaType(member, importableJavaType.type))
-                .map(t -> t.flatMap(JavaType::asImportableJavaType))
-                .filter(Optional::isPresent).map(Optional::get)
-                .flatMap(t -> t.getAllTsImportableTypes(visited, maxDepth, depth + 1).stream())
-                .collect(toList());
-    }
-
-    private Optional<JavaType> extractNonJdkMemberJavaType(final Element member,
-                                                           final TypeMirror memberOwner) {
-
-        if (member.getKind().equals(ElementKind.FIELD)) {
-            return Optional.of(new JavaType(member.asType(), memberOwner));
-        }
-
-//        if (member.getKind().equals(ElementKind.METHOD) && !member.getEnclosingElement().toString().matches("javax?.*")) {
-//            return Optional.of(new JavaType(((ExecutableElement) member).getReturnType(), memberOwner));
-//        }
-
-        return Optional.empty();
-    }
-
     public Optional<ImportableTsType> asImportableTsType() {
         try {
 
-            if (getFlatFqcn().matches("^javax?.*")) {
+            if (getCanonicalFqcn().matches("^javax?.*")) {
                 return Optional.empty();
             }
 
@@ -129,7 +67,7 @@ public class ImportableJavaType extends JavaType {
 
             return Optional.of(new ImportableTsType(split[split.length - 2], this));
         } catch (final ClassNotFoundException e) {
-            return Optional.of(new ImportableTsType(currentMavenModuleName, this));
+            return Optional.of(new ImportableTsType(getModuleName((TypeElement) getType().asElement()), this));
         }
     }
 
@@ -145,8 +83,10 @@ public class ImportableJavaType extends JavaType {
                 .flatMap(importableJavaType -> importableJavaType.getDirectImportableTsTypes(visited).stream())
                 .collect(toList());
 
-        final List<ImportableTsType> ret = Stream.concat(asImportableTsType().map(Stream::of).orElse(Stream.empty()),
-                                                         importableTsArgumentTypes.stream()).collect(toList());
+        final List<ImportableTsType> ret =
+                Stream.concat(asImportableTsType().map(Stream::of).orElse(Stream.empty()),
+                              importableTsArgumentTypes.stream()).collect(toList());
+
         visited.put(getType().toString(), ret);
         return ret;
     }

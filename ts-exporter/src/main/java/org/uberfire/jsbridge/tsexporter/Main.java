@@ -7,7 +7,10 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collection;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -25,20 +28,24 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
+import org.uberfire.jsbridge.tsexporter.meta.ImportableJavaType;
 import org.uberfire.jsbridge.tsexporter.meta.ImportableTsType;
+import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 import org.uberfire.jsbridge.tsexporter.model.PojoTsClass;
 import org.uberfire.jsbridge.tsexporter.model.RpcCallerTsClass;
 
 import static java.lang.String.format;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toMap;
 import static javax.lang.model.element.ElementKind.PACKAGE;
+import static javax.tools.Diagnostic.Kind.ERROR;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
-@SupportedAnnotationTypes({"org.jboss.errai.bus.server.annotations.Remote"})
+@SupportedAnnotationTypes({"org.jboss.errai.bus.server.annotations.Remote", "org.jboss.errai.common.client.api.annotations.Portable"})
 public class Main extends AbstractProcessor {
 
     public static Types types;
     public static Elements elements;
-    public static String currentMavenModuleName;
 
     @Override
     public synchronized void init(final ProcessingEnvironment processingEnv) {
@@ -47,24 +54,52 @@ public class Main extends AbstractProcessor {
         Main.elements = processingEnv.getElementUtils();
     }
 
-    public boolean process(final Set<? extends TypeElement> annotations, final RoundEnvironment roundEnv) {
+    public boolean process(final Set<? extends TypeElement> annotations,
+                           final RoundEnvironment roundEnv) {
         try {
-
             if (!Boolean.getBoolean("ts-export")) {
                 return false;
             }
 
-            if (roundEnv.processingOver()) {
+            if (roundEnv.processingOver() || roundEnv.errorRaised()) {
+                try {
+                    final Enumeration<URL> resources = this.getClass().getClassLoader().getResources("META-INF/ErraiApp.properties");
+                    Collections.list(resources).stream()
+                            .map(this::loadPropertiesFile)
+                            .map(properties -> Optional.ofNullable(properties.getProperty("errai.marshalling.serializableTypes")))
+                            .filter(Optional::isPresent).map(Optional::get)
+                            .flatMap(serializableTypes -> Arrays.stream(serializableTypes.split(" \n?")))
+                            .map(String::trim)
+                            .map(fqcn -> elements.getTypeElement(fqcn.replace("$", ".")))
+                            .map(typeElement -> new JavaType(typeElement.asType()).asImportableJavaType())
+                            .map(javaType -> javaType.flatMap(ImportableJavaType::asImportableTsType))
+                            .filter(Optional::isPresent).map(Optional::get)
+                            .peek(s -> System.out.println("WW!!: generating pojo " + s.getType()))
+                            .forEach(this::generatePojoTsClassFile);
+                } catch (final IOException e) {
+                    System.out.println("Failed to read ErraiApp.properties files");
+                }
+
                 return false;
             }
 
             annotations.stream()
-                    .map(roundEnv::getElementsAnnotatedWith)
-                    .flatMap(Collection::stream)
-                    .forEach(this::generateTypeScriptFile);
-
+                    .collect(toMap(s -> s, roundEnv::getElementsAnnotatedWith))
+                    .forEach((annotation, classes) -> {
+                        if (annotation.toString().contains("Remote")) {
+                            classes.forEach(this::generateTypeScriptFile);
+                        } else {
+                            classes.stream()
+                                    .map(s -> new JavaType(s.asType()).asImportableJavaType())
+                                    .filter(Optional::isPresent).map(Optional::get)
+                                    .map(ImportableJavaType::asImportableTsType)
+                                    .filter(Optional::isPresent).map(Optional::get)
+                                    .forEach(this::generatePojoTsClassFile);
+                        }
+                    });
             System.out.println("TypeScript files exported successfully.");
         } catch (final Exception e) {
+            processingEnv.getMessager().printMessage(ERROR, "Error on TS Exporter");
             e.printStackTrace();
         }
 
@@ -84,30 +119,11 @@ public class Main extends AbstractProcessor {
         }
 
         final RpcCallerTsClass rpcCallerTsClass = new RpcCallerTsClass((TypeElement) element);
-        setCurrentModuleName(rpcCallerTsClass);
         generateRemoteRpcTsClassFile(rpcCallerTsClass);
 
         rpcCallerTsClass.getDependencies().stream()
-                .filter(distinctBy(ImportableTsType::getFlatFqcn))
+                .filter(distinctBy(ImportableTsType::getCanonicalFqcn))
                 .forEach(this::generatePojoTsClassFile);
-
-//        try {
-//            final Enumeration<URL> resources = this.getClass().getClassLoader().getResources("META-INF/ErraiApp.properties");
-//            Collections.list(resources).stream()
-//                    .map(this::loadPropertiesFile)
-//                    .map(properties -> Optional.ofNullable(properties.getProperty("errai.marshalling.serializableTypes")))
-//                    .filter(Optional::isPresent).map(Optional::get)
-//                    .flatMap(serializableTypes -> Arrays.stream(serializableTypes.split(" \n?")))
-//                    .map(String::trim)
-//                    .map(fqcn -> elements.getTypeElement(fqcn.replace("$", ".")))
-//                    .map(typeElement -> new JavaType(typeElement.asType(), typeElement.asType()).asImportableJavaType())
-//                    .map(javaType -> javaType.flatMap(ImportableJavaType::asImportableTsType))
-//                    .filter(Optional::isPresent).map(Optional::get)
-//                    .peek(s -> System.out.println("WW!!: generating pojo " + s.getType()))
-//                    .forEach(this::generatePojoTsClassFile);
-//        } catch (final IOException e) {
-//            System.out.println("Failed to read ErraiApp.properties files");
-//        }
     }
 
     private Properties loadPropertiesFile(final URL fileUrl) {
@@ -120,23 +136,12 @@ public class Main extends AbstractProcessor {
         return properties;
     }
 
-    private void setCurrentModuleName(final RpcCallerTsClass tsClass) {
-        try {
-            final Field sourceFileField = tsClass.getInterface().getClass().getField("sourcefile");
-            sourceFileField.setAccessible(true);
-            final String[] sourceFileParts = sourceFileField.get(tsClass.getInterface()).toString().split("/src/main/java")[0].split("/");
-            currentMavenModuleName = sourceFileParts[sourceFileParts.length - 1];
-        } catch (final Exception e) {
-            throw new RuntimeException("Error while reading [sourcefile] field from @Remote interface element.", e);
-        }
-    }
-
     private void generateRemoteRpcTsClassFile(final RpcCallerTsClass tsClass) {
         System.out.println("Generating source for " + tsClass.getInterface().getQualifiedName().toString());
         final String source = tsClass.toSource();
 
         final String targetDir = tsClass.getInterface().getQualifiedName().toString().replace(".", "/");
-        final Path path = Paths.get(format("/tmp/ts-exporter/%s/%s.ts", currentMavenModuleName, targetDir).replace("/", File.separator));
+        final Path path = Paths.get(format("/tmp/ts-exporter/%s/%s.ts", getModuleName(tsClass.getInterface()), targetDir).replace("/", File.separator));
         System.out.println("Source generated. Saving to " + path.toString());
 
         try {
@@ -145,6 +150,42 @@ public class Main extends AbstractProcessor {
             System.out.println("Saved.");
         } catch (final IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    public static String lines(final String... lines) {
+        return Arrays.stream(lines).collect(joining("\n"));
+    }
+
+    public static String getModuleName(final TypeElement typeElement) {
+        try {
+            final Field sourceFileField = typeElement.getClass().getField("sourcefile");
+            sourceFileField.setAccessible(true);
+            final String sourceFilePath = sourceFileField.get(typeElement).toString();
+
+            if (sourceFilePath.contains("/src/main/java")) {
+                final String[] sourceFilePathParts = sourceFilePath.split("/src/main/java")[0].split("/");
+                return sourceFilePathParts[sourceFilePathParts.length - 1];
+            }
+
+            if (sourceFilePath.contains("/target/generated-sources")) {
+                final String[] sourceFilePathParts = sourceFilePath.split("/target/generated-sources")[0].split("/");
+                return sourceFilePathParts[sourceFilePathParts.length - 1];
+            }
+
+            if (sourceFilePath.contains("/src/test/java")) {
+                final String[] sourceFilePathParts = sourceFilePath.split("/src/test/java")[0].split("/");
+                return sourceFilePathParts[sourceFilePathParts.length - 1] + "-test";
+            }
+
+            if (sourceFilePath.contains("/target/generated-test-sources")) {
+                final String[] sourceFilePathParts = sourceFilePath.split("/target/generated-test-sources")[0].split("/");
+                return sourceFilePathParts[sourceFilePathParts.length - 1] + "-test";
+            }
+
+            throw new RuntimeException("Module name unretrievable from [" + sourceFilePath + "]");
+        } catch (final Exception e) {
+            throw new RuntimeException("Error while reading [sourcefile] field from @Remote interface element.", e);
         }
     }
 
