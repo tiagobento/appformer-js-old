@@ -33,6 +33,7 @@ import org.uberfire.jsbridge.tsexporter.Main;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
+import static javax.lang.model.type.TypeKind.NONE;
 import static javax.lang.model.type.TypeKind.NULL;
 import static javax.lang.model.type.TypeKind.TYPEVAR;
 import static org.uberfire.jsbridge.tsexporter.Main.types;
@@ -108,7 +109,7 @@ public class JavaType {
             case DECLARED:
                 final DeclaredType declaredType = (DeclaredType) type;
                 final String fqcn = declaredType.asElement().toString();
-                final List<String> typeArguments = extractTranslatedTypeArguments(declaredType, tsTypeTarget);
+                final List<JavaType> typeArguments = extractTypeArguments(declaredType);
 
                 switch (fqcn) {
                     case "java.lang.Object":
@@ -148,7 +149,7 @@ public class JavaType {
                     case "java.util.HashMap":
                     case "java.util.TreeMap":
                     case "java.util.Map":
-                        return format("Map<%s, %s>", typeArguments.get(0), typeArguments.get(1));
+                        return format("Map<%s, %s>", typeArguments.get(0).toUniqueTsType(tsTypeTarget), typeArguments.get(1).toUniqueTsType(tsTypeTarget));
                     case "java.util.Set":
                     case "java.util.HashSet":
                     case "java.util.TreeSet":
@@ -156,13 +157,13 @@ public class JavaType {
                     case "java.util.ArrayList":
                     case "java.util.LinkedList":
                     case "java.util.Collection":
-                        return format("%s[]", typeArguments.get(0));
+                        return format("%s[]", typeArguments.get(0).toUniqueTsType(tsTypeTarget));
                     case "java.util.Optional":
-                        return typeArguments.get(0);
+                        return typeArguments.get(0).toUniqueTsType(tsTypeTarget);
                     default:
                         return format("%s%s",
                                       !simpleNames ? fqcn.replace(".", "_") : declaredType.asElement().getSimpleName(),
-                                      typeArguments.isEmpty() ? "" : ("<" + typeArguments.stream().collect(joining(", "))) + ">");
+                                      typeArguments.isEmpty() ? "" : ("<" + typeArguments.stream().map(s -> s.toUniqueTsType(tsTypeTarget)).collect(joining(", "))) + ">");
                 }
             case WILDCARD:
                 final WildcardType wildcardType = (WildcardType) type;
@@ -181,6 +182,7 @@ public class JavaType {
                 return executableType.getTypeVariables().isEmpty() ? "" : "<" + translatedTypeArguments + ">";
             case PACKAGE:
             case NONE:
+                return "any";
             case ERROR:
             case OTHER:
             case UNION:
@@ -190,23 +192,19 @@ public class JavaType {
         }
     }
 
-    private List<String> extractTranslatedTypeArguments(final DeclaredType declaredType,
-                                                        final TsTypeTarget tsTypeTarget) {
+    private List<JavaType> extractTypeArguments(final DeclaredType declaredType) {
 
-        final List<String> typeArguments = declaredType.getTypeArguments().stream()
-                .map(typeArgument -> toUniqueTsType(typeArgument, tsTypeTarget))
+        final List<JavaType> typeArguments = declaredType.getTypeArguments().stream()
+                .map(typeArgument -> new JavaType(typeArgument, owner))
                 .collect(toList());
 
         if (!typeArguments.isEmpty()) {
             return typeArguments;
         }
 
-        final TypeElement vanillaTypeElement = Main.elements.getTypeElement(declaredType.asElement().toString());
-        if (vanillaTypeElement != null && !vanillaTypeElement.getTypeParameters().isEmpty()) {
-            return vanillaTypeElement.getTypeParameters().stream().map(s -> "any").collect(toList());
-        }
-
-        return typeArguments;
+        return ((TypeElement) ((DeclaredType) types.erasure(declaredType)).asElement()).getTypeParameters().stream()
+                .map(s -> new JavaType(types.getNoType(NONE)))
+                .collect(toList());
     }
 
     private String translateUnresolvableTypeArgument(final TypeVariable typeVariable,
