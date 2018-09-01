@@ -17,7 +17,6 @@
 package org.uberfire.jsbridge.tsexporter.meta;
 
 import java.util.List;
-import java.util.Optional;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ArrayType;
@@ -27,10 +26,11 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
 import javax.lang.model.type.WildcardType;
 
-import com.sun.tools.javac.code.Symbol;
-import org.uberfire.jsbridge.tsexporter.Main;
-
 import static java.lang.String.format;
+import static java.util.Arrays.asList;
+import static java.util.Arrays.stream;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static javax.lang.model.type.TypeKind.NONE;
@@ -42,10 +42,10 @@ import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_A
 
 public class JavaType {
 
-    static boolean simpleNames = false;
+    static boolean SIMPLE_NAMES = false;
 
-    protected final TypeMirror type;
-    protected final TypeMirror owner;
+    private final TypeMirror type;
+    private final TypeMirror owner;
 
     public JavaType(final TypeMirror type) {
         this(type, type);
@@ -59,21 +59,33 @@ public class JavaType {
         this.owner = owner;
     }
 
+    public TypeMirror getType() {
+        return type;
+    }
+
+    public TypeMirror getOwner() {
+        return owner;
+    }
+
     public enum TsTypeTarget {
         TYPE_ARGUMENT_USE,
         TYPE_ARGUMENT_DECLARATION;
     }
 
-    public String toUniqueTsType() {
-        return toUniqueTsType(TYPE_ARGUMENT_DECLARATION);
+    public TranslatableJavaType translate() {
+        return translate(TYPE_ARGUMENT_DECLARATION);
     }
 
-    public String toUniqueTsType(final TsTypeTarget tsTypeTarget) {
-        return toUniqueTsType(type, tsTypeTarget);
+    public TranslatableJavaType translate(final TsTypeTarget tsTypeTarget) {
+        return translate(type, tsTypeTarget);
     }
 
-    private String toUniqueTsType(final TypeMirror type,
-                                  final TsTypeTarget tsTypeTarget) {
+    private TranslatableJavaType simpleTranslatable(String name) {
+        return new TranslatableJavaType(name, emptyList(), emptyList());
+    }
+
+    private TranslatableJavaType translate(final TypeMirror type,
+                                           final TsTypeTarget tsTypeTarget) {
 
         switch (type.getKind()) {
             case INT:
@@ -82,17 +94,19 @@ public class JavaType {
             case FLOAT:
             case SHORT:
             case LONG:
-                return "number";
+                return simpleTranslatable("number");
             case VOID:
-                return "void";
+                return simpleTranslatable("void");
             case NULL:
-                return "null"; //FIXME: undefined?
+                return simpleTranslatable("null");
             case CHAR:
-                return "string";
+                return simpleTranslatable("string");
             case BOOLEAN:
-                return "boolean";
+                return simpleTranslatable("boolean");
             case ARRAY:
-                return format("%s[]", toUniqueTsType(((ArrayType) type).getComponentType(), tsTypeTarget));
+                return new TranslatableJavaType(t -> format("%s[]", t[0].toTypeScript()),
+                                                emptyList(),
+                                                singletonList(translate(((ArrayType) type).getComponentType(), tsTypeTarget)));
             case TYPEVAR:
                 final TypeMirror resolvedType;
                 try {
@@ -104,29 +118,28 @@ public class JavaType {
                 if (resolvedType.getKind().equals(TYPEVAR)) {
                     return translateUnresolvableTypeArgument((TypeVariable) resolvedType, tsTypeTarget);
                 } else {
-                    return toUniqueTsType(resolvedType, tsTypeTarget);
+                    return translate(resolvedType, tsTypeTarget);
                 }
             case DECLARED:
                 final DeclaredType declaredType = (DeclaredType) type;
-                final String fqcn = declaredType.asElement().toString();
                 final List<JavaType> typeArguments = extractTypeArguments(declaredType);
 
-                switch (fqcn) {
+                switch (declaredType.asElement().toString()) {
                     case "java.lang.Object":
-                        return "any /* object */";
+                        return simpleTranslatable("any /* object */");
                     case "java.util.Date":
-                        return "any /* date */"; //FIXME: Opinionate?
+                        return simpleTranslatable("any /* date */"); //FIXME: Opinionate?
                     case "java.lang.StackTraceElement":
-                        return "any /* stack trace element */";
+                        return simpleTranslatable("any /* stack trace element */");
                     case "java.lang.Throwable":
-                        return "any /* throwable */"; //FIXME: ???
+                        return simpleTranslatable("any /* throwable */"); //FIXME: ???
                     case "javax.enterprise.event.Event":
-                        return "any /* javax event */"; //FIXME: ???
+                        return simpleTranslatable("any /* javax event */"); //FIXME: ???
                     case "java.lang.Boolean":
-                        return "boolean";
+                        return simpleTranslatable("boolean");
                     case "java.lang.String":
                     case "java.lang.Character":
-                        return "string";
+                        return simpleTranslatable("string");
                     case "java.lang.Integer":
                     case "java.lang.Byte":
                     case "java.lang.Double":
@@ -137,19 +150,22 @@ public class JavaType {
                     case "java.math.BigInteger":
                     case "java.math.BigDecimal":
                     case "java.util.OptionalInt":
-                        return "number";
+                        return simpleTranslatable("number");
                     case "java.lang.Enum":
-                        return "any /* enum_ */";
+                        return simpleTranslatable("any /* enum_ */");
                     case "java.lang.Class":
-                        return "any /* class */";
+                        return simpleTranslatable("any /* class */");
                     case "java.util.Map.Entry":
-                        return "any /* map entry */";
+                        return simpleTranslatable("any /* map entry */");
                     case "java.util.HashMap.Node":
-                        return "any /* map node */";
+                        return simpleTranslatable("any /* map node */");
                     case "java.util.HashMap":
                     case "java.util.TreeMap":
                     case "java.util.Map":
-                        return format("Map<%s, %s>", typeArguments.get(0).toUniqueTsType(tsTypeTarget), typeArguments.get(1).toUniqueTsType(tsTypeTarget));
+                        return new TranslatableJavaType(t -> format("Map<%s, %s>", t[0].toTypeScript(), t[1].toTypeScript()),
+                                                        emptyList(),
+                                                        asList(typeArguments.get(0).translate(tsTypeTarget),
+                                                               typeArguments.get(1).translate(tsTypeTarget)));
                     case "java.util.Set":
                     case "java.util.HashSet":
                     case "java.util.TreeSet":
@@ -157,38 +173,47 @@ public class JavaType {
                     case "java.util.ArrayList":
                     case "java.util.LinkedList":
                     case "java.util.Collection":
-                        return format("%s[]", typeArguments.get(0).toUniqueTsType(tsTypeTarget));
+                        return new TranslatableJavaType(d -> format("%s[]", d[0].toTypeScript()),
+                                                        emptyList(),
+                                                        singletonList(typeArguments.get(0).translate(tsTypeTarget)));
                     case "java.util.Optional":
-                        return typeArguments.get(0).toUniqueTsType(tsTypeTarget);
-                    default:
-                        return format("%s%s",
-                                      !simpleNames ? fqcn.replace(".", "_") : declaredType.asElement().getSimpleName(),
-                                      typeArguments.isEmpty() ? "" : ("<" + typeArguments.stream().map(s -> s.toUniqueTsType(tsTypeTarget)).collect(joining(", "))) + ">");
+                        return typeArguments.get(0).translate(tsTypeTarget);
+                    default: {
+                        return new AnyDeclaredTranslatableJavaType(declaredType, typeArguments).translate(tsTypeTarget);
+                    }
                 }
             case WILDCARD:
                 final WildcardType wildcardType = (WildcardType) type;
                 if (wildcardType.getExtendsBound() != null) {
-                    return toUniqueTsType(wildcardType.getExtendsBound(), tsTypeTarget);
+                    return translate(wildcardType.getExtendsBound(), tsTypeTarget);
                 } else if (wildcardType.getSuperBound() != null) {
-                    return format("Partial<%s>", toUniqueTsType(wildcardType.getSuperBound(), tsTypeTarget));
+                    return new TranslatableJavaType(d -> format("Partial<%s>", d[0].toTypeScript()),
+                                                    emptyList(),
+                                                    singletonList(translate(wildcardType.getSuperBound(), tsTypeTarget)));
                 } else {
-                    return "any /* wildcard */";
+                    return simpleTranslatable("any /* wildcard */");
                 }
             case EXECUTABLE:
-                final ExecutableType executableType = (ExecutableType) type;
-                final String translatedTypeArguments = executableType.getTypeVariables().stream()
-                        .map(typeArgument -> toUniqueTsType(typeArgument, tsTypeTarget))
-                        .collect(joining(", "));
-                return executableType.getTypeVariables().isEmpty() ? "" : "<" + translatedTypeArguments + ">";
+                if (((ExecutableType) type).getTypeVariables().isEmpty()) {
+                    return simpleTranslatable("");
+                }
+
+                final List<TranslatableJavaType> dependencies = ((ExecutableType) type).getTypeVariables().stream()
+                        .map(t -> translate(t, tsTypeTarget))
+                        .collect(toList());
+
+                return new TranslatableJavaType(d -> "<" + stream(d).map(TranslatableJavaType::toTypeScript).collect(joining(", ")) + ">",
+                                                emptyList(),
+                                                dependencies);
             case PACKAGE:
             case NONE:
-                return "any";
+                return simpleTranslatable("any");
             case ERROR:
             case OTHER:
             case UNION:
             case INTERSECTION:
             default:
-                return "any /* unknown */";
+                return simpleTranslatable("any /* unknown */");
         }
     }
 
@@ -207,75 +232,27 @@ public class JavaType {
                 .collect(toList());
     }
 
-    private String translateUnresolvableTypeArgument(final TypeVariable typeVariable,
-                                                     final TsTypeTarget tsTypeTarget) {
+    private TranslatableJavaType translateUnresolvableTypeArgument(final TypeVariable typeVariable,
+                                                                   final TsTypeTarget tsTypeTarget) {
 
         if (!typeVariable.getUpperBound().getKind().equals(NULL)) {
             if (tsTypeTarget.equals(TYPE_ARGUMENT_DECLARATION)) {
                 if (!typeVariable.getUpperBound().toString().equals("java.lang.Object")) {
-                    return typeVariable.toString() + " extends " + toUniqueTsType(typeVariable.getUpperBound(), TYPE_ARGUMENT_USE);
+                    return new TranslatableJavaType(d -> typeVariable.toString() + " extends " + d[0].toTypeScript(),
+                                                    emptyList(),
+                                                    singletonList(translate(typeVariable.getUpperBound(), TYPE_ARGUMENT_USE)));
                 } else {
-                    return typeVariable.toString();
+                    return simpleTranslatable(typeVariable.toString());
                 }
             } else {
-                return typeVariable.toString();
+                return simpleTranslatable(typeVariable.toString());
             }
         } else {
             if (!typeVariable.getLowerBound().getKind().equals(NULL)) {
-                return toUniqueTsType(typeVariable.getLowerBound(), tsTypeTarget);
+                return translate(typeVariable.getLowerBound(), tsTypeTarget);
             } else {
-                return typeVariable.toString();
+                return simpleTranslatable(typeVariable.toString());
             }
         }
-    }
-
-    public Optional<ImportableJavaType> asImportableJavaType() {
-        switch (type.getKind()) {
-            case ARRAY:
-                return new JavaType(((ArrayType) type).getComponentType(), owner).asImportableJavaType();
-            case TYPEVAR:
-                try {
-                    final TypeMirror resolvedType = types.asMemberOf((DeclaredType) owner, types.asElement(this.type));
-                    if (resolvedType.getKind().equals(TYPEVAR)) {
-                        final TypeVariable typeVariable = (TypeVariable) resolvedType;
-                        if (typeVariable.getUpperBound() != null) {
-                            return new JavaType(typeVariable.getUpperBound(), owner).asImportableJavaType();
-                        } else if (typeVariable.getLowerBound() != null) {
-                            return new JavaType(typeVariable.getLowerBound(), owner).asImportableJavaType();
-                        } else {
-                            return Optional.empty();
-                        }
-                    } else {
-                        return new JavaType(resolvedType, owner).asImportableJavaType();
-                    }
-                } catch (final Exception e) {
-                    return new JavaType(((TypeVariable) type).getUpperBound(), owner).asImportableJavaType();
-                }
-            case WILDCARD:
-                final WildcardType wildcardType = (WildcardType) type;
-                if (wildcardType.getExtendsBound() != null) {
-                    return new JavaType(wildcardType.getExtendsBound(), owner).asImportableJavaType();
-                } else if (wildcardType.getSuperBound() != null) {
-                    return new JavaType(wildcardType.getSuperBound(), owner).asImportableJavaType();
-                } else {
-                    return Optional.empty();
-                }
-            case DECLARED:
-                return Optional.of(new ImportableJavaType(this));
-            default:
-                return Optional.empty();
-        }
-    }
-
-    public String getCanonicalFqcn() {
-        return types.asElement(type).toString();
-    }
-
-    public String getFlatFqcn() {
-        return ((Symbol) ((DeclaredType) type).asElement()).flatName().toString();
-    }
-
-    public TypeMirror getType() {
-        return type;
     }
 }

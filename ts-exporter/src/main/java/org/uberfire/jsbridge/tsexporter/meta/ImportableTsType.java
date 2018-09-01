@@ -16,28 +16,27 @@
 
 package org.uberfire.jsbridge.tsexporter.meta;
 
-import java.util.Optional;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
 
 import static java.lang.String.format;
 
-public class ImportableTsType extends ImportableJavaType {
+public class ImportableTsType {
 
     private final String moduleName;
+    private final DeclaredType declaredType;
 
-    public ImportableTsType(final String moduleName,
-                            final ImportableJavaType importableJavaType) {
-
-        super(importableJavaType);
+    public ImportableTsType(final String moduleName, final DeclaredType declaredType) {
         this.moduleName = moduleName;
-    }
-
-    @Override
-    public Optional<ImportableTsType> asImportableTsType() {
-        return Optional.of(this);
+        this.declaredType = declaredType;
     }
 
     private String getTemporaryPathToCodegen() {
         return "output/" + moduleName + "/" + getCanonicalFqcn().replace(".", "/");
+    }
+
+    public String getCanonicalFqcn() {
+        return ((TypeElement) declaredType.asElement()).getQualifiedName().toString();
     }
 
     public String getPath() {
@@ -48,5 +47,13 @@ public class ImportableTsType extends ImportableJavaType {
         return format("import %s from '%s';",
                       getCanonicalFqcn().replace(".", "_"),
                       getTemporaryPathToCodegen());
+    }
+
+    public DeclaredType getType() {
+        return declaredType;
+    }
+
+    public String getModuleName() {
+        return moduleName;
     }
 }

@@ -82,7 +82,7 @@ public class TestingUtils {
     }
 
     public static JavaType param(final int i, final JavaType owner) {
-        return new JavaType(((ExecutableType) owner.getType()).getParameterTypes().get(i), owner.owner);
+        return new JavaType(((ExecutableType) owner.getType()).getParameterTypes().get(i), owner.getOwner());
     }
 
     static class Foo {

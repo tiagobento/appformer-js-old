@@ -35,6 +35,7 @@ import static javax.lang.model.type.TypeKind.LONG;
 import static javax.lang.model.type.TypeKind.SHORT;
 import static javax.lang.model.type.TypeKind.VOID;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_USE;
 import static org.uberfire.jsbridge.tsexporter.meta.TestingUtils.array;
 import static org.uberfire.jsbridge.tsexporter.meta.TestingUtils.erased;
@@ -53,7 +54,7 @@ public class JavaTypeTest {
     @Before
     public void before() {
         TestingUtils.init(compilationRule.getTypes(), compilationRule.getElements());
-        JavaType.simpleNames = true;
+        JavaType.SIMPLE_NAMES = true;
     }
 
     @Test
@@ -222,7 +223,7 @@ public class JavaTypeTest {
     }
 
     private String translate(final JavaType type) {
-        return type.toUniqueTsType();
+        return type.translate().toTypeScript();
     }
 
     private String translate(final TsTypeTarget tsTypeTarget, final TypeMirror type) {
@@ -230,6 +231,6 @@ public class JavaTypeTest {
     }
 
     private String translate(final TsTypeTarget tsTypeTarget, final JavaType type) {
-        return type.toUniqueTsType(tsTypeTarget);
+        return type.translate(tsTypeTarget).toTypeScript();
     }
 }

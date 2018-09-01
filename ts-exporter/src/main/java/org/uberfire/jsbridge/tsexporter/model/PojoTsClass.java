@@ -24,10 +24,10 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 
-import org.uberfire.jsbridge.tsexporter.meta.ImportableJavaType;
-import org.uberfire.jsbridge.tsexporter.meta.ImportableTsType;
+import org.uberfire.jsbridge.tsexporter.meta.TranslatableJavaType;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget;
+import org.uberfire.jsbridge.tsexporter.meta.ImportableTsType;
 import org.uberfire.jsbridge.tsexporter.util.ImportStore;
 
 import static java.lang.String.format;
@@ -72,9 +72,7 @@ public class PojoTsClass {
         final TypeElement element = (TypeElement) type.asElement();
         final String simpleName = extractSimpleName(element, TYPE_ARGUMENT_DECLARATION);
 
-        final Optional<ImportableTsType> importableSuperclassTsType = new JavaType(element.getSuperclass(), type)
-                .asImportableJavaType()
-                .flatMap(ImportableJavaType::asImportableTsType);
+        final TranslatableJavaType importableSuperclassTsType = new JavaType(element.getSuperclass(), type).translate(TYPE_ARGUMENT_USE);
 
         final List<JavaType> implementedInterfaces = extractInterfaces();
 
@@ -82,16 +80,16 @@ public class PojoTsClass {
                 .filter(s -> s.getKind().isField())
                 .filter(s -> !s.getModifiers().contains(STATIC))
                 .filter(s -> !s.asType().toString().contains("java.util.function"))
-                .map(s -> format("public readonly %s?: %s;", s.getSimpleName(), importStore.importing(new JavaType(s.asType(), type)).toUniqueTsType(TYPE_ARGUMENT_USE)))
+                .map(s -> format("public readonly %s?: %s;", s.getSimpleName(), importStore.with(new JavaType(s.asType(), type).translate(TYPE_ARGUMENT_USE)).toTypeScript()))
                 .collect(joining("\n"));
 
         final String constructorArgs = extractConstructorArgs(element);
 
-        final String _extends = importableSuperclassTsType.map(t -> "extends " + importStore.importing(t).toUniqueTsType(TYPE_ARGUMENT_USE)).orElse("");
+        final String _extends = importableSuperclassTsType.toImportableTsType().isPresent() ? "extends " + importStore.with(importableSuperclassTsType).toTypeScript() : "";
 
         final String _implements = implementedInterfaces.isEmpty()
                 ? format("implements Portable<%s>", extractSimpleName(element, TYPE_ARGUMENT_USE))
-                : "implements " + implementedInterfaces.stream().peek(importStore::importing).map(javaType -> javaType.toUniqueTsType(TYPE_ARGUMENT_USE)).collect(joining(", ")) + format(", Portable<%s>", extractSimpleName(element, TYPE_ARGUMENT_USE));
+                : "implements " + implementedInterfaces.stream().map(javaType -> importStore.with(javaType.translate(TYPE_ARGUMENT_USE)).toTypeScript()).collect(joining(", ")) + format(", Portable<%s>", extractSimpleName(element, TYPE_ARGUMENT_USE));
 
         //Has to be the last.
         final String imports = importStore.getImportStatements();
@@ -119,7 +117,7 @@ public class PojoTsClass {
                       importableTsType.getCanonicalFqcn(),
                       fields,
                       constructorArgs,
-                      importableSuperclassTsType.map(t -> "super({...self.inherited});").orElse("")
+                      importableSuperclassTsType.toImportableTsType().isPresent() ? "super({...self.inherited});" : ""
         );
     }
 
@@ -149,7 +147,7 @@ public class PojoTsClass {
         final TypeElement element = (TypeElement) type.asElement();
         final String simpleName = extractSimpleName(element, TYPE_ARGUMENT_DECLARATION);
         final String _implements = !implementedInterfaces.isEmpty()
-                ? "extends " + implementedInterfaces.stream().peek(importStore::importing).map(javaType -> javaType.toUniqueTsType(TYPE_ARGUMENT_USE)).collect(joining(", "))
+                ? "extends " + implementedInterfaces.stream().map(javaType -> importStore.with(javaType.translate(TYPE_ARGUMENT_USE)).toTypeScript()).collect(joining(", "))
                 : "";
 
         //Has to be the last
@@ -170,14 +168,14 @@ public class PojoTsClass {
         final DeclaredType type = importableTsType.getType();
         final TypeElement element = (TypeElement) type.asElement();
         return element.getInterfaces().stream()
-                .map(t -> new JavaType(t, t).asImportableJavaType())
-                .map(t -> t.flatMap(ImportableJavaType::asImportableTsType))
+                .map(t -> new JavaType(t, t).translate().toImportableTsType())
                 .filter(Optional::isPresent).map(Optional::get)
+                .map(s -> new JavaType(s.getType(), s.getType()))
                 .collect(toList());
     }
 
     private String extractSimpleName(final TypeElement element, final TsTypeTarget tsTypeTarget) {
-        final String fqcn = importStore.importing(new JavaType(element.asType())).toUniqueTsType(tsTypeTarget);
+        final String fqcn = importStore.with(new JavaType(element.asType()).translate(tsTypeTarget)).toTypeScript();
         return fqcn.substring(fqcn.indexOf(element.getSimpleName().toString()));
     }
 
@@ -187,7 +185,7 @@ public class PojoTsClass {
                 .filter(f -> f.getKind().isField())
                 .filter(f -> !f.getModifiers().contains(STATIC))
                 .filter(s -> !s.asType().toString().contains("java.util.function"))
-                .map(f -> format("%s?: %s", f.getSimpleName(), importStore.importing(new JavaType(f.asType(), importableTsType.getType())).toUniqueTsType(TYPE_ARGUMENT_USE)))
+                .map(f -> format("%s?: %s", f.getSimpleName(), importStore.with(new JavaType(f.asType(), importableTsType.getType()).translate(TYPE_ARGUMENT_USE)).toTypeScript()))
                 .collect(toList());
 
         if (typeElement.getSuperclass().toString().equals("java.lang.Object")) {

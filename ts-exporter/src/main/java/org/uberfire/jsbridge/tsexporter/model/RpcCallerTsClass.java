@@ -24,8 +24,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 
-import org.uberfire.jsbridge.tsexporter.meta.ImportableTsType;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType;
+import org.uberfire.jsbridge.tsexporter.meta.ImportableTsType;
 import org.uberfire.jsbridge.tsexporter.util.ImportStore;
 import org.uberfire.jsbridge.tsexporter.util.Lazy;
 
@@ -99,7 +99,7 @@ public class RpcCallerTsClass {
     }
 
     private String simpleName() {
-        final String fqcn = importStore.importing(new JavaType(_interface.asType())).toUniqueTsType();
+        final String fqcn = importStore.with(new JavaType(_interface.asType()).translate()).toTypeScript();
         return fqcn.substring(fqcn.indexOf(_interface.getSimpleName().toString()));
     }
 

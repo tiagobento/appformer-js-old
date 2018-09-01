@@ -61,31 +61,46 @@ public class Utils {
         try {
             final Field sourceFileField = typeElement.getClass().getField("sourcefile");
             sourceFileField.setAccessible(true);
-            final String sourceFilePath = sourceFileField.get(typeElement).toString();
-
-            if (sourceFilePath.contains("/src/main/java")) {
-                return last(sourceFilePath.split("/src/main/java")[0].split("/"));
-            }
-
-            if (sourceFilePath.contains("/target/generated-sources")) {
-                return last(sourceFilePath.split("/target/generated-sources")[0].split("/"));
-            }
-
-            if (sourceFilePath.contains("/src/test/java")) {
-                return last(sourceFilePath.split("/src/test/java")[0].split("/")) + "-test";
-            }
-
-            if (sourceFilePath.contains("/target/generated-test-sources")) {
-                return last(sourceFilePath.split("/target/generated-test-sources")[0].split("/")) + "-test";
-            }
-
-            throw new RuntimeException("Module name unretrievable from [" + sourceFilePath + "]");
+            return getModuleName(sourceFileField.get(typeElement).toString());
         } catch (final Exception e) {
             throw new RuntimeException("Error while reading [sourcefile] field from @Remote interface element.", e);
         }
     }
 
-    private static <T> T last(final T[] array) {
-        return array[array.length - 1];
+    public static String getModuleName(final String sourceFilePath) {
+
+        if (sourceFilePath.contains("jar!")) {
+            return get(-2, sourceFilePath.split("(/)[\\w-]+(-)[\\d.]+(.*)\\.jar!")[0].split("/"));
+        }
+
+        if (sourceFilePath.contains("/src/main/java")) {
+            return get(-1, sourceFilePath.split("/src/main/java")[0].split("/"));
+        }
+
+        if (sourceFilePath.contains("/target/generated-sources")) {
+            return get(-1, sourceFilePath.split("/target/generated-sources")[0].split("/"));
+        }
+
+        if (sourceFilePath.contains("/target/classes")) {
+            return get(-1, sourceFilePath.split("/target/classes")[0].split("/"));
+        }
+
+        if (sourceFilePath.contains("/src/test/java")) {
+            return get(-1, sourceFilePath.split("/src/test/java")[0].split("/")) + "-test";
+        }
+
+        if (sourceFilePath.contains("/target/generated-test-sources")) {
+            return get(-1, sourceFilePath.split("/target/generated-test-sources")[0].split("/")) + "-test";
+        }
+
+        if (sourceFilePath.contains("/target/test-classes")) {
+            return get(-1, sourceFilePath.split("/target/test-classes")[0].split("/")) + "-test";
+        }
+
+        throw new RuntimeException("Module name unretrievable from [" + sourceFilePath + "]");
+    }
+
+    private static <T> T get(final int a, final T[] array) {
+        return array[array.length + a];
     }
 }

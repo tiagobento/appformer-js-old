@@ -17,46 +17,51 @@
 package org.uberfire.jsbridge.tsexporter.util;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
+
+import com.sun.tools.javac.code.Symbol;
 import org.uberfire.jsbridge.tsexporter.Main;
-import org.uberfire.jsbridge.tsexporter.meta.ImportableJavaType;
+import org.uberfire.jsbridge.tsexporter.meta.TranslatableJavaType;
 import org.uberfire.jsbridge.tsexporter.meta.ImportableTsType;
-import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 
+import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
+import static org.uberfire.jsbridge.tsexporter.Utils.distinctBy;
+import static org.uberfire.jsbridge.tsexporter.Utils.getModuleName;
 
 public class ImportStore {
 
-    public final List<JavaType> dependencies = new ArrayList<>();
+    private final List<TranslatableJavaType> dependencies = new ArrayList<>();
 
-    public <T extends JavaType> T importing(final T type) {
+    public TranslatableJavaType with(final TranslatableJavaType type) {
         dependencies.add(type);
         return type;
     }
 
     public List<ImportableTsType> getImports() {
-        final Map<String, List<ImportableTsType>> visited = new HashMap<>();
         return dependencies.stream()
-                .map(JavaType::asImportableJavaType)
-                .filter(Optional::isPresent).map(Optional::get)
-                .flatMap(importableJavaType -> importableJavaType.getDirectImportableTsTypes(visited).stream())
-                .map(s -> Main.elements.getTypeElement(s.getCanonicalFqcn()).asType())
-                .map(unownedType -> new JavaType(unownedType).asImportableJavaType())
-                .filter(Optional::isPresent).map(Optional::get)
-                .map(ImportableJavaType::asImportableTsType)
-                .filter(Optional::isPresent).map(Optional::get)
+                .flatMap(blergs -> blergs.getDependencies().stream())
+                .map(s -> (DeclaredType) Main.types.erasure(s))
+                .filter(distinctBy(DeclaredType::toString))
+                .map(ImportStore::asImportableTsType)
                 .collect(toList());
     }
 
     public String getImportStatements() {
-        return getImports().stream()
-                .map(ImportableTsType::asTsImportSource)
-                .distinct()
-                .collect(joining("\n"));
+        return getImports().stream().map(ImportableTsType::asTsImportSource).collect(joining("\n"));
+    }
+
+    public static ImportableTsType asImportableTsType(final DeclaredType declaredType) {
+        try {
+            final Class<?> clazz = Class.forName(((Symbol) declaredType.asElement()).flatName().toString());
+            final String path = clazz.getResource('/' + clazz.getName().replace('.', '/') + ".class").toString();
+            return new ImportableTsType(getModuleName(path), declaredType);
+        } catch (final ClassNotFoundException e) {
+            return new ImportableTsType(getModuleName((TypeElement) declaredType.asElement()), declaredType);
+        }
     }
 }

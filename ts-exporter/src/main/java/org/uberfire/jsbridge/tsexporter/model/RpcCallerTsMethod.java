@@ -63,7 +63,7 @@ public class RpcCallerTsMethod {
                             "}",
                             ""),
 
-                      name + new JavaType(javaMethod.getType(), _interface.asType()).toUniqueTsType(),
+                      name + new JavaType(javaMethod.getType(), _interface.asType()).translate().toTypeScript(),
                       params(),
                       erraiBusPath(),
                       rpcCallParams(),
@@ -77,7 +77,7 @@ public class RpcCallerTsMethod {
 
     private String params() {
         return javaMethod.getParameterJavaTypesByNames().entrySet().stream()
-                .map(e -> format("%s: %s", e.getKey(), importStore.importing(e.getValue()).toUniqueTsType(TYPE_ARGUMENT_USE)))
+                .map(e -> format("%s: %s", e.getKey(), importStore.with(e.getValue().translate(TYPE_ARGUMENT_USE)).toTypeScript()))
                 .collect(joining(", "));
     }
 
@@ -97,6 +97,6 @@ public class RpcCallerTsMethod {
     }
 
     private String returnType() {
-        return importStore.importing(javaMethod.getReturnType()).toUniqueTsType(TYPE_ARGUMENT_USE);
+        return importStore.with(javaMethod.getReturnType().translate(TYPE_ARGUMENT_USE)).toTypeScript();
     }
 }

@@ -23,7 +23,6 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
-import org.uberfire.jsbridge.tsexporter.meta.ImportableJavaType;
 import org.uberfire.jsbridge.tsexporter.meta.ImportableTsType;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 import org.uberfire.jsbridge.tsexporter.model.PojoTsClass;
@@ -133,7 +132,7 @@ public class Main extends AbstractProcessor {
 
         tsClass.getDependencies().stream()
                 .filter(distinctBy(ImportableTsType::getCanonicalFqcn))
-                .map(ImportableJavaType::getType)
+                .map(ImportableTsType::getType)
                 .map(DeclaredType::asElement)
                 .forEach(this::generatePojoTsClass);
 
@@ -148,9 +147,7 @@ public class Main extends AbstractProcessor {
 
     private void generatePojoTsClass(final Element element) {
 
-        final Optional<ImportableTsType> importableTsType = new JavaType(element.asType())
-                .asImportableJavaType()
-                .flatMap(ImportableJavaType::asImportableTsType);
+        final Optional<ImportableTsType> importableTsType = new JavaType(element.asType()).translate().toImportableTsType();
 
         if (!importableTsType.isPresent()) {
             return;
@@ -174,7 +171,7 @@ public class Main extends AbstractProcessor {
         }
 
         pojoTsClass.getDependencies().stream()
-                .map(ImportableJavaType::getType)
+                .map(ImportableTsType::getType)
                 .map(DeclaredType::asElement)
                 .forEach(this::generatePojoTsClass);
     }
