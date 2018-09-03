@@ -14,7 +14,7 @@ export class TestEvent implements Portable<TestEvent> {
 }
 
 // Generated class
-export class Foo implements Portable<TestEvent> {
+export class Foo implements Portable<Foo> {
   protected readonly _fqcn = "bdfds";
 
   public foo?: string;
