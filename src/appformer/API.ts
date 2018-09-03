@@ -1,7 +1,6 @@
 import * as ReactDOM from "react-dom";
-import { Screen, Perspective } from "appformer/Components";
+import { Perspective, Screen } from "appformer/Components";
 import JsBridge from "appformer/internal/JsBridge";
-import { Portable } from "generated__temporary__/Model";
 
 const jsBridge = new JsBridge();
 
@@ -32,20 +31,6 @@ export const translate = bridge.translate;
 
 export function goTo(place: string) {
   return bridge.goTo(place);
-}
-
-export function unmarshall(a: any, fqcn: { [fqcn: string]: (args: any) => Portable<any> }) {
-  return JSON.parse(a); //TODO: Implement
-}
-
-export function marshall(obj: Array<Portable<any>> | Portable<any> | string | undefined | any) {
-  return !obj
-    ? obj
-    : typeof obj === "string"
-      ? obj
-      : obj instanceof Array
-        ? JSON.stringify(obj.map(i => i.__toErraiBusObject()))
-        : obj.__toErraiBusObject().__toJson();
 }
 
 export function rpc(path: string, ...args: any[]): Promise<string> {
