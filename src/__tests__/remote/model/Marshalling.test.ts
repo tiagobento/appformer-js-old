@@ -435,7 +435,7 @@ describe("marshall", () => {
 // ==============
 // ============== fixture classes
 
-class Person implements Portable {
+class Person implements Portable<Person> {
   protected readonly _fqcn = "org.appformer-js.test.Person";
 
   public name: string;
@@ -448,7 +448,7 @@ class Person implements Portable {
   }
 }
 
-class Address implements Portable {
+class Address implements Portable<Address> {
   protected readonly _fqcn = "org.appformer-js.test.Address";
 
   public line1: string;
@@ -459,7 +459,7 @@ class Address implements Portable {
   }
 }
 
-class Pojo implements Portable {
+class Pojo implements Portable<Pojo> {
   protected readonly _fqcn = "org.appformer-js.test.Pojo";
 
   public line1?: string;

@@ -3,8 +3,9 @@ import JavaHashSet from "appformer/java-wrapper/JavaHashSet";
 import JavaHashMap from "appformer/java-wrapper/JavaHashMap";
 import JavaBoolean from "appformer/java-wrapper/JavaBoolean";
 import JavaString from "appformer/java-wrapper/JavaString";
+import Portable from "appformer/internal/model/Portable";
 
-export default abstract class JavaWrapper<T> {
+export default abstract class JavaWrapper<T> implements Portable<JavaWrapper<T>> {
   private static wrappingFuncForType: Map<(obj: any) => boolean, (obj: any) => JavaWrapper<any>> = new Map([
     [JavaWrapper.isArray, (obj: any) => new JavaArrayList(obj) as JavaWrapper<any>],
     [JavaWrapper.isSet, (obj: any) => new JavaHashSet(obj) as JavaWrapper<any>],

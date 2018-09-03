@@ -4,9 +4,10 @@ import ErraiObject from "appformer/marshalling/model/ErraiObject";
 import JavaWrapper from "appformer/java-wrapper/JavaWrapper";
 import ErraiObjectConstants from "appformer/marshalling/model/ErraiObjectConstants";
 import Marshaller from "appformer/marshalling/Marshaller";
+import Portable from "appformer/internal/model/Portable";
 
-export default class DefaultMarshaller implements Marshaller<any, ErraiObject> {
-  public marshall(input: any, ctx: MarshallingContext): ErraiObject {
+export default class DefaultMarshaller<T extends Portable<T>> implements Marshaller<T, ErraiObject> {
+  public marshall(input: T, ctx: MarshallingContext): ErraiObject {
     const cachedObject = ctx.getObject(input);
     if (cachedObject) {
       return cachedObject;

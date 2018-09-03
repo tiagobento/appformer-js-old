@@ -5,8 +5,9 @@ import MarshallingContext from "appformer/marshalling/MarshallingContext";
 import ErraiObjectConstants from "appformer/marshalling/model/ErraiObjectConstants";
 import MarshallerProvider from "appformer/marshalling/MarshallerProvider";
 import JavaNumber from "appformer/java-wrapper/JavaNumber";
+import Portable from "appformer/internal/model/Portable";
 
-export default class JavaCollectionMarshaller<T extends Iterable<any>>
+export default class JavaCollectionMarshaller<T extends Iterable<Portable<any>>>
   implements Marshaller<JavaCollection<T>, ErraiObject> {
   public marshall(input: JavaCollection<T>, ctx: MarshallingContext): ErraiObject {
     const elements = input.get();

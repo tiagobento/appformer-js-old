@@ -1,7 +1,7 @@
 // Generated class
 import Portable from "appformer/internal/model/Portable";
 
-export class TestEvent implements Portable {
+export class TestEvent implements Portable<TestEvent> {
   protected readonly _fqcn = "asdf";
 
   public bar?: string;
@@ -14,7 +14,7 @@ export class TestEvent implements Portable {
 }
 
 // Generated class
-export class Foo implements Portable {
+export class Foo implements Portable<TestEvent> {
   protected readonly _fqcn = "bdfds";
 
   public foo?: string;
