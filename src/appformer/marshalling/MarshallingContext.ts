@@ -3,7 +3,7 @@ import ErraiObjectConstants from "appformer/marshalling/model/ErraiObjectConstan
 import Portable from "appformer/internal/model/Portable";
 
 export default class MarshallingContext {
-  private objContext: Map<Portable, ErraiObject>;
+  private objContext: Map<Portable<any>, ErraiObject>;
   private objectId: number;
 
   constructor() {
@@ -15,14 +15,14 @@ export default class MarshallingContext {
     return ++this.objectId;
   }
 
-  public recordObject(key: Portable, obj: ErraiObject) {
+  public recordObject(key: Portable<any>, obj: ErraiObject) {
     this.objContext.set(key, {
       [ErraiObjectConstants.ENCODED_TYPE]: obj[ErraiObjectConstants.ENCODED_TYPE],
       [ErraiObjectConstants.OBJECT_ID]: obj[ErraiObjectConstants.OBJECT_ID]
     });
   }
 
-  public getObject(key: Portable): ErraiObject | undefined {
+  public getObject(key: Portable<any>): ErraiObject | undefined {
     return this.objContext.get(key)!;
   }
 }
