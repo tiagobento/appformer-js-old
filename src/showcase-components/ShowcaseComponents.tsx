@@ -1,17 +1,21 @@
 import * as React from "react";
 import * as AppFormer from "appformer";
-import DemoApp from "core-screens/DemoApp";
-import Foo from "generated/org/uberfire/shared/model/Foo";
-import TestEvent from "generated/org/uberfire/shared/model/TestEvent";
-import * as TestMessagesService from "generated/org/uberfire/shared/TestMessagesService";
+import ShowcaseReactComponent from "showcase-components/DemoReactComponent";
+import { Foo, TestEvent } from "generated__temporary__/Model";
+import TestMessagesService from "generated__temporary__/org/uberfire/shared/TestMessagesService";
 
-// import homePerspectiveTemplate from "core-screens/HomePerspective.html";
-// import otherPerspectiveTemplate from "core-screens/other-perspective.html";
+// import homePerspectiveTemplate from "showcase-components/HomePerspective.html";
+// import otherPerspectiveTemplate from "showcase-components/other-perspective.html";
 
 export class InoffensiveNonScreenClass {}
 
+enum Asd {
+    A2,
+}
+
 export class ReactComponentScreen extends AppFormer.Screen {
   public onFoo: (e: any) => void;
+
 
   constructor() {
     super();
@@ -25,13 +29,26 @@ export class ReactComponentScreen extends AppFormer.Screen {
       }
     };
 
-    this.af_componentService = {
-      sayHello: TestMessagesService.sayHello,
-      sayHelloToSomething: TestMessagesService.sayHelloToSomething,
-      sayHelloOnServer: TestMessagesService.sayHelloOnServer,
-      fireServerEvent: TestMessagesService.fireServerEvent,
-      sendTestPojo: TestMessagesService.sendTestPojo
-    };
+    // const servce = new TestMessagesService();
+    // const drlTextLends = new GlobalsEditorService();
+    // const MyPathImpl = class implements Path {
+    //     public readonly path: string;
+    //     constructor(s: string) {
+    //         this.path = s;
+    //     }
+    // };
+    //
+    // drlTextLends.loadContent({ path: new MyPathImpl("/tmp/test") }).then(e => {
+    //   console.info(e);
+    // });
+    //
+    // this.af_componentService = {
+    //   sayHello: servce.sayHello,
+    //   sayHelloToSomething: servce.sayHelloToSomething,
+    //   sayHelloOnServer: servce.sayHelloOnServer,
+    //   fireServerEvent: servce.fireServerEvent,
+    //   sendTestPojo: servce.sendTestPojo
+    // };
   }
 
   public af_onStartup() {
@@ -91,7 +108,7 @@ export class ReactComponentScreen extends AppFormer.Screen {
   }
 
   public af_componentRoot() {
-    const UntypedDemoApp = DemoApp as any;
+    const Component = ShowcaseReactComponent as any;
     return (
       <div>
         <br />
@@ -100,7 +117,7 @@ export class ReactComponentScreen extends AppFormer.Screen {
         </button>
         <br />
 
-        <UntypedDemoApp number={this.af_componentId} onFoo={(x: any) => (this.onFoo = x)} />
+        <Component number={this.af_componentId} onFoo={(x: any) => (this.onFoo = x)} />
       </div>
     );
   }
@@ -114,8 +131,9 @@ export class PureDomElementScreen extends AppFormer.Screen {
     this.af_componentId = "dom-elements-screen";
     this.af_componentTitle = "DOM Elements Component";
     this.span = document.createElement("span");
+    const sv = new TestMessagesService();
     this.af_componentService = {
-      fireServerEvent: TestMessagesService.fireServerEvent
+      fireServerEvent: sv.fireServerEvent
     };
   }
 

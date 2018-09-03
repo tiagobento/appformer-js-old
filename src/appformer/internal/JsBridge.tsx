@@ -29,7 +29,7 @@ export default class JsBridge {
     return `Translated ${key}`;
   }
 
-  public rpc(path: string, params: any[]) {
+  public rpc(path: string, args: any[]) {
     return Promise.reject("Sorry, RPC mocks are not available yet :(");
   }
 
