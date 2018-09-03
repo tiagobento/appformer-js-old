@@ -26,6 +26,7 @@ import javax.lang.model.type.DeclaredType;
 
 import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 import org.uberfire.jsbridge.tsexporter.util.ImportStore;
+import org.uberfire.jsbridge.tsexporter.util.Lazy;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.groupingBy;
@@ -39,33 +40,36 @@ public class RpcCallerTsClass implements TsClass {
 
     private final TypeElement _interface;
     private final ImportStore importStore;
+    private final Lazy<String> source;
 
     private static final List<String> RESERVED_WORDS = Arrays.asList("delete", "copy");
 
     public RpcCallerTsClass(final TypeElement _interface) {
         this._interface = _interface;
         this.importStore = new ImportStore();
+        this.source = new Lazy<>(() -> {
+            final String methods = methods();
+            final String simpleName = simpleName();
+            final String imports = imports(); //Has to be the last
+
+            return format(lines("",
+                                "import {rpc, marshall, unmarshall} from 'appformer/API';",
+                                "%s",
+                                "",
+                                "export default class %s {",
+                                "%s",
+                                "}"),
+
+                          imports,
+                          simpleName,
+                          methods
+            );
+        });
     }
 
     @Override
     public String toSource() {
-
-        final String methods = methods();
-        final String simpleName = simpleName();
-        final String imports = imports(); //Has to be the last
-
-        return format(lines("",
-                            "import {rpc, marshall, unmarshall} from 'appformer/API';",
-                            "%s",
-                            "",
-                            "export default class %s {",
-                            "%s",
-                            "}"),
-
-                      imports,
-                      simpleName,
-                      methods
-        );
+        return source.get();
     }
 
     private String simpleName() {
@@ -103,12 +107,9 @@ public class RpcCallerTsClass implements TsClass {
                 .collect(toList());
     }
 
-    public TypeElement getInterface() {
-        return _interface;
-    }
-
     @Override
     public List<DeclaredType> getDependencies() {
+        source.get();
         return importStore.getImports();
     }
 

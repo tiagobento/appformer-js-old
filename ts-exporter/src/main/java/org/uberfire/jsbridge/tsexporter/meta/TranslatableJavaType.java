@@ -17,15 +17,12 @@
 package org.uberfire.jsbridge.tsexporter.meta;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 import javax.lang.model.type.DeclaredType;
 
-import org.uberfire.jsbridge.tsexporter.util.ImportStore;
-
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Stream.concat;
 
 public class TranslatableJavaType {
 
@@ -56,10 +53,11 @@ public class TranslatableJavaType {
     }
 
     public List<DeclaredType> getDependencies() {
-        return Stream.concat(types.stream(), dependencies.stream().flatMap(t -> t.getDependencies().stream())).collect(toList());
+        return concat(types.stream(), dependencies.stream().flatMap(t -> t.getDependencies().stream()))
+                .collect(toList());
     }
 
-    public boolean isTypeScriptable() {
+    public boolean canBeSubclassed() {
         return !types.isEmpty();
     }
 }

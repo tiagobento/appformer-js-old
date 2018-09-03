@@ -27,6 +27,7 @@ import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget;
 import org.uberfire.jsbridge.tsexporter.meta.TranslatableJavaType;
 import org.uberfire.jsbridge.tsexporter.util.ImportStore;
+import org.uberfire.jsbridge.tsexporter.util.Lazy;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
@@ -44,26 +45,25 @@ public class PojoTsClass implements TsClass {
 
     private final DeclaredType declaredType;
     private final ImportStore importStore;
+    private final Lazy<String> source;
 
     public PojoTsClass(final DeclaredType declaredType) {
         this.declaredType = declaredType;
         this.importStore = new ImportStore();
+        this.source = new Lazy<>(() -> {
+            if (getElement().getKind().equals(INTERFACE)) {
+                return toInterface();
+            } else if (getElement().getKind().equals(ENUM)) {
+                return toEnum();
+            } else {
+                return toClass();
+            }
+        });
     }
 
     @Override
     public String toSource() {
-
-        final Element element = declaredType.asElement();
-
-        if (element.getKind().equals(INTERFACE)) {
-            return toInterface();
-        }
-
-        if (element.getKind().equals(ENUM)) {
-            return toEnum();
-        }
-
-        return toClass();
+        return source.get();
     }
 
     private String toClass() {
@@ -83,7 +83,7 @@ public class PojoTsClass implements TsClass {
 
         final String constructorArgs = extractConstructorArgs(element);
 
-        final String _extends = translatableSuperclass.isTypeScriptable() ? "extends " + importStore.with(translatableSuperclass).toTypeScript() : "";
+        final String _extends = translatableSuperclass.canBeSubclassed() ? "extends " + importStore.with(translatableSuperclass).toTypeScript() : "";
 
         final String _implements = implementedInterfaces.isEmpty()
                 ? format("implements Portable<%s>", extractSimpleName(element, TYPE_ARGUMENT_USE))
@@ -114,7 +114,7 @@ public class PojoTsClass implements TsClass {
                       ((TypeElement) declaredType.asElement()).getQualifiedName().toString(),
                       fields,
                       constructorArgs,
-                      translatableSuperclass.isTypeScriptable() ? "super({...self.inherited});" : ""
+                      translatableSuperclass.canBeSubclassed() ? "super({...self.inherited});" : ""
         );
     }
 
@@ -163,7 +163,7 @@ public class PojoTsClass implements TsClass {
     private List<JavaType> extractInterfaces() {
         return ((TypeElement) declaredType.asElement()).getInterfaces().stream()
                 .map(t -> new JavaType(t, t))
-                .filter(s -> s.translate().isTypeScriptable())
+                .filter(s -> s.translate().canBeSubclassed())
                 .collect(toList());
     }
 
@@ -191,6 +191,7 @@ public class PojoTsClass implements TsClass {
 
     @Override
     public List<DeclaredType> getDependencies() {
+        source.get();
         return importStore.getImports();
     }
 

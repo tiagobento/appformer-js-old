@@ -35,7 +35,7 @@ public class Lazy<T> {
             timeTook = System.currentTimeMillis() - start;
         }
 
-        System.out.println("Lazy just saved " + timeTook + "ms!");
+//        System.out.println("Lazy just saved " + timeTook + "ms!");
         return ref;
     }
 }
