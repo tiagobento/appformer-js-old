@@ -29,6 +29,9 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
+
+import com.sun.tools.javac.code.Symbol;
 
 import static java.util.stream.Collectors.joining;
 
@@ -57,7 +60,19 @@ public class Utils {
         return properties;
     }
 
-    public static String getModuleName(final TypeElement typeElement) {
+    public static String getModuleName(final DeclaredType declaredType) {
+        try {
+            if (declaredType.toString().matches("^javax?.*")) {
+                return "java";
+            }
+            final Class<?> clazz = Class.forName(((Symbol) declaredType.asElement()).flatName().toString());
+            return getModuleName(clazz.getResource('/' + clazz.getName().replace('.', '/') + ".class").toString());
+        } catch (ClassNotFoundException e) {
+            return getModuleName((TypeElement) declaredType.asElement());
+        }
+    }
+
+    private static String getModuleName(final TypeElement typeElement) {
         try {
             final Field sourceFileField = typeElement.getClass().getField("sourcefile");
             sourceFileField.setAccessible(true);
@@ -67,7 +82,7 @@ public class Utils {
         }
     }
 
-    public static String getModuleName(final String sourceFilePath) {
+    private static String getModuleName(final String sourceFilePath) {
 
         if (sourceFilePath.contains("jar!")) {
             return get(-2, sourceFilePath.split("(/)[\\w-]+(-)[\\d.]+(.*)\\.jar!")[0].split("/"));

@@ -16,73 +16,43 @@
 
 package org.uberfire.jsbridge.tsexporter.model;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
 
 import org.uberfire.jsbridge.tsexporter.meta.JavaType;
-import org.uberfire.jsbridge.tsexporter.meta.ImportableTsType;
 import org.uberfire.jsbridge.tsexporter.util.ImportStore;
-import org.uberfire.jsbridge.tsexporter.util.Lazy;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.ElementKind.METHOD;
-import static org.uberfire.jsbridge.tsexporter.Main.types;
+import static org.uberfire.jsbridge.tsexporter.Main.elements;
 import static org.uberfire.jsbridge.tsexporter.Utils.lines;
 
-public class RpcCallerTsClass {
+public class RpcCallerTsClass implements TsClass {
 
     private final TypeElement _interface;
-    private final Lazy<List<RpcCallerTsMethod>> tsMethods;
     private final ImportStore importStore;
 
     private static final List<String> RESERVED_WORDS = Arrays.asList("delete", "copy");
 
     public RpcCallerTsClass(final TypeElement _interface) {
         this._interface = _interface;
-        this.tsMethods = new Lazy<>(this::initAllTsMethods);
         this.importStore = new ImportStore();
     }
 
-    private List<RpcCallerTsMethod> initAllTsMethods() {
-        return getAllJavaMethods(_interface).stream()
-                .map(javaMethod -> new RpcCallerTsMethod(_interface, importStore, javaMethod))
-                .collect(toList());
-    }
-
-    private List<RpcJavaMethod> getJavaMethods(final TypeElement _interface) {
-        return _interface.getEnclosedElements().stream()
-                .filter(member -> member.getKind().equals(METHOD))
-                .map(member -> new RpcJavaMethod(this._interface, (ExecutableElement) member))
-                .collect(toList());
-    }
-
-    //TODO: Use elements.getAllMembers
-    private List<RpcJavaMethod> getAllJavaMethods(final TypeElement _interface) {
-        final List<RpcJavaMethod> methods = new ArrayList<>();
-
-        methods.addAll(getJavaMethods(_interface));
-        methods.addAll(_interface.getInterfaces().stream()
-                               .flatMap(iface -> getAllJavaMethods((TypeElement) types.asElement(iface)).stream())
-                               .collect(toList()));
-
-        return methods;
-    }
-
+    @Override
     public String toSource() {
 
         final String methods = methods();
         final String simpleName = simpleName();
-
-        //Has to be the last
-        final String imports = imports();
+        final String imports = imports(); //Has to be the last
 
         return format(lines("",
                             "import {rpc, marshall, unmarshall} from 'appformer/API';",
@@ -104,7 +74,11 @@ public class RpcCallerTsClass {
     }
 
     private String methods() {
-        return tsMethods.get().stream()
+        return elements.getAllMembers(_interface).stream()
+                .filter(member -> member.getKind().equals(METHOD))
+                .filter(member -> !member.getEnclosingElement().toString().equals("java.lang.Object"))
+                .map(member -> new RpcJavaMethod(_interface, (ExecutableElement) member))
+                .map(javaMethod -> new RpcCallerTsMethod(_interface, importStore, javaMethod))
                 .collect(groupingBy(RpcCallerTsMethod::getName)).entrySet().stream()
                 .flatMap(e -> resolveOverloadsAndReservedWords(e.getKey(), e.getValue()).stream())
                 .map(RpcCallerTsMethod::toSource)
@@ -115,9 +89,6 @@ public class RpcCallerTsClass {
         return importStore.getImportStatements();
     }
 
-    public List<ImportableTsType> getDependencies() {
-        return importStore.getImports();
-    }
 
     private List<RpcCallerTsMethod> resolveOverloadsAndReservedWords(final String name,
                                                                      final List<RpcCallerTsMethod> methods) {
@@ -134,5 +105,15 @@ public class RpcCallerTsClass {
 
     public TypeElement getInterface() {
         return _interface;
+    }
+
+    @Override
+    public List<DeclaredType> getDependencies() {
+        return importStore.getImports();
+    }
+
+    @Override
+    public DeclaredType getType() {
+        return (DeclaredType) _interface.asType();
     }
 }

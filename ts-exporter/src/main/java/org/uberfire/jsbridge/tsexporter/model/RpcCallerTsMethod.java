@@ -52,8 +52,11 @@ public class RpcCallerTsMethod {
         this.name = javaMethod.getName();
     }
 
+    public String getName() {
+        return name;
+    }
+
     public String toSource() {
-        System.out.println("Generating " + javaMethod + " for " + _interface.getQualifiedName().toString());
         return format(lines("",
                             "public %s(args: { %s }) {",
                             "  return rpc(%s, [%s])",
@@ -63,7 +66,7 @@ public class RpcCallerTsMethod {
                             "}",
                             ""),
 
-                      name + new JavaType(javaMethod.getType(), _interface.asType()).translate().toTypeScript(),
+                      methodDeclaration(),
                       params(),
                       erraiBusPath(),
                       rpcCallParams(),
@@ -71,8 +74,8 @@ public class RpcCallerTsMethod {
                       returnType());
     }
 
-    public String getName() {
-        return name;
+    private String methodDeclaration() {
+        return name + importStore.with(new JavaType(javaMethod.getType(), _interface.asType()).translate()).toTypeScript();
     }
 
     private String params() {

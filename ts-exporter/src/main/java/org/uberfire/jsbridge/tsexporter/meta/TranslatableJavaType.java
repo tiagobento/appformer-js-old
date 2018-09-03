@@ -16,7 +16,6 @@
 
 package org.uberfire.jsbridge.tsexporter.meta;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -30,15 +29,15 @@ import static java.util.stream.Collectors.toList;
 
 public class TranslatableJavaType {
 
-    private final Function<TranslatableJavaType[], String> uniqueTsType;
+    private final Function<TranslatableJavaType[], String> toTypeScript;
     private final List<DeclaredType> types;
     private final List<TranslatableJavaType> dependencies;
 
-    TranslatableJavaType(final String uniqueTsType,
+    TranslatableJavaType(final String toTypeScript,
                          final List<DeclaredType> types,
                          final List<TranslatableJavaType> dependencies) {
 
-        this.uniqueTsType = ds -> uniqueTsType;
+        this.toTypeScript = ds -> toTypeScript;
         this.dependencies = dependencies;
         this.types = types;
     }
@@ -47,25 +46,20 @@ public class TranslatableJavaType {
                          final List<DeclaredType> types,
                          final List<TranslatableJavaType> dependencies) {
 
-        this.uniqueTsType = uniqueTsType;
+        this.toTypeScript = uniqueTsType;
         this.dependencies = dependencies;
         this.types = types;
     }
 
     public String toTypeScript() {
-        return uniqueTsType.apply(dependencies.toArray(new TranslatableJavaType[]{}));
+        return toTypeScript.apply(dependencies.toArray(new TranslatableJavaType[]{}));
     }
 
     public List<DeclaredType> getDependencies() {
-        final Stream<DeclaredType> deps = dependencies.stream().map(TranslatableJavaType::getDependencies).flatMap(Collection::stream);
-        return Stream.concat(types.stream(), deps).collect(toList());
+        return Stream.concat(types.stream(), dependencies.stream().flatMap(t -> t.getDependencies().stream())).collect(toList());
     }
 
-    public Optional<ImportableTsType> toImportableTsType() {
-        if (types.isEmpty() || types.get(0).toString().matches("^javax?.*")) {
-            return Optional.empty();
-        } else {
-            return Optional.of(ImportStore.asImportableTsType(types.get(0)));
-        }
+    public boolean isTypeScriptable() {
+        return !types.isEmpty();
     }
 }

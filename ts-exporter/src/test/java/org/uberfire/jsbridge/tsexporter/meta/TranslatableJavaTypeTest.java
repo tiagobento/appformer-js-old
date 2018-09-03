@@ -13,7 +13,6 @@ import org.uberfire.jsbridge.tsexporter.util.ImportStore;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.*;
-import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_DECLARATION;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_USE;
 import static org.uberfire.jsbridge.tsexporter.meta.TestingUtils.member;
 import static org.uberfire.jsbridge.tsexporter.meta.TestingUtils.type;
@@ -53,12 +52,17 @@ public class TranslatableJavaTypeTest {
         assertEquals(1, dependencies2.size());
         assertTrue(dependencies2.get(0).toString().endsWith("Circle<T>"));
 
-        final List<ImportableTsType> imports = store.getImports();
+        List<DeclaredType> dependencies3 = store.with(
+                member("get6", type(TestingUtils.Circle.class)).translate())
+                .getDependencies();
+        assertEquals(1, dependencies3.size());
+        assertTrue(dependencies3.get(0).toString().endsWith("Circle<T>"));
+
+        final List<DeclaredType> imports = store.getImports();
         assertEquals(2, imports.size());
-        assertEquals("ts-exporter-test", imports.get(0).getModuleName());
-        assertTrue(imports.get(0).getType().toString().endsWith("Circle"));
-        assertEquals("ts-exporter-test", imports.get(1).getModuleName());
-        assertTrue(imports.get(1).getType().toString().endsWith("Sphere"));
+        assertTrue(imports.get(0).toString().endsWith("Circle"));
+        assertTrue(imports.get(1).toString().endsWith("Sphere"));
+
     }
 
     private TranslatableJavaType translatable(final DeclaredType type) {

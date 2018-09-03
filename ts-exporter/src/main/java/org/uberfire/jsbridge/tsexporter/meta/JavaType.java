@@ -33,6 +33,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
+import static javax.lang.model.type.TypeKind.DECLARED;
 import static javax.lang.model.type.TypeKind.NONE;
 import static javax.lang.model.type.TypeKind.NULL;
 import static javax.lang.model.type.TypeKind.TYPEVAR;
@@ -72,16 +73,16 @@ public class JavaType {
         TYPE_ARGUMENT_DECLARATION;
     }
 
+    private TranslatableJavaType simpleTranslatable(final String name) {
+        return new TranslatableJavaType(name, emptyList(), emptyList());
+    }
+
     public TranslatableJavaType translate() {
         return translate(TYPE_ARGUMENT_DECLARATION);
     }
 
     public TranslatableJavaType translate(final TsTypeTarget tsTypeTarget) {
         return translate(type, tsTypeTarget);
-    }
-
-    private TranslatableJavaType simpleTranslatable(String name) {
-        return new TranslatableJavaType(name, emptyList(), emptyList());
     }
 
     private TranslatableJavaType translate(final TypeMirror type,
@@ -125,6 +126,17 @@ public class JavaType {
                 final List<JavaType> typeArguments = extractTypeArguments(declaredType);
 
                 switch (declaredType.asElement().toString()) {
+                    case "java.lang.Integer":
+                    case "java.lang.Byte":
+                    case "java.lang.Double":
+                    case "java.lang.Float":
+                    case "java.lang.Long":
+                    case "java.lang.Number":
+                    case "java.lang.Short":
+                    case "java.math.BigInteger":
+                    case "java.math.BigDecimal":
+                    case "java.util.OptionalInt":
+                        return simpleTranslatable("number");
                     case "java.lang.Object":
                         return simpleTranslatable("any /* object */");
                     case "java.util.Date":
@@ -140,17 +152,6 @@ public class JavaType {
                     case "java.lang.String":
                     case "java.lang.Character":
                         return simpleTranslatable("string");
-                    case "java.lang.Integer":
-                    case "java.lang.Byte":
-                    case "java.lang.Double":
-                    case "java.lang.Float":
-                    case "java.lang.Long":
-                    case "java.lang.Number":
-                    case "java.lang.Short":
-                    case "java.math.BigInteger":
-                    case "java.math.BigDecimal":
-                    case "java.util.OptionalInt":
-                        return simpleTranslatable("number");
                     case "java.lang.Enum":
                         return simpleTranslatable("any /* enum_ */");
                     case "java.lang.Class":
@@ -159,6 +160,8 @@ public class JavaType {
                         return simpleTranslatable("any /* map entry */");
                     case "java.util.HashMap.Node":
                         return simpleTranslatable("any /* map node */");
+                    case "java.util.Optional":
+                        return typeArguments.get(0).translate(tsTypeTarget);
                     case "java.util.HashMap":
                     case "java.util.TreeMap":
                     case "java.util.Map":
@@ -176,10 +179,22 @@ public class JavaType {
                         return new TranslatableJavaType(d -> format("%s[]", d[0].toTypeScript()),
                                                         emptyList(),
                                                         singletonList(typeArguments.get(0).translate(tsTypeTarget)));
-                    case "java.util.Optional":
-                        return typeArguments.get(0).translate(tsTypeTarget);
                     default: {
-                        return new AnyDeclaredTranslatableJavaType(declaredType, typeArguments).translate(tsTypeTarget);
+                        final List<TranslatableJavaType> translatedTypeArguments = typeArguments.stream()
+                                .map(s -> s.translate(tsTypeTarget))
+                                .collect(toList());
+
+                        final String name = SIMPLE_NAMES
+                                ? declaredType.asElement().getSimpleName().toString()
+                                : declaredType.asElement().toString().replace(".", "_");
+
+                        final String typeArgumentsPart = !(typeArguments.size() == 0)
+                                ? "<" + translatedTypeArguments.stream().map(TranslatableJavaType::toTypeScript).collect(joining(", ")) + ">"
+                                : "";
+
+                        return new TranslatableJavaType(format("%s%s", name, typeArgumentsPart),
+                                                        singletonList(declaredType),
+                                                        translatedTypeArguments);
                     }
                 }
             case WILDCARD:

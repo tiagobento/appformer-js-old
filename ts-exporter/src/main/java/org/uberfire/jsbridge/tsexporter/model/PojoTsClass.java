@@ -17,17 +17,15 @@
 package org.uberfire.jsbridge.tsexporter.model;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 
-import org.uberfire.jsbridge.tsexporter.meta.TranslatableJavaType;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget;
-import org.uberfire.jsbridge.tsexporter.meta.ImportableTsType;
+import org.uberfire.jsbridge.tsexporter.meta.TranslatableJavaType;
 import org.uberfire.jsbridge.tsexporter.util.ImportStore;
 
 import static java.lang.String.format;
@@ -42,37 +40,37 @@ import static org.uberfire.jsbridge.tsexporter.Utils.lines;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_DECLARATION;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_USE;
 
-public class PojoTsClass {
+public class PojoTsClass implements TsClass {
 
-    private final ImportableTsType importableTsType;
+    private final DeclaredType declaredType;
     private final ImportStore importStore;
 
-    public PojoTsClass(final ImportableTsType importableTsType) {
-        this.importableTsType = importableTsType;
+    public PojoTsClass(final DeclaredType declaredType) {
+        this.declaredType = declaredType;
         this.importStore = new ImportStore();
     }
 
+    @Override
     public String toSource() {
 
-        final Element element = importableTsType.getType().asElement();
+        final Element element = declaredType.asElement();
 
         if (element.getKind().equals(INTERFACE)) {
-            return generateInterface();
+            return toInterface();
         }
 
         if (element.getKind().equals(ENUM)) {
-            return generateEnum();
+            return toEnum();
         }
 
-        return generateClass();
+        return toClass();
     }
 
-    private String generateClass() {
-        final DeclaredType type = importableTsType.getType();
-        final TypeElement element = (TypeElement) type.asElement();
+    private String toClass() {
+        final TypeElement element = (TypeElement) declaredType.asElement();
         final String simpleName = extractSimpleName(element, TYPE_ARGUMENT_DECLARATION);
 
-        final TranslatableJavaType importableSuperclassTsType = new JavaType(element.getSuperclass(), type).translate(TYPE_ARGUMENT_USE);
+        final TranslatableJavaType translatableSuperclass = new JavaType(element.getSuperclass(), declaredType).translate(TYPE_ARGUMENT_USE);
 
         final List<JavaType> implementedInterfaces = extractInterfaces();
 
@@ -80,19 +78,18 @@ public class PojoTsClass {
                 .filter(s -> s.getKind().isField())
                 .filter(s -> !s.getModifiers().contains(STATIC))
                 .filter(s -> !s.asType().toString().contains("java.util.function"))
-                .map(s -> format("public readonly %s?: %s;", s.getSimpleName(), importStore.with(new JavaType(s.asType(), type).translate(TYPE_ARGUMENT_USE)).toTypeScript()))
+                .map(s -> format("public readonly %s?: %s;", s.getSimpleName(), importStore.with(new JavaType(s.asType(), declaredType).translate(TYPE_ARGUMENT_USE)).toTypeScript()))
                 .collect(joining("\n"));
 
         final String constructorArgs = extractConstructorArgs(element);
 
-        final String _extends = importableSuperclassTsType.toImportableTsType().isPresent() ? "extends " + importStore.with(importableSuperclassTsType).toTypeScript() : "";
+        final String _extends = translatableSuperclass.isTypeScriptable() ? "extends " + importStore.with(translatableSuperclass).toTypeScript() : "";
 
         final String _implements = implementedInterfaces.isEmpty()
                 ? format("implements Portable<%s>", extractSimpleName(element, TYPE_ARGUMENT_USE))
                 : "implements " + implementedInterfaces.stream().map(javaType -> importStore.with(javaType.translate(TYPE_ARGUMENT_USE)).toTypeScript()).collect(joining(", ")) + format(", Portable<%s>", extractSimpleName(element, TYPE_ARGUMENT_USE));
 
-        //Has to be the last.
-        final String imports = importStore.getImportStatements();
+        final String imports = importStore.getImportStatements(); //Has to be the last.
 
         return format(lines("",
                             "import { Portable } from 'generated__temporary__/Model';",
@@ -114,15 +111,15 @@ public class PojoTsClass {
                       element.getModifiers().contains(ABSTRACT) ? "abstract" : "",
                       simpleName,
                       _extends + " " + _implements,
-                      importableTsType.getCanonicalFqcn(),
+                      ((TypeElement) declaredType.asElement()).getQualifiedName().toString(),
                       fields,
                       constructorArgs,
-                      importableSuperclassTsType.toImportableTsType().isPresent() ? "super({...self.inherited});" : ""
+                      translatableSuperclass.isTypeScriptable() ? "super({...self.inherited});" : ""
         );
     }
 
-    private String generateEnum() {
-        final TypeElement element = (TypeElement) importableTsType.getType().asElement();
+    private String toEnum() {
+        final TypeElement element = (TypeElement) declaredType.asElement();
         final String simpleName = extractSimpleName(element, TYPE_ARGUMENT_DECLARATION);
 
         //FIXME: Enum extending interfaces?
@@ -141,10 +138,9 @@ public class PojoTsClass {
                       simpleName);
     }
 
-    private String generateInterface() {
+    private String toInterface() {
         final List<JavaType> implementedInterfaces = extractInterfaces();
-        final DeclaredType type = importableTsType.getType();
-        final TypeElement element = (TypeElement) type.asElement();
+        final TypeElement element = (TypeElement) declaredType.asElement();
         final String simpleName = extractSimpleName(element, TYPE_ARGUMENT_DECLARATION);
         final String _implements = !implementedInterfaces.isEmpty()
                 ? "extends " + implementedInterfaces.stream().map(javaType -> importStore.with(javaType.translate(TYPE_ARGUMENT_USE)).toTypeScript()).collect(joining(", "))
@@ -165,12 +161,9 @@ public class PojoTsClass {
     }
 
     private List<JavaType> extractInterfaces() {
-        final DeclaredType type = importableTsType.getType();
-        final TypeElement element = (TypeElement) type.asElement();
-        return element.getInterfaces().stream()
-                .map(t -> new JavaType(t, t).translate().toImportableTsType())
-                .filter(Optional::isPresent).map(Optional::get)
-                .map(s -> new JavaType(s.getType(), s.getType()))
+        return ((TypeElement) declaredType.asElement()).getInterfaces().stream()
+                .map(t -> new JavaType(t, t))
+                .filter(s -> s.translate().isTypeScriptable())
                 .collect(toList());
     }
 
@@ -185,7 +178,7 @@ public class PojoTsClass {
                 .filter(f -> f.getKind().isField())
                 .filter(f -> !f.getModifiers().contains(STATIC))
                 .filter(s -> !s.asType().toString().contains("java.util.function"))
-                .map(f -> format("%s?: %s", f.getSimpleName(), importStore.with(new JavaType(f.asType(), importableTsType.getType()).translate(TYPE_ARGUMENT_USE)).toTypeScript()))
+                .map(f -> format("%s?: %s", f.getSimpleName(), importStore.with(new JavaType(f.asType(), declaredType).translate(TYPE_ARGUMENT_USE)).toTypeScript()))
                 .collect(toList());
 
         if (typeElement.getSuperclass().toString().equals("java.lang.Object")) {
@@ -196,7 +189,13 @@ public class PojoTsClass {
         return Stream.concat(fields.stream(), Stream.of("inherited?: {" + inheritedFields + "}")).collect(joining(", "));
     }
 
-    public List<ImportableTsType> getDependencies() {
+    @Override
+    public List<DeclaredType> getDependencies() {
         return importStore.getImports();
+    }
+
+    @Override
+    public DeclaredType getType() {
+        return declaredType;
     }
 }
