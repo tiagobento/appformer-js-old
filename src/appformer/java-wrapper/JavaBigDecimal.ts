@@ -7,4 +7,8 @@ export default class JavaBigDecimal extends JavaBigNumber {
   public from(asString: string): BigNumber {
     return new BigNumber(asString, 10);
   }
+
+  public isInRange(n: BigNumber): boolean {
+    return true; // arbitrary precision
+  }
 }

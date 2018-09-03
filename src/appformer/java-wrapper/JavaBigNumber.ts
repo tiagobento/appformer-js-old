@@ -5,12 +5,20 @@ export default abstract class JavaBigNumber implements JavaWrapper<BigNumber> {
   private readonly _value: BigNumber;
 
   public constructor(value: string) {
-    this._value = this.from(value);
+    const valueAsNumber = this.from(value);
+
+    if (!this.isInRange(valueAsNumber)) {
+      this._value = new BigNumber(NaN);
+    } else {
+      this._value = valueAsNumber;
+    }
   }
 
   public get(): BigNumber {
     return this._value;
   }
 
-  public abstract from(asString: string): BigNumber;
+  protected abstract from(asString: string): BigNumber;
+
+  protected abstract isInRange(n: BigNumber): boolean;
 }

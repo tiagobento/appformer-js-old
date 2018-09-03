@@ -1,7 +1,7 @@
 import JavaNumber from "appformer/java-wrapper/JavaNumber";
 
-export default class IntegerBasedJavaNumber extends JavaNumber {
-  public from(asString: string): number {
+export default abstract class IntegerBasedJavaNumber extends JavaNumber {
+  protected from(asString: string): number {
     return Number.parseInt(asString, 10);
   }
 }
