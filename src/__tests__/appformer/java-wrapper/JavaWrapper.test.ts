@@ -1,0 +1,144 @@
+import JavaWrapper, { JavaType } from "appformer/java-wrapper/JavaWrapper";
+import JavaArrayList from "appformer/java-wrapper/JavaArrayList";
+import JavaHashSet from "appformer/java-wrapper/JavaHashSet";
+import JavaHashMap from "appformer/java-wrapper/JavaHashMap";
+import JavaBoolean from "appformer/java-wrapper/JavaBoolean";
+import JavaString from "appformer/java-wrapper/JavaString";
+
+describe("needsWrapping", () => {
+  test("with array object, should return true", () => {
+    const input = ["foo1", "foo2", "foo3"];
+    expect(JavaWrapper.needsWrapping(input)).toBeTruthy();
+  });
+
+  test("with set object, should return true", () => {
+    const input = new Set(["foo1", "foo2", "foo3"]);
+    expect(JavaWrapper.needsWrapping(input)).toBeTruthy();
+  });
+
+  test("with map object, should return true", () => {
+    const input = new Map([["foo1", "bar1"], ["foo2", "bar2"]]);
+    expect(JavaWrapper.needsWrapping(input)).toBeTruthy();
+  });
+
+  test("with boolean object, should return true", () => {
+    const input = false;
+    expect(JavaWrapper.needsWrapping(input)).toBeTruthy();
+  });
+
+  test("with string object, should return true", () => {
+    const input = "foo";
+    expect(JavaWrapper.needsWrapping(input)).toBeTruthy();
+  });
+
+  test("with custom object, should return true", () => {
+    const input = {
+      foo: "bar1",
+      foo2: "bar2"
+    };
+    expect(JavaWrapper.needsWrapping(input)).toBeFalsy();
+  });
+
+  test("with every Java Type, all of them should need wrapping", () => {
+    Object.keys(JavaType)
+      .map((k: keyof typeof JavaType) => JavaType[k])
+      .forEach(javaType => expect(JavaWrapper.needsWrapping(javaType)).toBeTruthy());
+  });
+});
+
+describe("wrapIfNeeded", () => {
+  test("with array object, should return a JavaArray instance", () => {
+    const input = ["foo1", "foo2", "foo3"];
+    expect(JavaWrapper.wrapIfNeeded(input)).toEqual(new JavaArrayList(["foo1", "foo2", "foo3"]));
+  });
+
+  test("with set object, should return a JavaHashSet instance", () => {
+    const input = new Set(["foo1", "foo2", "foo3"]);
+    const output = new JavaHashSet(new Set(["foo1", "foo2", "foo3"]));
+    expect(JavaWrapper.wrapIfNeeded(input)).toEqual(output);
+  });
+
+  test("with map object, should return a JavaHashMap instance", () => {
+    const input = new Map([["foo1", "bar1"], ["foo2", "bar2"]]);
+    const output = new JavaHashMap(new Map([["foo1", "bar1"], ["foo2", "bar2"]]));
+    expect(JavaWrapper.wrapIfNeeded(input)).toEqual(output);
+  });
+
+  test("with boolean object, should return a JavaBoolean instance", () => {
+    const input = false;
+    const output = new JavaBoolean(false);
+    expect(JavaWrapper.wrapIfNeeded(input)).toEqual(output);
+  });
+
+  test("with string object, should return a JavaString instance", () => {
+    const input = "foo";
+    const output = new JavaString("foo");
+    expect(JavaWrapper.wrapIfNeeded(input)).toEqual(output);
+  });
+
+  test("with custom object, should return undefined", () => {
+    const input = {
+      foo: "bar1",
+      foo2: "bar2"
+    };
+    expect(JavaWrapper.wrapIfNeeded(input)).toBeUndefined();
+  });
+});
+
+describe("isJavaType", () => {
+  test("with Java Byte's fqcn, should return true", () => {
+    expect(JavaWrapper.isJavaType("java.lang.Byte")).toBeTruthy();
+  });
+
+  test("with Java Double's fqcn, should return true", () => {
+    expect(JavaWrapper.isJavaType("java.lang.Double")).toBeTruthy();
+  });
+
+  test("with Java Float's fqcn, should return true", () => {
+    expect(JavaWrapper.isJavaType("java.lang.Float")).toBeTruthy();
+  });
+
+  test("with Java Integer's fqcn, should return true", () => {
+    expect(JavaWrapper.isJavaType("java.lang.Integer")).toBeTruthy();
+  });
+
+  test("with Java Long's fqcn, should return true", () => {
+    expect(JavaWrapper.isJavaType("java.lang.Long")).toBeTruthy();
+  });
+
+  test("with Java Short's fqcn, should return true", () => {
+    expect(JavaWrapper.isJavaType("java.lang.Short")).toBeTruthy();
+  });
+
+  test("with Java Boolean's fqcn, should return true", () => {
+    expect(JavaWrapper.isJavaType("java.lang.Boolean")).toBeTruthy();
+  });
+
+  test("with Java String's fqcn, should return true", () => {
+    expect(JavaWrapper.isJavaType("java.lang.String")).toBeTruthy();
+  });
+
+  test("with Java BigDecimal's fqcn, should return true", () => {
+    expect(JavaWrapper.isJavaType("java.math.BigDecimal")).toBeTruthy();
+  });
+
+  test("with Java BigInteger's fqcn, should return true", () => {
+    expect(JavaWrapper.isJavaType("java.math.BigInteger")).toBeTruthy();
+  });
+
+  test("with Java ArrayList's fqcn, should return true", () => {
+    expect(JavaWrapper.isJavaType("java.util.ArrayList")).toBeTruthy();
+  });
+
+  test("with Java HashSet's fqcn, should return true", () => {
+    expect(JavaWrapper.isJavaType("java.util.HashSet")).toBeTruthy();
+  });
+
+  test("with Java HashMap's fqcn, should return true", () => {
+    expect(JavaWrapper.isJavaType("java.util.HashMap")).toBeTruthy();
+  });
+
+  test("with non Java type fqcn, should return false", () => {
+    expect(JavaWrapper.isJavaType("foo")).toBeFalsy();
+  });
+});
