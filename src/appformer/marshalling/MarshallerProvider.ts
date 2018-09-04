@@ -9,18 +9,22 @@ import JavaIntegerMarshaller from "appformer/marshalling/marshallers/JavaInteger
 import JavaBigIntegerMarshaller from "appformer/marshalling/marshallers/JavaBigIntegerMarshaller";
 import JavaFloatMarshaller from "appformer/marshalling/marshallers/JavaFloatMarshaller";
 import JavaBooleanMarshaller from "appformer/marshalling/marshallers/JavaBooleanMarshaller";
-import JavaHashSetMarshaller from "appformer/marshalling/marshallers/JavaHashSetMarshaller";
 import JavaLongMarshaller from "appformer/marshalling/marshallers/JavaLongMarshaller";
-import JavaArrayListMarshaller from "appformer/marshalling/marshallers/JavaArrayListMarshaller";
 import JavaBigDecimalMarshaller from "appformer/marshalling/marshallers/JavaBigDecimalMarshaller";
 import JavaByteMarshaller from "appformer/marshalling/marshallers/JavaByteMarshaller";
+import {
+  JavaArrayListMarshaller,
+  JavaHashSetMarshaller
+} from "appformer/marshalling/marshallers/JavaCollectionMarshaller";
 
 export default class MarshallerProvider {
+  private static initialized: boolean = false;
+
   private static marshallersByJavaType: Map<string, Marshaller<any, any>>;
   private static defaultMarshaller: Marshaller<any, any>;
 
   public static initialize() {
-    if (this.marshallersByJavaType) {
+    if (this.initialized) {
       return;
     }
 
@@ -42,9 +46,14 @@ export default class MarshallerProvider {
     this.marshallersByJavaType.set(JavaType.ARRAY_LIST, new JavaArrayListMarshaller());
     this.marshallersByJavaType.set(JavaType.HASH_SET, new JavaHashSetMarshaller());
     this.marshallersByJavaType.set(JavaType.HASH_MAP, new JavaHashMapMarshaller());
+    this.initialized = true;
   }
 
   public static getFor(obj: any): Marshaller<any, any> {
+    if (!this.initialized) {
+      throw new Error("MarshallerProvider should be initialized before using it.");
+    }
+
     const fqcn = obj._fqcn;
     if (!fqcn) {
       return this.defaultMarshaller;

@@ -3,11 +3,11 @@ import JavaCollection from "appformer/java-wrapper/JavaCollection";
 import ErraiObject from "appformer/marshalling/model/ErraiObject";
 import MarshallingContext from "appformer/marshalling/MarshallingContext";
 import ErraiObjectConstants from "appformer/marshalling/model/ErraiObjectConstants";
-import MarshallerProvider from "appformer/marshalling/MarshallerProvider";
 import JavaNumber from "appformer/java-wrapper/JavaNumber";
 import Portable from "appformer/internal/model/Portable";
+import MarshallerProvider from "appformer/marshalling/MarshallerProvider";
 
-export default class JavaCollectionMarshaller<T extends Iterable<Portable<any>>>
+class JavaCollectionMarshaller<T extends Iterable<Portable<any>>>
   implements Marshaller<JavaCollection<T>, ErraiObject> {
   public marshall(input: JavaCollection<T>, ctx: MarshallingContext): ErraiObject {
     const elements = input.get();
@@ -35,7 +35,7 @@ export default class JavaCollectionMarshaller<T extends Iterable<Portable<any>>>
       return this.erraiObjectFromNumber(value, marshaledValue);
     }
 
-    return marshaller.marshall(value, ctx);
+    return marshaledValue;
   }
 
   private erraiObjectFromNumber(value: any, marshaledValue: any) {
@@ -46,3 +46,7 @@ export default class JavaCollectionMarshaller<T extends Iterable<Portable<any>>>
     };
   }
 }
+
+export class JavaArrayListMarshaller extends JavaCollectionMarshaller<Array<Portable<any>>> {}
+
+export class JavaHashSetMarshaller extends JavaCollectionMarshaller<Set<Portable<any>>> {}
