@@ -3,6 +3,7 @@ import * as AppFormer from "appformer";
 import ShowcaseReactComponent from "showcase-components/DemoReactComponent";
 import { Foo, TestEvent } from "generated__temporary__/Model";
 import TestMessagesService from "generated__temporary__/org/uberfire/shared/TestMessagesService";
+// import ObeservablePathImpl from "uberfire-api/org/uberfire/backend/vfs/impl/ObservablePathImpl";
 
 // import homePerspectiveTemplate from "showcase-components/HomePerspective.html";
 // import otherPerspectiveTemplate from "showcase-components/other-perspective.html";
@@ -10,12 +11,11 @@ import TestMessagesService from "generated__temporary__/org/uberfire/shared/Test
 export class InoffensiveNonScreenClass {}
 
 enum Asd {
-    A2,
+  A2
 }
 
 export class ReactComponentScreen extends AppFormer.Screen {
   public onFoo: (e: any) => void;
-
 
   constructor() {
     super();
@@ -28,6 +28,8 @@ export class ReactComponentScreen extends AppFormer.Screen {
         return this.onFoo(`An event from server has arrived! "${testEvent.bar}"`);
       }
     };
+
+    // new ObeservablePathImpl({}).path;
 
     // const servce = new TestMessagesService();
     // const drlTextLends = new GlobalsEditorService();

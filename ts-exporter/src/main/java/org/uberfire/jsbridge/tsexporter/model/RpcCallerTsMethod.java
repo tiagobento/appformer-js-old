@@ -19,11 +19,14 @@ package org.uberfire.jsbridge.tsexporter.model;
 import javax.lang.model.element.TypeElement;
 
 import org.uberfire.jsbridge.tsexporter.meta.JavaType;
+import org.uberfire.jsbridge.tsexporter.meta.TranslatableJavaType;
+import org.uberfire.jsbridge.tsexporter.meta.hierarchy.DependencyGraph;
 import org.uberfire.jsbridge.tsexporter.util.ImportStore;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 import static org.uberfire.jsbridge.tsexporter.Utils.lines;
+import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_DECLARATION;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_USE;
 
 public class RpcCallerTsMethod {
@@ -32,6 +35,7 @@ public class RpcCallerTsMethod {
     private final ImportStore importStore;
     private final RpcJavaMethod javaMethod;
     private final String name;
+    private final DependencyGraph dependencyGraph;
 
     public RpcCallerTsMethod(final RpcCallerTsMethod tsMethod,
                              final String name) {
@@ -39,17 +43,20 @@ public class RpcCallerTsMethod {
         this._interface = tsMethod._interface;
         this.javaMethod = tsMethod.javaMethod;
         this.importStore = tsMethod.importStore;
+        this.dependencyGraph = tsMethod.dependencyGraph;
         this.name = name;
     }
 
     public RpcCallerTsMethod(final TypeElement _interface,
                              final ImportStore importStore,
-                             final RpcJavaMethod javaMethod) {
+                             final RpcJavaMethod javaMethod,
+                             final DependencyGraph dependencyGraph) {
 
         this._interface = _interface;
         this.importStore = importStore;
         this.javaMethod = javaMethod;
         this.name = javaMethod.getName();
+        this.dependencyGraph = dependencyGraph;
     }
 
     public String getName() {
@@ -75,12 +82,12 @@ public class RpcCallerTsMethod {
     }
 
     private String methodDeclaration() {
-        return name + importStore.with(new JavaType(javaMethod.getType(), _interface.asType()).translate()).toTypeScript();
+        return name + importing(new JavaType(javaMethod.getType(), _interface.asType()), TYPE_ARGUMENT_DECLARATION).toTypeScript();
     }
 
     private String params() {
         return javaMethod.getParameterJavaTypesByNames().entrySet().stream()
-                .map(e -> format("%s: %s", e.getKey(), importStore.with(e.getValue().translate(TYPE_ARGUMENT_USE)).toTypeScript()))
+                .map(e -> format("%s: %s", e.getKey(), importing(e.getValue(), TYPE_ARGUMENT_USE).toTypeScript()))
                 .collect(joining(", "));
     }
 
@@ -100,6 +107,11 @@ public class RpcCallerTsMethod {
     }
 
     private String returnType() {
-        return importStore.with(javaMethod.getReturnType().translate(TYPE_ARGUMENT_USE)).toTypeScript();
+        return importing(javaMethod.getReturnType(), TYPE_ARGUMENT_USE).toTypeScript();
+    }
+
+    private TranslatableJavaType importing(final JavaType javaType, final JavaType.TsTypeTarget tsTypeTarget) {
+        javaType.translate(tsTypeTarget).getDependencies().forEach(t -> dependencyGraph.add(t.asElement()));
+        return importStore.with(javaType.translate(tsTypeTarget));
     }
 }

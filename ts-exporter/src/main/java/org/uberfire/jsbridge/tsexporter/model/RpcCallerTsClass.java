@@ -25,6 +25,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 
 import org.uberfire.jsbridge.tsexporter.meta.JavaType;
+import org.uberfire.jsbridge.tsexporter.meta.hierarchy.DependencyGraph;
 import org.uberfire.jsbridge.tsexporter.util.ImportStore;
 import org.uberfire.jsbridge.tsexporter.util.Lazy;
 
@@ -34,18 +35,21 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.ElementKind.METHOD;
 import static org.uberfire.jsbridge.tsexporter.Main.elements;
+import static org.uberfire.jsbridge.tsexporter.Main.types;
 import static org.uberfire.jsbridge.tsexporter.Utils.lines;
 
 public class RpcCallerTsClass implements TsClass {
 
-    private final TypeElement _interface;
+    private final TypeElement typeElement;
+    private final DependencyGraph dependencyGraph;
     private final ImportStore importStore;
     private final Lazy<String> source;
 
     private static final List<String> RESERVED_WORDS = Arrays.asList("delete", "copy");
 
-    public RpcCallerTsClass(final TypeElement _interface) {
-        this._interface = _interface;
+    public RpcCallerTsClass(final TypeElement typeElement, DependencyGraph dependencyGraph) {
+        this.typeElement = typeElement;
+        this.dependencyGraph = dependencyGraph;
         this.importStore = new ImportStore();
         this.source = new Lazy<>(() -> {
             final String methods = methods();
@@ -73,16 +77,16 @@ public class RpcCallerTsClass implements TsClass {
     }
 
     private String simpleName() {
-        final String fqcn = importStore.with(new JavaType(_interface.asType()).translate()).toTypeScript();
-        return fqcn.substring(fqcn.indexOf(_interface.getSimpleName().toString()));
+        final String fqcn = importStore.with(new JavaType(typeElement.asType()).translate()).toTypeScript();
+        return fqcn.substring(fqcn.indexOf(typeElement.getSimpleName().toString()));
     }
 
     private String methods() {
-        return elements.getAllMembers(_interface).stream()
+        return elements.getAllMembers(typeElement).stream()
                 .filter(member -> member.getKind().equals(METHOD))
                 .filter(member -> !member.getEnclosingElement().toString().equals("java.lang.Object"))
-                .map(member -> new RpcJavaMethod(_interface, (ExecutableElement) member))
-                .map(javaMethod -> new RpcCallerTsMethod(_interface, importStore, javaMethod))
+                .map(member -> new RpcJavaMethod(typeElement, (ExecutableElement) member))
+                .map(javaMethod -> new RpcCallerTsMethod(typeElement, importStore, javaMethod, dependencyGraph))
                 .collect(groupingBy(RpcCallerTsMethod::getName)).entrySet().stream()
                 .flatMap(e -> resolveOverloadsAndReservedWords(e.getKey(), e.getValue()).stream())
                 .map(RpcCallerTsMethod::toSource)
@@ -92,7 +96,6 @@ public class RpcCallerTsClass implements TsClass {
     private String imports() {
         return importStore.getImportStatements();
     }
-
 
     private List<RpcCallerTsMethod> resolveOverloadsAndReservedWords(final String name,
                                                                      final List<RpcCallerTsMethod> methods) {
@@ -110,11 +113,11 @@ public class RpcCallerTsClass implements TsClass {
     @Override
     public List<DeclaredType> getDependencies() {
         source.get();
-        return importStore.getImports();
+        return importStore.getImports(this);
     }
 
     @Override
     public DeclaredType getType() {
-        return (DeclaredType) _interface.asType();
+        return (DeclaredType) typeElement.asType();
     }
 }

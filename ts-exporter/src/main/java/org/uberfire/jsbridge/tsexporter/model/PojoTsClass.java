@@ -192,7 +192,7 @@ public class PojoTsClass implements TsClass {
     @Override
     public List<DeclaredType> getDependencies() {
         source.get();
-        return importStore.getImports();
+        return importStore.getImports(this);
     }
 
     @Override

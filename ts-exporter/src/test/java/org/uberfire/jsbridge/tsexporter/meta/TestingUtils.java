@@ -71,6 +71,10 @@ public class TestingUtils {
         return (DeclaredType) elements.getTypeElement(clazz.getCanonicalName()).asType();
     }
 
+    public static TypeElement element(final Class<?> clazz) {
+        return elements.getTypeElement(clazz.getCanonicalName());
+    }
+
     public static JavaType member(final String name, final TypeMirror owner) {
         final TypeMirror member = elements.getAllMembers((TypeElement) types.asElement(owner)).stream()
                 .filter(s -> s.getSimpleName().toString().equals(name))

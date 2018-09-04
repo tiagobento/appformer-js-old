@@ -24,6 +24,8 @@ import javax.lang.model.type.DeclaredType;
 
 import org.uberfire.jsbridge.tsexporter.Main;
 import org.uberfire.jsbridge.tsexporter.meta.TranslatableJavaType;
+import org.uberfire.jsbridge.tsexporter.model.PojoTsClass;
+import org.uberfire.jsbridge.tsexporter.model.TsClass;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
@@ -42,7 +44,7 @@ public class ImportStore {
 
     public List<DeclaredType> getImports() {
         return dependencies.stream()
-                .flatMap(blergs -> blergs.getDependencies().stream())
+                .flatMap(t -> t.getDependencies().stream())
                 .map(s -> (DeclaredType) Main.types.erasure(s))
                 .filter(distinctBy(DeclaredType::toString))
                 .collect(toList());
@@ -52,6 +54,12 @@ public class ImportStore {
         return getImports().stream()
                 .map(this::toTypeScriptImportSource)
                 .collect(joining("\n"));
+    }
+
+    public List<DeclaredType> getImports(final TsClass pojoTsClass) {
+        return getImports().stream()
+                .filter(s -> !pojoTsClass.getElement().getQualifiedName().equals(((TypeElement) s.asElement()).getQualifiedName()))
+                .collect(toList());
     }
 
     private String toTypeScriptImportSource(final DeclaredType declaredType) {

@@ -18,6 +18,7 @@ package org.uberfire.jsbridge.tsexporter.meta;
 
 import java.util.List;
 
+import org.uberfire.jsbridge.tsexporter.Utils;
 import org.uberfire.jsbridge.tsexporter.model.PojoTsClass;
 import org.uberfire.jsbridge.tsexporter.model.TsClass;
 
@@ -29,10 +30,10 @@ import static org.uberfire.jsbridge.tsexporter.Utils.lines;
 public class PackageJson {
 
     private final String moduleName;
-    private final List<TsClass> classes;
+    private final List<? extends TsClass> classes;
 
     public PackageJson(final String moduleName,
-                       final List<TsClass> classes) {
+                       final List<? extends TsClass> classes) {
 
         this.moduleName = moduleName;
         this.classes = classes;
@@ -42,8 +43,8 @@ public class PackageJson {
 
         final String dependencies = classes.stream()
                 .flatMap(c -> c.getDependencies().stream())
-                .map(PojoTsClass::new)
-                .collect(groupingBy(TsClass::getModuleName)).keySet().stream()
+                .collect(groupingBy(Utils::getModuleName))
+                .keySet().stream()
                 .filter(s -> !s.equals(moduleName))
                 .map(moduleName -> format("\"%s\":\"file:../%s\"", moduleName, moduleName))
                 .collect(joining(",\n"));
@@ -57,6 +58,7 @@ public class PackageJson {
                             "%s",
                             "  }",
                             "}"),
+
                       moduleName,
                       "1.0.0",
                       dependencies

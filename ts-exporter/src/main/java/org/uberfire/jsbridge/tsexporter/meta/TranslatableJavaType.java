@@ -39,9 +39,9 @@ public class TranslatableJavaType {
         this.types = types;
     }
 
-    TranslatableJavaType(final Function<TranslatableJavaType[], String> uniqueTsType,
-                         final List<DeclaredType> types,
-                         final List<TranslatableJavaType> dependencies) {
+    protected TranslatableJavaType(final Function<TranslatableJavaType[], String> uniqueTsType,
+                                   final List<DeclaredType> types,
+                                   final List<TranslatableJavaType> dependencies) {
 
         this.toTypeScript = uniqueTsType;
         this.dependencies = dependencies;
