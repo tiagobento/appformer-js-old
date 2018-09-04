@@ -8,7 +8,7 @@ export default class JavaBigIntegerMarshaller implements Marshaller<JavaBigInteg
   public marshall(input: JavaBigInteger, ctx: MarshallingContext): ErraiObject {
     return {
       [ErraiObjectConstants.ENCODED_TYPE]: (input as any)._fqcn,
-      [ErraiObjectConstants.OBJECT_ID]: "-1",
+      [ErraiObjectConstants.OBJECT_ID]: `${ctx.newObjectId()}`,
       [ErraiObjectConstants.VALUE]: `${input.get().toString(10)}`
     } as ErraiObject;
   }

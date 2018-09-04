@@ -8,7 +8,7 @@ export default class JavaBigDecimalMarshaller implements Marshaller<JavaBigDecim
   public marshall(input: JavaBigDecimal, ctx: MarshallingContext): ErraiObject {
     return {
       [ErraiObjectConstants.ENCODED_TYPE]: (input as any)._fqcn,
-      [ErraiObjectConstants.OBJECT_ID]: "-1",
+      [ErraiObjectConstants.OBJECT_ID]: `${ctx.newObjectId()}`,
       [ErraiObjectConstants.VALUE]: `${input.get().toString(10)}`
     } as ErraiObject;
   }
