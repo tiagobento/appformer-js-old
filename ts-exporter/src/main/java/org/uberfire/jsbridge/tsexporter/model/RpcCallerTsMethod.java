@@ -19,8 +19,6 @@ package org.uberfire.jsbridge.tsexporter.model;
 import java.util.Set;
 
 import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 
@@ -31,9 +29,11 @@ import org.uberfire.jsbridge.tsexporter.meta.hierarchy.DependencyGraph;
 import org.uberfire.jsbridge.tsexporter.util.ImportStore;
 
 import static java.lang.String.format;
+import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toSet;
 import static javax.lang.model.element.ElementKind.CLASS;
+import static javax.lang.model.element.Modifier.ABSTRACT;
 import static org.uberfire.jsbridge.tsexporter.Utils.lines;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_DECLARATION;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_USE;
@@ -122,14 +122,14 @@ public class RpcCallerTsMethod {
 
     private String factoriesOracle() {
         final Element element = Main.types.asElement(javaMethod.getReturnType().getType());
-        final Set<Element> allDependencies = dependencyGraph.findAllDependencies(element).stream()
+        final Set<Element> allDependencies = dependencyGraph.findAllDependencies(singleton(element)).stream()
                 .map(DependencyGraph.Vertex::getElement)
                 .collect(toSet());
 
         return dependencyGraph.findAllDependents(allDependencies).stream()
                 .map(DependencyGraph.Vertex::getPojoClass)
                 .filter(dependent -> allDependencies.stream().anyMatch(d -> Main.types.isSubtype(dependent.getType(), d.asType())))
-                .filter(s -> isNewable(s.getType()))
+                .filter(dependent -> isInstantiable(dependent.getType()))
                 .distinct()
                 .map(c -> format("\"%s\": (x: any) => new %s(x)",
                                  c.getElement().getQualifiedName().toString(),
@@ -137,8 +137,8 @@ public class RpcCallerTsMethod {
                 .collect(joining(",\n"));
     }
 
-    private boolean isNewable(final DeclaredType type) {
-        return type.asElement().getKind().equals(CLASS) && !type.asElement().getModifiers().contains(Modifier.ABSTRACT);
+    private boolean isInstantiable(final DeclaredType type) {
+        return type.asElement().getKind().equals(CLASS) && !type.asElement().getModifiers().contains(ABSTRACT);
     }
 
     private String returnType() {

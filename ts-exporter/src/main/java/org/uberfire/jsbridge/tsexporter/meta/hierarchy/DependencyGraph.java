@@ -31,7 +31,6 @@ import javax.lang.model.type.DeclaredType;
 import org.uberfire.jsbridge.tsexporter.model.PojoTsClass;
 
 import static java.util.Collections.emptySet;
-import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toSet;
 import static java.util.stream.Stream.concat;
 
@@ -44,7 +43,7 @@ public class DependencyGraph {
     }
 
     public Vertex add(final Element element) {
-        if (canBePartOfTheGraph(element)) {
+        if (!canBePartOfTheGraph(element)) {
             return null;
         }
 
@@ -60,85 +59,66 @@ public class DependencyGraph {
     }
 
     private boolean canBePartOfTheGraph(final Element element) {
-        return element == null || !element.getKind().isClass() && !element.getKind().isInterface();
+        return element != null && (element.getKind().isClass() || element.getKind().isInterface());
     }
 
-    public Set<Vertex> findAllDependencies(final Element element) {
-        return findAllDependencies(singleton(element));
+    public Set<Vertex> findAllDependencies(final Set<? extends Element> elements) {
+        return findAllConnections(elements, v -> v.dependencies, new HashSet<>());
     }
 
-    public Set<Vertex> findAllDependents(final Element element) {
-        return findAllDependents(singleton(element));
+    public Set<Vertex> findAllDependents(final Set<? extends Element> elements) {
+        return findAllConnections(elements, v -> v.dependents, new HashSet<>());
     }
 
-    public Set<Vertex> findAllDependencies(final Set<Element> elements) {
-        return findAllConnections(elements, Vertex::getDependencies, new HashSet<>());
-    }
-
-    public Set<Vertex> findAllDependents(final Set<Element> elements) {
-        return findAllConnections(elements, Vertex::getDependents, new HashSet<>());
-    }
-
-    private Set<Vertex> findAllConnections(final Set<Element> elements,
+    private Set<Vertex> findAllConnections(final Set<? extends Element> elements,
                                            final Function<Vertex, Set<Vertex>> connections,
                                            final Set<Vertex> visited) {
 
-        if (elements.stream().allMatch(this::canBePartOfTheGraph)) {
+        if (elements.stream().noneMatch(this::canBePartOfTheGraph)) {
             return emptySet();
         }
 
-        final Set<Vertex> vertices = elements.stream()
-                .map(key -> graph.get((TypeElement) key))
+        final Set<Vertex> startingPoints = elements.stream()
+                .map(element -> (TypeElement) element)
+                .map(graph::get)
                 .filter(Objects::nonNull)
                 .collect(toSet());
 
-        final Set<Vertex> nonVisited = new HashSet<>(vertices);
-        nonVisited.removeAll(visited);
-        visited.addAll(nonVisited);
+        final Set<Vertex> toBeVisited = diff(startingPoints, visited);
+        visited.addAll(toBeVisited);
 
-        return concat(vertices.stream(), nonVisited.stream().flatMap(s -> connections.apply(s).stream())
-                .map(Vertex::getElement)
-                .map(e -> findAllConnections(singleton(e), connections, visited))
+        return concat(startingPoints.stream(), toBeVisited.stream()
+                .map(vertex -> connections.apply(vertex).stream().map(Vertex::getElement).collect(toSet()))
+                .map(e -> findAllConnections(e, connections, visited))
                 .flatMap(Collection::stream))
                 .collect(toSet());
     }
 
     public class Vertex {
 
-        private final Set<Vertex> dependencies;
-        private final Set<Vertex> dependents;
+        final Set<Vertex> dependencies;
+        final Set<Vertex> dependents;
         private final PojoTsClass pojoClass;
 
         private Vertex(final TypeElement typeElement) {
-            this(new PojoTsClass((DeclaredType) typeElement.asType()), emptySet(), new HashSet<>());
-        }
-
-        private Vertex(final PojoTsClass pojoTsClass,
-                       final Set<Vertex> dependencies,
-                       final Set<Vertex> dependents) {
-
-            this.pojoClass = pojoTsClass;
-            this.dependencies = dependencies;
-            this.dependents = dependents;
+            this.pojoClass = new PojoTsClass((DeclaredType) typeElement.asType());
+            this.dependencies = new HashSet<>();
+            this.dependents = new HashSet<>();
         }
 
         private Vertex init() {
-            final Vertex vertex = new Vertex(pojoClass, pojoClass.getDependencies().stream()
+            final Set<Vertex> dependencies = pojoClass.getDependencies().stream()
                     .map(s -> ((TypeElement) s.asElement()))
                     .map(DependencyGraph.this::add)
-                    .collect(toSet()), new HashSet<>());
+                    .collect(toSet());
 
-            vertex.dependencies.forEach(d -> d.dependents.add(vertex));
-
-            return vertex;
+            this.dependencies.addAll(dependencies);
+            this.dependencies.forEach(d -> d.dependents.add(this));
+            return this;
         }
 
         public PojoTsClass getPojoClass() {
             return pojoClass;
-        }
-
-        public Set<Vertex> getDependencies() {
-            return dependencies;
         }
 
         public TypeElement getElement() {
@@ -149,13 +129,24 @@ public class DependencyGraph {
         public String toString() {
             return pojoClass.getType().toString();
         }
+    }
 
-        public Set<Vertex> getDependents() {
-            return dependents;
+    public Vertex vertex(final Element e) {
+        if (!canBePartOfTheGraph(e)) {
+            return null;
         }
+        return graph.get(((TypeElement) e));
     }
 
     public Set<Vertex> vertices() {
         return new HashSet<>(graph.values());
+    }
+
+    private static <T> Set<T> diff(final Set<? extends T> a,
+                                   final Set<? extends T> b) {
+
+        final Set<T> tmp = new HashSet<>(a);
+        tmp.removeAll(b);
+        return tmp;
     }
 }
