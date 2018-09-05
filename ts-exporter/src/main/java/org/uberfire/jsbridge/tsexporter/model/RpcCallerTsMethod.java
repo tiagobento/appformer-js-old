@@ -19,6 +19,7 @@ package org.uberfire.jsbridge.tsexporter.model;
 import java.util.Set;
 
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
@@ -32,6 +33,7 @@ import org.uberfire.jsbridge.tsexporter.util.ImportStore;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toSet;
+import static javax.lang.model.element.ElementKind.CLASS;
 import static org.uberfire.jsbridge.tsexporter.Utils.lines;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_DECLARATION;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_USE;
@@ -127,7 +129,7 @@ public class RpcCallerTsMethod {
         return dependencyGraph.findAllDependents(allDependencies).stream()
                 .map(DependencyGraph.Vertex::getPojoClass)
                 .filter(dependent -> allDependencies.stream().anyMatch(d -> Main.types.isSubtype(dependent.getType(), d.asType())))
-                .filter(s -> isConcrete(s.getType()))
+                .filter(s -> isNewable(s.getType()))
                 .distinct()
                 .map(c -> format("\"%s\": (x: any) => new %s(x)",
                                  c.getElement().getQualifiedName().toString(),
@@ -135,8 +137,8 @@ public class RpcCallerTsMethod {
                 .collect(joining(",\n"));
     }
 
-    private boolean isConcrete(final DeclaredType type) {
-        return type.asElement().getKind().isClass() && !type.asElement().getModifiers().contains(Modifier.ABSTRACT);
+    private boolean isNewable(final DeclaredType type) {
+        return type.asElement().getKind().equals(CLASS) && !type.asElement().getModifiers().contains(Modifier.ABSTRACT);
     }
 
     private String returnType() {
