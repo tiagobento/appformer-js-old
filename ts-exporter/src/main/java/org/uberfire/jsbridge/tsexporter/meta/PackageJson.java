@@ -46,7 +46,7 @@ public class PackageJson {
                 .collect(groupingBy(Utils::getModuleName))
                 .keySet().stream()
                 .filter(s -> !s.equals(moduleName))
-                .map(moduleName -> format("\"%s\":\"file:../%s\"", moduleName, moduleName))
+                .map(moduleName -> format("\"%s\": \"file:../%s\"", moduleName, moduleName))
                 .collect(joining(",\n"));
 
         return format(lines("{",

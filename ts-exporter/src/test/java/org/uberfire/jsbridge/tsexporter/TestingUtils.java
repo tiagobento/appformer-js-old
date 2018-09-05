@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.uberfire.jsbridge.tsexporter.meta;
+package org.uberfire.jsbridge.tsexporter;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,7 +37,7 @@ import javax.lang.model.type.WildcardType;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
-import org.uberfire.jsbridge.tsexporter.Main;
+import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 
 import static java.util.stream.Collectors.toList;
 
@@ -89,7 +89,7 @@ public class TestingUtils {
         return new JavaType(((ExecutableType) owner.getType()).getParameterTypes().get(i), owner.getOwner());
     }
 
-    static class Foo {
+    public static class Foo {
 
         public static class Bar {
 

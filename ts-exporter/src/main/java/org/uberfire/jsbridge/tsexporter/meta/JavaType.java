@@ -33,17 +33,17 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
-import static javax.lang.model.type.TypeKind.DECLARED;
 import static javax.lang.model.type.TypeKind.NONE;
 import static javax.lang.model.type.TypeKind.NULL;
 import static javax.lang.model.type.TypeKind.TYPEVAR;
 import static org.uberfire.jsbridge.tsexporter.Main.types;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_DECLARATION;
+import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_IMPORT;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_USE;
 
 public class JavaType {
 
-    static boolean SIMPLE_NAMES = false;
+    public static boolean SIMPLE_NAMES = false;
 
     private final TypeMirror type;
     private final TypeMirror owner;
@@ -70,11 +70,12 @@ public class JavaType {
 
     public enum TsTypeTarget {
         TYPE_ARGUMENT_USE,
-        TYPE_ARGUMENT_DECLARATION;
+        TYPE_ARGUMENT_DECLARATION,
+        TYPE_ARGUMENT_IMPORT;
     }
 
     private TranslatableJavaType simpleTranslatable(final String name) {
-        return new TranslatableJavaType(name, emptyList(), emptyList());
+        return new TranslatableJavaType(d -> name, emptyList(), emptyList());
     }
 
     public TranslatableJavaType translate() {
@@ -192,7 +193,7 @@ public class JavaType {
                                 ? "<" + translatedTypeArguments.stream().map(TranslatableJavaType::toTypeScript).collect(joining(", ")) + ">"
                                 : "";
 
-                        return new TranslatableJavaType(format("%s%s", name, typeArgumentsPart),
+                        return new TranslatableJavaType(d -> format("%s%s", name, tsTypeTarget.equals(TYPE_ARGUMENT_IMPORT) ? "" : typeArgumentsPart),
                                                         singletonList(declaredType),
                                                         translatedTypeArguments);
                     }

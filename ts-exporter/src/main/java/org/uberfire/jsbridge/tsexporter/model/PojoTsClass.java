@@ -89,7 +89,7 @@ public class PojoTsClass implements TsClass {
                 ? format("implements Portable<%s>", extractSimpleName(element, TYPE_ARGUMENT_USE))
                 : "implements " + implementedInterfaces.stream().map(javaType -> importStore.with(javaType.translate(TYPE_ARGUMENT_USE)).toTypeScript()).collect(joining(", ")) + format(", Portable<%s>", extractSimpleName(element, TYPE_ARGUMENT_USE));
 
-        final String imports = importStore.getImportStatements(); //Has to be the last.
+        final String imports = importStore.getImportStatements(this); //Has to be the last.
 
         return format(lines("",
                             "import { Portable } from 'generated__temporary__/Model';",
@@ -147,7 +147,7 @@ public class PojoTsClass implements TsClass {
                 : "";
 
         //Has to be the last
-        final String imports = importStore.getImportStatements();
+        final String imports = importStore.getImportStatements(this);
 
         return format(lines("",
                             "%s",

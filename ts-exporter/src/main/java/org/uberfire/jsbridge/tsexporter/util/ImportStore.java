@@ -23,8 +23,8 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 
 import org.uberfire.jsbridge.tsexporter.Main;
+import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 import org.uberfire.jsbridge.tsexporter.meta.TranslatableJavaType;
-import org.uberfire.jsbridge.tsexporter.model.PojoTsClass;
 import org.uberfire.jsbridge.tsexporter.model.TsClass;
 
 import static java.lang.String.format;
@@ -32,6 +32,7 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static org.uberfire.jsbridge.tsexporter.Utils.distinctBy;
 import static org.uberfire.jsbridge.tsexporter.Utils.getModuleName;
+import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_IMPORT;
 
 public class ImportStore {
 
@@ -44,14 +45,14 @@ public class ImportStore {
 
     public List<DeclaredType> getImports() {
         return dependencies.stream()
-                .flatMap(t -> t.getDependencies().stream())
+                .flatMap(t -> t.getAggregated().stream())
                 .map(s -> (DeclaredType) Main.types.erasure(s))
                 .filter(distinctBy(DeclaredType::toString))
                 .collect(toList());
     }
 
-    public String getImportStatements() {
-        return getImports().stream()
+    public String getImportStatements(final TsClass pojoTsClass) {
+        return getImports(pojoTsClass).stream()
                 .map(this::toTypeScriptImportSource)
                 .collect(joining("\n"));
     }
@@ -65,7 +66,7 @@ public class ImportStore {
     private String toTypeScriptImportSource(final DeclaredType declaredType) {
         final String fqcn = ((TypeElement) declaredType.asElement()).getQualifiedName().toString();
         return format("import %s from '%s';",
-                      fqcn.replace(".", "_"),
+                      new JavaType(declaredType).translate(TYPE_ARGUMENT_IMPORT).toTypeScript(),
                       "output/" + getModuleName(declaredType) + "/" + fqcn.replace(".", "/"));
     }
 }

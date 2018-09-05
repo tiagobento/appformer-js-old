@@ -24,13 +24,13 @@ import com.google.testing.compile.CompilationRule;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.uberfire.jsbridge.tsexporter.meta.TestingUtils;
+import org.uberfire.jsbridge.tsexporter.TestingUtils;
 
 import static java.util.Collections.singleton;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertEquals;
-import static org.uberfire.jsbridge.tsexporter.meta.TestingUtils.element;
+import static org.uberfire.jsbridge.tsexporter.TestingUtils.element;
 
 public class DependencyGraphTest {
 

@@ -35,7 +35,6 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.ElementKind.METHOD;
 import static org.uberfire.jsbridge.tsexporter.Main.elements;
-import static org.uberfire.jsbridge.tsexporter.Main.types;
 import static org.uberfire.jsbridge.tsexporter.Utils.lines;
 
 public class RpcCallerTsClass implements TsClass {
@@ -84,8 +83,7 @@ public class RpcCallerTsClass implements TsClass {
         return elements.getAllMembers(typeElement).stream()
                 .filter(member -> member.getKind().equals(METHOD))
                 .filter(member -> !member.getEnclosingElement().toString().equals("java.lang.Object"))
-                .map(member -> new RpcJavaMethod(typeElement, (ExecutableElement) member))
-                .map(javaMethod -> new RpcCallerTsMethod(typeElement, importStore, javaMethod, dependencyGraph))
+                .map(member -> new RpcCallerTsMethod((ExecutableElement) member, typeElement, importStore, dependencyGraph))
                 .collect(groupingBy(RpcCallerTsMethod::getName)).entrySet().stream()
                 .flatMap(e -> resolveOverloadsAndReservedWords(e.getKey(), e.getValue()).stream())
                 .map(RpcCallerTsMethod::toSource)
@@ -93,7 +91,7 @@ public class RpcCallerTsClass implements TsClass {
     }
 
     private String imports() {
-        return importStore.getImportStatements();
+        return importStore.getImportStatements(this);
     }
 
     private List<RpcCallerTsMethod> resolveOverloadsAndReservedWords(final String name,

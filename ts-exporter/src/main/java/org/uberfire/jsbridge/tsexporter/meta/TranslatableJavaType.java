@@ -28,32 +28,24 @@ public class TranslatableJavaType {
 
     private final Function<TranslatableJavaType[], String> toTypeScript;
     private final List<DeclaredType> types;
-    private final List<TranslatableJavaType> dependencies;
+    private final List<TranslatableJavaType> aggregated;
 
-    TranslatableJavaType(final String toTypeScript,
+    TranslatableJavaType(final Function<TranslatableJavaType[], String> uniqueTsType,
                          final List<DeclaredType> types,
-                         final List<TranslatableJavaType> dependencies) {
-
-        this.toTypeScript = ds -> toTypeScript;
-        this.dependencies = dependencies;
-        this.types = types;
-    }
-
-    protected TranslatableJavaType(final Function<TranslatableJavaType[], String> uniqueTsType,
-                                   final List<DeclaredType> types,
-                                   final List<TranslatableJavaType> dependencies) {
+                         final List<TranslatableJavaType> aggregated) {
 
         this.toTypeScript = uniqueTsType;
-        this.dependencies = dependencies;
+        this.aggregated = aggregated;
         this.types = types;
     }
 
     public String toTypeScript() {
-        return toTypeScript.apply(dependencies.toArray(new TranslatableJavaType[]{}));
+        return toTypeScript.apply(aggregated.toArray(new TranslatableJavaType[]{}));
     }
 
-    public List<DeclaredType> getDependencies() {
-        return concat(types.stream(), dependencies.stream().flatMap(t -> t.getDependencies().stream()))
+    public List<DeclaredType> getAggregated() {
+        return concat(types.stream(),
+                      aggregated.stream().flatMap(t -> t.getAggregated().stream()))
                 .collect(toList());
     }
 
