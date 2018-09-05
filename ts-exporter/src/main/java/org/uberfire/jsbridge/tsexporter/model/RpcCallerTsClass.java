@@ -56,8 +56,7 @@ public class RpcCallerTsClass implements TsClass {
             final String simpleName = simpleName();
             final String imports = imports(); //Has to be the last
 
-            return format(lines("",
-                                "import {rpc, marshall, unmarshall} from 'appformer/API';",
+            return format(lines("import {rpc, marshall, unmarshall} from 'appformer/API';",
                                 "%s",
                                 "",
                                 "export default class %s {",

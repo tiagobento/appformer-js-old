@@ -70,44 +70,44 @@ public class DependencyGraphTest {
     public void test1() {
         final DependencyGraph depGraph = new DependencyGraph();
         depGraph.add(element(A0.class));
-        assertEquals(1, orderedVertexes(depGraph).size());
+        assertEquals(1, orderedVertices(depGraph).size());
         depGraph.add(element(A1.class));
-        assertEquals(2, orderedVertexes(depGraph).size());
+        assertEquals(2, orderedVertices(depGraph).size());
         depGraph.add(element(A2.class));
-        assertEquals(3, orderedVertexes(depGraph).size());
+        assertEquals(3, orderedVertices(depGraph).size());
 
-        final List<DependencyGraph.Vertex> vertexes = orderedVertexes(depGraph);
-        assertEquals(0, vertexes.get(0).getAdjacencies().size());
-        assertEquals(1, vertexes.get(1).getAdjacencies().size());
-        assertEquals(1, vertexes.get(2).getAdjacencies().size());
+        final List<DependencyGraph.Vertex> vertices = orderedVertices(depGraph);
+        assertEquals(0, vertices.get(0).getDependencies().size());
+        assertEquals(1, vertices.get(1).getDependencies().size());
+        assertEquals(1, vertices.get(2).getDependencies().size());
     }
 
     @Test
     public void test2() {
         final DependencyGraph depGraph = new DependencyGraph();
         depGraph.add(element(A2B1.class));
-        assertEquals(4, orderedVertexes(depGraph).size());
+        assertEquals(4, orderedVertices(depGraph).size());
         depGraph.add(element(A1.class));
-        assertEquals(4, orderedVertexes(depGraph).size());
+        assertEquals(4, orderedVertices(depGraph).size());
         depGraph.add(element(B0.class));
-        assertEquals(4, orderedVertexes(depGraph).size());
+        assertEquals(4, orderedVertices(depGraph).size());
         depGraph.add(element(A1B1.class));
-        assertEquals(5, orderedVertexes(depGraph).size());
+        assertEquals(5, orderedVertices(depGraph).size());
         depGraph.add(element(A0.class));
-        assertEquals(5, orderedVertexes(depGraph).size());
+        assertEquals(5, orderedVertices(depGraph).size());
         depGraph.add(element(A2.class));
-        assertEquals(6, orderedVertexes(depGraph).size());
+        assertEquals(6, orderedVertices(depGraph).size());
 
-        final List<DependencyGraph.Vertex> vertexes = orderedVertexes(depGraph);
-        assertEquals(0, vertexes.get(0).getAdjacencies().size());
-        assertEquals(1, vertexes.get(1).getAdjacencies().size());
-        assertEquals(2, vertexes.get(2).getAdjacencies().size());
-        assertEquals(1, vertexes.get(3).getAdjacencies().size());
-        assertEquals(2, vertexes.get(4).getAdjacencies().size());
-        assertEquals(0, vertexes.get(5).getAdjacencies().size());
+        final List<DependencyGraph.Vertex> vertices = orderedVertices(depGraph);
+        assertEquals(0, vertices.get(0).getDependencies().size());
+        assertEquals(1, vertices.get(1).getDependencies().size());
+        assertEquals(2, vertices.get(2).getDependencies().size());
+        assertEquals(1, vertices.get(3).getDependencies().size());
+        assertEquals(2, vertices.get(4).getDependencies().size());
+        assertEquals(0, vertices.get(5).getDependencies().size());
     }
 
-    private static List<DependencyGraph.Vertex> orderedVertexes(DependencyGraph depGraph) {
+    private static List<DependencyGraph.Vertex> orderedVertices(DependencyGraph depGraph) {
         return depGraph.vertices().stream().sorted(comparing(DependencyGraph.Vertex::toString)).collect(toList());
     }
 }

@@ -16,8 +16,14 @@
 
 package org.uberfire.jsbridge.tsexporter.model;
 
-import javax.lang.model.element.TypeElement;
+import java.util.Set;
 
+import javax.lang.model.element.Element;
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
+
+import org.uberfire.jsbridge.tsexporter.Main;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 import org.uberfire.jsbridge.tsexporter.meta.TranslatableJavaType;
 import org.uberfire.jsbridge.tsexporter.meta.hierarchy.DependencyGraph;
@@ -25,6 +31,7 @@ import org.uberfire.jsbridge.tsexporter.util.ImportStore;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toSet;
 import static org.uberfire.jsbridge.tsexporter.Utils.lines;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_DECLARATION;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_USE;
@@ -64,21 +71,31 @@ public class RpcCallerTsMethod {
     }
 
     public String toSource() {
+        final String name = methodDeclaration();
+        final String params = params();
+        final String erraiBusString = erraiBusPath();
+        final String rpcCallParams = rpcCallParams();
+        final String returnType = returnType();
+
+        final String factoriesOracle = factoriesOracle(); //Has to be the last
+
         return format(lines("",
                             "public %s(args: { %s }) {",
                             "  return rpc(%s, [%s])",
                             "         .then((json: string) => { ",
-                            "           return unmarshall(json, {%s}) as %s; ",
+                            "           return unmarshall(json, {",
+                            "%s",
+                            "           }) as %s; ",
                             "         }); ",
                             "}",
                             ""),
 
-                      methodDeclaration(),
-                      params(),
-                      erraiBusPath(),
-                      rpcCallParams(),
-                      factoriesOracle(),
-                      returnType());
+                      name,
+                      params,
+                      erraiBusString,
+                      rpcCallParams,
+                      factoriesOracle,
+                      returnType);
     }
 
     private String methodDeclaration() {
@@ -102,16 +119,35 @@ public class RpcCallerTsMethod {
     }
 
     private String factoriesOracle() {
-        //TODO: discover whole dependency/hierarchy tree of return type.
-        return "";
+        final Element element = Main.types.asElement(javaMethod.getReturnType().getType());
+        final Set<Element> allDependencies = dependencyGraph.findAllDependencies(element).stream()
+                .map(DependencyGraph.Vertex::getElement)
+                .collect(toSet());
+
+        return dependencyGraph.findAllDependents(allDependencies).stream()
+                .map(DependencyGraph.Vertex::getPojoClass)
+                .filter(dependent -> allDependencies.stream().anyMatch(d -> Main.types.isSubtype(dependent.getType(), d.asType())))
+                .filter(s -> isConcrete(s.getType()))
+                .distinct()
+                .map(c -> format("\"%s\": (x: any) => new %s(x)",
+                                 c.getElement().getQualifiedName().toString(),
+                                 importing(new JavaType(Main.types.erasure(c.getType())), TYPE_ARGUMENT_USE).toTypeScript()))
+                .collect(joining(",\n"));
+    }
+
+    private boolean isConcrete(final DeclaredType type) {
+        return type.asElement().getKind().isClass() && !type.asElement().getModifiers().contains(Modifier.ABSTRACT);
     }
 
     private String returnType() {
         return importing(javaMethod.getReturnType(), TYPE_ARGUMENT_USE).toTypeScript();
     }
 
-    private TranslatableJavaType importing(final JavaType javaType, final JavaType.TsTypeTarget tsTypeTarget) {
-        javaType.translate(tsTypeTarget).getDependencies().forEach(t -> dependencyGraph.add(t.asElement()));
-        return importStore.with(javaType.translate(tsTypeTarget));
+    private TranslatableJavaType importing(final JavaType javaType,
+                                           final JavaType.TsTypeTarget tsTypeTarget) {
+
+        final TranslatableJavaType translatable = javaType.translate(tsTypeTarget);
+        translatable.getDependencies().forEach(t -> dependencyGraph.add(t.asElement()));
+        return importStore.with(translatable);
     }
 }
