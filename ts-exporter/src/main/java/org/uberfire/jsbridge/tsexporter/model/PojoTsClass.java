@@ -103,7 +103,7 @@ public class PojoTsClass implements TsClass {
                             "",
                             "  constructor(self: { %s }) {",
                             "    %s",
-                            "    Object.assign(this, self); ",
+                            "    Object.assign(this, self);",
                             "  }",
                             "}"),
 
@@ -162,14 +162,13 @@ public class PojoTsClass implements TsClass {
 
     private List<JavaType> extractInterfaces() {
         return ((TypeElement) declaredType.asElement()).getInterfaces().stream()
-                .map(t -> new JavaType(t, t))
+                .map(t -> new JavaType(t, declaredType))
                 .filter(s -> s.translate().canBeSubclassed())
                 .collect(toList());
     }
 
     private String extractSimpleName(final TypeElement element, final TsTypeTarget tsTypeTarget) {
-        final String fqcn = importStore.with(new JavaType(element.asType()).translate(tsTypeTarget)).toTypeScript();
-        return fqcn.substring(fqcn.indexOf(element.getSimpleName().toString()));
+        return importStore.with(new JavaType(element.asType(), element.asType()).translate(tsTypeTarget)).toTypeScript();
     }
 
     private String extractConstructorArgs(final TypeElement typeElement) {

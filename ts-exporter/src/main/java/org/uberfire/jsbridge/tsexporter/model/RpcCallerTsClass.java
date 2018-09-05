@@ -75,8 +75,7 @@ public class RpcCallerTsClass implements TsClass {
     }
 
     private String simpleName() {
-        final String fqcn = importStore.with(new JavaType(typeElement.asType()).translate()).toTypeScript();
-        return fqcn.substring(fqcn.indexOf(typeElement.getSimpleName().toString()));
+        return importStore.with(new JavaType(typeElement.asType(), typeElement.asType()).translate()).toTypeScript();
     }
 
     private String methods() {

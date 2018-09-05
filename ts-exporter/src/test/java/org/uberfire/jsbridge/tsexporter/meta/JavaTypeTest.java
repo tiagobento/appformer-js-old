@@ -56,7 +56,7 @@ public class JavaTypeTest {
     @Before
     public void before() {
         init(compilationRule.getTypes(), compilationRule.getElements());
-        JavaType.SIMPLE_NAMES = true;
+        JavaType.SIMPLE_NAMES.set(true);
     }
 
     @Test
@@ -243,7 +243,7 @@ public class JavaTypeTest {
     }
 
     private String translate(final TypeMirror type) {
-        return translate(new JavaType(type));
+        return translate(new JavaType(type, type));
     }
 
     private String translate(final JavaType type) {
@@ -251,7 +251,7 @@ public class JavaTypeTest {
     }
 
     private String translate(final TsTypeTarget tsTypeTarget, final TypeMirror type) {
-        return translate(tsTypeTarget, new JavaType(type));
+        return translate(tsTypeTarget, new JavaType(type, type));
     }
 
     private String translate(final TsTypeTarget tsTypeTarget, final JavaType type) {

@@ -53,7 +53,7 @@ public class ImportStore {
 
     public String getImportStatements(final TsClass pojoTsClass) {
         return getImports(pojoTsClass).stream()
-                .map(this::toTypeScriptImportSource)
+                .map(declaredType -> toTypeScriptImportSource(declaredType, pojoTsClass.getType()))
                 .collect(joining("\n"));
     }
 
@@ -63,10 +63,10 @@ public class ImportStore {
                 .collect(toList());
     }
 
-    private String toTypeScriptImportSource(final DeclaredType declaredType) {
+    private String toTypeScriptImportSource(final DeclaredType declaredType, final DeclaredType owner) {
         final String fqcn = ((TypeElement) declaredType.asElement()).getQualifiedName().toString();
         return format("import %s from '%s';",
-                      new JavaType(declaredType).translate(TYPE_ARGUMENT_IMPORT).toTypeScript(),
+                      new JavaType(declaredType, owner).translate(TYPE_ARGUMENT_IMPORT).toTypeScript(),
                       "output/" + getModuleName(declaredType) + "/" + fqcn.replace(".", "/"));
     }
 }

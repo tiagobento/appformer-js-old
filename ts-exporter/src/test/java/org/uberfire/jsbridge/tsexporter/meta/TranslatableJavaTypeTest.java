@@ -13,10 +13,10 @@ import org.uberfire.jsbridge.tsexporter.util.ImportStore;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.uberfire.jsbridge.tsexporter.meta.JavaType.*;
-import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_USE;
 import static org.uberfire.jsbridge.tsexporter.TestingUtils.member;
 import static org.uberfire.jsbridge.tsexporter.TestingUtils.type;
+import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget;
+import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_USE;
 
 public class TranslatableJavaTypeTest {
 
@@ -38,7 +38,6 @@ public class TranslatableJavaTypeTest {
         assertEquals(2, aggregated0.size());
         assertTrue(aggregated0.get(0).toString().endsWith("Circle<T>"));
         assertTrue(aggregated0.get(1).toString().endsWith("Sphere<J>"));
-
 
         final List<DeclaredType> aggregated1 = store.with(
                 translatable(type(TestingUtils.Circle.class)))
@@ -63,16 +62,15 @@ public class TranslatableJavaTypeTest {
         assertEquals(2, imports.size());
         assertTrue(imports.get(0).toString().endsWith("Circle"));
         assertTrue(imports.get(1).toString().endsWith("Sphere"));
-
     }
 
     private TranslatableJavaType translatable(final DeclaredType type) {
-        return new JavaType(type).translate();
+        return new JavaType(type, type).translate();
     }
 
     private TranslatableJavaType translatable(final DeclaredType type,
                                               final TsTypeTarget target) {
 
-        return new JavaType(type).translate(target);
+        return new JavaType(type, type).translate(target);
     }
 }

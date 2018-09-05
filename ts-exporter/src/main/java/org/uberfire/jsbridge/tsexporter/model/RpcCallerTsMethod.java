@@ -46,7 +46,7 @@ import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_A
 public class RpcCallerTsMethod {
 
     private final ExecutableElement executableElement;
-    private final TypeElement _interface;
+    private final TypeElement typeElement;
     private final ImportStore importStore;
     private final String name;
     private final DependencyGraph dependencyGraph;
@@ -54,7 +54,7 @@ public class RpcCallerTsMethod {
     public RpcCallerTsMethod(final RpcCallerTsMethod tsMethod,
                              final String name) {
 
-        this._interface = tsMethod._interface;
+        this.typeElement = tsMethod.typeElement;
         this.executableElement = tsMethod.executableElement;
         this.importStore = tsMethod.importStore;
         this.dependencyGraph = tsMethod.dependencyGraph;
@@ -62,11 +62,11 @@ public class RpcCallerTsMethod {
     }
 
     public RpcCallerTsMethod(final ExecutableElement executableElement,
-                             final TypeElement _interface,
+                             final TypeElement typeElement,
                              final ImportStore importStore,
                              final DependencyGraph dependencyGraph) {
         this.executableElement = executableElement;
-        this._interface = _interface;
+        this.typeElement = typeElement;
         this.importStore = importStore;
         this.name = executableElement.getSimpleName().toString();
         this.dependencyGraph = dependencyGraph;
@@ -105,7 +105,7 @@ public class RpcCallerTsMethod {
     }
 
     private String methodDeclaration() {
-        return name + importing(new JavaType(executableElement.asType(), _interface.asType()), TYPE_ARGUMENT_DECLARATION).toTypeScript();
+        return name + importing(new JavaType(executableElement.asType(), typeElement.asType()), TYPE_ARGUMENT_DECLARATION).toTypeScript();
     }
 
     private String params() {
@@ -116,7 +116,7 @@ public class RpcCallerTsMethod {
 
     private String erraiBusString() {
         return '"' +
-                _interface.getQualifiedName().toString() +
+                typeElement.getQualifiedName().toString() +
                 "|" +
                 executableElement.getSimpleName() +
                 ":" +
@@ -148,7 +148,7 @@ public class RpcCallerTsMethod {
                 .distinct()
                 .map(c -> format("\"%s\": (x: any) => new %s(x)",
                                  c.getElement().getQualifiedName().toString(),
-                                 importing(new JavaType(Main.types.erasure(c.getType())), TYPE_ARGUMENT_USE).toTypeScript()))
+                                 importing(new JavaType(Main.types.erasure(c.getType()), typeElement.asType()), TYPE_ARGUMENT_USE).toTypeScript()))
                 .collect(joining(",\n"));
     }
 
@@ -157,7 +157,7 @@ public class RpcCallerTsMethod {
     }
 
     private JavaType getReturnTypeJavaType() {
-        return new JavaType(executableElement.getReturnType(), _interface.asType());
+        return new JavaType(executableElement.getReturnType(), typeElement.asType());
     }
 
     private TranslatableJavaType importing(final JavaType javaType,
@@ -171,7 +171,7 @@ public class RpcCallerTsMethod {
     private LinkedHashMap<String, JavaType> getParameterJavaTypesByNames() {
         return this.executableElement.getParameters().stream().collect(
                 toMap(arg -> arg.getSimpleName().toString(),
-                      arg -> new JavaType(arg.asType(), _interface.asType()),
+                      arg -> new JavaType(arg.asType(), typeElement.asType()),
                       (a, b) -> b, //default map behavior
                       LinkedHashMap::new)); //order is important!
     }

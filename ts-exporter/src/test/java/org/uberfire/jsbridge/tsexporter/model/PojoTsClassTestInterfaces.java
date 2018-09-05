@@ -11,7 +11,7 @@ import static org.uberfire.jsbridge.tsexporter.TestingUtils.init;
 import static org.uberfire.jsbridge.tsexporter.TestingUtils.type;
 import static org.uberfire.jsbridge.tsexporter.Utils.lines;
 
-public class PojoTsClassTest {
+public class PojoTsClassTestInterfaces {
 
     @Rule
     public final CompilationRule compilationRule = new CompilationRule();
@@ -19,7 +19,7 @@ public class PojoTsClassTest {
     @Before
     public void before() {
         init(compilationRule.getTypes(), compilationRule.getElements());
-        JavaType.SIMPLE_NAMES = true;
+        JavaType.SIMPLE_NAMES.set(true);
     }
 
     interface A {
@@ -45,7 +45,7 @@ public class PojoTsClassTest {
     public void testInterfaceB() {
         final PojoTsClass pojoTsClass = new PojoTsClass(type(B.class));
         assertEquals(lines("",
-                           "import A from 'output/ts-exporter-test/org/uberfire/jsbridge/tsexporter/model/PojoTsClassTest/A';",
+                           "import A from 'output/ts-exporter-test/org/uberfire/jsbridge/tsexporter/model/PojoTsClassTestInterfaces/A';",
                            "",
                            "export default interface B extends A {",
                            "}"),
@@ -75,7 +75,7 @@ public class PojoTsClassTest {
     public void testInterfaceD() {
         final PojoTsClass pojoTsClass = new PojoTsClass(type(D.class));
         assertEquals(lines("",
-                           "import A from 'output/ts-exporter-test/org/uberfire/jsbridge/tsexporter/model/PojoTsClassTest/A';",
+                           "import A from 'output/ts-exporter-test/org/uberfire/jsbridge/tsexporter/model/PojoTsClassTestInterfaces/A';",
                            "",
                            "export default interface D<T extends A>  {",
                            "}"),
@@ -90,8 +90,8 @@ public class PojoTsClassTest {
     public void testInterfaceE() {
         final PojoTsClass pojoTsClass = new PojoTsClass(type(E.class));
         assertEquals(lines("",
-                           "import D from 'output/ts-exporter-test/org/uberfire/jsbridge/tsexporter/model/PojoTsClassTest/D';",
-                           "import A from 'output/ts-exporter-test/org/uberfire/jsbridge/tsexporter/model/PojoTsClassTest/A';",
+                           "import D from 'output/ts-exporter-test/org/uberfire/jsbridge/tsexporter/model/PojoTsClassTestInterfaces/D';",
+                           "import A from 'output/ts-exporter-test/org/uberfire/jsbridge/tsexporter/model/PojoTsClassTestInterfaces/A';",
                            "",
                            "export default interface E<J extends D<A>>  {",
                            "}"),
@@ -121,7 +121,7 @@ public class PojoTsClassTest {
     public void testInterfaceG() {
         final PojoTsClass pojoTsClass = new PojoTsClass(type(G.class));
         assertEquals(lines("",
-                           "import A from 'output/ts-exporter-test/org/uberfire/jsbridge/tsexporter/model/PojoTsClassTest/A';",
+                           "import A from 'output/ts-exporter-test/org/uberfire/jsbridge/tsexporter/model/PojoTsClassTestInterfaces/A';",
                            "",
                            "export default interface G<T> extends A {",
                            "}"),
@@ -136,7 +136,7 @@ public class PojoTsClassTest {
     public void testInterfaceH() {
         final PojoTsClass pojoTsClass = new PojoTsClass(type(H.class));
         assertEquals(lines("",
-                           "import C from 'output/ts-exporter-test/org/uberfire/jsbridge/tsexporter/model/PojoTsClassTest/C';",
+                           "import C from 'output/ts-exporter-test/org/uberfire/jsbridge/tsexporter/model/PojoTsClassTestInterfaces/C';",
                            "",
                            "export default interface H<T> extends C<T> {",
                            "}"),
@@ -151,8 +151,8 @@ public class PojoTsClassTest {
     public void testInterfaceI() {
         final PojoTsClass pojoTsClass = new PojoTsClass(type(I.class));
         assertEquals(lines("",
-                           "import C from 'output/ts-exporter-test/org/uberfire/jsbridge/tsexporter/model/PojoTsClassTest/C';",
-                           "import H from 'output/ts-exporter-test/org/uberfire/jsbridge/tsexporter/model/PojoTsClassTest/H';",
+                           "import C from 'output/ts-exporter-test/org/uberfire/jsbridge/tsexporter/model/PojoTsClassTestInterfaces/C';",
+                           "import H from 'output/ts-exporter-test/org/uberfire/jsbridge/tsexporter/model/PojoTsClassTestInterfaces/H';",
                            "",
                            "export default interface I<T extends C<I<any>>> extends H<T> {",
                            "}"),

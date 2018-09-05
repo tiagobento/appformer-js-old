@@ -26,6 +26,8 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
 import javax.lang.model.type.WildcardType;
 
+import org.uberfire.jsbridge.tsexporter.Main;
+
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
@@ -43,14 +45,14 @@ import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_A
 
 public class JavaType {
 
-    public static boolean SIMPLE_NAMES = false;
+    public static ThreadLocal<Boolean> SIMPLE_NAMES = new ThreadLocal<>();
+
+    static {
+        SIMPLE_NAMES.set(false);
+    }
 
     private final TypeMirror type;
     private final TypeMirror owner;
-
-    public JavaType(final TypeMirror type) {
-        this(type, type);
-    }
 
     public JavaType(final TypeMirror type, final TypeMirror owner) {
         if (type == null || owner == null) {
@@ -185,7 +187,7 @@ public class JavaType {
                                 .map(s -> s.translate(tsTypeTarget))
                                 .collect(toList());
 
-                        final String name = SIMPLE_NAMES
+                        final String name = (SIMPLE_NAMES.get() || Main.types.asElement(declaredType).equals(Main.types.asElement(owner)))
                                 ? declaredType.asElement().getSimpleName().toString()
                                 : declaredType.asElement().toString().replace(".", "_");
 
@@ -244,7 +246,7 @@ public class JavaType {
         }
 
         return ((TypeElement) ((DeclaredType) types.erasure(declaredType)).asElement()).getTypeParameters().stream()
-                .map(s -> new JavaType(types.getNoType(NONE)))
+                .map(s -> new JavaType(types.getNoType(NONE), types.getNoType(NONE)))
                 .collect(toList());
     }
 
