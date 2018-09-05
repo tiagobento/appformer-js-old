@@ -90,8 +90,8 @@ public class PojoTsClassTestInterfaces {
     public void testInterfaceE() {
         final PojoTsClass pojoTsClass = new PojoTsClass(type(E.class));
         assertEquals(lines("",
-                           "import D from 'output/ts-exporter-test/org/uberfire/jsbridge/tsexporter/model/PojoTsClassTestInterfaces/D';",
                            "import A from 'output/ts-exporter-test/org/uberfire/jsbridge/tsexporter/model/PojoTsClassTestInterfaces/A';",
+                           "import D from 'output/ts-exporter-test/org/uberfire/jsbridge/tsexporter/model/PojoTsClassTestInterfaces/D';",
                            "",
                            "export default interface E<J extends D<A>>  {",
                            "}"),

@@ -28,7 +28,7 @@ public class PackageJsonTest {
     }
 
     @Test
-    public void noDependencies() {
+    public void testNoDependencies() {
         final PackageJson packageJson = new PackageJson("test-module", emptyList());
 
         assertEquals(lines("{",
@@ -55,7 +55,7 @@ public class PackageJsonTest {
 
 
     @Test
-    public void oneDependency() {
+    public void testOneDependency() {
         final PackageJson packageJsonA = new PackageJson("test-module", singletonList(new PojoTsClass(type(A.class))));
         final PackageJson packageJsonB = new PackageJson("test-module", singletonList(new PojoTsClass(type(B.class))));
 
@@ -79,7 +79,7 @@ public class PackageJsonTest {
     }
 
     @Test
-    public void twoDependencies() {
+    public void testTwoDependencies() {
         final PackageJson packageJsonC = new PackageJson("test-module", singletonList(new PojoTsClass(type(C.class))));
 
         assertEquals(lines("{",

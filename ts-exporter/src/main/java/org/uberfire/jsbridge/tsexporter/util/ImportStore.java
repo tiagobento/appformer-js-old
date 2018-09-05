@@ -51,15 +51,16 @@ public class ImportStore {
                 .collect(toList());
     }
 
-    public String getImportStatements(final TsClass pojoTsClass) {
-        return getImports(pojoTsClass).stream()
-                .map(declaredType -> toTypeScriptImportSource(declaredType, pojoTsClass.getType()))
+    public String getImportStatements(final TsClass tsClass) {
+        return getImports(tsClass).stream()
+                .map(declaredType -> toTypeScriptImportSource(declaredType, tsClass.getType()))
+                .sorted()
                 .collect(joining("\n"));
     }
 
-    public List<DeclaredType> getImports(final TsClass pojoTsClass) {
+    public List<DeclaredType> getImports(final TsClass tsClass) {
         return getImports().stream()
-                .filter(s -> !pojoTsClass.getElement().getQualifiedName().equals(((TypeElement) s.asElement()).getQualifiedName()))
+                .filter(s -> !tsClass.getElement().getQualifiedName().equals(((TypeElement) s.asElement()).getQualifiedName()))
                 .collect(toList());
     }
 

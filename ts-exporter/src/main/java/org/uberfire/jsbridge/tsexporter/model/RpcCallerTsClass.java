@@ -29,12 +29,12 @@ import org.uberfire.jsbridge.tsexporter.meta.hierarchy.DependencyGraph;
 import org.uberfire.jsbridge.tsexporter.util.ImportStore;
 import org.uberfire.jsbridge.tsexporter.util.Lazy;
 
-import static java.lang.String.format;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.ElementKind.METHOD;
 import static org.uberfire.jsbridge.tsexporter.Main.elements;
+import static org.uberfire.jsbridge.tsexporter.Utils.formatRightToLeft;
 import static org.uberfire.jsbridge.tsexporter.Utils.lines;
 
 public class RpcCallerTsClass implements TsClass {
@@ -46,25 +46,23 @@ public class RpcCallerTsClass implements TsClass {
 
     private static final List<String> RESERVED_WORDS = Arrays.asList("delete", "copy");
 
-    public RpcCallerTsClass(final TypeElement typeElement, DependencyGraph dependencyGraph) {
+    public RpcCallerTsClass(final TypeElement typeElement, final DependencyGraph dependencyGraph) {
         this.typeElement = typeElement;
         this.dependencyGraph = dependencyGraph;
         this.importStore = new ImportStore();
         this.source = new Lazy<>(() -> {
-            final String methods = methods();
-            final String simpleName = simpleName();
-            final String imports = imports(); //Has to be the last
 
-            return format(lines("import {rpc, marshall, unmarshall} from 'appformer/API';",
-                                "%s",
-                                "",
-                                "export default class %s {",
-                                "%s",
-                                "}"),
+            return formatRightToLeft(lines("",
+                                           "import {rpc, marshall, unmarshall} from 'appformer/API';",
+                                           "s%",
+                                           "",
+                                           "export default class s% {",
+                                           "s%",
+                                           "}"),
 
-                          imports,
-                          simpleName,
-                          methods
+                                     this::imports,
+                                     this::simpleName,
+                                     this::methods
             );
         });
     }

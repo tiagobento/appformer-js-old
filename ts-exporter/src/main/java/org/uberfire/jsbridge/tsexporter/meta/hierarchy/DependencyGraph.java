@@ -53,7 +53,6 @@ public class DependencyGraph {
             return existingVertex;
         }
 
-        System.out.println("Adding " + typeElement.asType());
         graph.put(typeElement, new Vertex(typeElement));
         return graph.computeIfPresent(typeElement, (t, vertex) -> vertex.init());
     }

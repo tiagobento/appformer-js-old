@@ -16,26 +16,20 @@
 
 package org.uberfire.jsbridge.tsexporter.util;
 
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.function.Supplier;
 
 public class Lazy<T> {
 
     private final Supplier<T> factory;
-    private long timeTook;
-    private T ref;
+    private final ConcurrentMap<Class<?>, T> map = new ConcurrentHashMap<>(1);
 
     public Lazy(final Supplier<T> factory) {
         this.factory = factory;
     }
 
-    public synchronized T get() {
-        if (ref == null) {
-            final long start = System.currentTimeMillis();
-            ref = factory.get();
-            timeTook = System.currentTimeMillis() - start;
-        }
-
-//        System.out.println("Lazy just saved " + timeTook + "ms!");
-        return ref;
+    public T get() {
+        return map.computeIfAbsent(Lazy.class, k -> this.factory.get());
     }
 }
