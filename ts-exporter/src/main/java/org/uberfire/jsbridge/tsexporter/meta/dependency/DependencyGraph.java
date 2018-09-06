@@ -61,7 +61,7 @@ public class DependencyGraph {
         }
 
         graph.put(typeElement, new Vertex(typeElement));
-        return graph.computeIfPresent(typeElement, (t, vertex) -> vertex.init());
+        return graph.computeIfPresent(typeElement, (k, vertex) -> vertex.init());
     }
 
     private boolean canBePartOfTheGraph(final Element element) {
@@ -133,14 +133,14 @@ public class DependencyGraph {
         }
     }
 
-    public Vertex vertex(final Element e) {
+    Vertex vertex(final Element e) {
         if (!canBePartOfTheGraph(e)) {
             return null;
         }
         return graph.get(((TypeElement) e));
     }
 
-    public Set<Vertex> vertices() {
+    Set<Vertex> vertices() {
         return new HashSet<>(graph.values());
     }
 

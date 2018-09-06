@@ -28,6 +28,7 @@ import javax.lang.model.type.TypeVariable;
 import javax.lang.model.type.WildcardType;
 
 import org.uberfire.jsbridge.tsexporter.Main;
+import org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
@@ -52,7 +53,6 @@ import static org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency.BuiltI
 import static org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency.BuiltIn.JAVA_LONG;
 import static org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency.BuiltIn.JAVA_NUMBER;
 import static org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency.BuiltIn.JAVA_SHORT;
-import static org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency.Java;
 
 public class JavaType {
 
@@ -164,13 +164,13 @@ public class JavaType {
                     case "java.math.BigDecimal":
                         return new TranslatableJavaType(d -> JAVA_BIG_DECIMAL.getUniqueName(), singletonList(JAVA_BIG_DECIMAL), emptyList());
                     case "java.util.OptionalInt":
-                        return simpleTranslatable("number");
+                        return simpleTranslatable("number"); //FIXME: ???
                     case "java.lang.Object":
                         return simpleTranslatable("any /* object */");
                     case "java.util.Date":
                         return simpleTranslatable("any /* date */"); //FIXME: Opinionate?
                     case "java.lang.StackTraceElement":
-                        return simpleTranslatable("any /* stack trace element */");
+                        return simpleTranslatable("any /* stack trace element */"); //FIXME: ???
                     case "java.lang.Throwable":
                         return simpleTranslatable("any /* throwable */"); //FIXME: ???
                     case "javax.enterprise.event.Event":
@@ -185,24 +185,27 @@ public class JavaType {
                     case "java.lang.Class":
                         return simpleTranslatable("any /* class */");
                     case "java.util.Map.Entry":
-                        return simpleTranslatable("any /* map entry */");
+                        return simpleTranslatable("any /* map entry */"); //TODO: [key: %s, value: %s] ???
                     case "java.util.HashMap.Node":
-                        return simpleTranslatable("any /* map node */");
+                        return simpleTranslatable("any /* map node */"); //TODO: ???
                     case "java.util.Optional":
                         return typeArguments.get(0).translate(tsTypeTarget);
+                    case "java.util.TreeMap": //TODO: JavaTreeMap
                     case "java.util.HashMap":
-                    case "java.util.TreeMap":
                     case "java.util.Map":
                         return new TranslatableJavaType(t -> format("Map<%s, %s>", t[0].toTypeScript(), t[1].toTypeScript()),
                                                         emptyList(),
                                                         asList(typeArguments.get(0).translate(tsTypeTarget),
                                                                typeArguments.get(1).translate(tsTypeTarget)));
+                    case "java.util.TreeSet": //TODO: JavaTreeSet
                     case "java.util.Set":
                     case "java.util.HashSet":
-                    case "java.util.TreeSet":
+                        return new TranslatableJavaType(d -> format("Set<%s>", d[0].toTypeScript()),
+                                                        emptyList(),
+                                                        singletonList(typeArguments.get(0).translate(tsTypeTarget)));
+                    case "java.util.LinkedList": //TODO: JavaLinkedList
                     case "java.util.List":
                     case "java.util.ArrayList":
-                    case "java.util.LinkedList":
                     case "java.util.Collection":
                         return new TranslatableJavaType(d -> format("%s[]", d[0].toTypeScript()),
                                                         emptyList(),
@@ -221,7 +224,7 @@ public class JavaType {
                                 : "";
 
                         return new TranslatableJavaType(d -> format("%s%s", name, tsTypeTarget.equals(TYPE_ARGUMENT_IMPORT) ? "" : typeArgumentsPart),
-                                                        singletonList(new Java(declaredType)),
+                                                        singletonList(new Dependency.Java(declaredType)),
                                                         translatedTypeArguments);
                     }
                 }
