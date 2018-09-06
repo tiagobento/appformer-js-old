@@ -140,7 +140,7 @@ public class DependencyGraph {
         return graph.get(((TypeElement) e));
     }
 
-    Set<Vertex> vertices() {
+    public Set<Vertex> vertices() {
         return new HashSet<>(graph.values());
     }
 

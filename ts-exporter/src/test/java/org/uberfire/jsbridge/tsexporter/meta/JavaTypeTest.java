@@ -146,9 +146,9 @@ public class JavaTypeTest {
         assertEquals("Map<any, any>", translate(erased(type(HashMap.class))));
         assertEquals("Map<any, any>", translate(erased(type(TreeMap.class))));
         assertEquals("Map<any, any>", translate(erased(type(Map.class))));
-        assertEquals("any[]", translate(erased(type(Set.class))));
-        assertEquals("any[]", translate(erased(type(HashSet.class))));
-        assertEquals("any[]", translate(erased(type(TreeSet.class))));
+        assertEquals("Set<any>", translate(erased(type(Set.class))));
+        assertEquals("Set<any>", translate(erased(type(HashSet.class))));
+        assertEquals("Set<any>", translate(erased(type(TreeSet.class))));
         assertEquals("any[]", translate(erased(type(List.class))));
         assertEquals("any[]", translate(erased(type(ArrayList.class))));
         assertEquals("any[]", translate(erased(type(LinkedList.class))));
@@ -162,9 +162,9 @@ public class JavaTypeTest {
         assertEquals("Circle", translate(TYPE_ARGUMENT_IMPORT, erased(type(Circle.class))));
         assertEquals("any", translate(erased(type(Optional.class))));
 
-        assertEquals("string[]", translate(member("set", type(DeclaredTypes.class))));
-        assertEquals("string[]", translate(member("hashSet", type(DeclaredTypes.class))));
-        assertEquals("string[]", translate(member("treeSet", type(DeclaredTypes.class))));
+        assertEquals("Set<string>", translate(member("set", type(DeclaredTypes.class))));
+        assertEquals("Set<string>", translate(member("hashSet", type(DeclaredTypes.class))));
+        assertEquals("Set<string>", translate(member("treeSet", type(DeclaredTypes.class))));
         assertEquals("string[]", translate(member("list", type(DeclaredTypes.class))));
         assertEquals("string[]", translate(member("arrayList", type(DeclaredTypes.class))));
         assertEquals("string[]", translate(member("linkedList", type(DeclaredTypes.class))));
