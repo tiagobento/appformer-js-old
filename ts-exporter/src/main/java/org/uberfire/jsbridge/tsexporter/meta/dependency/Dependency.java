@@ -34,7 +34,7 @@ public interface Dependency {
     String getModuleName();
 
     default String sourcePath() {
-        return "output/" + getModuleName() + "/" + relativePath();
+        return (this instanceof Java ? "output/" : "") + getModuleName() + "/" + relativePath();
     }
 
     boolean represents(final DeclaredType type);

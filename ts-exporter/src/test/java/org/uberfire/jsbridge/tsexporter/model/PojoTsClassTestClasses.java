@@ -37,7 +37,7 @@ public class PojoTsClassTestClasses {
         final PojoTsClass pojoTsClass = new PojoTsClass(type(B.class));
         assertEquals(lines("",
                            "import { Portable } from 'generated__temporary__/Model';",
-                           "import JavaInteger from 'output/appformer/java-wrappers/JavaInteger';",
+                           "import JavaInteger from 'appformer/java-wrappers/JavaInteger';",
                            "import org_uberfire_jsbridge_tsexporter_model_PojoTsClassTestClasses_A from 'output/ts-exporter-test/org/uberfire/jsbridge/tsexporter/model/PojoTsClassTestClasses/A';",
                            "",
                            "export default  class B extends org_uberfire_jsbridge_tsexporter_model_PojoTsClassTestClasses_A implements Portable<B> {",
