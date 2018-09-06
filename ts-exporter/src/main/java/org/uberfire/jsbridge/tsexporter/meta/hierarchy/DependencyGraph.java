@@ -16,7 +16,6 @@
 
 package org.uberfire.jsbridge.tsexporter.meta.hierarchy;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -75,7 +74,6 @@ public class DependencyGraph {
 
         final Set<Vertex> startingPoints = elements == null ? emptySet() : elements.stream()
                 .filter(this::canBePartOfTheGraph)
-                .map(element -> (TypeElement) element)
                 .map(graph::get)
                 .filter(Objects::nonNull)
                 .collect(toSet());
@@ -83,10 +81,10 @@ public class DependencyGraph {
         final Set<Vertex> toBeVisited = diff(startingPoints, visited);
         visited.addAll(toBeVisited);
 
-        return concat(startingPoints.stream(), toBeVisited.stream()
-                .map(vertex -> connections.apply(vertex).stream().map(Vertex::getElement).collect(toSet()))
-                .map(e -> findAllConnections(e, connections, visited))
-                .flatMap(Collection::stream))
+        return concat(startingPoints.stream(),
+                      toBeVisited.stream()
+                              .map(vertex -> connections.apply(vertex).stream().map(Vertex::getElement).collect(toSet()))
+                              .flatMap(e -> findAllConnections(e, connections, visited).stream()))
                 .collect(toSet());
     }
 

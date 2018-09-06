@@ -51,16 +51,16 @@ public class DependencyGraphTest {
 
     @Test
     public void testInvalidElements() {
-        final DependencyGraph dependencyGraph = new DependencyGraph();
-        assertEquals(null, dependencyGraph.add(null));
-        assertEquals(0, dependencyGraph.vertices().size());
-        assertEquals(null, dependencyGraph.add(memberElement("field", type(X.class))));
-        assertEquals(0, dependencyGraph.vertices().size());
+        final DependencyGraph graph = new DependencyGraph();
+        assertEquals(null, graph.add(null));
+        assertEquals(0, graph.vertices().size());
+        assertEquals(null, graph.add(memberElement("field", type(X.class))));
+        assertEquals(0, graph.vertices().size());
 
-        assertEquals(list(), ordered(dependencyGraph.findAllDependencies(null)));
-        assertEquals(list(), ordered(dependencyGraph.findAllDependents(null)));
-        assertEquals(list(), ordered(dependencyGraph.findAllDependencies(singleton(memberElement("field", type(X.class))))));
-        assertEquals(list(), ordered(dependencyGraph.findAllDependents(singleton(memberElement("field", type(X.class))))));
+        assertEquals(list(), ordered(graph.findAllDependencies(null)));
+        assertEquals(list(), ordered(graph.findAllDependents(null)));
+        assertEquals(list(), ordered(graph.findAllDependencies(singleton(memberElement("field", type(X.class))))));
+        assertEquals(list(), ordered(graph.findAllDependents(singleton(memberElement("field", type(X.class))))));
     }
 
     interface A0 {
