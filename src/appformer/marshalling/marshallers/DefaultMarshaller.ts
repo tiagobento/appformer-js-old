@@ -19,6 +19,8 @@ export default class DefaultMarshaller<T extends Portable<T>> implements Marshal
       // we need to wrap it before marshalling
       if (JavaWrapper.needsWrapping(input)) {
         return DefaultMarshaller.marshallWrappableType(input, ctx);
+      } else {
+        throw new Error(`Don't know how to marshall ${input}. Portable types must contain a '_fqcn' property!`);
       }
     }
 
@@ -47,17 +49,13 @@ export default class DefaultMarshaller<T extends Portable<T>> implements Marshal
     Object.keys(_this).forEach(k => {
       if (typeof _this[k] === "function") {
         delete _this[k];
-      } else if (!_this[k]) {
+      } else if (_this[k] === undefined || _this[k] === null) {
         _this[k] = null;
-      } else if (_this[k] && _this[k]._fqcn) {
+      } else if (_this[k]._fqcn) {
         const marshaller = MarshallerProvider.getFor(_this[k]);
         _this[k] = marshaller.marshall(_this[k], ctx);
       } else {
-        if (JavaWrapper.needsWrapping(_this[k])) {
-          return DefaultMarshaller.marshallWrappableType(_this[k], ctx);
-        }
-
-        // nothing to do, will marshall field as is
+        _this[k] = this.marshall(_this[k], ctx);
       }
     });
 
