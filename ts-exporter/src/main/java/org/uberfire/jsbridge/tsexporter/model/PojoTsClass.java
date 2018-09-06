@@ -57,9 +57,9 @@ public class PojoTsClass implements TsClass {
         this.declaredType = declaredType;
         this.importStore = new ImportStore();
         this.source = new Lazy<>(() -> {
-            if (getElement().getKind().equals(INTERFACE)) {
+            if (asElement().getKind().equals(INTERFACE)) {
                 return toInterface();
-            } else if (getElement().getKind().equals(ENUM)) {
+            } else if (asElement().getKind().equals(ENUM)) {
                 return toEnum();
             } else {
                 return toClass();
@@ -70,9 +70,9 @@ public class PojoTsClass implements TsClass {
     //FIXME: Enum extending interfaces?
     private String toEnum() {
         return formatRightToLeft(lines("",
-                                       "enum s% { s% }",
+                                       "enum %s { %s }",
                                        "",
-                                       "export default s%;"),
+                                       "export default %s;"),
 
                                  () -> extractSimpleName(TYPE_ARGUMENT_DECLARATION),
                                  this::enumFields,
@@ -81,9 +81,9 @@ public class PojoTsClass implements TsClass {
 
     private String toInterface() {
         return formatRightToLeft(lines("",
-                                       "s%",
+                                       "%s",
                                        "",
-                                       "export default interface s% s% {",
+                                       "export default interface %s %s {",
                                        "}"),
 
                                  this::imports,
@@ -94,16 +94,16 @@ public class PojoTsClass implements TsClass {
     private String toClass() {
         return formatRightToLeft(lines("",
                                        "import { Portable } from 'generated__temporary__/Model';",
-                                       "s%",
+                                       "%s",
                                        "",
-                                       "export default s% class s% s% {",
+                                       "export default %s class %s %s {",
                                        "",
-                                       "  protected readonly _fqcn: string = 's%';",
+                                       "  protected readonly _fqcn: string = '%s';",
                                        "",
-                                       "s%",
+                                       "%s",
                                        "",
-                                       "  constructor(self: { s% }) {",
-                                       "    s%",
+                                       "  constructor(self: { %s }) {",
+                                       "    %s",
                                        "    Object.assign(this, self);",
                                        "  }",
                                        "}"),
@@ -114,7 +114,7 @@ public class PojoTsClass implements TsClass {
                                  this::classHierarchy,
                                  this::fqcn,
                                  this::fields,
-                                 () -> extractConstructorArgs(getElement()),
+                                 () -> extractConstructorArgs(asElement()),
                                  this::superConstructorCall
         );
     }
@@ -124,22 +124,22 @@ public class PojoTsClass implements TsClass {
     }
 
     private String extractSimpleName(final TsTypeTarget tsTypeTarget) {
-        return importStore.with(new JavaType(getElement().asType(), getElement().asType()).translate(tsTypeTarget)).toTypeScript();
+        return importStore.with(new JavaType(asElement().asType(), asElement().asType()).translate(tsTypeTarget)).toTypeScript();
     }
 
     private String fqcn() {
-        return getElement().getQualifiedName().toString();
+        return asElement().getQualifiedName().toString();
     }
 
     private String enumFields() {
-        return getElement().getEnclosedElements().stream()
+        return asElement().getEnclosedElements().stream()
                 .filter(s -> s.getKind().equals(ENUM_CONSTANT))
                 .map(Element::getSimpleName)
                 .collect(joining(", "));
     }
 
     private String fields() {
-        return getElement().getEnclosedElements().stream()
+        return asElement().getEnclosedElements().stream()
                 .filter(s -> s.getKind().isField())
                 .filter(s -> !s.getModifiers().contains(STATIC))
                 .filter(s -> !s.asType().toString().contains("java.util.function"))
@@ -148,7 +148,7 @@ public class PojoTsClass implements TsClass {
     }
 
     private TranslatableJavaType superclass() {
-        return new JavaType(getElement().getSuperclass(), declaredType).translate(TYPE_ARGUMENT_USE);
+        return new JavaType(asElement().getSuperclass(), declaredType).translate(TYPE_ARGUMENT_USE);
     }
 
     private String superConstructorCall() {
@@ -172,7 +172,7 @@ public class PojoTsClass implements TsClass {
     }
 
     private String abstractOrNot() {
-        return getElement().getModifiers().contains(ABSTRACT) ? "abstract" : "";
+        return asElement().getModifiers().contains(ABSTRACT) ? "abstract" : "";
     }
 
     private String interfaceHierarchy() {

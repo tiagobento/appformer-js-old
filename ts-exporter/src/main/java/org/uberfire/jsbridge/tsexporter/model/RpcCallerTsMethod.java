@@ -147,7 +147,7 @@ public class RpcCallerTsMethod {
                 .filter(dependent -> dependent.getType().asElement().getKind().equals(CLASS) && !dependent.getType().asElement().getModifiers().contains(ABSTRACT))
                 .distinct()
                 .map(c -> format("\"%s\": (x: any) => new %s(x)",
-                                 c.getElement().getQualifiedName().toString(),
+                                 c.asElement().getQualifiedName().toString(),
                                  importing(new JavaType(Main.types.erasure(c.getType()), typeElement.asType()), TYPE_ARGUMENT_USE).toTypeScript()))
                 .collect(joining(",\n"));
     }

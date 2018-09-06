@@ -60,7 +60,7 @@ public class ImportStore {
 
     public List<DeclaredType> getImports(final TsClass tsClass) {
         return getImports().stream()
-                .filter(s -> !tsClass.getElement().getQualifiedName().equals(((TypeElement) s.asElement()).getQualifiedName()))
+                .filter(s -> !tsClass.asElement().getQualifiedName().equals(((TypeElement) s.asElement()).getQualifiedName()))
                 .collect(toList());
     }
 

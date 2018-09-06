@@ -18,6 +18,7 @@ package org.uberfire.jsbridge.tsexporter.meta;
 
 import java.util.List;
 
+import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
@@ -64,6 +65,10 @@ public class JavaType {
 
     public TypeMirror getOwner() {
         return owner;
+    }
+
+    public Element asElement() {
+        return Main.types.asElement(type);
     }
 
     public enum TsTypeTarget {

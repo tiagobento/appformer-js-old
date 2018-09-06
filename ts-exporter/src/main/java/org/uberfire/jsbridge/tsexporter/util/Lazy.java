@@ -22,14 +22,14 @@ import java.util.function.Supplier;
 
 public class Lazy<T> {
 
-    private final Supplier<T> factory;
+    private final Supplier<T> delegate;
     private final ConcurrentMap<Class<?>, T> map = new ConcurrentHashMap<>(1);
 
-    public Lazy(final Supplier<T> factory) {
-        this.factory = factory;
+    public Lazy(final Supplier<T> delegate) {
+        this.delegate = delegate;
     }
 
     public T get() {
-        return map.computeIfAbsent(Lazy.class, k -> this.factory.get());
+        return map.computeIfAbsent(Lazy.class, k -> delegate.get());
     }
 }

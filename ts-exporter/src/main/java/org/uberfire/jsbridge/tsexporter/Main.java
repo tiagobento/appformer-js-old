@@ -3,7 +3,6 @@ package org.uberfire.jsbridge.tsexporter;
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -49,6 +48,7 @@ import static org.uberfire.jsbridge.tsexporter.Main.PORTABLE;
 import static org.uberfire.jsbridge.tsexporter.Main.REMOTE;
 import static org.uberfire.jsbridge.tsexporter.Utils.createFileIfNotExists;
 import static org.uberfire.jsbridge.tsexporter.Utils.distinctBy;
+import static org.uberfire.jsbridge.tsexporter.Utils.getResources;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @SupportedAnnotationTypes({REMOTE, PORTABLE, ENTRY_POINT})
@@ -144,37 +144,31 @@ public class Main extends AbstractProcessor {
     }
 
     private List<TypeElement> getTsFilesFrom(final String exportFileName) {
-        return readAllExportFiles(exportFileName).stream().map(elements::getTypeElement).collect(toList());
+        return readAllExportFiles(exportFileName).stream()
+                .map(elements::getTypeElement)
+                .collect(toList());
     }
 
     private List<String> readAllExportFiles(final String fileName) {
-        try {
-            return Collections.list(getClass().getClassLoader().getResources(TS_EXPORTER_PACKAGE + "/" + fileName)).stream()
-                    .flatMap((URL url) -> {
-                        try {
-                            final Scanner scanner = new Scanner(url.openStream()).useDelimiter("\\A");
-                            return scanner.hasNext() ? stream(scanner.next().split("\n")) : empty();
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }).collect(toList());
-        } catch (final IOException e) {
-            throw new RuntimeException(e);
-        }
+        return Collections.list(getResources(TS_EXPORTER_PACKAGE + "/" + fileName)).stream()
+                .flatMap(url -> {
+                    try {
+                        final Scanner scanner = new Scanner(url.openStream()).useDelimiter("\\A");
+                        return scanner.hasNext() ? stream(scanner.next().split("\n")) : empty();
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }).collect(toList());
     }
 
     private List<TypeElement> getClassesFromErraiAppPropertiesFiles() {
-        try {
-            return Collections.list(getClass().getClassLoader().getResources("META-INF/ErraiApp.properties")).stream()
-                    .map(Utils::loadPropertiesFile)
-                    .map(properties -> Optional.ofNullable(properties.getProperty("errai.marshalling.serializableTypes")))
-                    .filter(Optional::isPresent).map(Optional::get)
-                    .flatMap(serializableTypes -> stream(serializableTypes.split(" \n?")))
-                    .map(fqcn -> elements.getTypeElement(fqcn.trim().replace("$", ".")))
-                    .collect(toList());
-        } catch (final IOException e) {
-            throw new RuntimeException("Error reading ErraiApp.properties files.", e);
-        }
+        return Collections.list(getResources("META-INF/ErraiApp.properties")).stream()
+                .map(Utils::loadPropertiesFile)
+                .map(properties -> Optional.ofNullable(properties.getProperty("errai.marshalling.serializableTypes")))
+                .filter(Optional::isPresent).map(Optional::get)
+                .flatMap(serializableTypes -> stream(serializableTypes.split(" \n?")))
+                .map(fqcn -> elements.getTypeElement(fqcn.trim().replace("$", ".")))
+                .collect(toList());
     }
 
     //
@@ -183,10 +177,9 @@ public class Main extends AbstractProcessor {
                                  final String fileName) {
 
         try {
-            System.out.print("Saving export file: " + fileName + "... ");
+            System.out.println("Saving export file: " + fileName + "... ");
             try (final Writer writer = processingEnv.getFiler().createResource(CLASS_OUTPUT, TS_EXPORTER_PACKAGE, fileName).openWriter()) {
                 writer.write(elements.stream().map(element -> ((TypeElement) element).getQualifiedName().toString()).distinct().collect(joining("\n")));
-                System.out.println("saved.");
             }
         } catch (final IOException e) {
             throw new RuntimeException(e);

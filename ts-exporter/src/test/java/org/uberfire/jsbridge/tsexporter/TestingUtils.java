@@ -26,6 +26,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 
+import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
@@ -76,13 +77,14 @@ public class TestingUtils {
     }
 
     public static JavaType member(final String name, final TypeMirror owner) {
-        final TypeMirror member = elements.getAllMembers((TypeElement) types.asElement(owner)).stream()
+        return new JavaType(memberElement(name, owner).asType(), owner);
+    }
+
+    public static Element memberElement(final String name, final TypeMirror owner) {
+        return elements.getAllMembers((TypeElement) types.asElement(owner)).stream()
                 .filter(s -> s.getSimpleName().toString().equals(name))
                 .collect(toList())
-                .get(0)
-                .asType();
-
-        return new JavaType(member, owner);
+                .get(0);
     }
 
     public static JavaType param(final int i, final JavaType owner) {

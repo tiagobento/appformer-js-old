@@ -21,7 +21,7 @@ import java.lang.reflect.Field;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -37,7 +37,6 @@ import com.sun.tools.javac.code.Symbol;
 import static java.lang.String.format;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
 
 public class Utils {
 
@@ -46,33 +45,26 @@ public class Utils {
     }
 
     public static <T> Predicate<T> distinctBy(final Function<? super T, ?> keyExtractor) {
-        Set<Object> seen = ConcurrentHashMap.newKeySet();
+        final Set<Object> seen = ConcurrentHashMap.newKeySet();
         return t -> seen.add(keyExtractor.apply(t));
     }
 
     public static String lines(final String... lines) {
-        return Arrays.stream(lines).collect(joining("\n"));
+        return stream(lines).collect(joining("\n"));
     }
-
 
     @SafeVarargs
-    @SuppressWarnings("unchecked")
     public static String formatRightToLeft(final String lines, final Supplier<String>... args) {
-        Object[] arr = stream(reverse(args)).map(s -> reverse(s.get())).collect(toList()).toArray(new String[]{});
-        return reverse(format(reverse(lines), arr));
+        return format(lines, reverse(stream(reverse(args)).map(Supplier::get).<Object>toArray(String[]::new)));
     }
 
-    private static <T> T[] reverse(final T[] validData) {
-        for (int i = 0; i < validData.length / 2; i++) {
-            T temp = validData[i];
-            validData[i] = validData[validData.length - i - 1];
-            validData[validData.length - i - 1] = temp;
+    private static <T> T[] reverse(final T[] array) {
+        for (int i = 0; i < array.length / 2; i++) {
+            T temp = array[i];
+            array[i] = array[array.length - i - 1];
+            array[array.length - i - 1] = temp;
         }
-        return validData;
-    }
-
-    private static String reverse(final String lines) {
-        return new StringBuilder(lines).reverse().toString();
+        return array;
     }
 
     public static Properties loadPropertiesFile(final URL fileUrl) {
@@ -92,7 +84,7 @@ public class Utils {
             }
             final Class<?> clazz = Class.forName(((Symbol) declaredType.asElement()).flatName().toString());
             return getModuleName(clazz.getResource('/' + clazz.getName().replace('.', '/') + ".class").toString());
-        } catch (ClassNotFoundException e) {
+        } catch (final ClassNotFoundException e) {
             return getModuleName((TypeElement) declaredType.asElement());
         }
     }
@@ -141,6 +133,14 @@ public class Utils {
     }
 
     private static <T> T get(final int a, final T[] array) {
-        return array[array.length + a];
+        return array[a < 0 ? array.length + a : a];
+    }
+
+    static Enumeration<URL> getResources(final String resourceName) {
+        try {
+            return Utils.class.getClassLoader().getResources(resourceName);
+        } catch (final IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

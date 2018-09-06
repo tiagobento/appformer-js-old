@@ -73,11 +73,8 @@ public class DependencyGraph {
                                            final Function<Vertex, Set<Vertex>> connections,
                                            final Set<Vertex> visited) {
 
-        if (elements.stream().noneMatch(this::canBePartOfTheGraph)) {
-            return emptySet();
-        }
-
-        final Set<Vertex> startingPoints = elements.stream()
+        final Set<Vertex> startingPoints = elements == null ? emptySet() : elements.stream()
+                .filter(this::canBePartOfTheGraph)
                 .map(element -> (TypeElement) element)
                 .map(graph::get)
                 .filter(Objects::nonNull)
@@ -121,7 +118,7 @@ public class DependencyGraph {
         }
 
         public TypeElement getElement() {
-            return pojoClass.getElement();
+            return pojoClass.asElement();
         }
 
         @Override

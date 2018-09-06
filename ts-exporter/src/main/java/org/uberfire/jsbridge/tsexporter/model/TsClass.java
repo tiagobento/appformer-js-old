@@ -35,11 +35,11 @@ public interface TsClass {
 
     DeclaredType getType();
 
-    default TypeElement getElement() {
+    default TypeElement asElement() {
         return ((TypeElement) getType().asElement());
     }
 
     default String getFqcn() {
-        return getElement().getQualifiedName().toString();
+        return asElement().getQualifiedName().toString();
     }
 }

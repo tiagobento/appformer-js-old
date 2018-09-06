@@ -50,21 +50,19 @@ public class RpcCallerTsClass implements TsClass {
         this.typeElement = typeElement;
         this.dependencyGraph = dependencyGraph;
         this.importStore = new ImportStore();
-        this.source = new Lazy<>(() -> {
+        this.source = new Lazy<>(() -> formatRightToLeft(
+                lines("",
+                      "import {rpc, marshall, unmarshall} from 'appformer/API';",
+                      "%s",
+                      "",
+                      "export default class %s {",
+                      "%s",
+                      "}"),
 
-            return formatRightToLeft(lines("",
-                                           "import {rpc, marshall, unmarshall} from 'appformer/API';",
-                                           "s%",
-                                           "",
-                                           "export default class s% {",
-                                           "s%",
-                                           "}"),
-
-                                     this::imports,
-                                     this::simpleName,
-                                     this::methods
-            );
-        });
+                this::imports,
+                this::simpleName,
+                this::methods
+        ));
     }
 
     @Override
