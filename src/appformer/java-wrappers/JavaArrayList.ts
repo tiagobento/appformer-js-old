@@ -1,15 +1,15 @@
 import JavaCollection from "appformer/java-wrappers/JavaCollection";
 
-export default class JavaArrayList implements JavaCollection<any[]> {
+export default class JavaArrayList<T> implements JavaCollection<T[]> {
   private readonly _fqcn = "java.util.ArrayList";
 
-  private readonly _value: any[];
+  private readonly _value: T[];
 
-  constructor(value: any[]) {
+  constructor(value: T[]) {
     this._value = value;
   }
 
-  public get(): any[] {
+  public get(): T[] {
     return this._value;
   }
 }

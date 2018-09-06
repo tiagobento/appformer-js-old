@@ -1,15 +1,15 @@
 import JavaCollection from "appformer/java-wrappers/JavaCollection";
 
-export default class JavaHashSet implements JavaCollection<Set<any>> {
+export default class JavaHashSet<T> implements JavaCollection<Set<T>> {
   private readonly _fqcn = "java.util.HashSet";
 
-  private readonly _value: Set<any>;
+  private readonly _value: Set<T>;
 
-  constructor(value: Set<any>) {
+  constructor(value: Set<T>) {
     this._value = value;
   }
 
-  public get(): Set<any> {
+  public get(): Set<T> {
     return this._value;
   }
 }
