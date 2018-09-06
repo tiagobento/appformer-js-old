@@ -1,9 +1,9 @@
 import Marshaller from "appformer/marshalling/Marshaller";
-import JavaCollection from "appformer/java-wrapper/JavaCollection";
+import JavaCollection from "appformer/java-wrappers/JavaCollection";
 import ErraiObject from "appformer/marshalling/model/ErraiObject";
 import MarshallingContext from "appformer/marshalling/MarshallingContext";
 import ErraiObjectConstants from "appformer/marshalling/model/ErraiObjectConstants";
-import JavaNumber from "appformer/java-wrapper/JavaNumber";
+import JavaNumber from "appformer/java-wrappers/JavaNumber";
 import Portable from "appformer/internal/model/Portable";
 import MarshallerProvider from "appformer/marshalling/MarshallerProvider";
 

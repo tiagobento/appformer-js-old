@@ -1,5 +1,5 @@
 import BigNumber from "bignumber.js";
-import JavaBigNumber from "appformer/java-wrapper/JavaBigNumber";
+import JavaBigNumber from "appformer/java-wrappers/JavaBigNumber";
 
 export default class JavaBigDecimal extends JavaBigNumber {
   private readonly _fqcn = "java.math.BigDecimal";

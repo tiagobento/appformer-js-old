@@ -1,8 +1,8 @@
-import JavaArrayList from "appformer/java-wrapper/JavaArrayList";
-import JavaHashSet from "appformer/java-wrapper/JavaHashSet";
-import JavaHashMap from "appformer/java-wrapper/JavaHashMap";
-import JavaBoolean from "appformer/java-wrapper/JavaBoolean";
-import JavaString from "appformer/java-wrapper/JavaString";
+import JavaArrayList from "appformer/java-wrappers/JavaArrayList";
+import JavaHashSet from "appformer/java-wrappers/JavaHashSet";
+import JavaHashMap from "appformer/java-wrappers/JavaHashMap";
+import JavaBoolean from "appformer/java-wrappers/JavaBoolean";
+import JavaString from "appformer/java-wrappers/JavaString";
 import Portable from "appformer/internal/model/Portable";
 
 export default abstract class JavaWrapper<T> implements Portable<JavaWrapper<T>> {

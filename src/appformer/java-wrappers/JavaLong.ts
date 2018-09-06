@@ -1,5 +1,5 @@
 import { BigNumber } from "bignumber.js";
-import JavaBigNumber from "appformer/java-wrapper/JavaBigNumber";
+import JavaBigNumber from "appformer/java-wrappers/JavaBigNumber";
 
 export default class JavaLong extends JavaBigNumber {
   public static readonly MIN_VALUE = new BigNumber("-9223372036854775808", 10);

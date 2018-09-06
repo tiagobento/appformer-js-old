@@ -1,13 +1,13 @@
 import ErraiObjectConstants from "appformer/marshalling/model/ErraiObjectConstants";
 import MarshallerProvider from "appformer/marshalling/MarshallerProvider";
-import JavaByte from "appformer/java-wrapper/JavaByte";
-import JavaDouble from "appformer/java-wrapper/JavaDouble";
-import JavaFloat from "appformer/java-wrapper/JavaFloat";
-import JavaInteger from "appformer/java-wrapper/JavaInteger";
-import JavaLong from "appformer/java-wrapper/JavaLong";
-import JavaShort from "appformer/java-wrapper/JavaShort";
-import JavaBigDecimal from "appformer/java-wrapper/JavaBigDecimal";
-import JavaBigInteger from "appformer/java-wrapper/JavaBigInteger";
+import JavaByte from "appformer/java-wrappers/JavaByte";
+import JavaDouble from "appformer/java-wrappers/JavaDouble";
+import JavaFloat from "appformer/java-wrappers/JavaFloat";
+import JavaInteger from "appformer/java-wrappers/JavaInteger";
+import JavaLong from "appformer/java-wrappers/JavaLong";
+import JavaShort from "appformer/java-wrappers/JavaShort";
+import JavaBigDecimal from "appformer/java-wrappers/JavaBigDecimal";
+import JavaBigInteger from "appformer/java-wrappers/JavaBigInteger";
 import Portable from "appformer/internal/model/Portable";
 import { marshall } from "appformer/marshalling";
 

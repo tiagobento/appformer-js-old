@@ -1,5 +1,5 @@
 import Marshaller from "appformer/marshalling/Marshaller";
-import JavaLong from "appformer/java-wrapper/JavaLong";
+import JavaLong from "appformer/java-wrappers/JavaLong";
 import ErraiObject from "appformer/marshalling/model/ErraiObject";
 import MarshallingContext from "appformer/marshalling/MarshallingContext";
 import ErraiObjectConstants from "appformer/marshalling/model/ErraiObjectConstants";

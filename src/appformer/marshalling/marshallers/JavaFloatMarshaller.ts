@@ -1,5 +1,5 @@
 import Marshaller from "../Marshaller";
-import JavaFloat from "../../java-wrapper/JavaFloat";
+import JavaFloat from "../../java-wrappers/JavaFloat";
 import MarshallingContext from "../MarshallingContext";
 
 export default class JavaFloatMarshaller implements Marshaller<JavaFloat, number> {

@@ -1,4 +1,4 @@
-import JavaLong from "appformer/java-wrapper/JavaLong";
+import JavaLong from "appformer/java-wrappers/JavaLong";
 import BigNumber from "bignumber.js";
 
 describe("get", () => {

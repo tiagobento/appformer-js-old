@@ -1,4 +1,4 @@
-import IntegerBasedJavaNumber from "appformer/java-wrapper/IntegerBasedJavaNumber";
+import IntegerBasedJavaNumber from "appformer/java-wrappers/IntegerBasedJavaNumber";
 
 export default class JavaShort extends IntegerBasedJavaNumber {
 

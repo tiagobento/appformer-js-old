@@ -1,4 +1,4 @@
-import JavaFloat from "appformer/java-wrapper/JavaFloat";
+import JavaFloat from "appformer/java-wrappers/JavaFloat";
 
 describe("get", () => {
   describe("with valid input", () => {

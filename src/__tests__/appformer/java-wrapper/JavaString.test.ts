@@ -1,4 +1,4 @@
-import JavaString from "appformer/java-wrapper/JavaString";
+import JavaString from "appformer/java-wrappers/JavaString";
 
 describe("get", () => {
   describe("with valid input", () => {

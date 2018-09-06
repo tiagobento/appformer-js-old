@@ -1,4 +1,4 @@
-import JavaDouble from "appformer/java-wrapper/JavaDouble";
+import JavaDouble from "appformer/java-wrappers/JavaDouble";
 
 describe("get", () => {
   describe("with valid input", () => {

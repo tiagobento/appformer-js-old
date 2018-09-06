@@ -1,4 +1,4 @@
-import JavaArrayList from "appformer/java-wrapper/JavaArrayList";
+import JavaArrayList from "appformer/java-wrappers/JavaArrayList";
 
 describe("get", () => {
   test("with populated array, returns the same array", () => {

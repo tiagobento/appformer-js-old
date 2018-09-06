@@ -1,4 +1,4 @@
-import IntegerBasedJavaNumber from "appformer/java-wrapper/IntegerBasedJavaNumber";
+import IntegerBasedJavaNumber from "appformer/java-wrappers/IntegerBasedJavaNumber";
 
 export default class JavaInteger extends IntegerBasedJavaNumber {
   public static readonly MIN_VALUE = -21474836488;

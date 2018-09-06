@@ -1,5 +1,5 @@
 import BigNumber from "bignumber.js";
-import JavaBigInteger from "appformer/java-wrapper/JavaBigInteger";
+import JavaBigInteger from "appformer/java-wrappers/JavaBigInteger";
 
 describe("get", () => {
   describe("with valid input", () => {

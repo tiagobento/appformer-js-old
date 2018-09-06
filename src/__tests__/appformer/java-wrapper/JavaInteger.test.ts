@@ -1,4 +1,4 @@
-import JavaInteger from "appformer/java-wrapper/JavaInteger";
+import JavaInteger from "appformer/java-wrappers/JavaInteger";
 
 describe("get", () => {
   describe("with valid input", () => {

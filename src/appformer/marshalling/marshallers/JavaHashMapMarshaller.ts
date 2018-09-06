@@ -1,5 +1,5 @@
 import Marshaller from "../Marshaller";
-import JavaHashMap from "../../java-wrapper/JavaHashMap";
+import JavaHashMap from "../../java-wrappers/JavaHashMap";
 import MarshallingContext from "../MarshallingContext";
 import ErraiObject from "../model/ErraiObject";
 

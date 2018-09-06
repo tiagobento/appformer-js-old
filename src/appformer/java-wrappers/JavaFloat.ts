@@ -1,4 +1,4 @@
-import FloatBasedJavaNumber from "appformer/java-wrapper/FloatBasedJavaNumber";
+import FloatBasedJavaNumber from "appformer/java-wrappers/FloatBasedJavaNumber";
 
 export default class JavaFloat extends FloatBasedJavaNumber {
   public static readonly MIN_VALUE = -3.40282347e38;

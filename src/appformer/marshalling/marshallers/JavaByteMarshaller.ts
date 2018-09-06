@@ -1,5 +1,5 @@
 import Marshaller from "../Marshaller";
-import JavaByte from "../../java-wrapper/JavaByte";
+import JavaByte from "../../java-wrappers/JavaByte";
 import MarshallingContext from "../MarshallingContext";
 
 export default class JavaByteMarshaller implements Marshaller<JavaByte, number> {

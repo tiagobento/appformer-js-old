@@ -1,4 +1,4 @@
-import JavaWrapper from "appformer/java-wrapper/JavaWrapper";
+import JavaWrapper from "appformer/java-wrappers/JavaWrapper";
 
 export default class JavaString implements JavaWrapper<string> {
   private readonly _fqcn = "java.lang.String";

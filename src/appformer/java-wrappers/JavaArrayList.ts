@@ -1,4 +1,4 @@
-import JavaCollection from "appformer/java-wrapper/JavaCollection";
+import JavaCollection from "appformer/java-wrappers/JavaCollection";
 
 export default class JavaArrayList implements JavaCollection<any[]> {
   private readonly _fqcn = "java.util.ArrayList";

@@ -1,4 +1,4 @@
-import JavaHashMap from "appformer/java-wrapper/JavaHashMap";
+import JavaHashMap from "appformer/java-wrappers/JavaHashMap";
 
 describe("get", () => {
   test("with populated map, returns the same map", () => {

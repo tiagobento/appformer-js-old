@@ -1,4 +1,4 @@
-import JavaHashSet from "appformer/java-wrapper/JavaHashSet";
+import JavaHashSet from "appformer/java-wrappers/JavaHashSet";
 
 describe("get", () => {
   test("with populated set, returns the same set", () => {

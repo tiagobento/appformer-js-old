@@ -1,4 +1,4 @@
-import JavaWrapper from "appformer/java-wrapper/JavaWrapper";
+import JavaWrapper from "appformer/java-wrappers/JavaWrapper";
 
 export default abstract class JavaNumber implements JavaWrapper<number> {
   private readonly _value: number;

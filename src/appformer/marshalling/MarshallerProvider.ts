@@ -1,4 +1,4 @@
-import JavaWrapper, { JavaType } from "appformer/java-wrapper/JavaWrapper";
+import JavaWrapper, { JavaType } from "appformer/java-wrappers/JavaWrapper";
 import Marshaller from "appformer/marshalling/Marshaller";
 import JavaHashMapMarshaller from "appformer/marshalling/marshallers/JavaHashMapMarshaller";
 import JavaShortMarshaller from "appformer/marshalling/marshallers/JavaShortMarshaller";

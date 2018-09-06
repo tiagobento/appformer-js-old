@@ -1,9 +1,9 @@
-import JavaWrapper, { JavaType } from "appformer/java-wrapper/JavaWrapper";
-import JavaArrayList from "appformer/java-wrapper/JavaArrayList";
-import JavaHashSet from "appformer/java-wrapper/JavaHashSet";
-import JavaHashMap from "appformer/java-wrapper/JavaHashMap";
-import JavaBoolean from "appformer/java-wrapper/JavaBoolean";
-import JavaString from "appformer/java-wrapper/JavaString";
+import JavaWrapper, { JavaType } from "appformer/java-wrappers/JavaWrapper";
+import JavaArrayList from "appformer/java-wrappers/JavaArrayList";
+import JavaHashSet from "appformer/java-wrappers/JavaHashSet";
+import JavaHashMap from "appformer/java-wrappers/JavaHashMap";
+import JavaBoolean from "appformer/java-wrappers/JavaBoolean";
+import JavaString from "appformer/java-wrappers/JavaString";
 
 describe("needsWrapping", () => {
   test("with array object, should return true", () => {

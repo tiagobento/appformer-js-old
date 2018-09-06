@@ -1,4 +1,4 @@
-import JavaWrapper from "appformer/java-wrapper/JavaWrapper";
+import JavaWrapper from "appformer/java-wrappers/JavaWrapper";
 
 export default class JavaHashMap implements JavaWrapper<Map<any, any>> {
   private readonly _fqcn = "java.util.HashMap";

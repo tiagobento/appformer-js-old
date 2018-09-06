@@ -1,4 +1,4 @@
-import JavaCollection from "appformer/java-wrapper/JavaCollection";
+import JavaCollection from "appformer/java-wrappers/JavaCollection";
 
 export default class JavaHashSet implements JavaCollection<Set<any>> {
   private readonly _fqcn = "java.util.HashSet";

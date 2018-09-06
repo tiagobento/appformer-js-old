@@ -1,5 +1,5 @@
 import Marshaller from "../Marshaller";
-import JavaBigInteger from "../../java-wrapper/JavaBigInteger";
+import JavaBigInteger from "../../java-wrappers/JavaBigInteger";
 import ErraiObject from "../model/ErraiObject";
 import MarshallingContext from "../MarshallingContext";
 import ErraiObjectConstants from "../model/ErraiObjectConstants";

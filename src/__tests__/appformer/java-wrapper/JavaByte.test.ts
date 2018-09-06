@@ -1,4 +1,4 @@
-import JavaByte from "appformer/java-wrapper/JavaByte";
+import JavaByte from "appformer/java-wrappers/JavaByte";
 
 describe("get", () => {
   describe("with valid input", () => {

@@ -1,4 +1,4 @@
-import FloatBasedJavaNumber from "appformer/java-wrapper/FloatBasedJavaNumber";
+import FloatBasedJavaNumber from "appformer/java-wrappers/FloatBasedJavaNumber";
 
 export default class JavaDouble extends FloatBasedJavaNumber {
   private readonly _fqcn = "java.lang.Double";

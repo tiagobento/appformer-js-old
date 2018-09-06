@@ -1,4 +1,4 @@
-import JavaBoolean from "appformer/java-wrapper/JavaBoolean";
+import JavaBoolean from "appformer/java-wrappers/JavaBoolean";
 
 describe("get", () => {
   describe("with valid input", () => {

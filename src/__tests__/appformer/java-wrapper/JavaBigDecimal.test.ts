@@ -1,4 +1,4 @@
-import JavaBigDecimal from "appformer/java-wrapper/JavaBigDecimal";
+import JavaBigDecimal from "appformer/java-wrappers/JavaBigDecimal";
 import BigNumber from "bignumber.js";
 
 describe("get", () => {

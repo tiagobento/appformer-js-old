@@ -1,4 +1,4 @@
-import JavaShort from "appformer/java-wrapper/JavaShort";
+import JavaShort from "appformer/java-wrappers/JavaShort";
 
 describe("get", () => {
   describe("with valid input", () => {

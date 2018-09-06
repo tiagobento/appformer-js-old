@@ -1,5 +1,5 @@
 import Marshaller from "../Marshaller";
-import JavaBigDecimal from "../../java-wrapper/JavaBigDecimal";
+import JavaBigDecimal from "../../java-wrappers/JavaBigDecimal";
 import MarshallingContext from "../MarshallingContext";
 import ErraiObject from "../model/ErraiObject";
 import ErraiObjectConstants from "../model/ErraiObjectConstants";
