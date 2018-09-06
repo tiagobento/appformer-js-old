@@ -19,20 +19,16 @@ package org.uberfire.jsbridge.tsexporter.util;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 
-import org.uberfire.jsbridge.tsexporter.Main;
-import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 import org.uberfire.jsbridge.tsexporter.meta.TranslatableJavaType;
+import org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency;
 import org.uberfire.jsbridge.tsexporter.model.TsClass;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static org.uberfire.jsbridge.tsexporter.Utils.distinctBy;
-import static org.uberfire.jsbridge.tsexporter.Utils.getModuleName;
-import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_IMPORT;
 
 public class ImportStore {
 
@@ -43,11 +39,10 @@ public class ImportStore {
         return type;
     }
 
-    public List<DeclaredType> getImports() {
+    public List<Dependency> getImports() {
         return dependencies.stream()
                 .flatMap(t -> t.getAggregated().stream())
-                .map(s -> (DeclaredType) Main.types.erasure(s))
-                .filter(distinctBy(DeclaredType::toString))
+                .filter(distinctBy(Dependency::sourcePath))
                 .collect(toList());
     }
 
@@ -58,16 +53,13 @@ public class ImportStore {
                 .collect(joining("\n"));
     }
 
-    public List<DeclaredType> getImports(final TsClass tsClass) {
+    public List<Dependency> getImports(final TsClass tsClass) {
         return getImports().stream()
-                .filter(s -> !tsClass.asElement().getQualifiedName().equals(((TypeElement) s.asElement()).getQualifiedName()))
+                .filter(dependency -> !dependency.represents(tsClass.getType()))
                 .collect(toList());
     }
 
-    private String toTypeScriptImportSource(final DeclaredType declaredType, final DeclaredType owner) {
-        final String fqcn = ((TypeElement) declaredType.asElement()).getQualifiedName().toString();
-        return format("import %s from '%s';",
-                      new JavaType(declaredType, owner).translate(TYPE_ARGUMENT_IMPORT).toTypeScript(),
-                      "output/" + getModuleName(declaredType) + "/" + fqcn.replace(".", "/"));
+    private String toTypeScriptImportSource(final Dependency dependency, final DeclaredType owner) {
+        return format("import %s from '%s';", dependency.uniqueName(owner), dependency.sourcePath());
     }
 }

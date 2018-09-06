@@ -24,8 +24,9 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 
+import org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType;
-import org.uberfire.jsbridge.tsexporter.meta.hierarchy.DependencyGraph;
+import org.uberfire.jsbridge.tsexporter.meta.dependency.DependencyGraph;
 import org.uberfire.jsbridge.tsexporter.util.ImportStore;
 import org.uberfire.jsbridge.tsexporter.util.Lazy;
 
@@ -103,7 +104,7 @@ public class RpcCallerTsClass implements TsClass {
     }
 
     @Override
-    public List<DeclaredType> getDependencies() {
+    public List<Dependency> getDependencies() {
         source.get();
         return importStore.getImports(this);
     }

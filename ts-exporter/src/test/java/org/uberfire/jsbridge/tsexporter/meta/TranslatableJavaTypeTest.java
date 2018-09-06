@@ -9,6 +9,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.uberfire.jsbridge.tsexporter.TestingUtils;
+import org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency;
 import org.uberfire.jsbridge.tsexporter.util.ImportStore;
 
 import static org.junit.Assert.assertEquals;
@@ -32,36 +33,36 @@ public class TranslatableJavaTypeTest {
     public void testAggregated() {
         final ImportStore store = new ImportStore();
 
-        final List<DeclaredType> aggregated0 = store.with(
+        final List<Dependency> aggregated0 = store.with(
                 member("field2", type(TestingUtils.Sphere.class)).translate())
                 .getAggregated();
         assertEquals(2, aggregated0.size());
         assertTrue(aggregated0.get(0).toString().endsWith("Circle<T>"));
         assertTrue(aggregated0.get(1).toString().endsWith("Sphere<J>"));
 
-        final List<DeclaredType> aggregated1 = store.with(
+        final List<Dependency> aggregated1 = store.with(
                 translatable(type(TestingUtils.Circle.class)))
                 .getAggregated();
         assertEquals(2, aggregated1.size());
         assertTrue(aggregated1.get(0).toString().endsWith("Circle<T>"));
         assertTrue(aggregated1.get(1).toString().endsWith("Circle<T>"));
 
-        final List<DeclaredType> aggregated2 = store.with(
+        final List<Dependency> aggregated2 = store.with(
                 translatable(type(TestingUtils.Circle.class), TYPE_ARGUMENT_USE))
                 .getAggregated();
         assertEquals(1, aggregated2.size());
         assertTrue(aggregated2.get(0).toString().endsWith("Circle<T>"));
 
-        List<DeclaredType> aggregated3 = store.with(
+        List<Dependency> aggregated3 = store.with(
                 member("get6", type(TestingUtils.Circle.class)).translate())
                 .getAggregated();
         assertEquals(1, aggregated3.size());
         assertTrue(aggregated3.get(0).toString().endsWith("Circle<T>"));
 
-        final List<DeclaredType> imports = store.getImports();
+        final List<Dependency> imports = store.getImports();
         assertEquals(2, imports.size());
-        assertTrue(imports.get(0).toString().endsWith("Circle"));
-        assertTrue(imports.get(1).toString().endsWith("Sphere"));
+        assertTrue(imports.get(0).toString().endsWith("Circle<T>"));
+        assertTrue(imports.get(1).toString().endsWith("Sphere<J>"));
     }
 
     private TranslatableJavaType translatable(final DeclaredType type) {

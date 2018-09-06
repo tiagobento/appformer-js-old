@@ -23,6 +23,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 
+import org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget;
 import org.uberfire.jsbridge.tsexporter.meta.TranslatableJavaType;
@@ -210,7 +211,7 @@ public class PojoTsClass implements TsClass {
     }
 
     @Override
-    public List<DeclaredType> getDependencies() {
+    public List<Dependency> getDependencies() {
         source.get();
         return importStore.getImports(this);
     }

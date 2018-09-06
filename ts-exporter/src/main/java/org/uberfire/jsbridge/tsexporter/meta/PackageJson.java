@@ -18,8 +18,7 @@ package org.uberfire.jsbridge.tsexporter.meta;
 
 import java.util.List;
 
-import org.uberfire.jsbridge.tsexporter.Utils;
-import org.uberfire.jsbridge.tsexporter.model.PojoTsClass;
+import org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency;
 import org.uberfire.jsbridge.tsexporter.model.TsClass;
 
 import static java.lang.String.format;
@@ -43,7 +42,7 @@ public class PackageJson {
 
         final String dependencies = classes.stream()
                 .flatMap(c -> c.getDependencies().stream())
-                .collect(groupingBy(Utils::getModuleName))
+                .collect(groupingBy(Dependency::getModuleName))
                 .keySet().stream()
                 .filter(s -> !s.equals(moduleName))
                 .map(moduleName -> format("\"%s\": \"file:../%s\"", moduleName, moduleName))

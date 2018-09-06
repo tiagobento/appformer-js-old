@@ -28,7 +28,7 @@ import org.uberfire.jsbridge.tsexporter.Main;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget;
 import org.uberfire.jsbridge.tsexporter.meta.TranslatableJavaType;
-import org.uberfire.jsbridge.tsexporter.meta.hierarchy.DependencyGraph;
+import org.uberfire.jsbridge.tsexporter.meta.dependency.DependencyGraph;
 import org.uberfire.jsbridge.tsexporter.util.ImportStore;
 
 import static java.lang.String.format;
@@ -164,7 +164,7 @@ public class RpcCallerTsMethod {
                                            final TsTypeTarget tsTypeTarget) {
 
         final TranslatableJavaType translatable = javaType.translate(tsTypeTarget);
-        translatable.getAggregated().forEach(t -> dependencyGraph.add(t.asElement()));
+        translatable.getAggregated().forEach(dependencyGraph::add);
         return importStore.with(translatable);
     }
 

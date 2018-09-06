@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
-package org.uberfire.jsbridge.tsexporter.meta.hierarchy;
+package org.uberfire.jsbridge.tsexporter.meta.dependency;
 
 import java.util.List;
 import java.util.Set;
+
+import javax.lang.model.element.Element;
 
 import com.google.testing.compile.CompilationRule;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.uberfire.jsbridge.tsexporter.TestingUtils;
+import org.uberfire.jsbridge.tsexporter.meta.dependency.DependencyGraph;
 
 import static java.util.Arrays.stream;
 import static java.util.Collections.singleton;
@@ -52,7 +55,9 @@ public class DependencyGraphTest {
     @Test
     public void testInvalidElements() {
         final DependencyGraph graph = new DependencyGraph();
-        assertEquals(null, graph.add(null));
+        assertEquals(null, graph.add((Dependency) null));
+        assertEquals(0, graph.vertices().size());
+        assertEquals(null, graph.add((Element) null));
         assertEquals(0, graph.vertices().size());
         assertEquals(null, graph.add(memberElement("field", type(X.class))));
         assertEquals(0, graph.vertices().size());

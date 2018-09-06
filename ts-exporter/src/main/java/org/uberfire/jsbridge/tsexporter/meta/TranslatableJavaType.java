@@ -19,19 +19,24 @@ package org.uberfire.jsbridge.tsexporter.meta;
 import java.util.List;
 import java.util.function.Function;
 
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
+
+import org.uberfire.jsbridge.tsexporter.Utils;
+import org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
+import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_IMPORT;
 
 public class TranslatableJavaType {
 
     private final Function<TranslatableJavaType[], String> toTypeScript;
-    private final List<DeclaredType> types;
+    private final List<Dependency> types;
     private final List<TranslatableJavaType> aggregated;
 
     TranslatableJavaType(final Function<TranslatableJavaType[], String> uniqueTsType,
-                         final List<DeclaredType> types,
+                         final List<Dependency> types,
                          final List<TranslatableJavaType> aggregated) {
 
         this.toTypeScript = uniqueTsType;
@@ -43,7 +48,7 @@ public class TranslatableJavaType {
         return toTypeScript.apply(aggregated.toArray(new TranslatableJavaType[]{}));
     }
 
-    public List<DeclaredType> getAggregated() {
+    public List<Dependency> getAggregated() {
         return concat(types.stream(),
                       aggregated.stream().flatMap(t -> t.getAggregated().stream()))
                 .collect(toList());

@@ -22,6 +22,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 
 import org.uberfire.jsbridge.tsexporter.Utils;
+import org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency;
 
 public interface TsClass {
 
@@ -31,7 +32,7 @@ public interface TsClass {
         return Utils.getModuleName(getType());
     }
 
-    List<DeclaredType> getDependencies();
+    List<Dependency> getDependencies();
 
     DeclaredType getType();
 
@@ -39,7 +40,7 @@ public interface TsClass {
         return ((TypeElement) getType().asElement());
     }
 
-    default String getFqcn() {
-        return asElement().getQualifiedName().toString();
+    default String getRelativePath() {
+        return asElement().getQualifiedName().toString().replace(".", "/");
     }
 }

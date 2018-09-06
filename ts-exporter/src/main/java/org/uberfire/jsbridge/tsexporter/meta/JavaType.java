@@ -43,6 +43,16 @@ import static org.uberfire.jsbridge.tsexporter.Main.types;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_DECLARATION;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_IMPORT;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_USE;
+import static org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency.BuiltIn.JAVA_BIG_DECIMAL;
+import static org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency.BuiltIn.JAVA_BIG_INTEGER;
+import static org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency.BuiltIn.JAVA_BYTE;
+import static org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency.BuiltIn.JAVA_DOUBLE;
+import static org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency.BuiltIn.JAVA_FLOAT;
+import static org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency.BuiltIn.JAVA_INTEGER;
+import static org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency.BuiltIn.JAVA_LONG;
+import static org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency.BuiltIn.JAVA_NUMBER;
+import static org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency.BuiltIn.JAVA_SHORT;
+import static org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency.Java;
 
 public class JavaType {
 
@@ -94,12 +104,17 @@ public class JavaType {
 
         switch (type.getKind()) {
             case INT:
+                return new TranslatableJavaType(d -> JAVA_INTEGER.getUniqueName(), singletonList(JAVA_INTEGER), emptyList());
             case BYTE:
+                return new TranslatableJavaType(d -> JAVA_BYTE.getUniqueName(), singletonList(JAVA_BYTE), emptyList());
             case DOUBLE:
+                return new TranslatableJavaType(d -> JAVA_DOUBLE.getUniqueName(), singletonList(JAVA_DOUBLE), emptyList());
             case FLOAT:
+                return new TranslatableJavaType(d -> JAVA_FLOAT.getUniqueName(), singletonList(JAVA_FLOAT), emptyList());
             case SHORT:
+                return new TranslatableJavaType(d -> JAVA_SHORT.getUniqueName(), singletonList(JAVA_SHORT), emptyList());
             case LONG:
-                return simpleTranslatable("number");
+                return new TranslatableJavaType(d -> JAVA_LONG.getUniqueName(), singletonList(JAVA_LONG), emptyList());
             case VOID:
                 return simpleTranslatable("void");
             case NULL:
@@ -131,14 +146,23 @@ public class JavaType {
 
                 switch (declaredType.asElement().toString()) {
                     case "java.lang.Integer":
+                        return new TranslatableJavaType(d -> JAVA_INTEGER.getUniqueName(), singletonList(JAVA_INTEGER), emptyList());
                     case "java.lang.Byte":
+                        return new TranslatableJavaType(d -> JAVA_BYTE.getUniqueName(), singletonList(JAVA_BYTE), emptyList());
                     case "java.lang.Double":
+                        return new TranslatableJavaType(d -> JAVA_DOUBLE.getUniqueName(), singletonList(JAVA_DOUBLE), emptyList());
                     case "java.lang.Float":
+                        return new TranslatableJavaType(d -> JAVA_FLOAT.getUniqueName(), singletonList(JAVA_FLOAT), emptyList());
                     case "java.lang.Long":
+                        return new TranslatableJavaType(d -> JAVA_LONG.getUniqueName(), singletonList(JAVA_LONG), emptyList());
                     case "java.lang.Number":
+                        return new TranslatableJavaType(d -> JAVA_NUMBER.getUniqueName(), singletonList(JAVA_NUMBER), emptyList());
                     case "java.lang.Short":
+                        return new TranslatableJavaType(d -> JAVA_SHORT.getUniqueName(), singletonList(JAVA_SHORT), emptyList());
                     case "java.math.BigInteger":
+                        return new TranslatableJavaType(d -> JAVA_BIG_INTEGER.getUniqueName(), singletonList(JAVA_BIG_INTEGER), emptyList());
                     case "java.math.BigDecimal":
+                        return new TranslatableJavaType(d -> JAVA_BIG_DECIMAL.getUniqueName(), singletonList(JAVA_BIG_DECIMAL), emptyList());
                     case "java.util.OptionalInt":
                         return simpleTranslatable("number");
                     case "java.lang.Object":
@@ -197,7 +221,7 @@ public class JavaType {
                                 : "";
 
                         return new TranslatableJavaType(d -> format("%s%s", name, tsTypeTarget.equals(TYPE_ARGUMENT_IMPORT) ? "" : typeArgumentsPart),
-                                                        singletonList(declaredType),
+                                                        singletonList(new Java(declaredType)),
                                                         translatedTypeArguments);
                     }
                 }

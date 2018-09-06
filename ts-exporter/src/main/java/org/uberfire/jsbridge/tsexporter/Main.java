@@ -26,7 +26,7 @@ import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
 import org.uberfire.jsbridge.tsexporter.meta.PackageJson;
-import org.uberfire.jsbridge.tsexporter.meta.hierarchy.DependencyGraph;
+import org.uberfire.jsbridge.tsexporter.meta.dependency.DependencyGraph;
 import org.uberfire.jsbridge.tsexporter.model.RpcCallerTsClass;
 import org.uberfire.jsbridge.tsexporter.model.TsClass;
 
@@ -189,7 +189,7 @@ public class Main extends AbstractProcessor {
     private void write(final TsClass tsClass) {
 
         System.out.println("Saving file: " + tsClass.getType() + "...");
-        final String targetDir = tsClass.getFqcn().replace(".", "/");
+        final String targetDir = tsClass.getRelativePath();
         final Path path = Paths.get(format("/tmp/ts-exporter/%s/%s.ts", tsClass.getModuleName(), targetDir).replace("/", File.separator));
 
         try {

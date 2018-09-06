@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.uberfire.jsbridge.tsexporter.meta.hierarchy;
+package org.uberfire.jsbridge.tsexporter.meta.dependency;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -39,6 +39,14 @@ public class DependencyGraph {
 
     public DependencyGraph() {
         graph = new HashMap<>();
+    }
+
+    public Vertex add(final Dependency dependency) {
+        if (dependency instanceof Dependency.Java) {
+            return add(((Dependency.Java) dependency).getDeclaredType().asElement());
+        } else {
+            return null;
+        }
     }
 
     public Vertex add(final Element element) {
@@ -102,8 +110,8 @@ public class DependencyGraph {
 
         private Vertex init() {
             final Set<Vertex> dependencies = pojoClass.getDependencies().stream()
-                    .map(s -> ((TypeElement) s.asElement()))
                     .map(DependencyGraph.this::add)
+                    .filter(Objects::nonNull)
                     .collect(toSet());
 
             this.dependencies.addAll(dependencies);
