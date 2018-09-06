@@ -39,6 +39,7 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toSet;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.empty;
 import static javax.tools.Diagnostic.Kind.ERROR;
@@ -81,8 +82,8 @@ public class Main extends AbstractProcessor {
             process(roundEnv, annotations.stream().collect(toMap(identity(), roundEnv::getElementsAnnotatedWith)));
             return false;
         } catch (final Exception e) {
-            processingEnv.getMessager().printMessage(ERROR, "Error on TypeScript exporter.");
             e.printStackTrace();
+            processingEnv.getMessager().printMessage(ERROR, "Error on TypeScript exporter.");
             return false;
         }
     }
@@ -119,18 +120,24 @@ public class Main extends AbstractProcessor {
             System.out.println("Generating TypeScript modules...");
 
             final DependencyGraph dependencyGraph = new DependencyGraph();
-            getTsFilesFrom("portables.txt").forEach(dependencyGraph::add);
-            getClassesFromErraiAppPropertiesFiles().forEach(dependencyGraph::add);
 
-            getTsFilesFrom("remotes.txt").stream()
+            concat(getTsFilesFrom("portables.txt").stream(),
+                   getClassesFromErraiAppPropertiesFiles().stream()
+            ).forEach(dependencyGraph::add);
+
+            final Set<TsClass> rpcTsClasses = getTsFilesFrom("remotes.txt").stream()
                     .map(element -> new RpcCallerTsClass(element, dependencyGraph))
-                    .forEach(this::write);
+                    .peek(TsClass::toSource)
+                    .collect(toSet());
 
-            dependencyGraph.vertices().stream().map(DependencyGraph.Vertex::getPojoClass)
+            concat(rpcTsClasses.stream().parallel(), dependencyGraph.vertices().stream().parallel().map(DependencyGraph.Vertex::getPojoClass))
+                    .parallel()
                     .filter(distinctBy(tsClass -> tsClass.getType().toString()))
                     .peek(this::write)
                     .collect(groupingBy(TsClass::getModuleName))
-                    .forEach((moduleName, classes) -> write(new PackageJson(moduleName, classes)));
+                    .entrySet().stream()
+                    .parallel()
+                    .forEach((e) -> write(new PackageJson(e.getKey(), e.getValue())));
 
             System.out.println("TypeScript exporter has successfully run. (" + (System.currentTimeMillis() - start) + "ms)");
         }
@@ -188,14 +195,13 @@ public class Main extends AbstractProcessor {
 
     private void write(final TsClass tsClass) {
 
-        System.out.print("Saving file: " + tsClass.getType() + "...");
-        final String targetDir = tsClass.getElement().getQualifiedName().toString().replace(".", "/");
+        System.out.println("Saving file: " + tsClass.getType() + "...");
+        final String targetDir = tsClass.getFqcn().replace(".", "/");
         final Path path = Paths.get(format("/tmp/ts-exporter/%s/%s.ts", tsClass.getModuleName(), targetDir).replace("/", File.separator));
 
         try {
             Files.createDirectories(path.getParent());
             Files.write(createFileIfNotExists(path), tsClass.toSource().getBytes());
-            System.out.println("saved.");
         } catch (final IOException e) {
             throw new RuntimeException(e);
         }
@@ -205,10 +211,9 @@ public class Main extends AbstractProcessor {
         final Path path = Paths.get(format("/tmp/ts-exporter/%s/package.json", packageJson.getModuleName()).replace("/", File.separator));
 
         try {
-            System.out.print("Saving file: " + packageJson.getModuleName() + "/package.json...");
+            System.out.println("Saving file: " + packageJson.getModuleName() + "/package.json...");
             Files.createDirectories(path.getParent());
             Files.write(createFileIfNotExists(path), packageJson.toSource().getBytes());
-            System.out.println("saved.");
         } catch (final IOException e) {
             throw new RuntimeException(e);
         }

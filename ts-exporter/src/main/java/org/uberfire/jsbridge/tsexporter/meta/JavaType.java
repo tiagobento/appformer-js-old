@@ -45,11 +45,7 @@ import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_A
 
 public class JavaType {
 
-    public static ThreadLocal<Boolean> SIMPLE_NAMES = new ThreadLocal<>();
-
-    static {
-        SIMPLE_NAMES.set(false);
-    }
+    public static ThreadLocal<Boolean> SIMPLE_NAMES = ThreadLocal.withInitial(() -> Boolean.FALSE);
 
     private final TypeMirror type;
     private final TypeMirror owner;

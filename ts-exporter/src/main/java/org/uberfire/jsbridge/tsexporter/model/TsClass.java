@@ -38,4 +38,8 @@ public interface TsClass {
     default TypeElement getElement() {
         return ((TypeElement) getType().asElement());
     }
+
+    default String getFqcn() {
+        return getElement().getQualifiedName().toString();
+    }
 }
