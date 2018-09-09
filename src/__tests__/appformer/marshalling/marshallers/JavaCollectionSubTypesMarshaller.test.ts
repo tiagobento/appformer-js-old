@@ -14,6 +14,11 @@ import JavaHashSet from "appformer/java-wrappers/JavaHashSet";
 import TestUtils from "__tests__/util/TestUtils";
 
 describe("marshall", () => {
+  const encodedType = ErraiObjectConstants.ENCODED_TYPE;
+  const objectId = ErraiObjectConstants.OBJECT_ID;
+  const value = ErraiObjectConstants.VALUE;
+  const numVal = ErraiObjectConstants.NUM_VAL;
+
   let context: MarshallingContext;
 
   beforeEach(() => {
@@ -36,9 +41,9 @@ describe("marshall", () => {
       const { fqcn, output } = outputFunc();
 
       expect(output).toStrictEqual({
-        [ErraiObjectConstants.ENCODED_TYPE]: fqcn,
-        [ErraiObjectConstants.OBJECT_ID]: expect.stringMatching(TestUtils.positiveNumberRegex),
-        [ErraiObjectConstants.VALUE]: []
+        [encodedType]: fqcn,
+        [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
+        [value]: []
       });
     });
   });
@@ -60,23 +65,23 @@ describe("marshall", () => {
       const { fqcn, output } = outputFunc();
 
       expect(output).toStrictEqual({
-        [ErraiObjectConstants.ENCODED_TYPE]: fqcn,
-        [ErraiObjectConstants.OBJECT_ID]: expect.stringMatching(TestUtils.positiveNumberRegex),
-        [ErraiObjectConstants.VALUE]: [
+        [encodedType]: fqcn,
+        [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
+        [value]: [
           {
-            [ErraiObjectConstants.ENCODED_TYPE]: "java.lang.Integer",
-            [ErraiObjectConstants.OBJECT_ID]: "-1",
-            [ErraiObjectConstants.NUM_VAL]: 1
+            [encodedType]: "java.lang.Integer",
+            [objectId]: "-1",
+            [numVal]: 1
           },
           {
-            [ErraiObjectConstants.ENCODED_TYPE]: "java.lang.Integer",
-            [ErraiObjectConstants.OBJECT_ID]: "-1",
-            [ErraiObjectConstants.NUM_VAL]: 2
+            [encodedType]: "java.lang.Integer",
+            [objectId]: "-1",
+            [numVal]: 2
           },
           {
-            [ErraiObjectConstants.ENCODED_TYPE]: "java.lang.Integer",
-            [ErraiObjectConstants.OBJECT_ID]: "-1",
-            [ErraiObjectConstants.NUM_VAL]: 3
+            [encodedType]: "java.lang.Integer",
+            [objectId]: "-1",
+            [numVal]: 3
           }
         ]
       });
@@ -102,20 +107,20 @@ describe("marshall", () => {
       const { fqcn, output } = outputFunc();
 
       expect(output).toStrictEqual({
-        [ErraiObjectConstants.ENCODED_TYPE]: fqcn,
-        [ErraiObjectConstants.OBJECT_ID]: expect.stringMatching(TestUtils.positiveNumberRegex),
-        [ErraiObjectConstants.VALUE]: [
+        [encodedType]: fqcn,
+        [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
+        [value]: [
           {
             ...(bigIntegerMarshaller.marshall(new JavaBigInteger("1"), context) as any),
-            [ErraiObjectConstants.OBJECT_ID]: expect.stringMatching(TestUtils.positiveNumberRegex)
+            [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex)
           },
           {
             ...(bigIntegerMarshaller.marshall(new JavaBigInteger("2"), context) as any),
-            [ErraiObjectConstants.OBJECT_ID]: expect.stringMatching(TestUtils.positiveNumberRegex)
+            [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex)
           },
           {
             ...(bigIntegerMarshaller.marshall(new JavaBigInteger("3"), context) as any),
-            [ErraiObjectConstants.OBJECT_ID]: expect.stringMatching(TestUtils.positiveNumberRegex)
+            [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex)
           }
         ]
       });
@@ -149,29 +154,82 @@ describe("marshall", () => {
       const { fqcn, output } = outputFunc();
 
       expect(output).toStrictEqual({
-        [ErraiObjectConstants.ENCODED_TYPE]: fqcn,
-        [ErraiObjectConstants.OBJECT_ID]: expect.stringMatching(TestUtils.positiveNumberRegex),
-        [ErraiObjectConstants.VALUE]: [
+        [encodedType]: fqcn,
+        [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
+        [value]: [
           {
-            [ErraiObjectConstants.ENCODED_TYPE]: "com.portable.my",
-            [ErraiObjectConstants.OBJECT_ID]: expect.stringMatching(TestUtils.positiveNumberRegex),
+            [encodedType]: "com.portable.my",
+            [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
             foo: "foo1",
             bar: "bar1"
           },
           {
-            [ErraiObjectConstants.ENCODED_TYPE]: "com.portable.my",
-            [ErraiObjectConstants.OBJECT_ID]: expect.stringMatching(TestUtils.positiveNumberRegex),
+            [encodedType]: "com.portable.my",
+            [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
             foo: "foo2",
             bar: "bar2"
           },
           {
-            [ErraiObjectConstants.ENCODED_TYPE]: "com.portable.my",
-            [ErraiObjectConstants.OBJECT_ID]: expect.stringMatching(TestUtils.positiveNumberRegex),
+            [encodedType]: "com.portable.my",
+            [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
             foo: "foo3",
             bar: "bar3"
           }
         ]
       });
+    });
+  });
+
+  test("with custom pojo array containing repeated elements, should cache inner objects and don't repeat data", () => {
+    const repeatedValue = new Node({ data: "foo1" });
+
+    const portableArray = [repeatedValue, new Node({ data: "foo2", right: repeatedValue })];
+
+    const arrayListScenario = () => {
+      const input = new JavaArrayList(portableArray);
+      return {
+        fqcn: "java.util.ArrayList",
+        output: new JavaArrayListMarshaller().marshall(input, new MarshallingContext())
+      };
+    };
+
+    const hashSetScenario = () => {
+      const input = new JavaHashSet(new Set(portableArray));
+      return {
+        fqcn: "java.util.HashSet",
+        output: new JavaHashSetMarshaller().marshall(input, new MarshallingContext())
+      };
+    };
+
+    [arrayListScenario, hashSetScenario].forEach(outputFunc => {
+      const { fqcn, output } = outputFunc();
+
+      const rootObjId = output[objectId];
+      expect(output[encodedType]).toEqual(fqcn);
+      expect(rootObjId).toMatch(TestUtils.positiveNumberRegex);
+
+      const rootObjValue = output[value] as any[];
+
+      const foo2Objects = rootObjValue.filter(obj => obj._data === "foo2");
+      expect(foo2Objects.length).toEqual(1);
+      const uniqueObjId = foo2Objects[0][objectId];
+      expect(uniqueObjId).toMatch(TestUtils.positiveNumberRegex);
+
+      const repeatedObjects = rootObjValue.filter(obj => obj._data !== "foo2");
+      expect(repeatedObjects.length).toEqual(1);
+      const repeatedObjId = repeatedObjects[0][objectId];
+      expect(repeatedObjId).toMatch(TestUtils.positiveNumberRegex);
+
+      expect(rootObjValue).toEqual([
+        { [encodedType]: "com.app.my.Node", [objectId]: repeatedObjId, _data: "foo1", _left: null, _right: null },
+        {
+          [encodedType]: "com.app.my.Node",
+          [objectId]: uniqueObjId,
+          _data: "foo2",
+          _right: { [encodedType]: "com.app.my.Node", [objectId]: repeatedObjId },
+          _left: null
+        }
+      ]);
     });
   });
 });
@@ -185,5 +243,19 @@ class MyPortable implements Portable<MyPortable> {
   constructor(self: { foo: string; bar: string }) {
     this.foo = self.foo;
     this.bar = self.bar;
+  }
+}
+
+class Node implements Portable<Node> {
+  private readonly _fqcn = "com.app.my.Node";
+
+  public readonly _data: any;
+  public readonly _left?: Node;
+  public readonly _right?: Node;
+
+  constructor(self: { data: any; left?: Node; right?: Node }) {
+    this._data = self.data;
+    this._left = self.left;
+    this._right = self.right;
   }
 }

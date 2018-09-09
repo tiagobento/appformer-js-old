@@ -15,10 +15,13 @@ import JavaShort from "appformer/java-wrappers/JavaShort";
 import JavaString from "appformer/java-wrappers/JavaString";
 import JavaArrayList from "appformer/java-wrappers/JavaArrayList";
 import JavaHashSet from "appformer/java-wrappers/JavaHashSet";
+import Portable from "appformer/internal/model/Portable";
 
 describe("marshall", () => {
   const objectId = ErraiObjectConstants.OBJECT_ID;
   const encodedType = ErraiObjectConstants.ENCODED_TYPE;
+  const value = ErraiObjectConstants.VALUE;
+  const numVal = ErraiObjectConstants.NUM_VAL;
 
   beforeEach(() => {
     MarshallerProvider.initialize();
@@ -140,12 +143,12 @@ describe("marshall", () => {
         bigDecimal: {
           [encodedType]: "java.math.BigDecimal",
           [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
-          [ErraiObjectConstants.VALUE]: "1.1"
+          [value]: "1.1"
         },
         bigInteger: {
           [encodedType]: "java.math.BigInteger",
           [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
-          [ErraiObjectConstants.VALUE]: "2"
+          [value]: "2"
         },
         boolean: false,
         byte: 3,
@@ -155,7 +158,7 @@ describe("marshall", () => {
         long: {
           [encodedType]: "java.lang.Long",
           [objectId]: "-1",
-          [ErraiObjectConstants.NUM_VAL]: "5"
+          [numVal]: "5"
         },
         short: 6,
         string: "str"
@@ -178,43 +181,437 @@ describe("marshall", () => {
         list: {
           [encodedType]: "java.util.ArrayList",
           [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
-          [ErraiObjectConstants.VALUE]: ["1", "2", "3"]
+          [value]: ["1", "2", "3"]
         },
         set: {
           [encodedType]: "java.util.HashSet",
           [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
-          [ErraiObjectConstants.VALUE]: ["3", "2", "1"]
+          [value]: ["3", "2", "1"]
         }
       });
     });
   });
 
   describe("object caching", () => {
-    test("custom pojo with repeated pojo objects, should cache the object and don't repeat data", () => {});
+    class Node implements Portable<Node> {
+      private readonly _fqcn = "com.app.my.Node";
 
-    test("custom pojo with repeated JavaBigDecimal objects, should not cache it", () => {});
+      public readonly _data: any;
+      public readonly _left?: Node;
+      public readonly _right?: Node;
 
-    test("custom pojo with repeated JavaBigInteger objects, should not cache it", () => {});
+      constructor(self: { data: any; left?: Node; right?: Node }) {
+        this._data = self.data;
+        this._left = self.left;
+        this._right = self.right;
+      }
+    }
 
-    test("custom pojo with repeated JavaBoolean objects, should not cache it", () => {});
+    test("custom pojo with repeated pojo objects, should cache the object and don't repeat data", () => {
+      // === scenario
 
-    test("custom pojo with repeated JavaByte objects, should not cache it", () => {});
+      // repeatedNode appears two times in the hierarchy, all other nodes are unique
+      const repeatedNode = new Node({ data: "repeatedNode" });
+      const input = new Node({
+        data: "root",
+        right: new Node({ data: "rightNode", left: repeatedNode, right: new Node({ data: "rightLeaf" }) }),
+        left: repeatedNode
+      });
 
-    test("custom pojo with repeated JavaArrayList objects, should cache the object and don't repeat data", () => {});
+      // === test
 
-    test("custom pojo with repeated JavaHashSet objects, should cache the object and don't repeat data", () => {});
+      const output = new DefaultMarshaller().marshall(input, new MarshallingContext());
 
-    test("custom pojo with repeated JavaDouble objects, should not cache it", () => {});
+      // === assertion
+      // expects all nodes to contain their data and a unique objectId, except for the deepest left node.
+      // the deepest left node should contain only its encodedType and objectId, which needs to be the same as the root's left node
 
-    test("custom pojo with repeated JavaFloat objects, should not cache it", () => {});
+      const rootObjId = output[objectId];
+      expect(output[encodedType]).toEqual("com.app.my.Node");
+      expect((output as any)._data).toEqual("root");
 
-    test("custom pojo with repeated JavaInteger objects, should not cache it", () => {});
+      const firstLeftLeaf = (output as any)._left;
+      const firstLeftLeafObjId = firstLeftLeaf[objectId];
+      expect(firstLeftLeaf._data).toEqual("repeatedNode");
 
-    test("custom pojo with repeated JavaLong objects, should not cache it", () => {});
+      const rightNodeOut = (output as any)._right;
+      const rightNodeObjId = rightNodeOut[objectId];
+      expect(rightNodeOut._data).toEqual("rightNode");
 
-    test("custom pojo with repeated JavaShort objects, should not cache it", () => {});
+      const repeatedLeftLeaf = (rightNodeOut as any)._left;
+      const repeatedLeftLeafObjId = repeatedLeftLeaf[objectId];
+      expect(repeatedLeftLeaf._data).toBeUndefined();
 
-    test("custom pojo with repeated JavaString objects, should not cache it", () => {});
+      const rightLeafOut = (rightNodeOut as any)._right;
+      const rightLeafObjId = rightLeafOut[objectId];
+      expect(rightLeafOut._data).toEqual("rightLeaf");
+
+      expect(firstLeftLeafObjId).toEqual(repeatedLeftLeafObjId); // reuse same id
+
+      const allObjIds = [rootObjId, firstLeftLeafObjId, rightNodeObjId, repeatedLeftLeafObjId, rightLeafObjId];
+      expect(allObjIds.forEach(id => expect(id).toMatch(TestUtils.positiveNumberRegex)));
+
+      // all ids unique (excluding the reused one)
+      const uniqueObjIds = new Set(allObjIds);
+      expect(uniqueObjIds).toStrictEqual(new Set([rootObjId, firstLeftLeafObjId, rightNodeObjId, rightLeafObjId]));
+    });
+
+    test("custom pojo with repeated JavaBigDecimal objects, should not cache it and not reuse data", () => {
+      const repeatedValue = new JavaBigDecimal("1.1");
+
+      const input = new Node({
+        data: repeatedValue,
+        left: new Node({ data: new JavaBigDecimal("1.2") }),
+        right: new Node({ data: repeatedValue })
+      });
+
+      // === test
+      const context = new MarshallingContext();
+      const output = new DefaultMarshaller().marshall(input, context);
+
+      // === assertions
+
+      const rootObjId = output[objectId];
+      const rootDataObjId = (output as any)._data[objectId];
+      expect((output as any)._data[value]).toEqual("1.1");
+
+      const leftObjId = (output as any)._left[objectId];
+      const leftDataObjId = (output as any)._left._data[objectId];
+      expect((output as any)._left._data[value]).toEqual("1.2");
+
+      const rightObjId = (output as any)._right[objectId];
+      const rightDataObjId = (output as any)._right._data[objectId];
+      expect((output as any)._right._data[value]).toEqual("1.1");
+
+      const allObjectIds = [rootObjId, rootDataObjId, leftObjId, leftDataObjId, rightObjId, rightDataObjId];
+
+      allObjectIds.forEach(id => expect(id).toBeDefined());
+
+      // create new object ids even for same obj references
+      expect(new Set(allObjectIds)).toStrictEqual(new Set(allObjectIds));
+
+      // do not cache repeated object
+      expect(context.getObject(repeatedValue)).toBeUndefined();
+    });
+
+    test("custom pojo with repeated JavaBigInteger objects, should not cache it", () => {
+      const repeatedValue = new JavaBigInteger("1");
+
+      const input = new Node({
+        data: repeatedValue,
+        left: new Node({ data: new JavaBigInteger("2") }),
+        right: new Node({ data: repeatedValue })
+      });
+
+      // === test
+      const context = new MarshallingContext();
+      const output = new DefaultMarshaller().marshall(input, context);
+
+      // === assertions
+
+      const rootObjId = output[objectId];
+      const rootDataObjId = (output as any)._data[objectId];
+      expect((output as any)._data[value]).toEqual("1");
+
+      const leftObjId = (output as any)._left[objectId];
+      const leftDataObjId = (output as any)._left._data[objectId];
+      expect((output as any)._left._data[value]).toEqual("2");
+
+      const rightObjId = (output as any)._right[objectId];
+      const rightDataObjId = (output as any)._right._data[objectId];
+      expect((output as any)._right._data[value]).toEqual("1");
+
+      const allObjectIds = [rootObjId, rootDataObjId, leftObjId, leftDataObjId, rightObjId, rightDataObjId];
+
+      allObjectIds.forEach(id => expect(id).toBeDefined());
+
+      // create new object ids even for same obj references
+      expect(new Set(allObjectIds)).toStrictEqual(new Set(allObjectIds));
+
+      // do not cache repeated object
+      expect(context.getObject(repeatedValue)).toBeUndefined();
+    });
+
+    test("custom pojo with repeated JavaBoolean objects, should not cache it", () => {
+      const repeatedValue = new JavaBoolean(false);
+
+      const input = new Node({
+        data: repeatedValue,
+        left: new Node({ data: new JavaBoolean(true) }),
+        right: new Node({ data: repeatedValue })
+      });
+
+      const context = new MarshallingContext();
+      new DefaultMarshaller().marshall(input, context);
+
+      // in this test we're not interested in the output structure, because Boolean types are not wrapped into an
+      // ErraiObject, so, it doesn't even have an objectId assigned.
+
+      // do not cache repeated object
+      expect(context.getObject(repeatedValue)).toBeUndefined();
+    });
+
+    test("custom pojo with repeated JavaByte objects, should not cache it", () => {
+      const repeatedValue = new JavaByte("1");
+
+      const input = new Node({
+        data: repeatedValue,
+        left: new Node({ data: new JavaByte("2") }),
+        right: new Node({ data: repeatedValue })
+      });
+
+      const context = new MarshallingContext();
+      new DefaultMarshaller().marshall(input, context);
+
+      // in this test we're not interested in the output structure, because Byte types are not wrapped into an
+      // ErraiObject, so, it doesn't even have an objectId assigned.
+
+      // do not cache repeated object
+      expect(context.getObject(repeatedValue)).toBeUndefined();
+    });
+
+    test("custom pojo with repeated JavaArrayList objects, should cache the object and don't repeat data", () => {
+      const repeatedValue = new JavaArrayList(["a", "b", "c"]);
+
+      const input = new Node({
+        data: repeatedValue,
+        left: new Node({ data: new JavaArrayList(["d", "e"]) }),
+        right: new Node({ data: repeatedValue })
+      });
+
+      // === test
+      const context = new MarshallingContext();
+      const output = new DefaultMarshaller().marshall(input, context);
+
+      // === assertions
+
+      const rootObjId = output[objectId];
+      const rootDataObjId = (output as any)._data[objectId];
+      expect((output as any)._data).toStrictEqual({
+        [encodedType]: "java.util.ArrayList",
+        [objectId]: expect.anything(),
+        [value]: ["a", "b", "c"]
+      });
+
+      const leftObjId = (output as any)._left[objectId];
+      const leftDataObjId = (output as any)._left._data[objectId];
+      expect((output as any)._left._data).toStrictEqual({
+        [encodedType]: "java.util.ArrayList",
+        [objectId]: expect.anything(),
+        [value]: ["d", "e"]
+      });
+
+      const rightObjId = (output as any)._right[objectId];
+      const rightDataObjId = (output as any)._right._data[objectId];
+      expect((output as any)._right._data).toStrictEqual({
+        [encodedType]: "java.util.ArrayList",
+        [objectId]: expect.anything()
+        // missing value since it is cached
+      });
+
+      const allObjectIds = [rootObjId, rootDataObjId, leftObjId, leftDataObjId, rightObjId, rightDataObjId];
+
+      allObjectIds.forEach(id => expect(id).toBeDefined());
+
+      // all ids are unique except for the right data id, that was reused
+      expect(new Set(allObjectIds)).toStrictEqual(
+        new Set([rootObjId, rootDataObjId, leftObjId, leftDataObjId, rightObjId])
+      );
+
+      // do not cache repeated object
+      expect(context.getObject(repeatedValue)).toStrictEqual({
+        [encodedType]: "java.util.ArrayList",
+        [objectId]: rootDataObjId
+      });
+    });
+
+    test("custom pojo with repeated JavaHashSet objects, should cache the object and don't repeat data", () => {
+      const repeatedValue = new JavaHashSet(new Set(["a", "b", "c"]));
+
+      const input = new Node({
+        data: repeatedValue,
+        left: new Node({ data: new JavaHashSet(new Set(["d", "e"])) }),
+        right: new Node({ data: repeatedValue })
+      });
+
+      // === test
+      const context = new MarshallingContext();
+      const output = new DefaultMarshaller().marshall(input, context);
+
+      // === assertions
+
+      const rootObjId = output[objectId];
+      const rootDataObjId = (output as any)._data[objectId];
+      expect((output as any)._data).toStrictEqual({
+        [encodedType]: "java.util.HashSet",
+        [objectId]: expect.anything(),
+        [value]: ["a", "b", "c"]
+      });
+
+      const leftObjId = (output as any)._left[objectId];
+      const leftDataObjId = (output as any)._left._data[objectId];
+      expect((output as any)._left._data).toStrictEqual({
+        [encodedType]: "java.util.HashSet",
+        [objectId]: expect.anything(),
+        [value]: ["d", "e"]
+      });
+
+      const rightObjId = (output as any)._right[objectId];
+      const rightDataObjId = (output as any)._right._data[objectId];
+      expect((output as any)._right._data).toStrictEqual({
+        [encodedType]: "java.util.HashSet",
+        [objectId]: expect.anything()
+        // missing value since it is cached
+      });
+
+      const allObjectIds = [rootObjId, rootDataObjId, leftObjId, leftDataObjId, rightObjId, rightDataObjId];
+
+      allObjectIds.forEach(id => expect(id).toBeDefined());
+
+      // all ids are unique except for the right data id, that was reused
+      expect(new Set(allObjectIds)).toStrictEqual(
+        new Set([rootObjId, rootDataObjId, leftObjId, leftDataObjId, rightObjId])
+      );
+
+      // do not cache repeated object
+      expect(context.getObject(repeatedValue)).toStrictEqual({
+        [encodedType]: "java.util.HashSet",
+        [objectId]: rootDataObjId
+      });
+    });
+
+    test("custom pojo with repeated JavaDouble objects, should not cache it", () => {
+      const repeatedValue = new JavaDouble("1.1");
+
+      const input = new Node({
+        data: repeatedValue,
+        left: new Node({ data: new JavaDouble("1.2") }),
+        right: new Node({ data: repeatedValue })
+      });
+
+      const context = new MarshallingContext();
+      new DefaultMarshaller().marshall(input, context);
+
+      // in this test we're not interested in the output structure, because Double types are not wrapped into an
+      // ErraiObject, so, it doesn't even have an objectId assigned.
+
+      // do not cache repeated object
+      expect(context.getObject(repeatedValue)).toBeUndefined();
+    });
+
+    test("custom pojo with repeated JavaFloat objects, should not cache it", () => {
+      const repeatedValue = new JavaFloat("1.1");
+
+      const input = new Node({
+        data: repeatedValue,
+        left: new Node({ data: new JavaFloat("1.2") }),
+        right: new Node({ data: repeatedValue })
+      });
+
+      const context = new MarshallingContext();
+      new DefaultMarshaller().marshall(input, context);
+
+      // in this test we're not interested in the output structure, because Float types are not wrapped into an
+      // ErraiObject, so, it doesn't even have an objectId assigned.
+
+      // do not cache repeated object
+      expect(context.getObject(repeatedValue)).toBeUndefined();
+    });
+
+    test("custom pojo with repeated JavaInteger objects, should not cache it", () => {
+      const repeatedValue = new JavaInteger("1");
+
+      const input = new Node({
+        data: repeatedValue,
+        left: new Node({ data: new JavaInteger("2") }),
+        right: new Node({ data: repeatedValue })
+      });
+
+      const context = new MarshallingContext();
+      new DefaultMarshaller().marshall(input, context);
+
+      // in this test we're not interested in the output structure, because Integer types are not wrapped into an
+      // ErraiObject, so, it doesn't even have an objectId assigned.
+
+      // do not cache repeated object
+      expect(context.getObject(repeatedValue)).toBeUndefined();
+    });
+
+    test("custom pojo with repeated JavaLong objects, should not cache it", () => {
+      const repeatedValue = new JavaLong("1");
+
+      const input = new Node({
+        data: repeatedValue,
+        left: new Node({ data: new JavaLong("2") }),
+        right: new Node({ data: repeatedValue })
+      });
+
+      // === test
+      const context = new MarshallingContext();
+      const output = new DefaultMarshaller().marshall(input, context);
+
+      // === assertions
+
+      const rootObjId = output[objectId];
+      const rootDataObjId = (output as any)._data[objectId];
+      expect((output as any)._data[numVal]).toEqual("1");
+
+      const leftObjId = (output as any)._left[objectId];
+      const leftDataObjId = (output as any)._left._data[objectId];
+      expect((output as any)._left._data[numVal]).toEqual("2");
+
+      const rightObjId = (output as any)._right[objectId];
+      const rightDataObjId = (output as any)._right._data[objectId];
+      expect((output as any)._right._data[numVal]).toEqual("1");
+
+      const allObjectIds = [rootObjId, rootDataObjId, leftObjId, leftDataObjId, rightObjId, rightDataObjId];
+
+      allObjectIds.forEach(id => expect(id).toBeDefined());
+
+      // create new object ids even for same obj references
+      expect(new Set(allObjectIds)).toStrictEqual(new Set(allObjectIds));
+
+      // do not cache repeated object
+      expect(context.getObject(repeatedValue)).toBeUndefined();
+    });
+
+    test("custom pojo with repeated JavaShort objects, should not cache it", () => {
+      const repeatedValue = new JavaShort("1");
+
+      const input = new Node({
+        data: repeatedValue,
+        left: new Node({ data: new JavaShort("2") }),
+        right: new Node({ data: repeatedValue })
+      });
+
+      const context = new MarshallingContext();
+      new DefaultMarshaller().marshall(input, context);
+
+      // in this test we're not interested in the output structure, because Short types are not wrapped into an
+      // ErraiObject, so, it doesn't even have an objectId assigned.
+
+      // do not cache repeated object
+      expect(context.getObject(repeatedValue)).toBeUndefined();
+    });
+
+    test("custom pojo with repeated JavaString objects, should not cache it", () => {
+      const repeatedValue = new JavaString("str1");
+
+      const input = new Node({
+        data: repeatedValue,
+        left: new Node({ data: new JavaString("str2") }),
+        right: new Node({ data: repeatedValue })
+      });
+
+      const context = new MarshallingContext();
+      new DefaultMarshaller().marshall(input, context);
+
+      // in this test we're not interested in the output structure, because String types are not wrapped into an
+      // ErraiObject, so, it doesn't even have an objectId assigned.
+
+      // do not cache repeated object
+      expect(context.getObject(repeatedValue)).toBeUndefined();
+    });
   });
 
   describe("non-pojo root types", () => {
@@ -226,7 +623,7 @@ describe("marshall", () => {
       expect(output).toStrictEqual({
         [encodedType]: "java.math.BigDecimal",
         [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
-        [ErraiObjectConstants.VALUE]: "1.2"
+        [value]: "1.2"
       });
     });
 
@@ -238,7 +635,7 @@ describe("marshall", () => {
       expect(output).toStrictEqual({
         [encodedType]: "java.math.BigInteger",
         [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
-        [ErraiObjectConstants.VALUE]: "1"
+        [value]: "1"
       });
     });
 
@@ -266,7 +663,7 @@ describe("marshall", () => {
       expect(output).toStrictEqual({
         [encodedType]: "java.util.ArrayList",
         [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
-        [ErraiObjectConstants.VALUE]: ["1", "2", "3"]
+        [value]: ["1", "2", "3"]
       });
     });
 
@@ -278,7 +675,7 @@ describe("marshall", () => {
       expect(output).toStrictEqual({
         [encodedType]: "java.util.HashSet",
         [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
-        [ErraiObjectConstants.VALUE]: ["1", "2", "3"]
+        [value]: ["1", "2", "3"]
       });
     });
 
@@ -314,7 +711,7 @@ describe("marshall", () => {
       expect(output).toStrictEqual({
         [encodedType]: "java.lang.Long",
         [objectId]: "-1",
-        [ErraiObjectConstants.NUM_VAL]: "1"
+        [numVal]: "1"
       });
     });
 
@@ -367,7 +764,7 @@ describe("marshall", () => {
       expect(output).toStrictEqual({
         [encodedType]: "java.util.ArrayList",
         [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
-        [ErraiObjectConstants.VALUE]: ["1", "2", "3"]
+        [value]: ["1", "2", "3"]
       });
     });
 
@@ -379,7 +776,7 @@ describe("marshall", () => {
       expect(output).toStrictEqual({
         [encodedType]: "java.util.HashSet",
         [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
-        [ErraiObjectConstants.VALUE]: ["1", "2", "3"]
+        [value]: ["1", "2", "3"]
       });
     });
   });
