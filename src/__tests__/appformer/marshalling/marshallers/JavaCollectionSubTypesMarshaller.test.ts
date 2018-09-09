@@ -12,6 +12,7 @@ import JavaBigIntegerMarshaller from "appformer/marshalling/marshallers/JavaBigI
 import Portable from "appformer/internal/model/Portable";
 import JavaHashSet from "appformer/java-wrappers/JavaHashSet";
 import TestUtils from "__tests__/util/TestUtils";
+import JavaBoolean from "appformer/java-wrappers/JavaBoolean";
 
 describe("marshall", () => {
   const encodedType = ErraiObjectConstants.ENCODED_TYPE;
@@ -82,6 +83,41 @@ describe("marshall", () => {
             [encodedType]: "java.lang.Integer",
             [objectId]: "-1",
             [numVal]: 3
+          }
+        ]
+      });
+    });
+  });
+
+  test("with JavaBoolean collection, should wrap every element into an errai object", () => {
+    const booleanArray = [new JavaBoolean(true), new JavaBoolean(false)];
+
+    const arrayListScenario = () => {
+      const input = new JavaArrayList(booleanArray);
+      return { fqcn: "java.util.ArrayList", output: new JavaArrayListMarshaller().marshall(input, context) };
+    };
+
+    const hashSetScenario = () => {
+      const input = new JavaHashSet(new Set(booleanArray));
+      return { fqcn: "java.util.HashSet", output: new JavaHashSetMarshaller().marshall(input, context) };
+    };
+
+    [arrayListScenario, hashSetScenario].forEach(outputFunc => {
+      const { fqcn, output } = outputFunc();
+
+      expect(output).toStrictEqual({
+        [encodedType]: fqcn,
+        [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
+        [value]: [
+          {
+            [encodedType]: "java.lang.Boolean",
+            [objectId]: "-1",
+            [numVal]: true
+          },
+          {
+            [encodedType]: "java.lang.Boolean",
+            [objectId]: "-1",
+            [numVal]: false
           }
         ]
       });

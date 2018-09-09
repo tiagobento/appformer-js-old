@@ -2,10 +2,10 @@ import JavaCollection from "appformer/java-wrappers/JavaCollection";
 import ErraiObject from "appformer/marshalling/model/ErraiObject";
 import MarshallingContext from "appformer/marshalling/MarshallingContext";
 import ErraiObjectConstants from "appformer/marshalling/model/ErraiObjectConstants";
-import JavaNumber from "appformer/java-wrappers/JavaNumber";
 import Portable from "appformer/internal/model/Portable";
 import MarshallerProvider from "appformer/marshalling/MarshallerProvider";
 import NullableMarshaller from "appformer/marshalling/marshallers/NullableMarshaller";
+import CollectionElementWrapper from "appformer/marshalling/marshallers/util/CollectionElementWrapper";
 
 class JavaCollectionMarshaller<T extends Iterable<Portable<any>>> extends NullableMarshaller<
   JavaCollection<T>,
@@ -35,26 +35,15 @@ class JavaCollectionMarshaller<T extends Iterable<Portable<any>>> extends Nullab
     return resultObject;
   }
 
-  private marshallInnerElement(value: any, ctx: MarshallingContext): ErraiObject {
+  private marshallInnerElement(value: Portable<any>, ctx: MarshallingContext): ErraiObject {
     const marshaller = MarshallerProvider.getFor(value);
     const marshaledValue = marshaller.marshall(value, ctx);
 
-    if (value instanceof JavaNumber) {
-      // This is mandatory in order to comply with errai-marshalling protocol.
-      // When it founds a number inside a collection, the number is wrapped
-      // inside a ErraiObject envelope
-      return this.erraiObjectFromNumber(value, marshaledValue);
+    if (CollectionElementWrapper.shouldWrapWhenInsideCollection(value)) {
+      return CollectionElementWrapper.erraiObjectFromCollectionInnerElement(value, marshaledValue)!;
     }
 
     return marshaledValue;
-  }
-
-  private erraiObjectFromNumber(value: any, marshaledValue: any) {
-    return {
-      [ErraiObjectConstants.ENCODED_TYPE]: (value as any)._fqcn,
-      [ErraiObjectConstants.OBJECT_ID]: "-1",
-      [ErraiObjectConstants.NUM_VAL]: marshaledValue
-    };
   }
 }
 
