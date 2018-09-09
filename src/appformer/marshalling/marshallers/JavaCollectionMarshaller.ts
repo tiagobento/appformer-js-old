@@ -10,6 +10,11 @@ import MarshallerProvider from "appformer/marshalling/MarshallerProvider";
 class JavaCollectionMarshaller<T extends Iterable<Portable<any>>>
   implements Marshaller<JavaCollection<T>, ErraiObject> {
   public marshall(input: JavaCollection<T>, ctx: MarshallingContext): ErraiObject {
+    const cachedObject = ctx.getObject(input);
+    if (cachedObject) {
+      return cachedObject;
+    }
+
     const elements = input.get();
 
     const serializedValues = [];
@@ -17,11 +22,15 @@ class JavaCollectionMarshaller<T extends Iterable<Portable<any>>>
       serializedValues.push(this.marshallInnerElement(element, ctx));
     }
 
-    return {
+    const resultObject = {
       [ErraiObjectConstants.ENCODED_TYPE]: (input as any)._fqcn,
       [ErraiObjectConstants.OBJECT_ID]: `${ctx.newObjectId()}`,
       [ErraiObjectConstants.VALUE]: serializedValues
     };
+
+    ctx.recordObject(input, resultObject);
+
+    return resultObject;
   }
 
   private marshallInnerElement(value: any, ctx: MarshallingContext): ErraiObject {
