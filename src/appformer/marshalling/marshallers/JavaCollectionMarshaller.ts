@@ -3,9 +3,8 @@ import ErraiObject from "appformer/marshalling/model/ErraiObject";
 import MarshallingContext from "appformer/marshalling/MarshallingContext";
 import ErraiObjectConstants from "appformer/marshalling/model/ErraiObjectConstants";
 import Portable from "appformer/internal/model/Portable";
-import MarshallerProvider from "appformer/marshalling/MarshallerProvider";
 import NullableMarshaller from "appformer/marshalling/marshallers/NullableMarshaller";
-import CollectionElementWrapper from "appformer/marshalling/marshallers/util/CollectionElementWrapper";
+import GenericsTypeMarshallingUtils from "appformer/marshalling/marshallers/util/GenericsTypeMarshallingUtils";
 
 class JavaCollectionMarshaller<T extends Iterable<Portable<any>>> extends NullableMarshaller<
   JavaCollection<T>,
@@ -21,7 +20,7 @@ class JavaCollectionMarshaller<T extends Iterable<Portable<any>>> extends Nullab
 
     const serializedValues = [];
     for (const element of Array.from(elements)) {
-      serializedValues.push(this.marshallInnerElement(element, ctx));
+      serializedValues.push(GenericsTypeMarshallingUtils.marshallGenericsTypeElement(element, ctx));
     }
 
     const resultObject = {
@@ -33,17 +32,6 @@ class JavaCollectionMarshaller<T extends Iterable<Portable<any>>> extends Nullab
     ctx.recordObject(input, resultObject);
 
     return resultObject;
-  }
-
-  private marshallInnerElement(value: Portable<any>, ctx: MarshallingContext): ErraiObject {
-    const marshaller = MarshallerProvider.getFor(value);
-    const marshaledValue = marshaller.marshall(value, ctx);
-
-    if (CollectionElementWrapper.shouldWrapWhenInsideCollection(value)) {
-      return CollectionElementWrapper.erraiObjectFromCollectionInnerElement(value, marshaledValue)!;
-    }
-
-    return marshaledValue;
   }
 }
 

@@ -17,6 +17,7 @@ import {
   JavaHashSetMarshaller
 } from "appformer/marshalling/marshallers/JavaCollectionMarshaller";
 import JavaDateMarshaller from "appformer/marshalling/marshallers/JavaDateMarshaller";
+import JavaOptionalMarshaller from "appformer/marshalling/marshallers/JavaOptionalMarshaller";
 
 export default class MarshallerProvider {
   private static initialized: boolean = false;
@@ -48,6 +49,9 @@ export default class MarshallerProvider {
     this.marshallersByJavaType.set(JavaType.ARRAY_LIST, new JavaArrayListMarshaller());
     this.marshallersByJavaType.set(JavaType.HASH_SET, new JavaHashSetMarshaller());
     this.marshallersByJavaType.set(JavaType.HASH_MAP, new JavaHashMapMarshaller());
+
+    this.marshallersByJavaType.set(JavaType.OPTIONAL, new JavaOptionalMarshaller());
+
     this.initialized = true;
   }
 

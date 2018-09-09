@@ -96,5 +96,6 @@ export enum JavaType {
   BIG_INTEGER = "java.math.BigInteger",
   ARRAY_LIST = "java.util.ArrayList",
   HASH_SET = "java.util.HashSet",
-  HASH_MAP = "java.util.HashMap"
+  HASH_MAP = "java.util.HashMap",
+  OPTIONAL = "java.util.Optional"
 }

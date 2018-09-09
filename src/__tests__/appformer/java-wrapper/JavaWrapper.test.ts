@@ -1,4 +1,4 @@
-import JavaWrapper, { JavaType } from "appformer/java-wrappers/JavaWrapper";
+import JavaWrapper from "appformer/java-wrappers/JavaWrapper";
 import JavaArrayList from "appformer/java-wrappers/JavaArrayList";
 import JavaHashSet from "appformer/java-wrappers/JavaHashSet";
 import JavaHashMap from "appformer/java-wrappers/JavaHashMap";
@@ -37,18 +37,12 @@ describe("needsWrapping", () => {
     expect(JavaWrapper.needsWrapping(input)).toBeTruthy();
   });
 
-  test("with custom object, should return true", () => {
+  test("with custom object, should return false", () => {
     const input = {
       foo: "bar1",
       foo2: "bar2"
     };
     expect(JavaWrapper.needsWrapping(input)).toBeFalsy();
-  });
-
-  test("with every Java Type, all of them should need wrapping", () => {
-    Object.keys(JavaType)
-      .map((k: keyof typeof JavaType) => JavaType[k])
-      .forEach(javaType => expect(JavaWrapper.needsWrapping(javaType)).toBeTruthy());
   });
 });
 
@@ -156,5 +150,9 @@ describe("isJavaType", () => {
 
   test("with non Java type fqcn, should return false", () => {
     expect(JavaWrapper.isJavaType("foo")).toBeFalsy();
+  });
+
+  test("with Java Optional's fqcn, should return true", () => {
+    expect(JavaWrapper.isJavaType("java.util.Optional")).toBeTruthy();
   });
 });

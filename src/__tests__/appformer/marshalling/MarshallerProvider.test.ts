@@ -28,6 +28,8 @@ import JavaWrapper, { JavaType } from "appformer/java-wrappers/JavaWrapper";
 import * as JavaCollectionMarshaller from "appformer/marshalling/marshallers/JavaCollectionMarshaller";
 import JavaDate from "appformer/java-wrappers/JavaDate";
 import JavaDateMarshaller from "appformer/marshalling/marshallers/JavaDateMarshaller";
+import JavaOptional from "appformer/java-wrappers/JavaOptional";
+import JavaOptionalMarshaller from "appformer/marshalling/marshallers/JavaOptionalMarshaller";
 
 describe("getFor", () => {
   test("without initialize, should return Error", () => {
@@ -109,6 +111,11 @@ describe("getFor", () => {
     test("with JavaHashMap instance, should return JavaHashMapMarshaller instance", () => {
       const input = new JavaHashMap(new Map([["foo", "bar"]]));
       expect(MarshallerProvider.getFor(input)).toEqual(new JavaHashMapMarshaller());
+    });
+
+    test("with JavaOptional instance, should return JavaOptionalMarshaller instance", () => {
+      const input = new JavaOptional<string>("str");
+      expect(MarshallerProvider.getFor(input)).toEqual(new JavaOptionalMarshaller());
     });
 
     test("with input without fqcn, should return default marshaller", () => {

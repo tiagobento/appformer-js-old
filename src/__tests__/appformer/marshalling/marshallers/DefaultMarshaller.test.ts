@@ -17,6 +17,7 @@ import JavaArrayList from "appformer/java-wrappers/JavaArrayList";
 import JavaHashSet from "appformer/java-wrappers/JavaHashSet";
 import Portable from "appformer/internal/model/Portable";
 import JavaDate from "appformer/java-wrappers/JavaDate";
+import JavaOptional from "appformer/java-wrappers/JavaOptional";
 
 describe("marshall", () => {
   const objectId = ErraiObjectConstants.OBJECT_ID;
@@ -136,7 +137,8 @@ describe("marshall", () => {
         long: new JavaLong("5"),
         short: new JavaShort("6"),
         string: new JavaString("str"),
-        date: new JavaDate(date)
+        date: new JavaDate(date),
+        optional: new JavaOptional<string>("optstr")
       };
 
       const output = new DefaultMarshaller().marshall(input, new MarshallingContext());
@@ -170,6 +172,11 @@ describe("marshall", () => {
           [encodedType]: "java.util.Date",
           [objectId]: "-1",
           [value]: `${date.getTime()}`
+        },
+        optional: {
+          [encodedType]: "java.util.Optional",
+          [objectId]: "-1",
+          [value]: "optstr"
         }
       });
     });
@@ -621,6 +628,46 @@ describe("marshall", () => {
       // do not cache repeated object
       expect(context.getObject(repeatedValue)).toBeUndefined();
     });
+
+    test("custom pojo with repeated JavaOptional objects, should not cache it", () => {
+      const repeatedValue = new JavaOptional<string>("str1");
+
+      const input = new Node({
+        data: repeatedValue,
+        left: new Node({ data: new JavaOptional<string>("str2") }),
+        right: new Node({ data: repeatedValue })
+      });
+
+      // === test
+      const context = new MarshallingContext();
+      const output = new DefaultMarshaller().marshall(input, context);
+
+      // === assertions
+
+      const rootObjId = output![objectId];
+      const rootDataObjId = (output as any)._data[objectId];
+      expect((output as any)._data[value]).toStrictEqual("str1");
+
+      const leftObjId = (output as any)._left[objectId];
+      const leftDataObjId = (output as any)._left._data[objectId];
+      expect((output as any)._left._data[value]).toEqual("str2");
+
+      const rightObjId = (output as any)._right[objectId];
+      const rightDataObjId = (output as any)._right._data[objectId];
+      expect((output as any)._right._data[value]).toEqual("str1");
+
+      const allObjectIds = [rootObjId, rootDataObjId, leftObjId, leftDataObjId, rightObjId, rightDataObjId];
+
+      allObjectIds.forEach(id => expect(id).toBeDefined());
+
+      // optional objects always use the same object id (its value doesn't matter)
+      expect(new Set(allObjectIds)).toStrictEqual(new Set([rootObjId, rootDataObjId, leftObjId, rightObjId]));
+      expect(rootDataObjId).toEqual(leftDataObjId);
+      expect(rootDataObjId).toEqual(rightDataObjId);
+
+      // do not cache repeated object
+      expect(context.getObject(repeatedValue)).toBeUndefined();
+    });
   });
 
   describe("non-pojo root types", () => {
@@ -766,6 +813,18 @@ describe("marshall", () => {
         [encodedType]: "java.util.Date",
         [objectId]: "-1",
         [value]: `${dateInput.getTime()}`
+      });
+    });
+
+    test("root JavaOptional object, should serialize it normally", () => {
+      const input = new JavaOptional<string>("str");
+
+      const output = new DefaultMarshaller().marshall(input, new MarshallingContext());
+
+      expect(output).toStrictEqual({
+        [encodedType]: "java.util.Optional",
+        [objectId]: "-1",
+        [value]: "str"
       });
     });
 
