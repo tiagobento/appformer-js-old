@@ -25,4 +25,20 @@ describe("marshall", () => {
     // == assertion
     expect(expectedJson).toEqual(output);
   });
+
+  test("with null input, should return null", () => {
+    const input = null as any;
+
+    const output = Marshalling.marshall(input);
+
+    expect(output).toBeNull();
+  });
+
+  test("with undefined input, should serialize marshaller output", () => {
+    const input = undefined as any;
+
+    const output = Marshalling.marshall(input);
+
+    expect(output).toBeNull();
+  });
 });

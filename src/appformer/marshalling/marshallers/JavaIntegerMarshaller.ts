@@ -1,9 +1,9 @@
 import MarshallingContext from "appformer/marshalling/MarshallingContext";
-import Marshaller from "appformer/marshalling/Marshaller";
 import JavaInteger from "appformer/java-wrappers/JavaInteger";
+import NullableMarshaller from "appformer/marshalling/marshallers/NullableMarshaller";
 
-export default class JavaIntegerMarshaller implements Marshaller<JavaInteger, number> {
-  public marshall(input: JavaInteger, ctx: MarshallingContext): number {
+export default class JavaIntegerMarshaller extends NullableMarshaller<JavaInteger, number> {
+  public notNullMarshall(input: JavaInteger, ctx: MarshallingContext): number {
     return input.get();
   }
 }

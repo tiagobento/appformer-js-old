@@ -1,11 +1,11 @@
-import Marshaller from "../Marshaller";
 import JavaBigDecimal from "../../java-wrappers/JavaBigDecimal";
 import MarshallingContext from "../MarshallingContext";
 import ErraiObject from "../model/ErraiObject";
 import ErraiObjectConstants from "../model/ErraiObjectConstants";
+import NullableMarshaller from "appformer/marshalling/marshallers/NullableMarshaller";
 
-export default class JavaBigDecimalMarshaller implements Marshaller<JavaBigDecimal, ErraiObject> {
-  public marshall(input: JavaBigDecimal, ctx: MarshallingContext): ErraiObject {
+export default class JavaBigDecimalMarshaller extends NullableMarshaller<JavaBigDecimal, ErraiObject> {
+  public notNullMarshall(input: JavaBigDecimal, ctx: MarshallingContext): ErraiObject {
     return {
       [ErraiObjectConstants.ENCODED_TYPE]: (input as any)._fqcn,
       [ErraiObjectConstants.OBJECT_ID]: `${ctx.newObjectId()}`,

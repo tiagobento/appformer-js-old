@@ -204,11 +204,11 @@ describe("marshall", () => {
     [arrayListScenario, hashSetScenario].forEach(outputFunc => {
       const { fqcn, output } = outputFunc();
 
-      const rootObjId = output[objectId];
-      expect(output[encodedType]).toEqual(fqcn);
+      const rootObjId = output![objectId];
+      expect(output![encodedType]).toEqual(fqcn);
       expect(rootObjId).toMatch(TestUtils.positiveNumberRegex);
 
-      const rootObjValue = output[value] as any[];
+      const rootObjValue = output![value] as any[];
 
       const foo2Objects = rootObjValue.filter(obj => obj._data === "foo2");
       expect(foo2Objects.length).toEqual(1);
@@ -230,6 +230,40 @@ describe("marshall", () => {
           _left: null
         }
       ]);
+    });
+  });
+
+  test("root null object, should serialize to null", () => {
+    const input = null as any;
+
+    const arrayListScenario = () => {
+      return new JavaArrayListMarshaller().marshall(input, new MarshallingContext());
+    };
+
+    const hashSetScenario = () => {
+      return new JavaHashSetMarshaller().marshall(input, new MarshallingContext());
+    };
+
+    [arrayListScenario, hashSetScenario].forEach(outputFunc => {
+      const output = outputFunc();
+      expect(output).toBeNull();
+    });
+  });
+
+  test("root undefined object, should serialize to null", () => {
+    const input = undefined as any;
+
+    const arrayListScenario = () => {
+      return new JavaArrayListMarshaller().marshall(input, new MarshallingContext());
+    };
+
+    const hashSetScenario = () => {
+      return new JavaHashSetMarshaller().marshall(input, new MarshallingContext());
+    };
+
+    [arrayListScenario, hashSetScenario].forEach(outputFunc => {
+      const output = outputFunc();
+      expect(output).toBeNull();
     });
   });
 });

@@ -2,7 +2,11 @@ import Portable from "appformer/internal/model/Portable";
 import MarshallerProvider from "appformer/marshalling/MarshallerProvider";
 import MarshallingContext from "appformer/marshalling/MarshallingContext";
 
-export function marshall(obj: Portable<any>) {
+export function marshall(obj: Portable<any>): string | null {
+  if (obj === null || obj === undefined) {
+    return null;
+  }
+
   const marshaller = MarshallerProvider.getFor(obj);
   return JSON.stringify(marshaller.marshall(obj, new MarshallingContext()));
 }

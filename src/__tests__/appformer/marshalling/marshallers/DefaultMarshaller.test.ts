@@ -226,8 +226,8 @@ describe("marshall", () => {
       // expects all nodes to contain their data and a unique objectId, except for the deepest left node.
       // the deepest left node should contain only its encodedType and objectId, which needs to be the same as the root's left node
 
-      const rootObjId = output[objectId];
-      expect(output[encodedType]).toEqual("com.app.my.Node");
+      const rootObjId = output![objectId];
+      expect(output![encodedType]).toEqual("com.app.my.Node");
       expect((output as any)._data).toEqual("root");
 
       const firstLeftLeaf = (output as any)._left;
@@ -271,7 +271,7 @@ describe("marshall", () => {
 
       // === assertions
 
-      const rootObjId = output[objectId];
+      const rootObjId = output![objectId];
       const rootDataObjId = (output as any)._data[objectId];
       expect((output as any)._data[value]).toEqual("1.1");
 
@@ -309,7 +309,7 @@ describe("marshall", () => {
 
       // === assertions
 
-      const rootObjId = output[objectId];
+      const rootObjId = output![objectId];
       const rootDataObjId = (output as any)._data[objectId];
       expect((output as any)._data[value]).toEqual("1");
 
@@ -385,7 +385,7 @@ describe("marshall", () => {
 
       // === assertions
 
-      const rootObjId = output[objectId];
+      const rootObjId = output![objectId];
       const rootDataObjId = (output as any)._data[objectId];
       expect((output as any)._data).toStrictEqual({
         [encodedType]: "java.util.ArrayList",
@@ -440,7 +440,7 @@ describe("marshall", () => {
 
       // === assertions
 
-      const rootObjId = output[objectId];
+      const rootObjId = output![objectId];
       const rootDataObjId = (output as any)._data[objectId];
       expect((output as any)._data).toStrictEqual({
         [encodedType]: "java.util.HashSet",
@@ -552,7 +552,7 @@ describe("marshall", () => {
 
       // === assertions
 
-      const rootObjId = output[objectId];
+      const rootObjId = output![objectId];
       const rootDataObjId = (output as any)._data[objectId];
       expect((output as any)._data[numVal]).toEqual("1");
 
@@ -615,6 +615,22 @@ describe("marshall", () => {
   });
 
   describe("non-pojo root types", () => {
+    test("root null object, should serialize to null", () => {
+      const input = null as any;
+
+      const output = new DefaultMarshaller().marshall(input, new MarshallingContext());
+
+      expect(output).toBeNull();
+    });
+
+    test("root undefined object, should serialize to null", () => {
+      const input = undefined as any;
+
+      const output = new DefaultMarshaller().marshall(input, new MarshallingContext());
+
+      expect(output).toBeNull();
+    });
+
     test("root JavaBigDecimal object, should serialize it normally", () => {
       const input = new JavaBigDecimal("1.2");
 

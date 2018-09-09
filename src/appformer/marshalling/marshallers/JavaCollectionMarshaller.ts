@@ -1,4 +1,3 @@
-import Marshaller from "appformer/marshalling/Marshaller";
 import JavaCollection from "appformer/java-wrappers/JavaCollection";
 import ErraiObject from "appformer/marshalling/model/ErraiObject";
 import MarshallingContext from "appformer/marshalling/MarshallingContext";
@@ -6,10 +5,13 @@ import ErraiObjectConstants from "appformer/marshalling/model/ErraiObjectConstan
 import JavaNumber from "appformer/java-wrappers/JavaNumber";
 import Portable from "appformer/internal/model/Portable";
 import MarshallerProvider from "appformer/marshalling/MarshallerProvider";
+import NullableMarshaller from "appformer/marshalling/marshallers/NullableMarshaller";
 
-class JavaCollectionMarshaller<T extends Iterable<Portable<any>>>
-  implements Marshaller<JavaCollection<T>, ErraiObject> {
-  public marshall(input: JavaCollection<T>, ctx: MarshallingContext): ErraiObject {
+class JavaCollectionMarshaller<T extends Iterable<Portable<any>>> extends NullableMarshaller<
+  JavaCollection<T>,
+  ErraiObject
+> {
+  public notNullMarshall(input: JavaCollection<T>, ctx: MarshallingContext): ErraiObject {
     const cachedObject = ctx.getObject(input);
     if (cachedObject) {
       return cachedObject;
