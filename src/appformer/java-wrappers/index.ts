@@ -11,3 +11,4 @@ export * from "./JavaBigInteger";
 export * from "./JavaBigDecimal";
 export * from "./JavaBoolean";
 export * from "./JavaString";
+export * from "./JavaDate";
