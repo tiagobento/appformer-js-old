@@ -4,6 +4,7 @@ import JavaHashMap from "appformer/java-wrappers/JavaHashMap";
 import JavaBoolean from "appformer/java-wrappers/JavaBoolean";
 import JavaString from "appformer/java-wrappers/JavaString";
 import Portable from "appformer/internal/model/Portable";
+import JavaDate from "appformer/java-wrappers/JavaDate";
 
 export default abstract class JavaWrapper<T> implements Portable<JavaWrapper<T>> {
   private static wrappingFuncForType: Map<(obj: any) => boolean, (obj: any) => JavaWrapper<any>> = new Map([
@@ -11,7 +12,8 @@ export default abstract class JavaWrapper<T> implements Portable<JavaWrapper<T>>
     [JavaWrapper.isSet, (obj: any) => new JavaHashSet(obj) as JavaWrapper<any>],
     [JavaWrapper.isMap, (obj: any) => new JavaHashMap(obj) as JavaWrapper<any>],
     [JavaWrapper.isBoolean, (obj: any) => new JavaBoolean(obj) as JavaWrapper<any>],
-    [JavaWrapper.isString, (obj: any) => new JavaString(obj) as JavaWrapper<any>]
+    [JavaWrapper.isString, (obj: any) => new JavaString(obj) as JavaWrapper<any>],
+    [JavaWrapper.isDate, (obj: any) => new JavaDate(obj) as JavaWrapper<any>]
   ]);
 
   public abstract get(): T;
@@ -74,6 +76,10 @@ export default abstract class JavaWrapper<T> implements Portable<JavaWrapper<T>>
   private static isString(obj: any): boolean {
     return obj instanceof String || typeof obj === "string";
   }
+
+  private static isDate(obj: any): boolean {
+    return obj instanceof Date;
+  }
 }
 
 export enum JavaType {
@@ -85,6 +91,7 @@ export enum JavaType {
   SHORT = "java.lang.Short",
   BOOLEAN = "java.lang.Boolean",
   STRING = "java.lang.String",
+  DATE = "java.util.Date",
   BIG_DECIMAL = "java.math.BigDecimal",
   BIG_INTEGER = "java.math.BigInteger",
   ARRAY_LIST = "java.util.ArrayList",

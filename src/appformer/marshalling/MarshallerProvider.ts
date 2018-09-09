@@ -16,6 +16,7 @@ import {
   JavaArrayListMarshaller,
   JavaHashSetMarshaller
 } from "appformer/marshalling/marshallers/JavaCollectionMarshaller";
+import JavaDateMarshaller from "appformer/marshalling/marshallers/JavaDateMarshaller";
 
 export default class MarshallerProvider {
   private static initialized: boolean = false;
@@ -39,6 +40,7 @@ export default class MarshallerProvider {
     this.marshallersByJavaType.set(JavaType.SHORT, new JavaShortMarshaller());
     this.marshallersByJavaType.set(JavaType.BOOLEAN, new JavaBooleanMarshaller());
     this.marshallersByJavaType.set(JavaType.STRING, new JavaStringMarshaller());
+    this.marshallersByJavaType.set(JavaType.DATE, new JavaDateMarshaller());
 
     this.marshallersByJavaType.set(JavaType.BIG_DECIMAL, new JavaBigDecimalMarshaller());
     this.marshallersByJavaType.set(JavaType.BIG_INTEGER, new JavaBigIntegerMarshaller());

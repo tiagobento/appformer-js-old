@@ -13,6 +13,7 @@ import JavaLong from "appformer/java-wrappers/JavaLong";
 import JavaShort from "appformer/java-wrappers/JavaShort";
 import JavaString from "appformer/java-wrappers/JavaString";
 import Portable from "appformer/internal/model/Portable";
+import JavaDate from "appformer/java-wrappers/JavaDate";
 
 describe("shouldWrapWhenInsideCollection", () => {
   test("with JavaArrayList input, should return false", () => {
@@ -113,6 +114,14 @@ describe("shouldWrapWhenInsideCollection", () => {
 
   test("with JavaString input, should return false", () => {
     const input = new JavaString("str");
+
+    const output = CollectionElementWrapper.shouldWrapWhenInsideCollection(input);
+
+    expect(output).toBeFalsy();
+  });
+
+  test("with JavaDate input, should return false", () => {
+    const input = new JavaDate(new Date());
 
     const output = CollectionElementWrapper.shouldWrapWhenInsideCollection(input);
 

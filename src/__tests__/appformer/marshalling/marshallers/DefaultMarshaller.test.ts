@@ -16,6 +16,7 @@ import JavaString from "appformer/java-wrappers/JavaString";
 import JavaArrayList from "appformer/java-wrappers/JavaArrayList";
 import JavaHashSet from "appformer/java-wrappers/JavaHashSet";
 import Portable from "appformer/internal/model/Portable";
+import JavaDate from "appformer/java-wrappers/JavaDate";
 
 describe("marshall", () => {
   const objectId = ErraiObjectConstants.OBJECT_ID;
@@ -121,6 +122,8 @@ describe("marshall", () => {
     });
 
     test("custom pojo with java types, should serialize it normally", () => {
+      const date = new Date();
+
       const input = {
         _fqcn: "com.app.my.Pojo",
         bigDecimal: new JavaBigDecimal("1.1"),
@@ -132,7 +135,8 @@ describe("marshall", () => {
         integer: new JavaInteger("4"),
         long: new JavaLong("5"),
         short: new JavaShort("6"),
-        string: new JavaString("str")
+        string: new JavaString("str"),
+        date: new JavaDate(date)
       };
 
       const output = new DefaultMarshaller().marshall(input, new MarshallingContext());
@@ -161,7 +165,12 @@ describe("marshall", () => {
           [numVal]: "5"
         },
         short: 6,
-        string: "str"
+        string: "str",
+        date: {
+          [encodedType]: "java.util.Date",
+          [objectId]: "-1",
+          [value]: `${date.getTime()}`
+        }
       });
     });
 
@@ -747,6 +756,19 @@ describe("marshall", () => {
       expect(output).toEqual("str");
     });
 
+    test("root JavaDate object, should serialize it normally", () => {
+      const dateInput = new Date();
+      const input = new JavaDate(dateInput);
+
+      const output = new DefaultMarshaller().marshall(input, new MarshallingContext());
+
+      expect(output).toStrictEqual({
+        [encodedType]: "java.util.Date",
+        [objectId]: "-1",
+        [value]: `${dateInput.getTime()}`
+      });
+    });
+
     test("root string object, should serialize it to string raw value", () => {
       const input = "str";
 
@@ -770,6 +792,18 @@ describe("marshall", () => {
       const ctx = new MarshallingContext();
 
       expect(() => marshaller.marshall(input, ctx)).toThrowError();
+    });
+
+    test("root date object, should serialize it normally", () => {
+      const input = new Date();
+
+      const output = new DefaultMarshaller().marshall(input, new MarshallingContext());
+
+      expect(output).toStrictEqual({
+        [encodedType]: "java.util.Date",
+        [objectId]: "-1",
+        [value]: `${input.getTime()}`
+      });
     });
 
     test("root array object, should serialize it normally", () => {

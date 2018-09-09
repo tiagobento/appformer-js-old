@@ -26,6 +26,8 @@ import JavaDoubleMarshaller from "appformer/marshalling/marshallers/JavaDoubleMa
 import DefaultMarshaller from "appformer/marshalling/marshallers/DefaultMarshaller";
 import JavaWrapper, { JavaType } from "appformer/java-wrappers/JavaWrapper";
 import * as JavaCollectionMarshaller from "appformer/marshalling/marshallers/JavaCollectionMarshaller";
+import JavaDate from "appformer/java-wrappers/JavaDate";
+import JavaDateMarshaller from "appformer/marshalling/marshallers/JavaDateMarshaller";
 
 describe("getFor", () => {
   test("without initialize, should return Error", () => {
@@ -77,6 +79,11 @@ describe("getFor", () => {
     test("with JavaString instance, should return JavaStringMarshaller instance", () => {
       const input = new JavaString("foo");
       expect(MarshallerProvider.getFor(input)).toEqual(new JavaStringMarshaller());
+    });
+
+    test("with JavaDate instance, should return JavaDateMarshaller instance", () => {
+      const input = new JavaDate(new Date());
+      expect(MarshallerProvider.getFor(input)).toEqual(new JavaDateMarshaller());
     });
 
     test("with JavaBigDecimal instance, should return JavaBigDecimalMarshaller instance", () => {

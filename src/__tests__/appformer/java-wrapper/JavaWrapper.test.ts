@@ -4,6 +4,7 @@ import JavaHashSet from "appformer/java-wrappers/JavaHashSet";
 import JavaHashMap from "appformer/java-wrappers/JavaHashMap";
 import JavaBoolean from "appformer/java-wrappers/JavaBoolean";
 import JavaString from "appformer/java-wrappers/JavaString";
+import JavaDate from "appformer/java-wrappers/JavaDate";
 
 describe("needsWrapping", () => {
   test("with array object, should return true", () => {
@@ -28,6 +29,11 @@ describe("needsWrapping", () => {
 
   test("with string object, should return true", () => {
     const input = "foo";
+    expect(JavaWrapper.needsWrapping(input)).toBeTruthy();
+  });
+
+  test("with date object, should return true", () => {
+    const input = new Date();
     expect(JavaWrapper.needsWrapping(input)).toBeTruthy();
   });
 
@@ -73,6 +79,12 @@ describe("wrapIfNeeded", () => {
   test("with string object, should return a JavaString instance", () => {
     const input = "foo";
     const output = new JavaString("foo");
+    expect(JavaWrapper.wrapIfNeeded(input)).toEqual(output);
+  });
+
+  test("with date object, should return a JavaDate instance", () => {
+    const input = new Date();
+    const output = new JavaDate(input);
     expect(JavaWrapper.wrapIfNeeded(input)).toEqual(output);
   });
 
@@ -136,6 +148,10 @@ describe("isJavaType", () => {
 
   test("with Java HashMap's fqcn, should return true", () => {
     expect(JavaWrapper.isJavaType("java.util.HashMap")).toBeTruthy();
+  });
+
+  test("with Java Date's fqcn, should return true", () => {
+    expect(JavaWrapper.isJavaType("java.util.Date")).toBeTruthy();
   });
 
   test("with non Java type fqcn, should return false", () => {
