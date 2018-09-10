@@ -59,17 +59,17 @@ public class RpcCallerTsClassTest {
         final DependencyGraph dependencyGraph = new DependencyGraph();
         dependencyGraph.add(element(FooImpl2.class));
 
-        final DecoratorDependency dependency1 = new DecoratorDependency(
+        final DecoratorDependency fooDecorator = new DecoratorDependency(
                 "my-decorators",
                 "decorators/pojo/FooDEC",
                 Foo.class.getCanonicalName());
 
-        final DecoratorDependency dependency2 = new DecoratorDependency(
+        final DecoratorDependency fooImpl1Decorator = new DecoratorDependency(
                 "my-decorators",
                 "decorators/pojo/impl/FooImpl1DEC",
                 FooImpl1.class.getCanonicalName());
 
-        final DecoratorDependency dependency3 = new DecoratorDependency(
+        final DecoratorDependency fooImpl2Decorator = new DecoratorDependency(
                 "my-decorators",
                 "decorators/pojo/impl/FooImpl2DEC",
                 FooImpl2.class.getCanonicalName());
@@ -77,7 +77,7 @@ public class RpcCallerTsClassTest {
         final RpcCallerTsClass tsClass = new RpcCallerTsClass(
                 element(SomeInterface.class),
                 dependencyGraph,
-                new DecoratorStore(new HashSet<>(asList(dependency1, dependency2, dependency3))));
+                new DecoratorStore(new HashSet<>(asList(fooDecorator, fooImpl1Decorator, fooImpl2Decorator))));
 
         assertEquals(lines("",
                            "import {rpc, marshall, unmarshall} from 'appformer/API';",
