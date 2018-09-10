@@ -1,3 +1,4 @@
+import { isArray, isBoolean, isDate, isMap, isSet, isString } from "appformer/util/TypeUtils";
 import JavaArrayList from "appformer/java-wrappers/JavaArrayList";
 import JavaHashSet from "appformer/java-wrappers/JavaHashSet";
 import JavaHashMap from "appformer/java-wrappers/JavaHashMap";
@@ -8,12 +9,12 @@ import JavaDate from "appformer/java-wrappers/JavaDate";
 
 export default abstract class JavaWrapper<T> implements Portable<JavaWrapper<T>> {
   private static wrappingFuncForType: Map<(obj: any) => boolean, (obj: any) => JavaWrapper<any>> = new Map([
-    [JavaWrapper.isArray, (obj: any) => new JavaArrayList(obj) as JavaWrapper<any>],
-    [JavaWrapper.isSet, (obj: any) => new JavaHashSet(obj) as JavaWrapper<any>],
-    [JavaWrapper.isMap, (obj: any) => new JavaHashMap(obj) as JavaWrapper<any>],
-    [JavaWrapper.isBoolean, (obj: any) => new JavaBoolean(obj) as JavaWrapper<any>],
-    [JavaWrapper.isString, (obj: any) => new JavaString(obj) as JavaWrapper<any>],
-    [JavaWrapper.isDate, (obj: any) => new JavaDate(obj) as JavaWrapper<any>]
+    [isArray, (obj: any) => new JavaArrayList(obj) as JavaWrapper<any>],
+    [isSet, (obj: any) => new JavaHashSet(obj) as JavaWrapper<any>],
+    [isMap, (obj: any) => new JavaHashMap(obj) as JavaWrapper<any>],
+    [isBoolean, (obj: any) => new JavaBoolean(obj) as JavaWrapper<any>],
+    [isString, (obj: any) => new JavaString(obj) as JavaWrapper<any>],
+    [isDate, (obj: any) => new JavaDate(obj) as JavaWrapper<any>]
   ]);
 
   public abstract get(): T;
@@ -55,30 +56,6 @@ export default abstract class JavaWrapper<T> implements Portable<JavaWrapper<T>>
     });
 
     return result;
-  }
-
-  private static isArray(obj: any): boolean {
-    return obj instanceof Array;
-  }
-
-  private static isSet(obj: any): boolean {
-    return obj instanceof Set;
-  }
-
-  private static isMap(obj: any): boolean {
-    return obj instanceof Map;
-  }
-
-  private static isBoolean(obj: any): boolean {
-    return obj instanceof Boolean || typeof obj === "boolean";
-  }
-
-  private static isString(obj: any): boolean {
-    return obj instanceof String || typeof obj === "string";
-  }
-
-  private static isDate(obj: any): boolean {
-    return obj instanceof Date;
   }
 }
 
