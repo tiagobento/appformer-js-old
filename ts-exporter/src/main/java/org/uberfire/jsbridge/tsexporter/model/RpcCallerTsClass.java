@@ -91,14 +91,14 @@ public class RpcCallerTsClass implements TsClass {
     }
 
     private List<RpcCallerTsMethod> resolveOverloadsAndReservedWords(final String name,
-                                                                     final List<RpcCallerTsMethod> methods) {
+                                                                     final List<RpcCallerTsMethod> methodsWithTheSameName) {
 
-        if (methods.size() <= 1 && !RESERVED_WORDS.contains(name)) {
-            return methods;
+        if (methodsWithTheSameName.size() <= 1 && !RESERVED_WORDS.contains(name)) {
+            return methodsWithTheSameName;
         }
 
         final AtomicInteger i = new AtomicInteger(0);
-        return methods.stream()
+        return methodsWithTheSameName.stream()
                 .map(tsMethod -> new RpcCallerTsMethod(tsMethod, tsMethod.getName() + i.getAndIncrement()))
                 .collect(toList());
     }

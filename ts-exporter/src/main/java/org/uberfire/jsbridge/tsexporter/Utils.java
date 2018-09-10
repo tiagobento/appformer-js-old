@@ -77,62 +77,7 @@ public class Utils {
         return properties;
     }
 
-    public static String getModuleName(final DeclaredType declaredType) {
-        try {
-            if (declaredType.toString().matches("^javax?.*")) {
-                return "java";
-            }
-            final Class<?> clazz = Class.forName(((Symbol) declaredType.asElement()).flatName().toString());
-            return getModuleName(clazz.getResource('/' + clazz.getName().replace('.', '/') + ".class").toString());
-        } catch (final ClassNotFoundException e) {
-            return getModuleName((TypeElement) declaredType.asElement());
-        }
-    }
-
-    private static String getModuleName(final TypeElement typeElement) {
-        try {
-            final Field sourceFileField = typeElement.getClass().getField("sourcefile");
-            sourceFileField.setAccessible(true);
-            return getModuleName(sourceFileField.get(typeElement).toString());
-        } catch (final Exception e) {
-            throw new RuntimeException("Error while reading [sourcefile] field from @Remote interface element.", e);
-        }
-    }
-
-    private static String getModuleName(final String sourceFilePath) {
-
-        if (sourceFilePath.contains("jar!")) {
-            return get(-2, sourceFilePath.split("(/)[\\w-]+(-)[\\d.]+(.*)\\.jar!")[0].split("/"));
-        }
-
-        if (sourceFilePath.contains("/src/main/java")) {
-            return get(-1, sourceFilePath.split("/src/main/java")[0].split("/"));
-        }
-
-        if (sourceFilePath.contains("/target/generated-sources")) {
-            return get(-1, sourceFilePath.split("/target/generated-sources")[0].split("/"));
-        }
-
-        if (sourceFilePath.contains("/target/classes")) {
-            return get(-1, sourceFilePath.split("/target/classes")[0].split("/"));
-        }
-
-        if (sourceFilePath.contains("/src/test/java")) {
-            return get(-1, sourceFilePath.split("/src/test/java")[0].split("/")) + "-test";
-        }
-
-        if (sourceFilePath.contains("/target/generated-test-sources")) {
-            return get(-1, sourceFilePath.split("/target/generated-test-sources")[0].split("/")) + "-test";
-        }
-
-        if (sourceFilePath.contains("/target/test-classes")) {
-            return get(-1, sourceFilePath.split("/target/test-classes")[0].split("/")) + "-test";
-        }
-
-        throw new RuntimeException("Module name unretrievable from [" + sourceFilePath + "]");
-    }
-
-    private static <T> T get(final int a, final T[] array) {
+    public static <T> T get(final int a, final T[] array) {
         return array[a < 0 ? array.length + a : a];
     }
 

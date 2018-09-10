@@ -124,7 +124,7 @@ public class PojoTsClass implements TsClass {
     }
 
     private String extractSimpleName(final TsTypeTarget tsTypeTarget) {
-        return importStore.with(new JavaType(asElement().asType(), asElement().asType()).translate(tsTypeTarget)).toTypeScript();
+        return importStore.with(new JavaType(getType(), getType()).translate(tsTypeTarget)).toTypeScript();
     }
 
     private String fqcn() {
