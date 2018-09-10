@@ -50,7 +50,7 @@ describe("marshall", () => {
     });
   });
 
-  test("with JavaBoolean collection, should wrap every element into an errai object", () => {
+  test("with JavaBoolean optional, should wrap element into an errai object", () => {
     const input = new JavaOptional<JavaBoolean>(new JavaBoolean(false));
 
     const output = new JavaOptionalMarshaller().marshall(input, context);
@@ -66,7 +66,7 @@ describe("marshall", () => {
     });
   });
 
-  test("with JavaBigNumber array, should serialize every element normally", () => {
+  test("with JavaBigNumber optional, should serialize element normally", () => {
     const input = new JavaOptional<JavaBigInteger>(new JavaBigInteger("1"));
 
     const output = new JavaOptionalMarshaller().marshall(input, context);
@@ -82,7 +82,7 @@ describe("marshall", () => {
     });
   });
 
-  test("with custom object array, should serialize every element normally", () => {
+  test("with custom object optional, should serialize element normally", () => {
     const input = new JavaOptional<MyPortable>(new MyPortable({ foo: "foo1", bar: "bar1" }));
 
     const output = new JavaOptionalMarshaller().marshall(input, context);

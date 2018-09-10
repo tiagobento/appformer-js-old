@@ -124,7 +124,7 @@ describe("marshall", () => {
     });
   });
 
-  test("with JavaBigNumber array, should serialize every element normally", () => {
+  test("with JavaBigNumber collection, should serialize every element normally", () => {
     const bigIntegerMarshaller = new JavaBigIntegerMarshaller();
 
     const bigNumberArray = [new JavaBigInteger("1"), new JavaBigInteger("2"), new JavaBigInteger("3")];
@@ -163,7 +163,7 @@ describe("marshall", () => {
     });
   });
 
-  test("with custom object array, should serialize every element normally", () => {
+  test("with custom object collection, should serialize every element normally", () => {
     const portableArray = [
       new MyPortable({ foo: "foo1", bar: "bar1" }),
       new MyPortable({ foo: "foo2", bar: "bar2" }),

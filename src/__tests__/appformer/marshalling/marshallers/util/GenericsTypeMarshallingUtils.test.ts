@@ -53,6 +53,45 @@ describe("marshallGenericsTypeElement", () => {
     expect(output).toStrictEqual(expected);
   });
 
+  test("with Array input, should marshall with regular marshalling", () => {
+    const input = ["str1", "str2"];
+
+    const output = GenericsTypeMarshallingUtils.marshallGenericsTypeElement(input, new MarshallingContext());
+    const expected = new JavaArrayListMarshaller().marshall(new JavaArrayList(input), new MarshallingContext())!;
+
+    // don't care about the ids
+    delete output[objectId];
+    delete expected[objectId];
+
+    expect(output).toStrictEqual(expected);
+  });
+
+  test("with JavaHashSet input, should marshall with regular marshalling", () => {
+    const input = new JavaHashSet(new Set(["str1", "str2"]));
+
+    const output = GenericsTypeMarshallingUtils.marshallGenericsTypeElement(input, new MarshallingContext());
+    const expected = new JavaHashSetMarshaller().marshall(input, new MarshallingContext())!;
+
+    // don't care about the ids
+    delete output[objectId];
+    delete expected[objectId];
+
+    expect(output).toStrictEqual(expected);
+  });
+
+  test("with Set input, should marshall with regular marshalling", () => {
+    const input = new Set(["str1", "str2"]);
+
+    const output = GenericsTypeMarshallingUtils.marshallGenericsTypeElement(input, new MarshallingContext());
+    const expected = new JavaHashSetMarshaller().marshall(new JavaHashSet(input), new MarshallingContext())!;
+
+    // don't care about the ids
+    delete output[objectId];
+    delete expected[objectId];
+
+    expect(output).toStrictEqual(expected);
+  });
+
   test("with JavaBigDecimal input, should marshall with regular marshalling", () => {
     const input = new JavaBigDecimal("1.1");
 
@@ -92,11 +131,11 @@ describe("marshallGenericsTypeElement", () => {
     expect(output).toStrictEqual(expected);
   });
 
-  test("with JavaHashSet input, should marshall with regular marshalling", () => {
-    const input = new JavaHashSet(new Set(["str1", "str2"]));
+  test("with Map input, should marshall with regular marshalling", () => {
+    const input = new Map([["foo1", "bar1"], ["foo2", "bar2"]]);
 
     const output = GenericsTypeMarshallingUtils.marshallGenericsTypeElement(input, new MarshallingContext());
-    const expected = new JavaHashSetMarshaller().marshall(input, new MarshallingContext())!;
+    const expected = new JavaHashMapMarshaller().marshall(new JavaHashMap(input), new MarshallingContext())!;
 
     // don't care about the ids
     delete output[objectId];
@@ -127,11 +166,33 @@ describe("marshallGenericsTypeElement", () => {
     expect(output).toStrictEqual(expected);
   });
 
+  test("with string input, should marshall with regular marshalling", () => {
+    const input = "str";
+
+    const output = GenericsTypeMarshallingUtils.marshallGenericsTypeElement(input, new MarshallingContext());
+    const expected = new JavaStringMarshaller().marshall(new JavaString(input), new MarshallingContext())!;
+
+    expect(output).toStrictEqual(expected);
+  });
+
   test("with JavaDate input, should marshall with regular marshalling", () => {
     const input = new JavaDate(new Date());
 
     const output = GenericsTypeMarshallingUtils.marshallGenericsTypeElement(input, new MarshallingContext());
     const expected = new JavaDateMarshaller().marshall(input, new MarshallingContext())!;
+
+    // don't care about the ids
+    delete output[objectId];
+    delete expected[objectId];
+
+    expect(output).toStrictEqual(expected);
+  });
+
+  test("with Date input, should marshall with regular marshalling", () => {
+    const input = new Date();
+
+    const output = GenericsTypeMarshallingUtils.marshallGenericsTypeElement(input, new MarshallingContext());
+    const expected = new JavaDateMarshaller().marshall(new JavaDate(input), new MarshallingContext())!;
 
     // don't care about the ids
     delete output[objectId];
@@ -168,6 +229,18 @@ describe("marshallGenericsTypeElement", () => {
 
   test("with JavaBoolean input, should return input wrapped as an ErraiObject", () => {
     const input = new JavaBoolean(false);
+
+    const output = GenericsTypeMarshallingUtils.marshallGenericsTypeElement(input, new MarshallingContext());
+
+    expect(output).toStrictEqual({
+      [encodedType]: "java.lang.Boolean",
+      [objectId]: "-1",
+      [numVal]: false
+    });
+  });
+
+  test("with boolean input, should return input wrapped as an ErraiObject", () => {
+    const input = false;
 
     const output = GenericsTypeMarshallingUtils.marshallGenericsTypeElement(input, new MarshallingContext());
 

@@ -5,6 +5,7 @@ import ErraiObjectConstants from "appformer/marshalling/model/ErraiObjectConstan
 import ErraiObject from "appformer/marshalling/model/ErraiObject";
 import MarshallingContext from "appformer/marshalling/MarshallingContext";
 import MarshallerProvider from "appformer/marshalling/MarshallerProvider";
+import JavaWrapper from "appformer/java-wrappers/JavaWrapper";
 
 export default class GenericsTypeMarshallingUtils {
   private static shouldWrapWhenUsedAsGenericsType(value: Portable<any>) {
@@ -23,12 +24,15 @@ export default class GenericsTypeMarshallingUtils {
     };
   }
 
-  public static marshallGenericsTypeElement(value: Portable<any>, ctx: MarshallingContext): ErraiObject {
-    const marshaller = MarshallerProvider.getFor(value);
-    const marshaledValue = marshaller.marshall(value, ctx);
+  public static marshallGenericsTypeElement(value: any, ctx: MarshallingContext): ErraiObject {
+    // apply automatic native types -> java types conversion
+    const enhancedInput = JavaWrapper.wrapIfNeeded(value);
 
-    if (this.shouldWrapWhenUsedAsGenericsType(value)) {
-      return this.wrapGenericsTypeElement(value, marshaledValue)!;
+    const marshaller = MarshallerProvider.getFor(enhancedInput);
+    const marshaledValue = marshaller.marshall(enhancedInput, ctx);
+
+    if (this.shouldWrapWhenUsedAsGenericsType(enhancedInput)) {
+      return this.wrapGenericsTypeElement(enhancedInput, marshaledValue)!;
     }
 
     return marshaledValue;

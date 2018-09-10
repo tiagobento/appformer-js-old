@@ -22,10 +22,10 @@ export default abstract class JavaWrapper<T> implements Portable<JavaWrapper<T>>
     return this.getWrappingFunction(obj) !== undefined;
   }
 
-  public static wrapIfNeeded(obj: any): JavaWrapper<any> | undefined {
+  public static wrapIfNeeded<U>(obj: U): JavaWrapper<U> | U {
     const func = this.getWrappingFunction(obj);
     if (!func) {
-      return undefined;
+      return obj;
     }
 
     return func(obj);

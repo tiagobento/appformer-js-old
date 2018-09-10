@@ -82,12 +82,12 @@ describe("wrapIfNeeded", () => {
     expect(JavaWrapper.wrapIfNeeded(input)).toEqual(output);
   });
 
-  test("with custom object, should return undefined", () => {
+  test("with custom object, should return same object", () => {
     const input = {
       foo: "bar1",
       foo2: "bar2"
     };
-    expect(JavaWrapper.wrapIfNeeded(input)).toBeUndefined();
+    expect(JavaWrapper.wrapIfNeeded(input)).toStrictEqual(input);
   });
 });
 
