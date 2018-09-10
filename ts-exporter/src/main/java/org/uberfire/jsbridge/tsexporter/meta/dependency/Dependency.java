@@ -16,10 +16,8 @@
 
 package org.uberfire.jsbridge.tsexporter.meta.dependency;
 
-import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 
-import org.uberfire.jsbridge.tsexporter.Utils;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 import org.uberfire.jsbridge.tsexporter.model.PojoTsClass;
 
@@ -63,7 +61,7 @@ public interface Dependency {
 
         @Override
         public String getModuleName() {
-            return Utils.getModuleName(declaredType);
+            return new PojoTsClass(declaredType).getModuleName();
         }
 
         @Override
@@ -88,6 +86,10 @@ public interface Dependency {
         public static final BuiltIn JAVA_SHORT = new BuiltIn("JavaShort", "appformer", "java-wrappers/JavaShort");
         public static final BuiltIn JAVA_BIG_INTEGER = new BuiltIn("JavaBigInteger", "appformer", "java-wrappers/JavaBigInteger");
         public static final BuiltIn JAVA_BIG_DECIMAL = new BuiltIn("JavaBigDecimal", "appformer", "java-wrappers/JavaBigDecimal");
+        public static final BuiltIn JAVA_TREE_SET = new BuiltIn("JavaTreeSet", "appformer", "java-wrappers/JavaTreeSet");
+        public static final BuiltIn JAVA_LINKED_LIST = new BuiltIn("JavaLinkedList", "appformer", "java-wrappers/JavaLinkedList");
+        public static final BuiltIn JAVA_TREE_MAP = new BuiltIn("JavaTreeMap", "appformer", "java-wrappers/JavaTreeMap");
+        public static final BuiltIn JAVA_OPTIONAL = new BuiltIn("JavaOptional", "appformer", "java-wrappers/JavaOptional");
 
         private String uniqueName;
         private String relativePath;
@@ -104,6 +106,10 @@ public interface Dependency {
 
         @Override
         public String uniqueName(final DeclaredType owner) {
+            return getUniqueName();
+        }
+
+        public String getUniqueName() {
             return uniqueName;
         }
 
@@ -120,10 +126,6 @@ public interface Dependency {
         @Override
         public boolean represents(final DeclaredType type) {
             return false;
-        }
-
-        public String getUniqueName() {
-            return uniqueName;
         }
     }
 }

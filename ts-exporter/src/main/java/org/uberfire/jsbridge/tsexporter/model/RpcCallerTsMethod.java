@@ -27,7 +27,6 @@ import javax.lang.model.element.TypeElement;
 import org.uberfire.jsbridge.tsexporter.Main;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget;
-import org.uberfire.jsbridge.tsexporter.meta.TranslatableJavaType;
 import org.uberfire.jsbridge.tsexporter.meta.dependency.DependencyGraph;
 import org.uberfire.jsbridge.tsexporter.util.ImportStore;
 
@@ -160,10 +159,10 @@ public class RpcCallerTsMethod {
         return new JavaType(executableElement.getReturnType(), typeElement.asType());
     }
 
-    private TranslatableJavaType importing(final JavaType javaType,
-                                           final TsTypeTarget tsTypeTarget) {
+    private JavaType.Translatable importing(final JavaType javaType,
+                                            final TsTypeTarget tsTypeTarget) {
 
-        final TranslatableJavaType translatable = javaType.translate(tsTypeTarget);
+        final JavaType.Translatable translatable = javaType.translate(tsTypeTarget);
         translatable.getAggregated().forEach(dependencyGraph::add);
         return importStore.with(translatable);
     }

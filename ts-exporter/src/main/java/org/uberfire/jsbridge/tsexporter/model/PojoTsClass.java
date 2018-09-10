@@ -26,7 +26,6 @@ import javax.lang.model.type.DeclaredType;
 import org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget;
-import org.uberfire.jsbridge.tsexporter.meta.TranslatableJavaType;
 import org.uberfire.jsbridge.tsexporter.util.ImportStore;
 import org.uberfire.jsbridge.tsexporter.util.Lazy;
 
@@ -148,7 +147,7 @@ public class PojoTsClass implements TsClass {
                 .collect(joining("\n"));
     }
 
-    private TranslatableJavaType superclass() {
+    private JavaType.Translatable superclass() {
         return new JavaType(asElement().getSuperclass(), declaredType).translate(TYPE_ARGUMENT_USE);
     }
 

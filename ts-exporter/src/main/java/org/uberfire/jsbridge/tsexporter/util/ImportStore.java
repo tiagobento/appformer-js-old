@@ -21,7 +21,7 @@ import java.util.List;
 
 import javax.lang.model.type.DeclaredType;
 
-import org.uberfire.jsbridge.tsexporter.meta.TranslatableJavaType;
+import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 import org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency;
 import org.uberfire.jsbridge.tsexporter.model.TsClass;
 
@@ -32,9 +32,9 @@ import static org.uberfire.jsbridge.tsexporter.Utils.distinctBy;
 
 public class ImportStore {
 
-    private final List<TranslatableJavaType> dependencies = new ArrayList<>();
+    private final List<JavaType.Translatable> dependencies = new ArrayList<>();
 
-    public TranslatableJavaType with(final TranslatableJavaType type) {
+    public JavaType.Translatable with(final JavaType.Translatable type) {
         dependencies.add(type);
         return type;
     }

@@ -1,5 +1,10 @@
 package org.uberfire.jsbridge.tsexporter.model;
 
+import java.util.LinkedList;
+import java.util.Optional;
+import java.util.TreeMap;
+import java.util.TreeSet;
+
 import com.google.testing.compile.CompilationRule;
 import org.junit.Before;
 import org.junit.Rule;
@@ -29,6 +34,10 @@ public class PojoTsClassTestClasses {
         A a;
         B b;
         Integer c;
+        TreeSet<String> d;
+        LinkedList<String> e;
+        TreeMap<String, String> f;
+        Optional<TreeSet<String>> g;
     }
 
     @Test
@@ -38,6 +47,10 @@ public class PojoTsClassTestClasses {
         assertEquals(lines("",
                            "import { Portable } from 'generated__temporary__/Model';",
                            "import JavaInteger from 'appformer/java-wrappers/JavaInteger';",
+                           "import JavaLinkedList from 'appformer/java-wrappers/JavaLinkedList';",
+                           "import JavaOptional from 'appformer/java-wrappers/JavaOptional';",
+                           "import JavaTreeMap from 'appformer/java-wrappers/JavaTreeMap';",
+                           "import JavaTreeSet from 'appformer/java-wrappers/JavaTreeSet';",
                            "import org_uberfire_jsbridge_tsexporter_model_PojoTsClassTestClasses_A from 'output/ts-exporter-test/org/uberfire/jsbridge/tsexporter/model/PojoTsClassTestClasses/A';",
                            "",
                            "export default  class B extends org_uberfire_jsbridge_tsexporter_model_PojoTsClassTestClasses_A implements Portable<B> {",
@@ -47,8 +60,12 @@ public class PojoTsClassTestClasses {
                            "public readonly a?: org_uberfire_jsbridge_tsexporter_model_PojoTsClassTestClasses_A;",
                            "public readonly b?: B;",
                            "public readonly c?: JavaInteger;",
+                           "public readonly d?: JavaTreeSet<string>;",
+                           "public readonly e?: JavaLinkedList<string>;",
+                           "public readonly f?: JavaTreeMap<string, string>;",
+                           "public readonly g?: JavaOptional<JavaTreeSet<string>>;",
                            "",
-                           "  constructor(self: { a?: org_uberfire_jsbridge_tsexporter_model_PojoTsClassTestClasses_A, b?: B, c?: JavaInteger, inherited?: {} }) {",
+                           "  constructor(self: { a?: org_uberfire_jsbridge_tsexporter_model_PojoTsClassTestClasses_A, b?: B, c?: JavaInteger, d?: JavaTreeSet<string>, e?: JavaLinkedList<string>, f?: JavaTreeMap<string, string>, g?: JavaOptional<JavaTreeSet<string>>, inherited?: {} }) {",
                            "    super({...self.inherited});",
                            "    Object.assign(this, self);",
                            "  }",

@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import javax.lang.model.element.Element;
@@ -101,6 +102,7 @@ public class TestingUtils {
     public abstract static class DeclaredTypes {
 
         Map<String, String> map;
+        TreeMap<String, String> treeMap;
         List<String> list;
         ArrayList<String> arrayList;
         LinkedList<String> linkedList;

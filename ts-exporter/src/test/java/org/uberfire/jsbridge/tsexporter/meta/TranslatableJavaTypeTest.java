@@ -65,12 +65,12 @@ public class TranslatableJavaTypeTest {
         assertTrue(imports.get(1).toString().endsWith("Sphere<J>"));
     }
 
-    private TranslatableJavaType translatable(final DeclaredType type) {
+    private JavaType.Translatable translatable(final DeclaredType type) {
         return new JavaType(type, type).translate();
     }
 
-    private TranslatableJavaType translatable(final DeclaredType type,
-                                              final TsTypeTarget target) {
+    private JavaType.Translatable translatable(final DeclaredType type,
+                                               final TsTypeTarget target) {
 
         return new JavaType(type, type).translate(target);
     }

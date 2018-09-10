@@ -143,15 +143,15 @@ public class JavaTypeTest {
         assertEquals("any /* enum_ */", translate(type(Enum.class)));
         assertEquals("any /* map entry */", translate(type(Map.Entry.class)));
         //TODO: HashMap.Node: It's protected! How?
+        assertEquals("JavaTreeMap<any, any>", translate(erased(type(TreeMap.class))));
         assertEquals("Map<any, any>", translate(erased(type(HashMap.class))));
-        assertEquals("Map<any, any>", translate(erased(type(TreeMap.class))));
         assertEquals("Map<any, any>", translate(erased(type(Map.class))));
         assertEquals("Set<any>", translate(erased(type(Set.class))));
         assertEquals("Set<any>", translate(erased(type(HashSet.class))));
-        assertEquals("Set<any>", translate(erased(type(TreeSet.class))));
+        assertEquals("JavaTreeSet<any>", translate(erased(type(TreeSet.class))));
         assertEquals("any[]", translate(erased(type(List.class))));
         assertEquals("any[]", translate(erased(type(ArrayList.class))));
-        assertEquals("any[]", translate(erased(type(LinkedList.class))));
+        assertEquals("JavaLinkedList<any>", translate(erased(type(LinkedList.class))));
         assertEquals("any[]", translate(erased(type(Collection.class))));
         assertEquals("any[]", translate(TYPE_ARGUMENT_IMPORT, erased(type(Collection.class))));
         assertEquals("Foo", translate(type(Foo.class)));
@@ -160,17 +160,19 @@ public class JavaTypeTest {
         assertEquals("Bar", translate(TYPE_ARGUMENT_IMPORT, type(Foo.Bar.class)));
         assertEquals("Circle<any>", translate(erased(type(Circle.class))));
         assertEquals("Circle", translate(TYPE_ARGUMENT_IMPORT, erased(type(Circle.class))));
-        assertEquals("any", translate(erased(type(Optional.class))));
+        assertEquals("JavaOptional<any>", translate(erased(type(Optional.class))));
 
+        assertEquals("Map<string, string>", translate(member("map", type(DeclaredTypes.class))));
+        assertEquals("JavaTreeMap<string, string>", translate(member("treeMap", type(DeclaredTypes.class))));
         assertEquals("Set<string>", translate(member("set", type(DeclaredTypes.class))));
         assertEquals("Set<string>", translate(member("hashSet", type(DeclaredTypes.class))));
-        assertEquals("Set<string>", translate(member("treeSet", type(DeclaredTypes.class))));
+        assertEquals("JavaTreeSet<string>", translate(member("treeSet", type(DeclaredTypes.class))));
         assertEquals("string[]", translate(member("list", type(DeclaredTypes.class))));
         assertEquals("string[]", translate(member("arrayList", type(DeclaredTypes.class))));
-        assertEquals("string[]", translate(member("linkedList", type(DeclaredTypes.class))));
+        assertEquals("JavaLinkedList<string>", translate(member("linkedList", type(DeclaredTypes.class))));
         assertEquals("string[]", translate(member("collection", type(DeclaredTypes.class))));
         assertEquals("any /* class */", translate(member("clazz", type(DeclaredTypes.class))));
-        assertEquals("string", translate(member("optional", type(DeclaredTypes.class))));
+        assertEquals("JavaOptional<string>", translate(member("optional", type(DeclaredTypes.class))));
     }
 
     @Test
