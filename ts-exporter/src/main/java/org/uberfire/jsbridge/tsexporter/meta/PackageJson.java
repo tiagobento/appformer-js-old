@@ -24,9 +24,9 @@ import org.uberfire.jsbridge.tsexporter.model.TsClass;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.joining;
-import static org.uberfire.jsbridge.tsexporter.Utils.lines;
+import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
 
-public class PackageJson {
+public class PackageJson implements TsExporterResource {
 
     private final String moduleName;
     private final List<? extends TsClass> classes;
@@ -38,6 +38,7 @@ public class PackageJson {
         this.classes = classes;
     }
 
+    @Override
     public String toSource() {
 
         final String dependencies = classes.stream()
@@ -64,6 +65,7 @@ public class PackageJson {
         );
     }
 
+    @Override
     public String getModuleName() {
         return moduleName;
     }

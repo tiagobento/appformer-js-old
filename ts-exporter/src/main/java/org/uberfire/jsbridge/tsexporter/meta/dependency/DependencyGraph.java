@@ -27,6 +27,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 
+import org.uberfire.jsbridge.tsexporter.util.Utils;
 import org.uberfire.jsbridge.tsexporter.model.PojoTsClass;
 
 import static java.util.Collections.emptySet;
@@ -86,7 +87,7 @@ public class DependencyGraph {
                 .filter(Objects::nonNull)
                 .collect(toSet());
 
-        final Set<Vertex> toBeVisited = diff(startingPoints, visited);
+        final Set<Vertex> toBeVisited = Utils.diff(startingPoints, visited);
         visited.addAll(toBeVisited);
 
         return concat(startingPoints.stream(),
@@ -142,13 +143,5 @@ public class DependencyGraph {
 
     public Set<Vertex> vertices() {
         return new HashSet<>(graph.values());
-    }
-
-    private static <T> Set<T> diff(final Set<? extends T> a,
-                                   final Set<? extends T> b) {
-
-        final Set<T> tmp = new HashSet<>(a);
-        tmp.removeAll(b);
-        return tmp;
     }
 }

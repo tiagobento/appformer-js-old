@@ -6,15 +6,16 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import com.google.testing.compile.CompilationRule;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 
 import static org.junit.Assert.assertEquals;
-import static org.uberfire.jsbridge.tsexporter.TestingUtils.init;
-import static org.uberfire.jsbridge.tsexporter.TestingUtils.type;
-import static org.uberfire.jsbridge.tsexporter.Utils.lines;
+import static org.uberfire.jsbridge.tsexporter.util.TestingUtils.init;
+import static org.uberfire.jsbridge.tsexporter.util.TestingUtils.type;
+import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
 
 public class PojoTsClassTestClasses {
 
@@ -27,10 +28,17 @@ public class PojoTsClassTestClasses {
         JavaType.SIMPLE_NAMES.set(true);
     }
 
+    @After
+    public void after() {
+        JavaType.SIMPLE_NAMES.set(false);
+    }
+
     static class A {
+
     }
 
     public class B extends A {
+
         A a;
         B b;
         Integer c;

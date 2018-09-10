@@ -25,17 +25,16 @@ import com.google.testing.compile.CompilationRule;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.uberfire.jsbridge.tsexporter.TestingUtils;
-import org.uberfire.jsbridge.tsexporter.meta.dependency.DependencyGraph;
+import org.uberfire.jsbridge.tsexporter.util.TestingUtils;
 
 import static java.util.Arrays.stream;
 import static java.util.Collections.singleton;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertEquals;
-import static org.uberfire.jsbridge.tsexporter.TestingUtils.element;
-import static org.uberfire.jsbridge.tsexporter.TestingUtils.memberElement;
-import static org.uberfire.jsbridge.tsexporter.TestingUtils.type;
+import static org.uberfire.jsbridge.tsexporter.util.TestingUtils.element;
+import static org.uberfire.jsbridge.tsexporter.util.TestingUtils.memberElement;
+import static org.uberfire.jsbridge.tsexporter.util.TestingUtils.type;
 
 public class DependencyGraphTest {
 

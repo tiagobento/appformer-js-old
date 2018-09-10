@@ -24,21 +24,23 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 
-import org.uberfire.jsbridge.tsexporter.Main;
+import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget;
 import org.uberfire.jsbridge.tsexporter.meta.dependency.DependencyGraph;
-import org.uberfire.jsbridge.tsexporter.util.ImportStore;
+import org.uberfire.jsbridge.tsexporter.meta.dependency.ImportStore;
 
 import static java.lang.String.format;
 import static java.util.Collections.singleton;
+import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 import static javax.lang.model.element.ElementKind.CLASS;
 import static javax.lang.model.element.Modifier.ABSTRACT;
-import static org.uberfire.jsbridge.tsexporter.Utils.lines;
+import static org.uberfire.jsbridge.tsexporter.Main.types;
+import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_DECLARATION;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_USE;
 
@@ -49,6 +51,7 @@ public class RpcCallerTsMethod {
     private final ImportStore importStore;
     private final String name;
     private final DependencyGraph dependencyGraph;
+    private final DecoratorStore decoratorStore;
 
     public RpcCallerTsMethod(final RpcCallerTsMethod tsMethod,
                              final String name) {
@@ -57,18 +60,22 @@ public class RpcCallerTsMethod {
         this.executableElement = tsMethod.executableElement;
         this.importStore = tsMethod.importStore;
         this.dependencyGraph = tsMethod.dependencyGraph;
+        this.decoratorStore = tsMethod.decoratorStore;
         this.name = name;
     }
 
     public RpcCallerTsMethod(final ExecutableElement executableElement,
                              final TypeElement typeElement,
                              final ImportStore importStore,
-                             final DependencyGraph dependencyGraph) {
+                             final DependencyGraph dependencyGraph,
+                             final DecoratorStore decoratorStore) {
+
         this.executableElement = executableElement;
         this.typeElement = typeElement;
         this.importStore = importStore;
         this.name = executableElement.getSimpleName().toString();
         this.dependencyGraph = dependencyGraph;
+        this.decoratorStore = decoratorStore;
     }
 
     public String getName() {
@@ -81,17 +88,16 @@ public class RpcCallerTsMethod {
         final String erraiBusString = erraiBusString();
         final String rpcCallParams = rpcCallParams();
         final String returnType = returnType();
-
         final String factoriesOracle = factoriesOracle(); //Has to be the last
 
         return format(lines("",
                             "public %s(args: { %s }) {",
                             "  return rpc(%s, [%s])",
-                            "         .then((json: string) => { ",
+                            "         .then((json: string) => {",
                             "           return unmarshall(json, {",
                             "%s",
-                            "           }) as %s; ",
-                            "         }); ",
+                            "           }) as %s;",
+                            "         });",
                             "}",
                             ""),
 
@@ -121,7 +127,7 @@ public class RpcCallerTsMethod {
                 ":" +
                 executableElement.getParameters().stream()
                         .map(Element::asType)
-                        .map(s -> Optional.ofNullable(Main.types.asElement(s)))
+                        .map(s -> Optional.ofNullable(types.asElement(s)))
                         .filter(Optional::isPresent).map(Optional::get)
                         .map(Object::toString)
                         .collect(toList()).stream().collect(joining(":")) +
@@ -135,19 +141,19 @@ public class RpcCallerTsMethod {
     }
 
     private String factoriesOracle() {
-        final Element element = Main.types.asElement(getReturnTypeJavaType().getType());
-        final Set<Element> allDependencies = dependencyGraph.findAllDependencies(singleton(element)).stream()
+        final Set<Element> allDependencies = dependencyGraph.findAllDependencies(singleton(getReturnTypeJavaType().asElement())).stream()
                 .map(DependencyGraph.Vertex::getElement)
                 .collect(toSet());
 
         return dependencyGraph.findAllDependents(allDependencies).stream()
                 .map(DependencyGraph.Vertex::getPojoClass)
-                .filter(dependent -> allDependencies.stream().anyMatch(d -> Main.types.isSubtype(dependent.getType(), d.asType())))
+                .sorted(comparing(TsClass::getRelativePath))
+                .filter(dependent -> allDependencies.stream().anyMatch(d -> types.isSubtype(types.erasure(dependent.getType()), types.erasure(d.asType()))))
                 .filter(dependent -> dependent.getType().asElement().getKind().equals(CLASS) && !dependent.getType().asElement().getModifiers().contains(ABSTRACT))
                 .distinct()
                 .map(c -> format("\"%s\": (x: any) => new %s(x)",
                                  c.asElement().getQualifiedName().toString(),
-                                 importing(new JavaType(Main.types.erasure(c.getType()), typeElement.asType()), TYPE_ARGUMENT_USE).toTypeScript()))
+                                 importing(new JavaType(types.erasure(c.getType()), typeElement.asType()), TYPE_ARGUMENT_USE).toTypeScript()))
                 .collect(joining(",\n"));
     }
 
@@ -162,7 +168,7 @@ public class RpcCallerTsMethod {
     private JavaType.Translatable importing(final JavaType javaType,
                                             final TsTypeTarget tsTypeTarget) {
 
-        final JavaType.Translatable translatable = javaType.translate(tsTypeTarget);
+        final JavaType.Translatable translatable = javaType.translate(tsTypeTarget, decoratorStore);
         translatable.getAggregated().forEach(dependencyGraph::add);
         return importStore.with(translatable);
     }

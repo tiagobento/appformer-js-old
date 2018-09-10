@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.uberfire.jsbridge.tsexporter.util;
+package org.uberfire.jsbridge.tsexporter.meta.dependency;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,13 +22,12 @@ import java.util.List;
 import javax.lang.model.type.DeclaredType;
 
 import org.uberfire.jsbridge.tsexporter.meta.JavaType;
-import org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency;
 import org.uberfire.jsbridge.tsexporter.model.TsClass;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
-import static org.uberfire.jsbridge.tsexporter.Utils.distinctBy;
+import static org.uberfire.jsbridge.tsexporter.util.Utils.distinctBy;
 
 public class ImportStore {
 

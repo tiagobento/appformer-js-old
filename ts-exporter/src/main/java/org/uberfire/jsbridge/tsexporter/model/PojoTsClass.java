@@ -23,10 +23,10 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 
-import org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget;
-import org.uberfire.jsbridge.tsexporter.util.ImportStore;
+import org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency;
+import org.uberfire.jsbridge.tsexporter.meta.dependency.ImportStore;
 import org.uberfire.jsbridge.tsexporter.util.Lazy;
 
 import static java.lang.String.format;
@@ -37,8 +37,8 @@ import static javax.lang.model.element.ElementKind.ENUM_CONSTANT;
 import static javax.lang.model.element.ElementKind.INTERFACE;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.STATIC;
-import static org.uberfire.jsbridge.tsexporter.Utils.formatRightToLeft;
-import static org.uberfire.jsbridge.tsexporter.Utils.lines;
+import static org.uberfire.jsbridge.tsexporter.util.Utils.formatRightToLeft;
+import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_DECLARATION;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_USE;
 
@@ -69,53 +69,56 @@ public class PojoTsClass implements TsClass {
 
     //FIXME: Enum extending interfaces?
     private String toEnum() {
-        return formatRightToLeft(lines("",
-                                       "enum %s { %s }",
-                                       "",
-                                       "export default %s;"),
+        return formatRightToLeft(
+                lines("",
+                      "enum %s { %s }",
+                      "",
+                      "export default %s;"),
 
-                                 () -> extractSimpleName(TYPE_ARGUMENT_DECLARATION),
-                                 this::enumFields,
-                                 () -> extractSimpleName(TYPE_ARGUMENT_DECLARATION));
+                () -> extractSimpleName(TYPE_ARGUMENT_DECLARATION),
+                this::enumFields,
+                () -> extractSimpleName(TYPE_ARGUMENT_DECLARATION));
     }
 
     private String toInterface() {
-        return formatRightToLeft(lines("",
-                                       "%s",
-                                       "",
-                                       "export default interface %s %s {",
-                                       "}"),
+        return formatRightToLeft(
+                lines("",
+                      "%s",
+                      "",
+                      "export default interface %s %s {",
+                      "}"),
 
-                                 this::imports,
-                                 () -> extractSimpleName(TYPE_ARGUMENT_DECLARATION),
-                                 this::interfaceHierarchy);
+                this::imports,
+                () -> extractSimpleName(TYPE_ARGUMENT_DECLARATION),
+                this::interfaceHierarchy);
     }
 
     private String toClass() {
-        return formatRightToLeft(lines("",
-                                       "import { Portable } from 'generated__temporary__/Model';",
-                                       "%s",
-                                       "",
-                                       "export default %s class %s %s {",
-                                       "",
-                                       "  protected readonly _fqcn: string = '%s';",
-                                       "",
-                                       "%s",
-                                       "",
-                                       "  constructor(self: { %s }) {",
-                                       "    %s",
-                                       "    Object.assign(this, self);",
-                                       "  }",
-                                       "}"),
+        return formatRightToLeft(
+                lines("",
+                      "import { Portable } from 'generated__temporary__/Model';",
+                      "%s",
+                      "",
+                      "export default %s class %s %s {",
+                      "",
+                      "  protected readonly _fqcn: string = '%s';",
+                      "",
+                      "%s",
+                      "",
+                      "  constructor(self: { %s }) {",
+                      "    %s",
+                      "    Object.assign(this, self);",
+                      "  }",
+                      "}"),
 
-                                 this::imports,
-                                 this::abstractOrNot,
-                                 () -> extractSimpleName(TYPE_ARGUMENT_DECLARATION),
-                                 this::classHierarchy,
-                                 this::fqcn,
-                                 this::fields,
-                                 () -> extractConstructorArgs(asElement()),
-                                 this::superConstructorCall
+                this::imports,
+                this::abstractOrNot,
+                () -> extractSimpleName(TYPE_ARGUMENT_DECLARATION),
+                this::classHierarchy,
+                this::fqcn,
+                this::fields,
+                () -> extractConstructorArgs(asElement()),
+                this::superConstructorCall
         );
     }
 
@@ -124,7 +127,7 @@ public class PojoTsClass implements TsClass {
     }
 
     private String extractSimpleName(final TsTypeTarget tsTypeTarget) {
-        return importStore.with(new JavaType(getType(), getType()).translate(tsTypeTarget)).toTypeScript();
+        return importStore.with(new JavaType(declaredType, declaredType).translate(tsTypeTarget)).toTypeScript();
     }
 
     private String fqcn() {
@@ -188,7 +191,7 @@ public class PojoTsClass implements TsClass {
     private List<JavaType> interfaces() {
         return ((TypeElement) declaredType.asElement()).getInterfaces().stream()
                 .map(t -> new JavaType(t, declaredType))
-                .filter(s -> s.translate().canBeSubclassed())
+                .filter(s -> s.translate(TYPE_ARGUMENT_DECLARATION).canBeSubclassed())
                 .collect(toList());
     }
 

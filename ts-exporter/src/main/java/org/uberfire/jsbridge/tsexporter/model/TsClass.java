@@ -23,13 +23,12 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 
 import com.sun.tools.javac.code.Symbol;
+import org.uberfire.jsbridge.tsexporter.meta.TsExporterResource;
 import org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency;
 
-import static org.uberfire.jsbridge.tsexporter.Utils.get;
+import static org.uberfire.jsbridge.tsexporter.util.Utils.get;
 
-public interface TsClass {
-
-    String toSource();
+public interface TsClass extends TsExporterResource {
 
     List<Dependency> getDependencies();
 
@@ -43,6 +42,7 @@ public interface TsClass {
         return asElement().getQualifiedName().toString().replace(".", "/");
     }
 
+    @Override
     default String getModuleName() {
 
         if (getType().toString().matches("^javax?.*")) {

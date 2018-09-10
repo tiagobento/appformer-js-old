@@ -6,9 +6,9 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
-import static org.uberfire.jsbridge.tsexporter.TestingUtils.init;
-import static org.uberfire.jsbridge.tsexporter.TestingUtils.type;
-import static org.uberfire.jsbridge.tsexporter.Utils.lines;
+import static org.uberfire.jsbridge.tsexporter.util.TestingUtils.init;
+import static org.uberfire.jsbridge.tsexporter.util.TestingUtils.type;
+import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
 
 public class PojoTsClassTestEnum {
 

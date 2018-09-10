@@ -20,11 +20,15 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 
 import com.google.testing.compile.CompilationRule;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.uberfire.jsbridge.tsexporter.decorators.DecoratorDependency;
+import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget;
 
+import static java.util.Collections.singletonMap;
 import static javax.lang.model.type.TypeKind.BOOLEAN;
 import static javax.lang.model.type.TypeKind.BYTE;
 import static javax.lang.model.type.TypeKind.CHAR;
@@ -35,18 +39,23 @@ import static javax.lang.model.type.TypeKind.LONG;
 import static javax.lang.model.type.TypeKind.SHORT;
 import static javax.lang.model.type.TypeKind.VOID;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.uberfire.jsbridge.tsexporter.util.TestingUtils.Circle;
+import static org.uberfire.jsbridge.tsexporter.util.TestingUtils.Cylinder;
+import static org.uberfire.jsbridge.tsexporter.util.TestingUtils.DeclaredTypes;
+import static org.uberfire.jsbridge.tsexporter.util.TestingUtils.Foo;
+import static org.uberfire.jsbridge.tsexporter.util.TestingUtils.Sphere;
+import static org.uberfire.jsbridge.tsexporter.util.TestingUtils.array;
+import static org.uberfire.jsbridge.tsexporter.util.TestingUtils.erased;
+import static org.uberfire.jsbridge.tsexporter.util.TestingUtils.init;
+import static org.uberfire.jsbridge.tsexporter.util.TestingUtils.member;
+import static org.uberfire.jsbridge.tsexporter.util.TestingUtils.param;
+import static org.uberfire.jsbridge.tsexporter.util.TestingUtils.primitive;
+import static org.uberfire.jsbridge.tsexporter.util.TestingUtils.type;
+import static org.uberfire.jsbridge.tsexporter.util.TestingUtils.types;
+import static org.uberfire.jsbridge.tsexporter.util.TestingUtils.wildcard;
+import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_DECLARATION;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_IMPORT;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_USE;
-import static org.uberfire.jsbridge.tsexporter.TestingUtils.*;
-import static org.uberfire.jsbridge.tsexporter.TestingUtils.array;
-import static org.uberfire.jsbridge.tsexporter.TestingUtils.erased;
-import static org.uberfire.jsbridge.tsexporter.TestingUtils.member;
-import static org.uberfire.jsbridge.tsexporter.TestingUtils.param;
-import static org.uberfire.jsbridge.tsexporter.TestingUtils.primitive;
-import static org.uberfire.jsbridge.tsexporter.TestingUtils.type;
-import static org.uberfire.jsbridge.tsexporter.TestingUtils.types;
-import static org.uberfire.jsbridge.tsexporter.TestingUtils.wildcard;
 
 public class JavaTypeTest {
 
@@ -58,10 +67,14 @@ public class JavaTypeTest {
         init(compilationRule.getTypes(), compilationRule.getElements());
         JavaType.SIMPLE_NAMES.set(true);
     }
+    @After
+    public void after() {
+        JavaType.SIMPLE_NAMES.set(false);
+    }
 
     @Test
     public void testPrimitives() {
-//        assertEquals("number", translate(primitive(INT)));
+        assertEquals("JavaInteger", translate(primitive(INT)));
         assertEquals("JavaByte", translate(primitive(BYTE)));
         assertEquals("JavaDouble", translate(primitive(DOUBLE)));
         assertEquals("JavaFloat", translate(primitive(FLOAT)));
@@ -117,6 +130,25 @@ public class JavaTypeTest {
         assertEquals("Sphere<J>", translate(TYPE_ARGUMENT_USE, param(0, member("get1", type(Sphere.class)))));
         assertEquals("Sphere<J>", translate(TYPE_ARGUMENT_USE, param(0, member("get2", type(Sphere.class)))));
         assertEquals("U", translate(TYPE_ARGUMENT_USE, param(1, member("get2", type(Sphere.class)))));
+    }
+
+    @Test
+    public void testDecorated() {
+        final DecoratorDependency dependency = new DecoratorDependency(
+                "my-decorators",
+                "my-decorators/decorators/Bar",
+                Foo.class.getCanonicalName());
+
+        final DecoratorStore decoratorStore = new DecoratorStore(singletonMap(
+                Foo.class.getCanonicalName(),
+                dependency));
+
+        final JavaType.Translatable translatable = new JavaType(type(Foo.class), type(Foo.class))
+                .translate(TYPE_ARGUMENT_DECLARATION, decoratorStore);
+
+        assertEquals("mydecorators_decorators_Bar", translatable.toTypeScript());
+        assertEquals(1, translatable.getAggregated().size());
+        assertEquals(dependency, translatable.getAggregated().get(0));
     }
 
     @Test
@@ -248,7 +280,7 @@ public class JavaTypeTest {
     }
 
     private String translate(final JavaType type) {
-        return type.translate().toTypeScript();
+        return type.translate(TYPE_ARGUMENT_DECLARATION).toTypeScript();
     }
 
     private String translate(final TsTypeTarget tsTypeTarget, final TypeMirror type) {

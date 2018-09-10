@@ -13,9 +13,9 @@ import org.uberfire.jsbridge.tsexporter.model.PojoTsClass;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
-import static org.uberfire.jsbridge.tsexporter.TestingUtils.init;
-import static org.uberfire.jsbridge.tsexporter.TestingUtils.type;
-import static org.uberfire.jsbridge.tsexporter.Utils.lines;
+import static org.uberfire.jsbridge.tsexporter.util.TestingUtils.init;
+import static org.uberfire.jsbridge.tsexporter.util.TestingUtils.type;
+import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
 
 public class PackageJsonTest {
 

@@ -1,15 +1,16 @@
 package org.uberfire.jsbridge.tsexporter.model;
 
 import com.google.testing.compile.CompilationRule;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 
 import static org.junit.Assert.assertEquals;
-import static org.uberfire.jsbridge.tsexporter.TestingUtils.init;
-import static org.uberfire.jsbridge.tsexporter.TestingUtils.type;
-import static org.uberfire.jsbridge.tsexporter.Utils.lines;
+import static org.uberfire.jsbridge.tsexporter.util.TestingUtils.init;
+import static org.uberfire.jsbridge.tsexporter.util.TestingUtils.type;
+import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
 
 public class PojoTsClassTestInterfaces {
 
@@ -20,6 +21,11 @@ public class PojoTsClassTestInterfaces {
     public void before() {
         init(compilationRule.getTypes(), compilationRule.getElements());
         JavaType.SIMPLE_NAMES.set(true);
+    }
+
+    @After
+    public void after() {
+        JavaType.SIMPLE_NAMES.set(false);
     }
 
     interface A {

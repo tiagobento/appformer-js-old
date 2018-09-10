@@ -8,15 +8,16 @@ import com.google.testing.compile.CompilationRule;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.uberfire.jsbridge.tsexporter.TestingUtils;
+import org.uberfire.jsbridge.tsexporter.util.TestingUtils;
 import org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency;
-import org.uberfire.jsbridge.tsexporter.util.ImportStore;
+import org.uberfire.jsbridge.tsexporter.meta.dependency.ImportStore;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.uberfire.jsbridge.tsexporter.TestingUtils.member;
-import static org.uberfire.jsbridge.tsexporter.TestingUtils.type;
+import static org.uberfire.jsbridge.tsexporter.util.TestingUtils.member;
+import static org.uberfire.jsbridge.tsexporter.util.TestingUtils.type;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget;
+import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_DECLARATION;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_USE;
 
 public class TranslatableJavaTypeTest {
@@ -34,7 +35,7 @@ public class TranslatableJavaTypeTest {
         final ImportStore store = new ImportStore();
 
         final List<Dependency> aggregated0 = store.with(
-                member("field2", type(TestingUtils.Sphere.class)).translate())
+                member("field2", type(TestingUtils.Sphere.class)).translate(TYPE_ARGUMENT_DECLARATION))
                 .getAggregated();
         assertEquals(2, aggregated0.size());
         assertTrue(aggregated0.get(0).toString().endsWith("Circle<T>"));
@@ -54,7 +55,7 @@ public class TranslatableJavaTypeTest {
         assertTrue(aggregated2.get(0).toString().endsWith("Circle<T>"));
 
         List<Dependency> aggregated3 = store.with(
-                member("get6", type(TestingUtils.Circle.class)).translate())
+                member("get6", type(TestingUtils.Circle.class)).translate(TYPE_ARGUMENT_DECLARATION))
                 .getAggregated();
         assertEquals(1, aggregated3.size());
         assertTrue(aggregated3.get(0).toString().endsWith("Circle<T>"));
@@ -66,7 +67,7 @@ public class TranslatableJavaTypeTest {
     }
 
     private JavaType.Translatable translatable(final DeclaredType type) {
-        return new JavaType(type, type).translate();
+        return new JavaType(type, type).translate(TYPE_ARGUMENT_DECLARATION);
     }
 
     private JavaType.Translatable translatable(final DeclaredType type,
