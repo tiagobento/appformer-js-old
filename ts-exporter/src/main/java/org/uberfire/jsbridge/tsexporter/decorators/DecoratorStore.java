@@ -17,17 +17,26 @@
 package org.uberfire.jsbridge.tsexporter.decorators;
 
 import java.util.Map;
+import java.util.Set;
 
 import javax.lang.model.type.TypeMirror;
 
 import org.uberfire.jsbridge.tsexporter.Main;
 
+import static java.lang.String.format;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toMap;
+
 public class DecoratorStore {
 
     private Map<String, DecoratorDependency> decorators;
 
-    public DecoratorStore(final Map<String, DecoratorDependency> decorators) {
-        this.decorators = decorators;
+    public DecoratorStore(final Set<DecoratorDependency> decorators) {
+        this.decorators = decorators.stream()
+                .collect(toMap(DecoratorDependency::getDecoratedFqcn, identity(), (kept, discarded) -> {
+                    System.out.println(format("Found more than one decorator for %s. Keeping %s and discarding %s.", kept.getDecoratedFqcn(), kept.getDecoratorPath(), discarded.getDecoratorPath()));
+                    return kept;
+                }));
     }
 
     public boolean hasDecoratorFor(TypeMirror type) {

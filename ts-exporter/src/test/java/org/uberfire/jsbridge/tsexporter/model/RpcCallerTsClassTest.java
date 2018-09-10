@@ -1,5 +1,7 @@
 package org.uberfire.jsbridge.tsexporter.model;
 
+import java.util.HashSet;
+
 import com.google.testing.compile.CompilationRule;
 import org.junit.After;
 import org.junit.Before;
@@ -10,7 +12,7 @@ import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 import org.uberfire.jsbridge.tsexporter.meta.dependency.DependencyGraph;
 
-import static java.util.Collections.singletonMap;
+import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.uberfire.jsbridge.tsexporter.util.TestingUtils.element;
 import static org.uberfire.jsbridge.tsexporter.util.TestingUtils.init;
@@ -48,38 +50,50 @@ public class RpcCallerTsClassTest {
 
     interface SomeInterface {
 
-        Foo<String> apiMethod();
+        Foo<String> someMethod();
     }
 
     @Test
-    public void test() {
+    public void testDecorators() {
 
         final DependencyGraph dependencyGraph = new DependencyGraph();
         dependencyGraph.add(element(FooImpl2.class));
 
+        final DecoratorDependency dependency1 = new DecoratorDependency(
+                "my-decorators",
+                "decorators/pojo/FooDEC",
+                Foo.class.getCanonicalName());
+
+        final DecoratorDependency dependency2 = new DecoratorDependency(
+                "my-decorators",
+                "decorators/pojo/impl/FooImpl1DEC",
+                FooImpl1.class.getCanonicalName());
+
+        final DecoratorDependency dependency3 = new DecoratorDependency(
+                "my-decorators",
+                "decorators/pojo/impl/FooImpl2DEC",
+                FooImpl2.class.getCanonicalName());
+
         final RpcCallerTsClass tsClass = new RpcCallerTsClass(
                 element(SomeInterface.class),
                 dependencyGraph,
-                new DecoratorStore(singletonMap(Foo.class.getCanonicalName(), new DecoratorDependency(
-                        "my-decorators",
-                        "decorators/pojo/Bar",
-                        Foo.class.getCanonicalName()))));
+                new DecoratorStore(new HashSet<>(asList(dependency1, dependency2, dependency3))));
 
         assertEquals(lines("",
                            "import {rpc, marshall, unmarshall} from 'appformer/API';",
-                           "import decorators_pojo_Bar from 'my-decorators/decorators/pojo/Bar';",
-                           "import org_uberfire_jsbridge_tsexporter_model_RpcCallerTsClassTest_FooImpl1 from 'output/ts-exporter-test/org/uberfire/jsbridge/tsexporter/model/RpcCallerTsClassTest/FooImpl1';",
-                           "import org_uberfire_jsbridge_tsexporter_model_RpcCallerTsClassTest_FooImpl2 from 'output/ts-exporter-test/org/uberfire/jsbridge/tsexporter/model/RpcCallerTsClassTest/FooImpl2';",
+                           "import decorators_pojo_FooDEC from 'my-decorators/decorators/pojo/FooDEC';",
+                           "import decorators_pojo_impl_FooImpl1DEC from 'my-decorators/decorators/pojo/impl/FooImpl1DEC';",
+                           "import decorators_pojo_impl_FooImpl2DEC from 'my-decorators/decorators/pojo/impl/FooImpl2DEC';",
                            "",
                            "export default class SomeInterface {",
                            "",
-                           "public apiMethod(args: {  }) {",
-                           "  return rpc(\"org.uberfire.jsbridge.tsexporter.model.RpcCallerTsClassTest.SomeInterface|apiMethod:\", [])",
+                           "public someMethod(args: {  }) {",
+                           "  return rpc(\"org.uberfire.jsbridge.tsexporter.model.RpcCallerTsClassTest.SomeInterface|someMethod:\", [])",
                            "         .then((json: string) => {",
                            "           return unmarshall(json, {",
-                           "\"org.uberfire.jsbridge.tsexporter.model.RpcCallerTsClassTest.FooImpl1\": (x: any) => new org_uberfire_jsbridge_tsexporter_model_RpcCallerTsClassTest_FooImpl1<any>(x),",
-                           "\"org.uberfire.jsbridge.tsexporter.model.RpcCallerTsClassTest.FooImpl2\": (x: any) => new org_uberfire_jsbridge_tsexporter_model_RpcCallerTsClassTest_FooImpl2(x)",
-                           "           }) as decorators_pojo_Bar<string>;",
+                           "\"org.uberfire.jsbridge.tsexporter.model.RpcCallerTsClassTest.FooImpl1\": (x: any) => new decorators_pojo_impl_FooImpl1DEC<any>(x),",
+                           "\"org.uberfire.jsbridge.tsexporter.model.RpcCallerTsClassTest.FooImpl2\": (x: any) => new decorators_pojo_impl_FooImpl2DEC(x)",
+                           "           }) as decorators_pojo_FooDEC<string>;",
                            "         });",
                            "}",
                            "",

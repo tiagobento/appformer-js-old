@@ -38,6 +38,7 @@ import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
+import static java.util.Collections.emptySet;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -107,7 +108,7 @@ public class JavaType {
     }
 
     public Translatable translate(final TsTypeTarget tsTypeTarget) {
-        return translate(type, tsTypeTarget, new DecoratorStore(emptyMap()));
+        return translate(type, tsTypeTarget, new DecoratorStore(emptySet()));
     }
 
     private Translatable translate(final TypeMirror type,

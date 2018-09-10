@@ -64,11 +64,7 @@ public class TsCodegenExporter {
 
     public void run() {
 
-        final DecoratorStore decoratorStore = new DecoratorStore(decorators.stream()
-                .collect(toMap(DecoratorDependency::getDecoratedFqcn, identity(), (kept, discarded) -> {
-                    System.out.println(format("Found more than one decorator for %s. Keeping %s and discarding %s.", kept.getDecoratedFqcn(), kept.getDecoratorPath(), discarded.getDecoratorPath()));
-                    return kept;
-                })));
+        final DecoratorStore decoratorStore = new DecoratorStore(decorators);
 
         concat(getTsFilesFrom("portables.txt").stream(),
                getClassesFromErraiAppPropertiesFiles().stream()
