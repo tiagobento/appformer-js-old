@@ -29,9 +29,7 @@ export default class JavaHashMapMarshaller<T, U> extends NullableMarshaller<Java
   private marshallEntries(entries: IterableIterator<[T, U]>, ctx: MarshallingContext) {
     return Array.from(entries)
       .map(([key, value]) => this.marshallEntry(key, value, ctx))
-      .reduce((acc, cur) => {
-        return { ...acc, ...cur };
-      }, {});
+      .reduce((acc, cur) => ({ ...acc, ...cur }), {});
   }
 
   private marshallEntry(key: T, value: U, ctx: MarshallingContext) {
