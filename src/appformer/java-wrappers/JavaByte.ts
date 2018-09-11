@@ -1,4 +1,4 @@
-import IntegerBasedJavaNumber from "./IntegerBasedJavaNumber";
+import IntegerBasedJavaNumber from "appformer/java-wrappers/IntegerBasedJavaNumber";
 
 export default class JavaByte extends IntegerBasedJavaNumber {
   public static readonly MIN_VALUE = -128;

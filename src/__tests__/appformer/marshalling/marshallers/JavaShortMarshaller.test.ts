@@ -3,7 +3,7 @@ import JavaShort from "appformer/java-wrappers/JavaShort";
 import JavaShortMarshaller from "appformer/marshalling/marshallers/JavaShortMarshaller";
 
 describe("marshall", () => {
-  test("with regular short, should return the wrapped value", () => {
+  test("with regular short, should return the same value", () => {
     const input = new JavaShort("2");
 
     const output = new JavaShortMarshaller().marshall(input, new MarshallingContext());

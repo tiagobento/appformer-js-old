@@ -3,7 +3,7 @@ import JavaDouble from "appformer/java-wrappers/JavaDouble";
 import JavaDoubleMarshaller from "appformer/marshalling/marshallers/JavaDoubleMarshaller";
 
 describe("marshall", () => {
-  test("with regular double, should return the wrapped value", () => {
+  test("with regular double, should return the same value", () => {
     const input = new JavaDouble("2.1");
 
     const output = new JavaDoubleMarshaller().marshall(input, new MarshallingContext());

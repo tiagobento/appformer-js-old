@@ -1,8 +1,8 @@
-import MarshallingContext from "../MarshallingContext";
 import NullableMarshaller from "appformer/marshalling/marshallers/NullableMarshaller";
 import JavaDate from "appformer/java-wrappers/JavaDate";
 import ErraiObject from "appformer/marshalling/model/ErraiObject";
 import ErraiObjectConstants from "appformer/marshalling/model/ErraiObjectConstants";
+import MarshallingContext from "appformer/marshalling/MarshallingContext";
 
 export default class JavaDateMarshaller extends NullableMarshaller<JavaDate, ErraiObject> {
   public notNullMarshall(input: JavaDate, ctx: MarshallingContext): ErraiObject {

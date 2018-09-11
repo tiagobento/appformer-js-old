@@ -1,4 +1,4 @@
-import { BigNumber } from "bignumber.js";
+import BigNumber from "bignumber.js";
 import JavaBigNumber from "appformer/java-wrappers/JavaBigNumber";
 
 export default class JavaLong extends JavaBigNumber {

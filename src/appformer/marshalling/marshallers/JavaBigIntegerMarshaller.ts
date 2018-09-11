@@ -1,8 +1,8 @@
-import JavaBigInteger from "../../java-wrappers/JavaBigInteger";
-import ErraiObject from "../model/ErraiObject";
-import MarshallingContext from "../MarshallingContext";
-import ErraiObjectConstants from "../model/ErraiObjectConstants";
 import NullableMarshaller from "appformer/marshalling/marshallers/NullableMarshaller";
+import JavaBigInteger from "appformer/java-wrappers/JavaBigInteger";
+import ErraiObjectConstants from "appformer/marshalling/model/ErraiObjectConstants";
+import ErraiObject from "appformer/marshalling/model/ErraiObject";
+import MarshallingContext from "appformer/marshalling/MarshallingContext";
 
 export default class JavaBigIntegerMarshaller extends NullableMarshaller<JavaBigInteger, ErraiObject> {
   public notNullMarshall(input: JavaBigInteger, ctx: MarshallingContext): ErraiObject {

@@ -3,7 +3,7 @@ import JavaFloat from "appformer/java-wrappers/JavaFloat";
 import JavaFloatMarshaller from "appformer/marshalling/marshallers/JavaFloatMarshaller";
 
 describe("marshall", () => {
-  test("with regular float, should return the wrapped value", () => {
+  test("with regular float, should return the same value", () => {
     const input = new JavaFloat("2.1");
 
     const output = new JavaFloatMarshaller().marshall(input, new MarshallingContext());

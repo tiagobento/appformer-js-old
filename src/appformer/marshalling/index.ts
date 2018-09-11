@@ -1,1 +1,1 @@
-export * from "./Marshalling";
+export * from "appformer/marshalling/Marshalling";

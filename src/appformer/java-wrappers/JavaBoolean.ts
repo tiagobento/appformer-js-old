@@ -1,4 +1,4 @@
-import JavaWrapper from "./JavaWrapper";
+import JavaWrapper from "appformer/java-wrappers/JavaWrapper";
 
 export default class JavaBoolean extends JavaWrapper<boolean> {
   private readonly _fqcn = "java.lang.Boolean";

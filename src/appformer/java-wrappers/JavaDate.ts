@@ -1,4 +1,4 @@
-import JavaWrapper from "./JavaWrapper";
+import JavaWrapper from "appformer/java-wrappers/JavaWrapper";
 
 export default class JavaDate extends JavaWrapper<Date> {
   private readonly _fqcn = "java.util.Date";

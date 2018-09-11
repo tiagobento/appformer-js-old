@@ -1,5 +1,5 @@
 import JavaWrapper from "appformer/java-wrappers/JavaWrapper";
-import { JavaType } from "appformer/java-wrappers/JavaType";
+import JavaType from "appformer/java-wrappers/JavaType";
 import { isArray, isBoolean, isDate, isMap, isSet, isString } from "appformer/util/TypeUtils";
 import JavaArrayList from "appformer/java-wrappers/JavaArrayList";
 import JavaHashSet from "appformer/java-wrappers/JavaHashSet";
