@@ -27,8 +27,9 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 
-import org.uberfire.jsbridge.tsexporter.util.Utils;
+import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
 import org.uberfire.jsbridge.tsexporter.model.PojoTsClass;
+import org.uberfire.jsbridge.tsexporter.util.Utils;
 
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toSet;
@@ -37,8 +38,10 @@ import static java.util.stream.Stream.concat;
 public class DependencyGraph {
 
     private final Map<TypeElement, Vertex> graph;
+    private final DecoratorStore decoratorStore;
 
-    public DependencyGraph() {
+    public DependencyGraph(final DecoratorStore decoratorStore) {
+        this.decoratorStore = decoratorStore;
         graph = new HashMap<>();
     }
 
@@ -104,7 +107,7 @@ public class DependencyGraph {
         private final PojoTsClass pojoClass;
 
         private Vertex(final TypeElement typeElement) {
-            this.pojoClass = new PojoTsClass((DeclaredType) typeElement.asType());
+            this.pojoClass = new PojoTsClass((DeclaredType) typeElement.asType(), decoratorStore);
             this.dependencies = new HashSet<>();
             this.dependents = new HashSet<>();
         }

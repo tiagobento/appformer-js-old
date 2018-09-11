@@ -29,16 +29,14 @@ import javax.lang.model.type.TypeVariable;
 import javax.lang.model.type.WildcardType;
 
 import org.uberfire.jsbridge.tsexporter.Main;
-import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorDependency;
+import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
 import org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
-import static java.util.Collections.emptySet;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -105,10 +103,6 @@ public class JavaType {
                                   final DecoratorStore decoratorStore) {
 
         return translate(type, tsTypeTarget, decoratorStore);
-    }
-
-    public Translatable translate(final TsTypeTarget tsTypeTarget) {
-        return translate(type, tsTypeTarget, new DecoratorStore(emptySet()));
     }
 
     private Translatable translate(final TypeMirror type,
@@ -204,40 +198,40 @@ public class JavaType {
                     case "java.util.Optional":
                         return new Translatable(d -> format("JavaOptional<%s>", d[0].toTypeScript()),
                                                 singletonList(JAVA_OPTIONAL),
-                                                singletonList(typeArguments.get(0).translate(tsTypeTarget)));
+                                                singletonList(typeArguments.get(0).translate(tsTypeTarget, decoratorStore)));
                     case "java.util.TreeMap":
                         return new Translatable(t -> format("JavaTreeMap<%s, %s>", t[0].toTypeScript(), t[1].toTypeScript()),
                                                 singletonList(JAVA_TREE_MAP),
-                                                asList(typeArguments.get(0).translate(tsTypeTarget),
-                                                       typeArguments.get(1).translate(tsTypeTarget)));
+                                                asList(typeArguments.get(0).translate(tsTypeTarget, decoratorStore),
+                                                       typeArguments.get(1).translate(tsTypeTarget, decoratorStore)));
                     case "java.util.HashMap":
                     case "java.util.Map":
                         return new Translatable(t -> format("Map<%s, %s>", t[0].toTypeScript(), t[1].toTypeScript()),
                                                 emptyList(),
-                                                asList(typeArguments.get(0).translate(tsTypeTarget),
-                                                       typeArguments.get(1).translate(tsTypeTarget)));
+                                                asList(typeArguments.get(0).translate(tsTypeTarget, decoratorStore),
+                                                       typeArguments.get(1).translate(tsTypeTarget, decoratorStore)));
                     case "java.util.TreeSet":
                         return new Translatable(d -> format("JavaTreeSet<%s>", d[0].toTypeScript()),
                                                 singletonList(JAVA_TREE_SET),
-                                                singletonList(typeArguments.get(0).translate(tsTypeTarget)));
+                                                singletonList(typeArguments.get(0).translate(tsTypeTarget, decoratorStore)));
                     case "java.util.Set":
                     case "java.util.HashSet":
                         return new Translatable(d -> format("Set<%s>", d[0].toTypeScript()),
                                                 emptyList(),
-                                                singletonList(typeArguments.get(0).translate(tsTypeTarget)));
+                                                singletonList(typeArguments.get(0).translate(tsTypeTarget, decoratorStore)));
                     case "java.util.LinkedList":
                         return new Translatable(d -> format("JavaLinkedList<%s>", d[0].toTypeScript()),
                                                 singletonList(JAVA_LINKED_LIST),
-                                                singletonList(typeArguments.get(0).translate(tsTypeTarget)));
+                                                singletonList(typeArguments.get(0).translate(tsTypeTarget, decoratorStore)));
                     case "java.util.List":
                     case "java.util.ArrayList":
                     case "java.util.Collection":
                         return new Translatable(d -> format("%s[]", d[0].toTypeScript()),
                                                 emptyList(),
-                                                singletonList(typeArguments.get(0).translate(tsTypeTarget)));
+                                                singletonList(typeArguments.get(0).translate(tsTypeTarget, decoratorStore)));
                     default: {
                         final List<Translatable> translatedTypeArguments = typeArguments.stream()
-                                .map(s -> s.translate(tsTypeTarget))
+                                .map(s -> s.translate(tsTypeTarget, decoratorStore))
                                 .collect(toList());
 
                         final String typeArgumentsPart = !(typeArguments.size() == 0)
@@ -256,7 +250,7 @@ public class JavaType {
                                 : declaredType.asElement().toString().replace(".", "_");
 
                         return new Translatable(d -> format("%s%s", name, tsTypeTarget.equals(TYPE_ARGUMENT_IMPORT) ? "" : typeArgumentsPart),
-                                                singletonList(new Dependency.Java(declaredType)),
+                                                singletonList(new Dependency.Java(declaredType, decoratorStore)),
                                                 translatedTypeArguments);
                     }
                 }

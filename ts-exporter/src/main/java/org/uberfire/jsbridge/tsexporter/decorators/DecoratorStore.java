@@ -24,10 +24,13 @@ import javax.lang.model.type.TypeMirror;
 import org.uberfire.jsbridge.tsexporter.Main;
 
 import static java.lang.String.format;
+import static java.util.Collections.emptySet;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 
 public class DecoratorStore {
+
+    public static final DecoratorStore EMPTY = new DecoratorStore(emptySet());
 
     private Map<String, DecoratorDependency> decorators;
 
@@ -39,11 +42,11 @@ public class DecoratorStore {
                 }));
     }
 
-    public boolean hasDecoratorFor(TypeMirror type) {
+    public boolean hasDecoratorFor(final TypeMirror type) {
         return decorators.containsKey(Main.types.erasure(type).toString());
     }
 
-    public DecoratorDependency getDecoratorFor(TypeMirror type) {
+    public DecoratorDependency getDecoratorFor(final TypeMirror type) {
         return decorators.get(Main.types.erasure(type).toString());
     }
 }

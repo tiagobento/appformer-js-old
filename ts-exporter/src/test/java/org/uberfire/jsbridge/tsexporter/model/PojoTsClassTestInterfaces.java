@@ -8,6 +8,7 @@ import org.junit.Test;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 
 import static org.junit.Assert.assertEquals;
+import static org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore.EMPTY;
 import static org.uberfire.jsbridge.tsexporter.util.TestingUtils.init;
 import static org.uberfire.jsbridge.tsexporter.util.TestingUtils.type;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
@@ -34,7 +35,7 @@ public class PojoTsClassTestInterfaces {
 
     @Test
     public void testInterfaceA() {
-        final PojoTsClass pojoTsClass = new PojoTsClass(type(A.class));
+        final PojoTsClass pojoTsClass = new PojoTsClass(type(A.class), EMPTY);
         assertEquals(lines("",
                            "",
                            "",
@@ -49,7 +50,7 @@ public class PojoTsClassTestInterfaces {
 
     @Test
     public void testInterfaceB() {
-        final PojoTsClass pojoTsClass = new PojoTsClass(type(B.class));
+        final PojoTsClass pojoTsClass = new PojoTsClass(type(B.class), EMPTY);
         assertEquals(lines("",
                            "import A from 'output/ts-exporter-test/org/uberfire/jsbridge/tsexporter/model/PojoTsClassTestInterfaces/A';",
                            "",
@@ -64,7 +65,7 @@ public class PojoTsClassTestInterfaces {
 
     @Test
     public void testInterfaceC() {
-        final PojoTsClass pojoTsClass = new PojoTsClass(type(C.class));
+        final PojoTsClass pojoTsClass = new PojoTsClass(type(C.class), EMPTY);
         assertEquals(lines("",
                            "",
                            "",
@@ -79,7 +80,7 @@ public class PojoTsClassTestInterfaces {
 
     @Test
     public void testInterfaceD() {
-        final PojoTsClass pojoTsClass = new PojoTsClass(type(D.class));
+        final PojoTsClass pojoTsClass = new PojoTsClass(type(D.class), EMPTY);
         assertEquals(lines("",
                            "import A from 'output/ts-exporter-test/org/uberfire/jsbridge/tsexporter/model/PojoTsClassTestInterfaces/A';",
                            "",
@@ -94,7 +95,7 @@ public class PojoTsClassTestInterfaces {
 
     @Test
     public void testInterfaceE() {
-        final PojoTsClass pojoTsClass = new PojoTsClass(type(E.class));
+        final PojoTsClass pojoTsClass = new PojoTsClass(type(E.class), EMPTY);
         assertEquals(lines("",
                            "import A from 'output/ts-exporter-test/org/uberfire/jsbridge/tsexporter/model/PojoTsClassTestInterfaces/A';",
                            "import D from 'output/ts-exporter-test/org/uberfire/jsbridge/tsexporter/model/PojoTsClassTestInterfaces/D';",
@@ -110,7 +111,7 @@ public class PojoTsClassTestInterfaces {
 
     @Test
     public void testInterfaceF() {
-        final PojoTsClass pojoTsClass = new PojoTsClass(type(F.class));
+        final PojoTsClass pojoTsClass = new PojoTsClass(type(F.class), EMPTY);
         assertEquals(lines("",
                            "",
                            "",
@@ -125,7 +126,7 @@ public class PojoTsClassTestInterfaces {
 
     @Test
     public void testInterfaceG() {
-        final PojoTsClass pojoTsClass = new PojoTsClass(type(G.class));
+        final PojoTsClass pojoTsClass = new PojoTsClass(type(G.class), EMPTY);
         assertEquals(lines("",
                            "import A from 'output/ts-exporter-test/org/uberfire/jsbridge/tsexporter/model/PojoTsClassTestInterfaces/A';",
                            "",
@@ -140,7 +141,7 @@ public class PojoTsClassTestInterfaces {
 
     @Test
     public void testInterfaceH() {
-        final PojoTsClass pojoTsClass = new PojoTsClass(type(H.class));
+        final PojoTsClass pojoTsClass = new PojoTsClass(type(H.class), EMPTY);
         assertEquals(lines("",
                            "import C from 'output/ts-exporter-test/org/uberfire/jsbridge/tsexporter/model/PojoTsClassTestInterfaces/C';",
                            "",
@@ -155,7 +156,7 @@ public class PojoTsClassTestInterfaces {
 
     @Test
     public void testInterfaceI() {
-        final PojoTsClass pojoTsClass = new PojoTsClass(type(I.class));
+        final PojoTsClass pojoTsClass = new PojoTsClass(type(I.class), EMPTY);
         assertEquals(lines("",
                            "import C from 'output/ts-exporter-test/org/uberfire/jsbridge/tsexporter/model/PojoTsClassTestInterfaces/C';",
                            "import H from 'output/ts-exporter-test/org/uberfire/jsbridge/tsexporter/model/PojoTsClassTestInterfaces/H';",

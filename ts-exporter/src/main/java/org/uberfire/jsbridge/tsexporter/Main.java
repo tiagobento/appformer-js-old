@@ -3,6 +3,7 @@ package org.uberfire.jsbridge.tsexporter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -18,8 +19,10 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
+import org.uberfire.jsbridge.tsexporter.decorators.DecoratorDependency;
+
 import static java.lang.Boolean.getBoolean;
-import static java.util.Collections.emptySet;
+import static java.util.Arrays.asList;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
@@ -95,9 +98,18 @@ public class Main extends AbstractProcessor {
 
             System.out.println("Generating TypeScript modules...");
             long start = System.currentTimeMillis();
-            new TsCodegenExporter(emptySet()).run();
+            new TsCodegenExporter(readDecoratorFiles()).run();
             System.out.println("TypeScript exporter has successfully run. (" + (System.currentTimeMillis() - start) + "ms)");
         }
+    }
+
+    private Set<DecoratorDependency> readDecoratorFiles() {
+        return new HashSet<>(asList(
+                new DecoratorDependency("appformer", "decorators/PathDEC", "org.uberfire.backend.vfs.Path"),
+                new DecoratorDependency("appformer", "decorators/PathImplDEC", "org.uberfire.backend.vfs.PathFactory.PathImpl"),
+                new DecoratorDependency("appformer", "decorators/ObservablePathDEC", "org.uberfire.backend.vfs.ObservablePath"),
+                new DecoratorDependency("appformer", "decorators/ObservablePathImplDEC", "org.uberfire.backend.vfs.impl.ObservablePathImpl")
+        ));
     }
 
     private void writeExportFile(final List<Element> elements,

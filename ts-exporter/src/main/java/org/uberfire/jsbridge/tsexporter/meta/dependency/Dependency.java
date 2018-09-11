@@ -18,6 +18,7 @@ package org.uberfire.jsbridge.tsexporter.meta.dependency;
 
 import javax.lang.model.type.DeclaredType;
 
+import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 import org.uberfire.jsbridge.tsexporter.model.PojoTsClass;
 
@@ -40,9 +41,11 @@ public interface Dependency {
     class Java implements Dependency {
 
         private final DeclaredType declaredType;
+        private final DecoratorStore decoratorStore;
 
-        public Java(final DeclaredType declaredType) {
+        public Java(final DeclaredType declaredType, final DecoratorStore decoratorStore) {
             this.declaredType = declaredType;
+            this.decoratorStore = decoratorStore;
         }
 
         public DeclaredType getDeclaredType() {
@@ -51,17 +54,17 @@ public interface Dependency {
 
         @Override
         public String uniqueName(final DeclaredType owner) {
-            return new JavaType(declaredType, owner).translate(TYPE_ARGUMENT_IMPORT).toTypeScript();
+            return new JavaType(declaredType, owner).translate(TYPE_ARGUMENT_IMPORT, decoratorStore).toTypeScript();
         }
 
         @Override
         public String relativePath() {
-            return new PojoTsClass(declaredType).getRelativePath();
+            return new PojoTsClass(declaredType, decoratorStore).getRelativePath();
         }
 
         @Override
         public String getModuleName() {
-            return new PojoTsClass(declaredType).getModuleName();
+            return new PojoTsClass(declaredType, decoratorStore).getModuleName();
         }
 
         @Override

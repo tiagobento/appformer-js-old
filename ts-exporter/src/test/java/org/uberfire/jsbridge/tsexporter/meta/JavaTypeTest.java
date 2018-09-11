@@ -277,7 +277,7 @@ public class JavaTypeTest {
     }
 
     private String translate(final JavaType type) {
-        return type.translate(TYPE_ARGUMENT_DECLARATION).toTypeScript();
+        return type.translate(TYPE_ARGUMENT_DECLARATION, DecoratorStore.EMPTY).toTypeScript();
     }
 
     private String translate(final TsTypeTarget tsTypeTarget, final TypeMirror type) {
@@ -285,6 +285,6 @@ public class JavaTypeTest {
     }
 
     private String translate(final TsTypeTarget tsTypeTarget, final JavaType type) {
-        return type.translate(tsTypeTarget).toTypeScript();
+        return type.translate(tsTypeTarget, DecoratorStore.EMPTY).toTypeScript();
     }
 }

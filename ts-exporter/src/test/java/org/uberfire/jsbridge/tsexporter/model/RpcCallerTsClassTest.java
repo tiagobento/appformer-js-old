@@ -14,6 +14,7 @@ import org.uberfire.jsbridge.tsexporter.meta.dependency.DependencyGraph;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
+import static org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore.EMPTY;
 import static org.uberfire.jsbridge.tsexporter.util.TestingUtils.element;
 import static org.uberfire.jsbridge.tsexporter.util.TestingUtils.init;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
@@ -56,28 +57,17 @@ public class RpcCallerTsClassTest {
     @Test
     public void testDecorators() {
 
-        final DependencyGraph dependencyGraph = new DependencyGraph();
+        final DependencyGraph dependencyGraph = new DependencyGraph(EMPTY);
         dependencyGraph.add(element(FooImpl2.class));
-
-        final DecoratorDependency fooDecorator = new DecoratorDependency(
-                "my-decorators",
-                "decorators/pojo/FooDEC",
-                Foo.class.getCanonicalName());
-
-        final DecoratorDependency fooImpl1Decorator = new DecoratorDependency(
-                "my-decorators",
-                "decorators/pojo/impl/FooImpl1DEC",
-                FooImpl1.class.getCanonicalName());
-
-        final DecoratorDependency fooImpl2Decorator = new DecoratorDependency(
-                "my-decorators",
-                "decorators/pojo/impl/FooImpl2DEC",
-                FooImpl2.class.getCanonicalName());
 
         final RpcCallerTsClass tsClass = new RpcCallerTsClass(
                 element(SomeInterface.class),
                 dependencyGraph,
-                new DecoratorStore(new HashSet<>(asList(fooDecorator, fooImpl1Decorator, fooImpl2Decorator))));
+                new DecoratorStore(new HashSet<>(asList(
+                        new DecoratorDependency("my-decorators", "decorators/pojo/FooDEC", Foo.class.getCanonicalName()),
+                        new DecoratorDependency("my-decorators", "decorators/pojo/impl/FooImpl1DEC", FooImpl1.class.getCanonicalName()),
+                        new DecoratorDependency("my-decorators", "decorators/pojo/impl/FooImpl2DEC", FooImpl2.class.getCanonicalName()))
+                )));
 
         assertEquals(lines("",
                            "import {rpc, marshall, unmarshall} from 'appformer/API';",

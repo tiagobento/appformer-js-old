@@ -58,7 +58,7 @@ public class DecoratorDependency implements Dependency {
     }
 
     @Override
-    public boolean represents(DeclaredType type) {
+    public boolean represents(final DeclaredType type) {
         return false;
     }
 }

@@ -110,12 +110,12 @@ public class RpcCallerTsMethod {
     }
 
     private String methodDeclaration() {
-        return name + importing(new JavaType(executableElement.asType(), typeElement.asType()), TYPE_ARGUMENT_DECLARATION).toTypeScript();
+        return name + importing(new JavaType(executableElement.asType(), typeElement.asType()), TYPE_ARGUMENT_DECLARATION, DecoratorStore.EMPTY).toTypeScript();
     }
 
     private String params() {
         return getParameterJavaTypesByNames().entrySet().stream()
-                .map(e -> format("%s: %s", e.getKey(), importing(e.getValue(), TYPE_ARGUMENT_USE).toTypeScript()))
+                .map(e -> format("%s: %s", e.getKey(), importing(e.getValue(), TYPE_ARGUMENT_USE, DecoratorStore.EMPTY).toTypeScript()))
                 .collect(joining(", "));
     }
 
@@ -153,12 +153,12 @@ public class RpcCallerTsMethod {
                 .distinct()
                 .map(c -> format("\"%s\": (x: any) => new %s(x)",
                                  c.asElement().getQualifiedName().toString(),
-                                 importing(new JavaType(types.erasure(c.getType()), typeElement.asType()), TYPE_ARGUMENT_USE).toTypeScript()))
+                                 importing(new JavaType(types.erasure(c.getType()), typeElement.asType()), TYPE_ARGUMENT_USE, decoratorStore).toTypeScript()))
                 .collect(joining(",\n"));
     }
 
     private String returnType() {
-        return importing(getReturnTypeJavaType(), TYPE_ARGUMENT_USE).toTypeScript();
+        return importing(getReturnTypeJavaType(), TYPE_ARGUMENT_USE, decoratorStore).toTypeScript();
     }
 
     private JavaType getReturnTypeJavaType() {
@@ -166,7 +166,8 @@ public class RpcCallerTsMethod {
     }
 
     private JavaType.Translatable importing(final JavaType javaType,
-                                            final TsTypeTarget tsTypeTarget) {
+                                            final TsTypeTarget tsTypeTarget,
+                                            final DecoratorStore decoratorStore) {
 
         final JavaType.Translatable translatable = javaType.translate(tsTypeTarget, decoratorStore);
         translatable.getAggregated().forEach(dependencyGraph::add);

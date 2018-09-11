@@ -55,16 +55,15 @@ import static org.uberfire.jsbridge.tsexporter.util.Utils.getResources;
 public class TsCodegenExporter {
 
     private final DependencyGraph dependencyGraph;
-    private final Set<DecoratorDependency> decorators;
+    private final DecoratorStore decoratorStore;
 
     public TsCodegenExporter(final Set<DecoratorDependency> decorators) {
-        this.dependencyGraph = new DependencyGraph();
-        this.decorators = decorators;
+        this.decoratorStore = new DecoratorStore(decorators);
+        this.dependencyGraph = new DependencyGraph(decoratorStore);
     }
 
     public void run() {
 
-        final DecoratorStore decoratorStore = new DecoratorStore(decorators);
 
         concat(getTsFilesFrom("portables.txt").stream(),
                getClassesFromErraiAppPropertiesFiles().stream()

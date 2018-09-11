@@ -16,8 +16,9 @@
 
 package org.uberfire.jsbridge.tsexporter.meta.dependency;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.lang.model.type.DeclaredType;
 
@@ -31,7 +32,7 @@ import static org.uberfire.jsbridge.tsexporter.util.Utils.distinctBy;
 
 public class ImportStore {
 
-    private final List<JavaType.Translatable> dependencies = new ArrayList<>();
+    private final Set<JavaType.Translatable> dependencies = new HashSet<>();
 
     public JavaType.Translatable with(final JavaType.Translatable type) {
         dependencies.add(type);

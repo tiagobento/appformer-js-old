@@ -1,7 +1,9 @@
 package org.uberfire.jsbridge.tsexporter.model;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Optional;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -10,8 +12,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.uberfire.jsbridge.tsexporter.decorators.DecoratorDependency;
+import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptySet;
 import static org.junit.Assert.assertEquals;
 import static org.uberfire.jsbridge.tsexporter.util.TestingUtils.init;
 import static org.uberfire.jsbridge.tsexporter.util.TestingUtils.type;
@@ -25,12 +31,6 @@ public class PojoTsClassTestClasses {
     @Before
     public void before() {
         init(compilationRule.getTypes(), compilationRule.getElements());
-        JavaType.SIMPLE_NAMES.set(true);
-    }
-
-    @After
-    public void after() {
-        JavaType.SIMPLE_NAMES.set(false);
     }
 
     static class A {
@@ -49,9 +49,8 @@ public class PojoTsClassTestClasses {
     }
 
     @Test
-    public void testB() {
-        JavaType.SIMPLE_NAMES.set(false);
-        final PojoTsClass pojoTsClass = new PojoTsClass(type(B.class));
+    public void testNormalClass() {
+        final PojoTsClass pojoTsClass = new PojoTsClass(type(B.class), new DecoratorStore(emptySet()));
         assertEquals(lines("",
                            "import { Portable } from 'generated__temporary__/Model';",
                            "import JavaInteger from 'appformer/java-wrappers/JavaInteger';",
@@ -79,6 +78,41 @@ public class PojoTsClassTestClasses {
                            "  }",
                            "}"),
                      pojoTsClass.toSource());
-        JavaType.SIMPLE_NAMES.set(true);
+    }
+
+    public class C extends A {
+
+        A a;
+        C c;
+        Set<A> setA;
+    }
+
+    @Test
+    public void testDecorators() {
+        final PojoTsClass pojoTsClass = new PojoTsClass(type(C.class), new DecoratorStore(new HashSet<>(asList(
+                new DecoratorDependency("my-decorators", "decorators/simple/CDEC", C.class.getCanonicalName()),
+                new DecoratorDependency("my-decorators", "decorators/simple/ADEC", A.class.getCanonicalName())
+        ))));
+
+        assertEquals(lines("",
+                           "import { Portable } from 'generated__temporary__/Model';",
+                           "import decorators_simple_ADEC from 'my-decorators/decorators/simple/ADEC';",
+                           "import decorators_simple_CDEC from 'my-decorators/decorators/simple/CDEC';",
+                           "import org_uberfire_jsbridge_tsexporter_model_PojoTsClassTestClasses_A from 'output/ts-exporter-test/org/uberfire/jsbridge/tsexporter/model/PojoTsClassTestClasses/A';",
+                           "",
+                           "export default  class C extends org_uberfire_jsbridge_tsexporter_model_PojoTsClassTestClasses_A implements Portable<C> {",
+                           "",
+                           "  protected readonly _fqcn: string = 'org.uberfire.jsbridge.tsexporter.model.PojoTsClassTestClasses.C';",
+                           "",
+                           "public readonly a?: decorators_simple_ADEC;",
+                           "public readonly c?: decorators_simple_CDEC;",
+                           "public readonly setA?: Set<decorators_simple_ADEC>;",
+                           "",
+                           "  constructor(self: { a?: decorators_simple_ADEC, c?: decorators_simple_CDEC, setA?: Set<decorators_simple_ADEC>, inherited?: {} }) {",
+                           "    super({...self.inherited});",
+                           "    Object.assign(this, self);",
+                           "  }",
+                           "}"),
+                     pojoTsClass.toSource());
     }
 }
