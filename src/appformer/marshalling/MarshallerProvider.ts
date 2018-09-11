@@ -61,6 +61,10 @@ export default class MarshallerProvider {
       throw new Error("MarshallerProvider should be initialized before using it.");
     }
 
+    if (obj === null || undefined) {
+      return this.defaultMarshaller;
+    }
+
     const fqcn = obj._fqcn;
     if (!fqcn) {
       return this.defaultMarshaller;

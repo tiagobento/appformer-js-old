@@ -6,7 +6,7 @@ import Portable from "appformer/internal/model/Portable";
 import NullableMarshaller from "appformer/marshalling/marshallers/NullableMarshaller";
 import GenericsTypeMarshallingUtils from "appformer/marshalling/marshallers/util/GenericsTypeMarshallingUtils";
 
-class JavaCollectionMarshaller<T extends Iterable<Portable<any>>> extends NullableMarshaller<
+class JavaCollectionMarshaller<T extends Iterable<Portable<any> | null>> extends NullableMarshaller<
   JavaCollection<T>,
   ErraiObject
 > {
@@ -35,6 +35,6 @@ class JavaCollectionMarshaller<T extends Iterable<Portable<any>>> extends Nullab
   }
 }
 
-export class JavaArrayListMarshaller extends JavaCollectionMarshaller<Array<Portable<any>>> {}
+export class JavaArrayListMarshaller extends JavaCollectionMarshaller<Array<Portable<any> | null>> {}
 
-export class JavaHashSetMarshaller extends JavaCollectionMarshaller<Set<Portable<any>>> {}
+export class JavaHashSetMarshaller extends JavaCollectionMarshaller<Set<Portable<any> | null>> {}

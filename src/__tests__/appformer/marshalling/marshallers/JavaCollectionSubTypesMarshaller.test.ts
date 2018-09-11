@@ -216,6 +216,34 @@ describe("marshall", () => {
     });
   });
 
+  test("with collection containing null elements, should serialize every element normally", () => {
+    const arrayListScenario = () => {
+      const input = new JavaArrayList([null]);
+      return {
+        fqcn: "java.util.ArrayList",
+        output: new JavaArrayListMarshaller().marshall(input, new MarshallingContext())
+      };
+    };
+
+    const hashSetScenario = () => {
+      const input = new JavaHashSet(new Set([null]));
+      return {
+        fqcn: "java.util.HashSet",
+        output: new JavaHashSetMarshaller().marshall(input, new MarshallingContext())
+      };
+    };
+
+    [arrayListScenario, hashSetScenario].forEach(outputFunc => {
+      const { fqcn, output } = outputFunc();
+
+      expect(output).toStrictEqual({
+        [encodedType]: fqcn,
+        [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
+        [value]: [null]
+      });
+    });
+  });
+
   test("with custom pojo array containing repeated elements, should cache inner objects and don't repeat data", () => {
     const repeatedValue = new Node({ data: "foo1" });
 

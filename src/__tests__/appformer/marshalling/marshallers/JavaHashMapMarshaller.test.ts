@@ -239,6 +239,20 @@ describe("marshall", () => {
     });
   });
 
+  test("with null key and value, should set key as null reference and value as null", () => {
+    const input = new JavaHashMap(new Map([[null, null]]));
+
+    const output = new JavaHashMapMarshaller().marshall(input, new MarshallingContext());
+
+    expect(output).toStrictEqual({
+      [encodedType]: "java.util.HashMap",
+      [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
+      [value]: {
+        [ErraiObjectConstants.NULL]: null
+      }
+    });
+  });
+
   test("with custom pojo containing cached key, should reuse it and don't repeat data", () => {
     const repeatedPojo = new DummyPojo("repeatedKey");
 

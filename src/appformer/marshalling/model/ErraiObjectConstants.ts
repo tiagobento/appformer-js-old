@@ -3,6 +3,7 @@ export enum ErraiObjectConstants {
   OBJECT_ID = "^ObjectID",
   NUM_VAL = "^NumVal",
   VALUE = "^Value",
-  JSON = "^${$JSON$}$::"
+  JSON = "^${$JSON$}$::",
+  NULL = "^NullVal"
 }
 export default ErraiObjectConstants;
