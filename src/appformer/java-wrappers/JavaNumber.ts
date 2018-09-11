@@ -1,9 +1,10 @@
 import JavaWrapper from "appformer/java-wrappers/JavaWrapper";
 
-export default abstract class JavaNumber implements JavaWrapper<number> {
+export default abstract class JavaNumber extends JavaWrapper<number> {
   private readonly _value: number;
 
   public constructor(value: string) {
+    super();
     const valueAsNumber = this.from(value);
 
     if (!this.isInRange(valueAsNumber)) {

@@ -1,11 +1,12 @@
 import JavaWrapper from "./JavaWrapper";
 
-export default class JavaDate implements JavaWrapper<Date> {
+export default class JavaDate extends JavaWrapper<Date> {
   private readonly _fqcn = "java.util.Date";
 
   private readonly _value: Date;
 
   constructor(date: Date) {
+    super();
     this._value = new Date(date);
   }
 

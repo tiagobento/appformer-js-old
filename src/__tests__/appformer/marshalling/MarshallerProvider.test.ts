@@ -24,7 +24,8 @@ import JavaFloatMarshaller from "appformer/marshalling/marshallers/JavaFloatMars
 import JavaDouble from "appformer/java-wrappers/JavaDouble";
 import JavaDoubleMarshaller from "appformer/marshalling/marshallers/JavaDoubleMarshaller";
 import DefaultMarshaller from "appformer/marshalling/marshallers/DefaultMarshaller";
-import JavaWrapper, { JavaType } from "appformer/java-wrappers/JavaWrapper";
+import JavaWrapperUtils from "appformer/java-wrappers/JavaWrapperUtils";
+import JavaType from "appformer/java-wrappers/JavaType";
 import * as JavaCollectionMarshaller from "appformer/marshalling/marshallers/JavaCollectionMarshaller";
 import JavaDate from "appformer/java-wrappers/JavaDate";
 import JavaDateMarshaller from "appformer/marshalling/marshallers/JavaDateMarshaller";
@@ -136,7 +137,7 @@ describe("getFor", () => {
       };
 
       // it is a custom pojo (i.e. no pre-defined marshaller)
-      expect(JavaWrapper.isJavaType(fqcn)).toBeFalsy();
+      expect(JavaWrapperUtils.isJavaType(fqcn)).toBeFalsy();
 
       expect(MarshallerProvider.getFor(input)).toEqual(new DefaultMarshaller());
     });

@@ -1,10 +1,11 @@
 import BigNumber from "bignumber.js";
 import JavaWrapper from "./JavaWrapper";
 
-export default abstract class JavaBigNumber implements JavaWrapper<BigNumber> {
+export default abstract class JavaBigNumber extends JavaWrapper<BigNumber> {
   private readonly _value: BigNumber;
 
   public constructor(value: string) {
+    super();
     const valueAsNumber = this.from(value);
 
     if (!this.isInRange(valueAsNumber)) {

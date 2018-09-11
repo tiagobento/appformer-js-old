@@ -395,173 +395,193 @@ describe("marshall", () => {
       expect(context.getObject(repeatedValue)).toBeUndefined();
     });
 
-    test("custom pojo with repeated JavaArrayList objects, should cache the object and don't repeat data", () => {
-      const repeatedValue = new JavaArrayList(["a", "b", "c"]);
+    test("custom pojo with repeated array objects, should cache the object and don't repeat data", () => {
+      const repeatedValue = ["a", "b", "c"];
 
-      const input = new Node({
+      const arrayInput = new Node({
         data: repeatedValue,
+        left: new Node({ data: ["d", "e"] }),
+        right: new Node({ data: repeatedValue })
+      });
+
+      const javaArrayListInput = new Node({
+        data: new JavaArrayList(repeatedValue),
         left: new Node({ data: new JavaArrayList(["d", "e"]) }),
-        right: new Node({ data: repeatedValue })
+        right: new Node({ data: new JavaArrayList(repeatedValue) })
       });
 
-      // === test
-      const context = new MarshallingContext();
-      const output = new DefaultMarshaller().marshall(input, context);
+      [arrayInput, javaArrayListInput].forEach(input => {
+        const context = new MarshallingContext();
+        const output = new DefaultMarshaller().marshall(input, context);
 
-      // === assertions
+        // === assertions
 
-      const rootObjId = output![objectId];
-      const rootDataObjId = (output as any)._data[objectId];
-      expect((output as any)._data).toStrictEqual({
-        [encodedType]: "java.util.ArrayList",
-        [objectId]: expect.anything(),
-        [value]: ["a", "b", "c"]
-      });
+        const rootObjId = output![objectId];
+        const rootDataObjId = (output as any)._data[objectId];
+        expect((output as any)._data).toStrictEqual({
+          [encodedType]: "java.util.ArrayList",
+          [objectId]: expect.anything(),
+          [value]: ["a", "b", "c"]
+        });
 
-      const leftObjId = (output as any)._left[objectId];
-      const leftDataObjId = (output as any)._left._data[objectId];
-      expect((output as any)._left._data).toStrictEqual({
-        [encodedType]: "java.util.ArrayList",
-        [objectId]: expect.anything(),
-        [value]: ["d", "e"]
-      });
+        const leftObjId = (output as any)._left[objectId];
+        const leftDataObjId = (output as any)._left._data[objectId];
+        expect((output as any)._left._data).toStrictEqual({
+          [encodedType]: "java.util.ArrayList",
+          [objectId]: expect.anything(),
+          [value]: ["d", "e"]
+        });
 
-      const rightObjId = (output as any)._right[objectId];
-      const rightDataObjId = (output as any)._right._data[objectId];
-      expect((output as any)._right._data).toStrictEqual({
-        [encodedType]: "java.util.ArrayList",
-        [objectId]: expect.anything()
-        // missing value since it is cached
-      });
+        const rightObjId = (output as any)._right[objectId];
+        const rightDataObjId = (output as any)._right._data[objectId];
+        expect((output as any)._right._data).toStrictEqual({
+          [encodedType]: "java.util.ArrayList",
+          [objectId]: expect.anything()
+          // missing value since it is cached
+        });
 
-      const allObjectIds = [rootObjId, rootDataObjId, leftObjId, leftDataObjId, rightObjId, rightDataObjId];
+        const allObjectIds = [rootObjId, rootDataObjId, leftObjId, leftDataObjId, rightObjId, rightDataObjId];
 
-      allObjectIds.forEach(id => expect(id).toBeDefined());
+        allObjectIds.forEach(id => expect(id).toBeDefined());
 
-      // all ids are unique except for the right data id, that was reused
-      expect(new Set(allObjectIds)).toStrictEqual(
-        new Set([rootObjId, rootDataObjId, leftObjId, leftDataObjId, rightObjId])
-      );
+        // all ids are unique except for the right data id, that was reused
+        expect(new Set(allObjectIds)).toStrictEqual(
+          new Set([rootObjId, rootDataObjId, leftObjId, leftDataObjId, rightObjId])
+        );
 
-      // do not cache repeated object
-      expect(context.getObject(repeatedValue)).toStrictEqual({
-        [encodedType]: "java.util.ArrayList",
-        [objectId]: rootDataObjId
+        // do not cache repeated object
+        expect(context.getObject(repeatedValue)).toStrictEqual({
+          [encodedType]: "java.util.ArrayList",
+          [objectId]: rootDataObjId
+        });
       });
     });
 
-    test("custom pojo with repeated JavaHashSet objects, should cache the object and don't repeat data", () => {
-      const repeatedValue = new JavaHashSet(new Set(["a", "b", "c"]));
+    test("custom pojo with repeated set objects, should cache the object and don't repeat data", () => {
+      const repeatedValue = new Set(["a", "b", "c"]);
 
-      const input = new Node({
+      const setInput = new Node({
         data: repeatedValue,
+        left: new Node({ data: new Set(["d", "e"]) }),
+        right: new Node({ data: repeatedValue })
+      });
+
+      const javaHashSetInput = new Node({
+        data: new JavaHashSet(repeatedValue),
         left: new Node({ data: new JavaHashSet(new Set(["d", "e"])) }),
-        right: new Node({ data: repeatedValue })
+        right: new Node({ data: new JavaHashSet(repeatedValue) })
       });
 
-      // === test
-      const context = new MarshallingContext();
-      const output = new DefaultMarshaller().marshall(input, context);
+      [setInput, javaHashSetInput].forEach(input => {
+        const context = new MarshallingContext();
+        const output = new DefaultMarshaller().marshall(input, context);
 
-      // === assertions
+        // === assertions
 
-      const rootObjId = output![objectId];
-      const rootDataObjId = (output as any)._data[objectId];
-      expect((output as any)._data).toStrictEqual({
-        [encodedType]: "java.util.HashSet",
-        [objectId]: expect.anything(),
-        [value]: ["a", "b", "c"]
-      });
+        const rootObjId = output![objectId];
+        const rootDataObjId = (output as any)._data[objectId];
+        expect((output as any)._data).toStrictEqual({
+          [encodedType]: "java.util.HashSet",
+          [objectId]: expect.anything(),
+          [value]: ["a", "b", "c"]
+        });
 
-      const leftObjId = (output as any)._left[objectId];
-      const leftDataObjId = (output as any)._left._data[objectId];
-      expect((output as any)._left._data).toStrictEqual({
-        [encodedType]: "java.util.HashSet",
-        [objectId]: expect.anything(),
-        [value]: ["d", "e"]
-      });
+        const leftObjId = (output as any)._left[objectId];
+        const leftDataObjId = (output as any)._left._data[objectId];
+        expect((output as any)._left._data).toStrictEqual({
+          [encodedType]: "java.util.HashSet",
+          [objectId]: expect.anything(),
+          [value]: ["d", "e"]
+        });
 
-      const rightObjId = (output as any)._right[objectId];
-      const rightDataObjId = (output as any)._right._data[objectId];
-      expect((output as any)._right._data).toStrictEqual({
-        [encodedType]: "java.util.HashSet",
-        [objectId]: expect.anything()
-        // missing value since it is cached
-      });
+        const rightObjId = (output as any)._right[objectId];
+        const rightDataObjId = (output as any)._right._data[objectId];
+        expect((output as any)._right._data).toStrictEqual({
+          [encodedType]: "java.util.HashSet",
+          [objectId]: expect.anything()
+          // missing value since it is cached
+        });
 
-      const allObjectIds = [rootObjId, rootDataObjId, leftObjId, leftDataObjId, rightObjId, rightDataObjId];
+        const allObjectIds = [rootObjId, rootDataObjId, leftObjId, leftDataObjId, rightObjId, rightDataObjId];
 
-      allObjectIds.forEach(id => expect(id).toBeDefined());
+        allObjectIds.forEach(id => expect(id).toBeDefined());
 
-      // all ids are unique except for the right data id, that was reused
-      expect(new Set(allObjectIds)).toStrictEqual(
-        new Set([rootObjId, rootDataObjId, leftObjId, leftDataObjId, rightObjId])
-      );
+        // all ids are unique except for the right data id, that was reused
+        expect(new Set(allObjectIds)).toStrictEqual(
+          new Set([rootObjId, rootDataObjId, leftObjId, leftDataObjId, rightObjId])
+        );
 
-      // do not cache repeated object
-      expect(context.getObject(repeatedValue)).toStrictEqual({
-        [encodedType]: "java.util.HashSet",
-        [objectId]: rootDataObjId
+        // do not cache repeated object
+        expect(context.getObject(repeatedValue)).toStrictEqual({
+          [encodedType]: "java.util.HashSet",
+          [objectId]: rootDataObjId
+        });
       });
     });
 
-    test("custom pojo with repeated JavaHashMap objects, should cache the object and don't repeat data", () => {
-      const repeatedValue = new JavaHashMap(new Map([["k1", "v1"], ["k2", "v2"]]));
+    test("custom pojo with repeated map objects, should cache the object and don't repeat data", () => {
+      const repeatedMap = new Map([["k1", "v1"]]);
 
-      const input = new Node({
-        data: repeatedValue,
-        left: new Node({ data: new JavaHashMap(new Map([["k3", "v3"]])) }),
-        right: new Node({ data: repeatedValue })
+      const mapInput = new Node({
+        data: repeatedMap,
+        left: new Node({ data: new Map([["k2", "v2"]]) }),
+        right: new Node({ data: repeatedMap })
       });
 
-      // === test
-      const context = new MarshallingContext();
-      const output = new DefaultMarshaller().marshall(input, context);
-
-      // === assertions
-
-      const rootObjId = output![objectId];
-      const rootDataObjId = (output as any)._data[objectId];
-      expect((output as any)._data).toStrictEqual({
-        [encodedType]: "java.util.HashMap",
-        [objectId]: expect.anything(),
-        [value]: {
-          k1: "v1",
-          k2: "v2"
-        }
+      const javaHashMapInput = new Node({
+        data: new JavaHashMap(repeatedMap),
+        left: new Node({ data: new JavaHashMap(new Map([["k2", "v2"]])) }),
+        right: new Node({ data: new JavaHashMap(repeatedMap) })
       });
 
-      const leftObjId = (output as any)._left[objectId];
-      const leftDataObjId = (output as any)._left._data[objectId];
-      expect((output as any)._left._data).toStrictEqual({
-        [encodedType]: "java.util.HashMap",
-        [objectId]: expect.anything(),
-        [value]: {
-          k3: "v3"
-        }
-      });
+      [mapInput, javaHashMapInput].forEach(input => {
+        const context = new MarshallingContext();
+        const output = new DefaultMarshaller().marshall(input, context);
 
-      const rightObjId = (output as any)._right[objectId];
-      const rightDataObjId = (output as any)._right._data[objectId];
-      expect((output as any)._right._data).toStrictEqual({
-        [encodedType]: "java.util.HashMap",
-        [objectId]: expect.anything()
-        // missing value since it is cached
-      });
+        // === assertions
 
-      const allObjectIds = [rootObjId, rootDataObjId, leftObjId, leftDataObjId, rightObjId, rightDataObjId];
+        const rootObjId = output![objectId];
+        const rootDataObjId = (output as any)._data[objectId];
+        expect((output as any)._data).toStrictEqual({
+          [encodedType]: "java.util.HashMap",
+          [objectId]: expect.anything(),
+          [value]: {
+            k1: "v1"
+          }
+        });
 
-      allObjectIds.forEach(id => expect(id).toBeDefined());
+        const leftObjId = (output as any)._left[objectId];
+        const leftDataObjId = (output as any)._left._data[objectId];
+        expect((output as any)._left._data).toStrictEqual({
+          [encodedType]: "java.util.HashMap",
+          [objectId]: expect.anything(),
+          [value]: {
+            k2: "v2"
+          }
+        });
 
-      // all ids are unique except for the right data id, that was reused
-      expect(new Set(allObjectIds)).toStrictEqual(
-        new Set([rootObjId, rootDataObjId, leftObjId, leftDataObjId, rightObjId])
-      );
+        const rightObjId = (output as any)._right[objectId];
+        const rightDataObjId = (output as any)._right._data[objectId];
+        expect((output as any)._right._data).toStrictEqual({
+          [encodedType]: "java.util.HashMap",
+          [objectId]: expect.anything()
+          // missing value since it is cached
+        });
 
-      // do not cache repeated object's data
-      expect(context.getObject(repeatedValue)).toStrictEqual({
-        [encodedType]: "java.util.HashMap",
-        [objectId]: rootDataObjId
+        const allObjectIds = [rootObjId, rootDataObjId, leftObjId, leftDataObjId, rightObjId, rightDataObjId];
+
+        allObjectIds.forEach(id => expect(id).toBeDefined());
+
+        // all ids are unique except for the right data id, that was reused
+        expect(new Set(allObjectIds)).toStrictEqual(
+          new Set([rootObjId, rootDataObjId, leftObjId, leftDataObjId, rightObjId])
+        );
+
+        // do not cache repeated object's data
+        expect(context.getObject(repeatedMap)).toStrictEqual({
+          [encodedType]: "java.util.HashMap",
+          [objectId]: rootDataObjId
+        });
       });
     });
 
@@ -780,59 +800,12 @@ describe("marshall", () => {
       });
     });
 
-    test("root JavaBoolean object, should serialize it to boolean raw value", () => {
-      const input = new JavaBoolean(false);
-
-      const output = new DefaultMarshaller().marshall(input, new MarshallingContext());
-
-      expect(output).toEqual(false);
-    });
-
     test("root JavaByte object, should serialize it to byte raw value", () => {
       const input = new JavaByte("1");
 
       const output = new DefaultMarshaller().marshall(input, new MarshallingContext());
 
       expect(output).toEqual(1);
-    });
-
-    test("root JavaArrayList object, should serialize it normally", () => {
-      const input = new JavaArrayList(["1", "2", "3"]);
-
-      const output = new DefaultMarshaller().marshall(input, new MarshallingContext());
-
-      expect(output).toStrictEqual({
-        [encodedType]: "java.util.ArrayList",
-        [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
-        [value]: ["1", "2", "3"]
-      });
-    });
-
-    test("root JavaHashSet object, should serialize it normally", () => {
-      const input = new JavaHashSet(new Set(["1", "2", "3"]));
-
-      const output = new DefaultMarshaller().marshall(input, new MarshallingContext());
-
-      expect(output).toStrictEqual({
-        [encodedType]: "java.util.HashSet",
-        [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
-        [value]: ["1", "2", "3"]
-      });
-    });
-
-    test("root JavaHashMap object, should serialize it normally", () => {
-      const input = new JavaHashMap(new Map([["k1", "v1"], ["k2", "v2"]]));
-
-      const output = new DefaultMarshaller().marshall(input, new MarshallingContext());
-
-      expect(output).toStrictEqual({
-        [encodedType]: "java.util.HashMap",
-        [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
-        [value]: {
-          k1: "v1",
-          k2: "v2"
-        }
-      });
     });
 
     test("root JavaDouble object, should serialize it to double raw value", () => {
@@ -879,27 +852,6 @@ describe("marshall", () => {
       expect(output).toEqual(1);
     });
 
-    test("root JavaString object, should serialize it to string raw value", () => {
-      const input = new JavaString("str");
-
-      const output = new DefaultMarshaller().marshall(input, new MarshallingContext());
-
-      expect(output).toEqual("str");
-    });
-
-    test("root JavaDate object, should serialize it normally", () => {
-      const dateInput = new Date();
-      const input = new JavaDate(dateInput);
-
-      const output = new DefaultMarshaller().marshall(input, new MarshallingContext());
-
-      expect(output).toStrictEqual({
-        [encodedType]: "java.util.Date",
-        [objectId]: "-1",
-        [value]: `${dateInput.getTime()}`
-      });
-    });
-
     test("root JavaOptional object, should serialize it normally", () => {
       const input = new JavaOptional<string>("str");
 
@@ -913,19 +865,40 @@ describe("marshall", () => {
     });
 
     test("root string object, should serialize it to string raw value", () => {
-      const input = "str";
+      const stringInput = "str";
+      const javaStringInput = new JavaString("str");
 
-      const output = new DefaultMarshaller().marshall(input, new MarshallingContext());
+      [stringInput, javaStringInput].forEach(input => {
+        const output = new DefaultMarshaller().marshall(input, new MarshallingContext());
 
-      expect(output).toEqual("str");
+        expect(output).toEqual("str");
+      });
     });
 
-    test("root boolean object, should serialize it normally", () => {
-      const input = false;
+    test("root date object, should serialize it normally", () => {
+      const date = new Date();
+      const javaDate = new JavaDate(date);
 
-      const output = new DefaultMarshaller().marshall(input, new MarshallingContext());
+      [date, javaDate].forEach(input => {
+        const output = new DefaultMarshaller().marshall(input, new MarshallingContext());
 
-      expect(output).toEqual(false);
+        expect(output).toStrictEqual({
+          [encodedType]: "java.util.Date",
+          [objectId]: "-1",
+          [value]: `${date.getTime()}`
+        });
+      });
+    });
+
+    test("root boolean object, should serialize it to boolean raw value", () => {
+      const booleanInput = false;
+      const javaBooleanInput = new JavaBoolean(false);
+
+      [booleanInput, javaBooleanInput].forEach(input => {
+        const output = new DefaultMarshaller().marshall(input, new MarshallingContext());
+
+        expect(output).toEqual(false);
+      });
     });
 
     test("root number object, should throw error", () => {
@@ -937,54 +910,51 @@ describe("marshall", () => {
       expect(() => marshaller.marshall(input, ctx)).toThrowError();
     });
 
-    test("root date object, should serialize it normally", () => {
-      const input = new Date();
-
-      const output = new DefaultMarshaller().marshall(input, new MarshallingContext());
-
-      expect(output).toStrictEqual({
-        [encodedType]: "java.util.Date",
-        [objectId]: "-1",
-        [value]: `${input.getTime()}`
-      });
-    });
-
     test("root array object, should serialize it normally", () => {
-      const input = ["1", "2", "3"];
+      const arrayInput = ["1", "2", "3"];
+      const javaArrayListInput = new JavaArrayList(["1", "2", "3"]);
 
-      const output = new DefaultMarshaller().marshall(input, new MarshallingContext());
+      [arrayInput, javaArrayListInput].forEach(input => {
+        const output = new DefaultMarshaller().marshall(input, new MarshallingContext());
 
-      expect(output).toStrictEqual({
-        [encodedType]: "java.util.ArrayList",
-        [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
-        [value]: ["1", "2", "3"]
+        expect(output).toStrictEqual({
+          [encodedType]: "java.util.ArrayList",
+          [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
+          [value]: ["1", "2", "3"]
+        });
       });
     });
 
     test("root set object, should serialize it normally", () => {
-      const input = new Set(["1", "2", "3"]);
+      const setInput = new Set(["1", "2", "3"]);
+      const javaHashSetInput = new JavaHashSet(new Set(["1", "2", "3"]));
 
-      const output = new DefaultMarshaller().marshall(input, new MarshallingContext());
+      [setInput, javaHashSetInput].forEach(input => {
+        const output = new DefaultMarshaller().marshall(input, new MarshallingContext());
 
-      expect(output).toStrictEqual({
-        [encodedType]: "java.util.HashSet",
-        [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
-        [value]: ["1", "2", "3"]
+        expect(output).toStrictEqual({
+          [encodedType]: "java.util.HashSet",
+          [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
+          [value]: ["1", "2", "3"]
+        });
       });
     });
 
     test("root map object, should serialize it normally", () => {
-      const input = new Map([["k1", "v1"], ["k2", "v2"]]);
+      const mapInput = new Map([["k1", "v1"], ["k2", "v2"]]);
+      const javaHashMapInput = new JavaHashMap(new Map([["k1", "v1"], ["k2", "v2"]]));
 
-      const output = new DefaultMarshaller().marshall(input, new MarshallingContext());
+      [mapInput, javaHashMapInput].forEach(input => {
+        const output = new DefaultMarshaller().marshall(input, new MarshallingContext());
 
-      expect(output).toStrictEqual({
-        [encodedType]: "java.util.HashMap",
-        [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
-        [value]: {
-          k1: "v1",
-          k2: "v2"
-        }
+        expect(output).toStrictEqual({
+          [encodedType]: "java.util.HashMap",
+          [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
+          [value]: {
+            k1: "v1",
+            k2: "v2"
+          }
+        });
       });
     });
   });

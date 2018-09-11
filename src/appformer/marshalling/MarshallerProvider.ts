@@ -1,4 +1,5 @@
-import JavaWrapper, { JavaType } from "appformer/java-wrappers/JavaWrapper";
+import JavaWrapperUtils from "appformer/java-wrappers/JavaWrapperUtils";
+import JavaType from "appformer/java-wrappers/JavaType";
 import Marshaller from "appformer/marshalling/Marshaller";
 import JavaHashMapMarshaller from "appformer/marshalling/marshallers/JavaHashMapMarshaller";
 import JavaShortMarshaller from "appformer/marshalling/marshallers/JavaShortMarshaller";
@@ -65,7 +66,7 @@ export default class MarshallerProvider {
       return this.defaultMarshaller;
     }
 
-    if (!JavaWrapper.isJavaType(fqcn)) {
+    if (!JavaWrapperUtils.isJavaType(fqcn)) {
       // portable objects defines an fqcn but we don't have default marshallers for it.
       return this.defaultMarshaller;
     }

@@ -1,11 +1,12 @@
 import JavaWrapper from "appformer/java-wrappers/JavaWrapper";
 
-export default class JavaHashMap<T, U> implements JavaWrapper<Map<T, U>> {
+export default class JavaHashMap<T, U> extends JavaWrapper<Map<T, U>> {
   private readonly _fqcn = "java.util.HashMap";
 
   private readonly _value: Map<T, U>;
 
   constructor(value: Map<T, U>) {
+    super();
     this._value = value;
   }
 
