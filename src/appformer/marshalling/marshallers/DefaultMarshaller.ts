@@ -30,10 +30,10 @@ export default class DefaultMarshaller<T extends Portable<T>> extends NullableMa
 
     if (JavaWrapperUtils.isJavaType(rootFqcn)) {
       const marshaller = MarshallerProvider.getFor(input);
-      const marshaledObject = marshaller.marshall(input, ctx);
+      const marshalledObject = marshaller.marshall(input, ctx);
 
-      ctx.recordObject(input, marshaledObject);
-      return marshaledObject;
+      ctx.recordObject(input, marshalledObject);
+      return marshalledObject;
     }
 
     const _this = this.marshallCustomObject(input, ctx, rootFqcn);

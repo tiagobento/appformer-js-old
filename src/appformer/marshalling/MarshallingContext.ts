@@ -29,6 +29,10 @@ export default class MarshallingContext {
 
   private unwrapJavaWrappedIfNeeded(key: Portable<any>) {
     if (JavaWrapper.extendsJavaWrapper(key)) {
+      // When handling wrapped values, we use the raw typescript value as cache key.
+      // This is needed because in the marshalling flow we wrap the values automatically
+      // if they represent a Java type, creating a new wrapper object every time. If we use the wrapper
+      // object directly, the value will never be found in cache, because it'll always be a different pointer
       return key.get();
     }
 

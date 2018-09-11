@@ -14,6 +14,7 @@ export default abstract class JavaWrapper<T> implements Portable<JavaWrapper<T>>
       return false;
     }
 
+    // this is just a trick to allow the application to identify in runtime if an object extends JavaWrapper.
     return obj.instanceIdentifier() === JavaWrapper.javaWrapperInstanceIdentifier;
   }
 }

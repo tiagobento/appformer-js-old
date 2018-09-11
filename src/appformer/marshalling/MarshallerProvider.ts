@@ -67,7 +67,7 @@ export default class MarshallerProvider {
     }
 
     if (!JavaWrapperUtils.isJavaType(fqcn)) {
-      // portable objects defines an fqcn but we don't have default marshallers for it.
+      // portable objects defines an fqcn but we don't have specific marshallers for it.
       return this.defaultMarshaller;
     }
 

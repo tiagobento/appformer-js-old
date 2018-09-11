@@ -12,15 +12,15 @@ export default class GenericsTypeMarshallingUtils {
     return value instanceof JavaNumber || value instanceof JavaBoolean;
   }
 
-  private static wrapGenericsTypeElement(value: Portable<any>, marshaledValue: any): ErraiObject {
+  private static wrapGenericsTypeElement(value: Portable<any>, marshalledValue: any): ErraiObject {
     // This is mandatory in order to comply with errai-marshalling protocol.
-    // Primitive types must be wrapped inside an ErraiObject envelope when
-    // used as Generics type.
+    // When marshalling numeric or boolean values, we use its raw value, without any ErraiObject envelope.
+    // But, when the value is a generic type, we always wrap it inside an ErraiObject
 
     return {
       [ErraiObjectConstants.ENCODED_TYPE]: (value as any)._fqcn,
       [ErraiObjectConstants.OBJECT_ID]: "-1",
-      [ErraiObjectConstants.NUM_VAL]: marshaledValue
+      [ErraiObjectConstants.NUM_VAL]: marshalledValue
     };
   }
 
@@ -29,12 +29,12 @@ export default class GenericsTypeMarshallingUtils {
     const enhancedInput = JavaWrapperUtils.wrapIfNeeded(value);
 
     const marshaller = MarshallerProvider.getFor(enhancedInput);
-    const marshaledValue = marshaller.marshall(enhancedInput, ctx);
+    const marshalledValue = marshaller.marshall(enhancedInput, ctx);
 
     if (this.shouldWrapWhenUsedAsGenericsType(enhancedInput)) {
-      return this.wrapGenericsTypeElement(enhancedInput, marshaledValue)!;
+      return this.wrapGenericsTypeElement(enhancedInput, marshalledValue)!;
     }
 
-    return marshaledValue;
+    return marshalledValue;
   }
 }
