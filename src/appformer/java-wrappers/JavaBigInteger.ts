@@ -1,5 +1,5 @@
 import { BigNumber } from "bignumber.js";
-import JavaBigNumber from "./JavaBigNumber";
+import JavaBigNumber from "appformer/java-wrappers/JavaBigNumber";
 
 export default class JavaBigInteger extends JavaBigNumber {
   private readonly _fqcn = "java.math.BigInteger";
