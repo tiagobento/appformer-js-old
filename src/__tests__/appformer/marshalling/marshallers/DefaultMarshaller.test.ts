@@ -18,6 +18,7 @@ import JavaHashSet from "appformer/java-wrappers/JavaHashSet";
 import Portable from "appformer/internal/model/Portable";
 import JavaDate from "appformer/java-wrappers/JavaDate";
 import JavaOptional from "appformer/java-wrappers/JavaOptional";
+import JavaHashMap from "appformer/java-wrappers/JavaHashMap";
 
 describe("marshall", () => {
   const objectId = ErraiObjectConstants.OBJECT_ID;
@@ -185,8 +186,8 @@ describe("marshall", () => {
       const input = {
         _fqcn: "com.app.my.Pojo",
         list: ["1", "2", "3"],
-        set: new Set(["3", "2", "1"])
-        //TODO map support
+        set: new Set(["3", "2", "1"]),
+        map: new Map([["k1", "v1"], ["k2", "v2"]])
       };
 
       const output = new DefaultMarshaller().marshall(input, new MarshallingContext());
@@ -203,6 +204,14 @@ describe("marshall", () => {
           [encodedType]: "java.util.HashSet",
           [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
           [value]: ["3", "2", "1"]
+        },
+        map: {
+          [encodedType]: "java.util.HashMap",
+          [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
+          [value]: {
+            k1: "v1",
+            k2: "v2"
+          }
         }
       });
     });
@@ -496,6 +505,66 @@ describe("marshall", () => {
       });
     });
 
+    test("custom pojo with repeated JavaHashMap objects, should cache the object and don't repeat data", () => {
+      const repeatedValue = new JavaHashMap(new Map([["k1", "v1"], ["k2", "v2"]]));
+
+      const input = new Node({
+        data: repeatedValue,
+        left: new Node({ data: new JavaHashMap(new Map([["k3", "v3"]])) }),
+        right: new Node({ data: repeatedValue })
+      });
+
+      // === test
+      const context = new MarshallingContext();
+      const output = new DefaultMarshaller().marshall(input, context);
+
+      // === assertions
+
+      const rootObjId = output![objectId];
+      const rootDataObjId = (output as any)._data[objectId];
+      expect((output as any)._data).toStrictEqual({
+        [encodedType]: "java.util.HashMap",
+        [objectId]: expect.anything(),
+        [value]: {
+          k1: "v1",
+          k2: "v2"
+        }
+      });
+
+      const leftObjId = (output as any)._left[objectId];
+      const leftDataObjId = (output as any)._left._data[objectId];
+      expect((output as any)._left._data).toStrictEqual({
+        [encodedType]: "java.util.HashMap",
+        [objectId]: expect.anything(),
+        [value]: {
+          k3: "v3"
+        }
+      });
+
+      const rightObjId = (output as any)._right[objectId];
+      const rightDataObjId = (output as any)._right._data[objectId];
+      expect((output as any)._right._data).toStrictEqual({
+        [encodedType]: "java.util.HashMap",
+        [objectId]: expect.anything()
+        // missing value since it is cached
+      });
+
+      const allObjectIds = [rootObjId, rootDataObjId, leftObjId, leftDataObjId, rightObjId, rightDataObjId];
+
+      allObjectIds.forEach(id => expect(id).toBeDefined());
+
+      // all ids are unique except for the right data id, that was reused
+      expect(new Set(allObjectIds)).toStrictEqual(
+        new Set([rootObjId, rootDataObjId, leftObjId, leftDataObjId, rightObjId])
+      );
+
+      // do not cache repeated object's data
+      expect(context.getObject(repeatedValue)).toStrictEqual({
+        [encodedType]: "java.util.HashMap",
+        [objectId]: rootDataObjId
+      });
+    });
+
     test("custom pojo with repeated JavaDouble objects, should not cache it", () => {
       const repeatedValue = new JavaDouble("1.1");
 
@@ -751,6 +820,21 @@ describe("marshall", () => {
       });
     });
 
+    test("root JavaHashMap object, should serialize it normally", () => {
+      const input = new JavaHashMap(new Map([["k1", "v1"], ["k2", "v2"]]));
+
+      const output = new DefaultMarshaller().marshall(input, new MarshallingContext());
+
+      expect(output).toStrictEqual({
+        [encodedType]: "java.util.HashMap",
+        [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
+        [value]: {
+          k1: "v1",
+          k2: "v2"
+        }
+      });
+    });
+
     test("root JavaDouble object, should serialize it to double raw value", () => {
       const input = new JavaDouble("1.1");
 
@@ -886,6 +970,21 @@ describe("marshall", () => {
         [encodedType]: "java.util.HashSet",
         [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
         [value]: ["1", "2", "3"]
+      });
+    });
+
+    test("root map object, should serialize it normally", () => {
+      const input = new Map([["k1", "v1"], ["k2", "v2"]]);
+
+      const output = new DefaultMarshaller().marshall(input, new MarshallingContext());
+
+      expect(output).toStrictEqual({
+        [encodedType]: "java.util.HashMap",
+        [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
+        [value]: {
+          k1: "v1",
+          k2: "v2"
+        }
       });
     });
   });
