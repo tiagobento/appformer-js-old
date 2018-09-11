@@ -3,18 +3,18 @@ import ErraiObject from "appformer/marshalling/model/ErraiObject";
 import ErraiObjectConstants from "appformer/marshalling/model/ErraiObjectConstants";
 import JavaWrapper from "appformer/java-wrappers/JavaWrapper";
 
-describe("newObjectId", () => {
+describe("incrementAndGetObjectId", () => {
   test("with sequential calls, should return different ids", () => {
     const context = new MarshallingContext();
 
-    const firstObjectId = context.newObjectId();
-    const secondObjectId = context.newObjectId();
+    const firstObjectId = context.incrementAndGetObjectId();
+    const secondObjectId = context.incrementAndGetObjectId();
 
     expect(firstObjectId).not.toEqual(secondObjectId);
   });
 });
 
-describe("recordObject", () => {
+describe("cacheObject", () => {
   let context: MarshallingContext;
 
   beforeEach(() => {
@@ -30,7 +30,7 @@ describe("recordObject", () => {
       [ErraiObjectConstants.NUM_VAL]: "123"
     } as ErraiObject;
 
-    context.recordObject(inputPortable, inputErraiObject);
+    context.cacheObject(inputPortable, inputErraiObject);
 
     // the only cached fields are the encodedType and objectId
     expect((context as any).objContext.get(inputPortable)).toStrictEqual({
@@ -48,10 +48,10 @@ describe("recordObject", () => {
       [ErraiObjectConstants.NUM_VAL]: "123"
     } as ErraiObject;
 
-    context.recordObject(inputPortable, inputErraiObject);
+    context.cacheObject(inputPortable, inputErraiObject);
 
     // override object
-    context.recordObject(inputPortable, {
+    context.cacheObject(inputPortable, {
       ...inputErraiObject,
       [ErraiObjectConstants.OBJECT_ID]: "2"
     });
@@ -72,7 +72,7 @@ describe("recordObject", () => {
       [ErraiObjectConstants.NUM_VAL]: "123"
     } as ErraiObject;
 
-    context.recordObject(wrappedValue, inputErraiObject);
+    context.cacheObject(wrappedValue, inputErraiObject);
 
     // use the inner value object as cache key
     expect((context as any).objContext.get(innerValue)).toStrictEqual({
@@ -85,7 +85,7 @@ describe("recordObject", () => {
   });
 });
 
-describe("getObject", () => {
+describe("getCached", () => {
   let context: MarshallingContext;
 
   beforeEach(() => {
@@ -94,7 +94,7 @@ describe("getObject", () => {
 
   test("with non-existent key, should return undefined", () => {
     const input = { _fqcn: "com.myapp.my.portable", foo: "bar", bar: "foo" };
-    expect(context.getObject(input)).toBeUndefined();
+    expect(context.getCached(input)).toBeUndefined();
   });
 
   test("with existent key, should same object recorded previously", () => {
@@ -106,7 +106,7 @@ describe("getObject", () => {
 
     (context as any).objContext.set(inputPortable, inputErraiObject);
 
-    expect(context.getObject(inputPortable)).toStrictEqual(inputErraiObject);
+    expect(context.getCached(inputPortable)).toStrictEqual(inputErraiObject);
   });
 
   test("with java wrapper object, should use the inner value as cache key", () => {
@@ -121,12 +121,12 @@ describe("getObject", () => {
     (context as any).objContext.set(innerValue, inputErraiObject);
 
     // use the inner value object as cache key
-    expect(context.getObject(innerValue)).toStrictEqual({
+    expect(context.getCached(innerValue)).toStrictEqual({
       [ErraiObjectConstants.ENCODED_TYPE]: "com.foo.bar",
       [ErraiObjectConstants.OBJECT_ID]: "1"
     });
 
-    expect(context.getObject(wrappedValue)).toStrictEqual({
+    expect(context.getCached(wrappedValue)).toStrictEqual({
       [ErraiObjectConstants.ENCODED_TYPE]: "com.foo.bar",
       [ErraiObjectConstants.OBJECT_ID]: "1"
     });

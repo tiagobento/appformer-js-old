@@ -316,7 +316,7 @@ describe("marshall", () => {
       expect(new Set(allObjectIds)).toStrictEqual(new Set(allObjectIds));
 
       // do not cache repeated object
-      expect(context.getObject(repeatedValue)).toBeUndefined();
+      expect(context.getCached(repeatedValue)).toBeUndefined();
     });
 
     test("custom pojo with repeated JavaBigInteger objects, should not cache it", () => {
@@ -354,7 +354,7 @@ describe("marshall", () => {
       expect(new Set(allObjectIds)).toStrictEqual(new Set(allObjectIds));
 
       // do not cache repeated object
-      expect(context.getObject(repeatedValue)).toBeUndefined();
+      expect(context.getCached(repeatedValue)).toBeUndefined();
     });
 
     test("custom pojo with repeated JavaBoolean objects, should not cache it", () => {
@@ -373,7 +373,7 @@ describe("marshall", () => {
       // ErraiObject, so, it doesn't even have an objectId assigned.
 
       // do not cache repeated object
-      expect(context.getObject(repeatedValue)).toBeUndefined();
+      expect(context.getCached(repeatedValue)).toBeUndefined();
     });
 
     test("custom pojo with repeated JavaByte objects, should not cache it", () => {
@@ -392,7 +392,7 @@ describe("marshall", () => {
       // ErraiObject, so, it doesn't even have an objectId assigned.
 
       // do not cache repeated object
-      expect(context.getObject(repeatedValue)).toBeUndefined();
+      expect(context.getCached(repeatedValue)).toBeUndefined();
     });
 
     test("custom pojo with repeated array objects, should cache the object and don't repeat data", () => {
@@ -450,7 +450,7 @@ describe("marshall", () => {
         );
 
         // do not cache repeated object
-        expect(context.getObject(repeatedValue)).toStrictEqual({
+        expect(context.getCached(repeatedValue)).toStrictEqual({
           [encodedType]: "java.util.ArrayList",
           [objectId]: rootDataObjId
         });
@@ -512,7 +512,7 @@ describe("marshall", () => {
         );
 
         // do not cache repeated object
-        expect(context.getObject(repeatedValue)).toStrictEqual({
+        expect(context.getCached(repeatedValue)).toStrictEqual({
           [encodedType]: "java.util.HashSet",
           [objectId]: rootDataObjId
         });
@@ -578,7 +578,7 @@ describe("marshall", () => {
         );
 
         // do not cache repeated object's data
-        expect(context.getObject(repeatedMap)).toStrictEqual({
+        expect(context.getCached(repeatedMap)).toStrictEqual({
           [encodedType]: "java.util.HashMap",
           [objectId]: rootDataObjId
         });
@@ -601,7 +601,7 @@ describe("marshall", () => {
       // ErraiObject, so, it doesn't even have an objectId assigned.
 
       // do not cache repeated object
-      expect(context.getObject(repeatedValue)).toBeUndefined();
+      expect(context.getCached(repeatedValue)).toBeUndefined();
     });
 
     test("custom pojo with repeated JavaFloat objects, should not cache it", () => {
@@ -620,7 +620,7 @@ describe("marshall", () => {
       // ErraiObject, so, it doesn't even have an objectId assigned.
 
       // do not cache repeated object
-      expect(context.getObject(repeatedValue)).toBeUndefined();
+      expect(context.getCached(repeatedValue)).toBeUndefined();
     });
 
     test("custom pojo with repeated JavaInteger objects, should not cache it", () => {
@@ -639,7 +639,7 @@ describe("marshall", () => {
       // ErraiObject, so, it doesn't even have an objectId assigned.
 
       // do not cache repeated object
-      expect(context.getObject(repeatedValue)).toBeUndefined();
+      expect(context.getCached(repeatedValue)).toBeUndefined();
     });
 
     test("custom pojo with repeated JavaLong objects, should not cache it", () => {
@@ -677,7 +677,7 @@ describe("marshall", () => {
       expect(new Set(allObjectIds)).toStrictEqual(new Set(allObjectIds));
 
       // do not cache repeated object
-      expect(context.getObject(repeatedValue)).toBeUndefined();
+      expect(context.getCached(repeatedValue)).toBeUndefined();
     });
 
     test("custom pojo with repeated JavaShort objects, should not cache it", () => {
@@ -696,7 +696,7 @@ describe("marshall", () => {
       // ErraiObject, so, it doesn't even have an objectId assigned.
 
       // do not cache repeated object
-      expect(context.getObject(repeatedValue)).toBeUndefined();
+      expect(context.getCached(repeatedValue)).toBeUndefined();
     });
 
     test("custom pojo with repeated JavaString objects, should not cache it", () => {
@@ -715,7 +715,7 @@ describe("marshall", () => {
       // ErraiObject, so, it doesn't even have an objectId assigned.
 
       // do not cache repeated object
-      expect(context.getObject(repeatedValue)).toBeUndefined();
+      expect(context.getCached(repeatedValue)).toBeUndefined();
     });
 
     test("custom pojo with repeated JavaOptional objects, should not cache it", () => {
@@ -755,7 +755,7 @@ describe("marshall", () => {
       expect(rootDataObjId).toEqual(rightDataObjId);
 
       // do not cache repeated object
-      expect(context.getObject(repeatedValue)).toBeUndefined();
+      expect(context.getCached(repeatedValue)).toBeUndefined();
     });
   });
 

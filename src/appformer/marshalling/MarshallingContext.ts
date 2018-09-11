@@ -12,22 +12,22 @@ export default class MarshallingContext {
     this.objectId = 0;
   }
 
-  public newObjectId() {
+  public incrementAndGetObjectId() {
     return ++this.objectId;
   }
 
-  public recordObject(key: Portable<any>, obj: ErraiObject) {
-    this.objContext.set(this.unwrapJavaWrappedIfNeeded(key), {
+  public cacheObject(key: Portable<any>, obj: ErraiObject) {
+    this.objContext.set(this.unwrap(key), {
       [ErraiObjectConstants.ENCODED_TYPE]: obj[ErraiObjectConstants.ENCODED_TYPE],
       [ErraiObjectConstants.OBJECT_ID]: obj[ErraiObjectConstants.OBJECT_ID]
     });
   }
 
-  public getObject(key: Portable<any>): ErraiObject | undefined {
-    return this.objContext.get(this.unwrapJavaWrappedIfNeeded(key))!;
+  public getCached(key: Portable<any>): ErraiObject | undefined {
+    return this.objContext.get(this.unwrap(key))!;
   }
 
-  private unwrapJavaWrappedIfNeeded(key: Portable<any>) {
+  private unwrap(key: Portable<any>) {
     if (JavaWrapper.extendsJavaWrapper(key)) {
       // When handling wrapped values, we use the raw typescript value as cache key.
       // This is needed because in the marshalling flow we wrap the values automatically

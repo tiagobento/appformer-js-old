@@ -8,7 +8,7 @@ import { isString } from "appformer/util/TypeUtils";
 
 export default class JavaHashMapMarshaller<T, U> extends NullableMarshaller<JavaHashMap<T, U>, ErraiObject> {
   public notNullMarshall(input: JavaHashMap<T, U>, ctx: MarshallingContext): ErraiObject {
-    const cachedObject = ctx.getObject(input);
+    const cachedObject = ctx.getCached(input);
     if (cachedObject) {
       return cachedObject;
     }
@@ -17,11 +17,11 @@ export default class JavaHashMapMarshaller<T, U> extends NullableMarshaller<Java
 
     const result = {
       [ErraiObjectConstants.ENCODED_TYPE]: (input as any)._fqcn,
-      [ErraiObjectConstants.OBJECT_ID]: `${ctx.newObjectId()}`,
+      [ErraiObjectConstants.OBJECT_ID]: `${ctx.incrementAndGetObjectId()}`,
       [ErraiObjectConstants.VALUE]: marshalledEntriesMap
     };
 
-    ctx.recordObject(input, result);
+    ctx.cacheObject(input, result);
 
     return result;
   }

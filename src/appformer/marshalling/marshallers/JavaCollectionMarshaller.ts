@@ -11,7 +11,7 @@ class JavaCollectionMarshaller<T extends Iterable<Portable<any>>> extends Nullab
   ErraiObject
 > {
   public notNullMarshall(input: JavaCollection<T>, ctx: MarshallingContext): ErraiObject {
-    const cachedObject = ctx.getObject(input);
+    const cachedObject = ctx.getCached(input);
     if (cachedObject) {
       return cachedObject;
     }
@@ -25,11 +25,11 @@ class JavaCollectionMarshaller<T extends Iterable<Portable<any>>> extends Nullab
 
     const resultObject = {
       [ErraiObjectConstants.ENCODED_TYPE]: (input as any)._fqcn,
-      [ErraiObjectConstants.OBJECT_ID]: `${ctx.newObjectId()}`,
+      [ErraiObjectConstants.OBJECT_ID]: `${ctx.incrementAndGetObjectId()}`,
       [ErraiObjectConstants.VALUE]: serializedValues
     };
 
-    ctx.recordObject(input, resultObject);
+    ctx.cacheObject(input, resultObject);
 
     return resultObject;
   }

@@ -8,7 +8,7 @@ export default class JavaBigIntegerMarshaller extends NullableMarshaller<JavaBig
   public notNullMarshall(input: JavaBigInteger, ctx: MarshallingContext): ErraiObject {
     return {
       [ErraiObjectConstants.ENCODED_TYPE]: (input as any)._fqcn,
-      [ErraiObjectConstants.OBJECT_ID]: `${ctx.newObjectId()}`,
+      [ErraiObjectConstants.OBJECT_ID]: `${ctx.incrementAndGetObjectId()}`,
       [ErraiObjectConstants.VALUE]: `${input.get().toString(10)}`
     } as ErraiObject;
   }

@@ -310,7 +310,7 @@ describe("marshall", () => {
     });
 
     // do not cache repeated object's data
-    expect(context.getObject(repeatedPojo)).toStrictEqual({
+    expect(context.getCached(repeatedPojo)).toStrictEqual({
       [encodedType]: "com.app.my.DummyPojo",
       [objectId]: key1ObjectId
     });
@@ -353,7 +353,7 @@ describe("marshall", () => {
     expect(repeatedObjIdFirstAppearance).toEqual(repeatedObjIdSecondAppearance);
 
     // do not cache repeated object's data
-    expect(context.getObject(repeatedValue)).toStrictEqual({
+    expect(context.getCached(repeatedValue)).toStrictEqual({
       [encodedType]: "com.app.my.DummyPojo",
       [objectId]: repeatedObjIdFirstAppearance
     });

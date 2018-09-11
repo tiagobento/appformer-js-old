@@ -8,7 +8,7 @@ import NullableMarshaller from "appformer/marshalling/marshallers/NullableMarsha
 
 export default class DefaultMarshaller<T extends Portable<T>> extends NullableMarshaller<T, ErraiObject> {
   public notNullMarshall(input: T, ctx: MarshallingContext): ErraiObject {
-    const cachedObject = ctx.getObject(input);
+    const cachedObject = ctx.getCached(input);
     if (cachedObject) {
       return cachedObject;
     }
@@ -32,13 +32,13 @@ export default class DefaultMarshaller<T extends Portable<T>> extends NullableMa
       const marshaller = MarshallerProvider.getFor(input);
       const marshalledObject = marshaller.marshall(input, ctx);
 
-      ctx.recordObject(input, marshalledObject);
+      ctx.cacheObject(input, marshalledObject);
       return marshalledObject;
     }
 
     const _this = this.marshallCustomObject(input, ctx, rootFqcn);
 
-    ctx.recordObject(input, _this);
+    ctx.cacheObject(input, _this);
 
     return _this;
   }
@@ -60,7 +60,7 @@ export default class DefaultMarshaller<T extends Portable<T>> extends NullableMa
     });
 
     _this[ErraiObjectConstants.ENCODED_TYPE] = fqcn;
-    _this[ErraiObjectConstants.OBJECT_ID] = `${ctx.newObjectId()}`;
+    _this[ErraiObjectConstants.OBJECT_ID] = `${ctx.incrementAndGetObjectId()}`;
     delete _this._fqcn;
     return _this;
   }
