@@ -94,9 +94,9 @@ public interface Dependency {
         public static final BuiltIn JAVA_TREE_MAP = new BuiltIn("JavaTreeMap", "appformer", "java-wrappers/JavaTreeMap");
         public static final BuiltIn JAVA_OPTIONAL = new BuiltIn("JavaOptional", "appformer", "java-wrappers/JavaOptional");
 
-        private String uniqueName;
-        private String relativePath;
-        private String moduleName;
+        private final String uniqueName;
+        private final String relativePath;
+        private final String moduleName;
 
         private BuiltIn(final String uniqueName,
                         final String moduleName,

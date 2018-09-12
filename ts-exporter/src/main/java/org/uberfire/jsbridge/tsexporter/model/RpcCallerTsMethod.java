@@ -34,20 +34,20 @@ import static java.lang.String.format;
 import static java.util.Collections.singleton;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 import static javax.lang.model.element.ElementKind.CLASS;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static org.uberfire.jsbridge.tsexporter.Main.types;
-import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
+import static org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore.NO_DECORATORS;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_DECLARATION;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_USE;
+import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
 
 public class RpcCallerTsMethod {
 
     private final ExecutableElement executableElement;
-    private final TypeElement typeElement;
+    private final TypeElement owner;
     private final ImportStore importStore;
     private final String name;
     private final DependencyGraph dependencyGraph;
@@ -56,7 +56,7 @@ public class RpcCallerTsMethod {
     public RpcCallerTsMethod(final RpcCallerTsMethod tsMethod,
                              final String name) {
 
-        this.typeElement = tsMethod.typeElement;
+        this.owner = tsMethod.owner;
         this.executableElement = tsMethod.executableElement;
         this.importStore = tsMethod.importStore;
         this.dependencyGraph = tsMethod.dependencyGraph;
@@ -65,13 +65,13 @@ public class RpcCallerTsMethod {
     }
 
     public RpcCallerTsMethod(final ExecutableElement executableElement,
-                             final TypeElement typeElement,
+                             final TypeElement owner,
                              final ImportStore importStore,
                              final DependencyGraph dependencyGraph,
                              final DecoratorStore decoratorStore) {
 
         this.executableElement = executableElement;
-        this.typeElement = typeElement;
+        this.owner = owner;
         this.importStore = importStore;
         this.name = executableElement.getSimpleName().toString();
         this.dependencyGraph = dependencyGraph;
@@ -110,18 +110,18 @@ public class RpcCallerTsMethod {
     }
 
     private String methodDeclaration() {
-        return name + importing(new JavaType(executableElement.asType(), typeElement.asType()), TYPE_ARGUMENT_DECLARATION, DecoratorStore.EMPTY).toTypeScript();
+        return name + importing(new JavaType(executableElement.asType(), owner.asType()), TYPE_ARGUMENT_DECLARATION, NO_DECORATORS).toTypeScript();
     }
 
     private String params() {
         return getParameterJavaTypesByNames().entrySet().stream()
-                .map(e -> format("%s: %s", e.getKey(), importing(e.getValue(), TYPE_ARGUMENT_USE, DecoratorStore.EMPTY).toTypeScript()))
+                .map(e -> format("%s: %s", e.getKey(), importing(e.getValue(), TYPE_ARGUMENT_USE, NO_DECORATORS).toTypeScript()))
                 .collect(joining(", "));
     }
 
     private String erraiBusString() {
         return '"' +
-                typeElement.getQualifiedName().toString() +
+                owner.getQualifiedName().toString() +
                 "|" +
                 executableElement.getSimpleName() +
                 ":" +
@@ -129,8 +129,8 @@ public class RpcCallerTsMethod {
                         .map(Element::asType)
                         .map(s -> Optional.ofNullable(types.asElement(s)))
                         .filter(Optional::isPresent).map(Optional::get)
-                        .map(Object::toString)
-                        .collect(toList()).stream().collect(joining(":")) +
+                        .map(Object::toString) //FIXME: This is probably not 100% right
+                        .collect(joining(":")) +
                 '"';
     }
 
@@ -153,7 +153,7 @@ public class RpcCallerTsMethod {
                 .distinct()
                 .map(c -> format("\"%s\": (x: any) => new %s(x)",
                                  c.asElement().getQualifiedName().toString(),
-                                 importing(new JavaType(types.erasure(c.getType()), typeElement.asType()), TYPE_ARGUMENT_USE, decoratorStore).toTypeScript()))
+                                 importing(new JavaType(types.erasure(c.getType()), owner.asType()), TYPE_ARGUMENT_USE, decoratorStore).toTypeScript()))
                 .collect(joining(",\n"));
     }
 
@@ -162,7 +162,7 @@ public class RpcCallerTsMethod {
     }
 
     private JavaType getReturnTypeJavaType() {
-        return new JavaType(executableElement.getReturnType(), typeElement.asType());
+        return new JavaType(executableElement.getReturnType(), owner.asType());
     }
 
     private JavaType.Translatable importing(final JavaType javaType,
@@ -177,7 +177,7 @@ public class RpcCallerTsMethod {
     private LinkedHashMap<String, JavaType> getParameterJavaTypesByNames() {
         return this.executableElement.getParameters().stream().collect(
                 toMap(arg -> arg.getSimpleName().toString(),
-                      arg -> new JavaType(arg.asType(), typeElement.asType()),
+                      arg -> new JavaType(arg.asType(), owner.asType()),
                       (a, b) -> b, //default map behavior
                       LinkedHashMap::new)); //order is important!
     }

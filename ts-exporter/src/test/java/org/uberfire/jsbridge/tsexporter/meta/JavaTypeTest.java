@@ -39,6 +39,7 @@ import static javax.lang.model.type.TypeKind.LONG;
 import static javax.lang.model.type.TypeKind.SHORT;
 import static javax.lang.model.type.TypeKind.VOID;
 import static org.junit.Assert.assertEquals;
+import static org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore.*;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_DECLARATION;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_IMPORT;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_USE;
@@ -93,8 +94,8 @@ public class JavaTypeTest {
         assertEquals("JavaInteger[][]", translate(array(array(primitive(INT)))));
         assertEquals("string[]", translate(array(type(String.class))));
         assertEquals("Map<any, any>[]", translate(array(erased(type(Map.class)))));
-        assertEquals("E[][]", translate(array(type(List.class))));
-        assertEquals("any[][]", translate(array(erased(type(List.class)))));
+        assertEquals("Array<E>[]", translate(array(type(List.class))));
+        assertEquals("Array<any>[]", translate(array(erased(type(List.class)))));
     }
 
     @Test
@@ -178,11 +179,11 @@ public class JavaTypeTest {
         assertEquals("Set<any>", translate(erased(type(Set.class))));
         assertEquals("Set<any>", translate(erased(type(HashSet.class))));
         assertEquals("JavaTreeSet<any>", translate(erased(type(TreeSet.class))));
-        assertEquals("any[]", translate(erased(type(List.class))));
-        assertEquals("any[]", translate(erased(type(ArrayList.class))));
+        assertEquals("Array<any>", translate(erased(type(List.class))));
+        assertEquals("Array<any>", translate(erased(type(ArrayList.class))));
         assertEquals("JavaLinkedList<any>", translate(erased(type(LinkedList.class))));
-        assertEquals("any[]", translate(erased(type(Collection.class))));
-        assertEquals("any[]", translate(TYPE_ARGUMENT_IMPORT, erased(type(Collection.class))));
+        assertEquals("Array<any>", translate(erased(type(Collection.class))));
+        assertEquals("Array", translate(TYPE_ARGUMENT_IMPORT, erased(type(Collection.class))));
         assertEquals("Foo", translate(type(Foo.class)));
         assertEquals("Foo", translate(TYPE_ARGUMENT_IMPORT, type(Foo.class)));
         assertEquals("Bar", translate(type(Foo.Bar.class)));
@@ -196,10 +197,10 @@ public class JavaTypeTest {
         assertEquals("Set<string>", translate(member("set", type(DeclaredTypes.class))));
         assertEquals("Set<string>", translate(member("hashSet", type(DeclaredTypes.class))));
         assertEquals("JavaTreeSet<string>", translate(member("treeSet", type(DeclaredTypes.class))));
-        assertEquals("string[]", translate(member("list", type(DeclaredTypes.class))));
-        assertEquals("string[]", translate(member("arrayList", type(DeclaredTypes.class))));
+        assertEquals("Array<string>", translate(member("list", type(DeclaredTypes.class))));
+        assertEquals("Array<string>", translate(member("arrayList", type(DeclaredTypes.class))));
         assertEquals("JavaLinkedList<string>", translate(member("linkedList", type(DeclaredTypes.class))));
-        assertEquals("string[]", translate(member("collection", type(DeclaredTypes.class))));
+        assertEquals("Array<string>", translate(member("collection", type(DeclaredTypes.class))));
         assertEquals("any /* class */", translate(member("clazz", type(DeclaredTypes.class))));
         assertEquals("JavaOptional<string>", translate(member("optional", type(DeclaredTypes.class))));
     }
@@ -226,7 +227,7 @@ public class JavaTypeTest {
         assertEquals("<U extends T, S extends U>", translate(member("get4", type(Circle.class))));
         assertEquals("<U, S>", translate(TYPE_ARGUMENT_USE, member("get4", type(Circle.class))));
         assertEquals("<U, S>", translate(TYPE_ARGUMENT_IMPORT, member("get4", type(Circle.class))));
-        assertEquals("<U extends T, S extends T[]>", translate(member("get5", type(Circle.class))));
+        assertEquals("<U extends T, S extends Array<T>>", translate(member("get5", type(Circle.class))));
         assertEquals("<U, S>", translate(TYPE_ARGUMENT_USE, member("get5", type(Circle.class))));
         assertEquals("<U, S>", translate(TYPE_ARGUMENT_IMPORT, member("get5", type(Circle.class))));
         assertEquals("<U extends T, S extends Circle<T>>", translate(member("get6", type(Circle.class))));
@@ -245,7 +246,7 @@ public class JavaTypeTest {
         assertEquals("<U extends Cylinder, S extends U>", translate(member("get4", type(Cylinder.class))));
         assertEquals("<U, S>", translate(TYPE_ARGUMENT_USE, member("get4", type(Cylinder.class))));
         assertEquals("<U, S>", translate(TYPE_ARGUMENT_IMPORT, member("get4", type(Cylinder.class))));
-        assertEquals("<U extends Cylinder, S extends Cylinder[]>", translate(member("get5", type(Cylinder.class))));
+        assertEquals("<U extends Cylinder, S extends Array<Cylinder>>", translate(member("get5", type(Cylinder.class))));
         assertEquals("<U, S>", translate(TYPE_ARGUMENT_USE, member("get5", type(Cylinder.class))));
         assertEquals("<U, S>", translate(TYPE_ARGUMENT_IMPORT, member("get5", type(Cylinder.class))));
         assertEquals("<U extends Cylinder, S extends Circle<Cylinder>>", translate(member("get6", type(Cylinder.class))));
@@ -264,7 +265,7 @@ public class JavaTypeTest {
         assertEquals("<U extends Sphere<J>, S extends U>", translate(member("get4", type(Sphere.class))));
         assertEquals("<U, S>", translate(TYPE_ARGUMENT_USE, member("get4", type(Sphere.class))));
         assertEquals("<U, S>", translate(TYPE_ARGUMENT_IMPORT, member("get4", type(Sphere.class))));
-        assertEquals("<U extends Sphere<J>, S extends Sphere<J>[]>", translate(member("get5", type(Sphere.class))));
+        assertEquals("<U extends Sphere<J>, S extends Array<Sphere<J>>>", translate(member("get5", type(Sphere.class))));
         assertEquals("<U, S>", translate(TYPE_ARGUMENT_USE, member("get5", type(Sphere.class))));
         assertEquals("<U, S>", translate(TYPE_ARGUMENT_IMPORT, member("get5", type(Sphere.class))));
         assertEquals("<U extends Sphere<J>, S extends Circle<Sphere<J>>>", translate(member("get6", type(Sphere.class))));
@@ -277,7 +278,7 @@ public class JavaTypeTest {
     }
 
     private String translate(final JavaType type) {
-        return type.translate(TYPE_ARGUMENT_DECLARATION, DecoratorStore.EMPTY).toTypeScript();
+        return type.translate(TYPE_ARGUMENT_DECLARATION, NO_DECORATORS).toTypeScript();
     }
 
     private String translate(final TsTypeTarget tsTypeTarget, final TypeMirror type) {
@@ -285,6 +286,6 @@ public class JavaTypeTest {
     }
 
     private String translate(final TsTypeTarget tsTypeTarget, final JavaType type) {
-        return type.translate(tsTypeTarget, DecoratorStore.EMPTY).toTypeScript();
+        return type.translate(tsTypeTarget, NO_DECORATORS).toTypeScript();
     }
 }

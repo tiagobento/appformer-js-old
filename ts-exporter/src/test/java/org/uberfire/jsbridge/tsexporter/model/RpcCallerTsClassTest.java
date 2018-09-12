@@ -14,7 +14,7 @@ import org.uberfire.jsbridge.tsexporter.meta.dependency.DependencyGraph;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
-import static org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore.EMPTY;
+import static org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore.NO_DECORATORS;
 import static org.uberfire.jsbridge.tsexporter.util.TestingUtils.element;
 import static org.uberfire.jsbridge.tsexporter.util.TestingUtils.init;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
@@ -57,7 +57,7 @@ public class RpcCallerTsClassTest {
     @Test
     public void testDecorators() {
 
-        final DependencyGraph dependencyGraph = new DependencyGraph(EMPTY);
+        final DependencyGraph dependencyGraph = new DependencyGraph(NO_DECORATORS);
         dependencyGraph.add(element(FooImpl2.class));
 
         final RpcCallerTsClass tsClass = new RpcCallerTsClass(

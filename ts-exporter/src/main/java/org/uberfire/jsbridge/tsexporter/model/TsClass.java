@@ -17,7 +17,7 @@
 package org.uberfire.jsbridge.tsexporter.model;
 
 import java.lang.reflect.Field;
-import java.util.List;
+import java.util.Set;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
@@ -30,7 +30,7 @@ import static org.uberfire.jsbridge.tsexporter.util.Utils.get;
 
 public interface TsClass extends TsExporterResource {
 
-    List<Dependency> getDependencies();
+    Set<Dependency> getDependencies();
 
     DeclaredType getType();
 

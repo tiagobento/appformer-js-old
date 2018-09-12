@@ -86,6 +86,7 @@ public class DependencyGraph {
 
         final Set<Vertex> startingPoints = elements == null ? emptySet() : elements.stream()
                 .filter(this::canBePartOfTheGraph)
+                .map(e -> ((TypeElement) e))
                 .map(graph::get)
                 .filter(Objects::nonNull)
                 .collect(toSet());

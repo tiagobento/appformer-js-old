@@ -17,7 +17,6 @@
 package org.uberfire.jsbridge.tsexporter.meta.dependency;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import javax.lang.model.type.DeclaredType;
@@ -27,23 +26,16 @@ import org.uberfire.jsbridge.tsexporter.model.TsClass;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.distinctBy;
 
 public class ImportStore {
 
-    private final Set<JavaType.Translatable> dependencies = new HashSet<>();
+    private final Set<Dependency> dependencies = new HashSet<>();
 
     public JavaType.Translatable with(final JavaType.Translatable type) {
-        dependencies.add(type);
+        dependencies.addAll(type.getAggregated());
         return type;
-    }
-
-    public List<Dependency> getImports() {
-        return dependencies.stream()
-                .flatMap(t -> t.getAggregated().stream())
-                .filter(distinctBy(Dependency::sourcePath))
-                .collect(toList());
     }
 
     public String getImportStatements(final TsClass tsClass) {
@@ -53,10 +45,11 @@ public class ImportStore {
                 .collect(joining("\n"));
     }
 
-    public List<Dependency> getImports(final TsClass tsClass) {
-        return getImports().stream()
+    public Set<Dependency> getImports(final TsClass tsClass) {
+        return dependencies.stream()
+                .filter(distinctBy(Dependency::sourcePath))
                 .filter(dependency -> !dependency.represents(tsClass.getType()))
-                .collect(toList());
+                .collect(toSet());
     }
 
     private String toTypeScriptImportSource(final Dependency dependency, final DeclaredType owner) {

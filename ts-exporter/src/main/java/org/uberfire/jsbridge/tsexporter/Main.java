@@ -44,8 +44,8 @@ public class Main extends AbstractProcessor {
     public static Types types;
     public static Elements elements;
 
-    private static List<Element> seenPortables = new ArrayList<>();
-    private static List<Element> seenRemotes = new ArrayList<>();
+    private static final List<Element> seenPortables = new ArrayList<>();
+    private static final List<Element> seenRemotes = new ArrayList<>();
 
     @Override
     public synchronized void init(final ProcessingEnvironment processingEnv) {

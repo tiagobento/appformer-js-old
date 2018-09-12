@@ -18,6 +18,7 @@ package org.uberfire.jsbridge.tsexporter.model;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.lang.model.element.ExecutableElement;
@@ -25,8 +26,8 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
-import org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType;
+import org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency;
 import org.uberfire.jsbridge.tsexporter.meta.dependency.DependencyGraph;
 import org.uberfire.jsbridge.tsexporter.meta.dependency.ImportStore;
 import org.uberfire.jsbridge.tsexporter.util.Lazy;
@@ -36,9 +37,10 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.ElementKind.METHOD;
 import static org.uberfire.jsbridge.tsexporter.Main.elements;
+import static org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore.NO_DECORATORS;
+import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_DECLARATION;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.formatRightToLeft;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
-import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_DECLARATION;
 
 public class RpcCallerTsClass implements TsClass {
 
@@ -79,7 +81,7 @@ public class RpcCallerTsClass implements TsClass {
     }
 
     private String simpleName() {
-        return importStore.with(new JavaType(typeElement.asType(), typeElement.asType()).translate(TYPE_ARGUMENT_DECLARATION, DecoratorStore.EMPTY)).toTypeScript();
+        return importStore.with(new JavaType(typeElement.asType(), typeElement.asType()).translate(TYPE_ARGUMENT_DECLARATION, NO_DECORATORS)).toTypeScript();
     }
 
     private String methods() {
@@ -111,7 +113,7 @@ public class RpcCallerTsClass implements TsClass {
     }
 
     @Override
-    public List<Dependency> getDependencies() {
+    public Set<Dependency> getDependencies() {
         source.get();
         return importStore.getImports(this);
     }

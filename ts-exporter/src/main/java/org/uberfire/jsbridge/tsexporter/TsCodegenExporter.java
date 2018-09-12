@@ -40,14 +40,12 @@ import org.uberfire.jsbridge.tsexporter.util.Utils;
 
 import static java.lang.String.format;
 import static java.util.Arrays.stream;
-import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.empty;
-import static org.uberfire.jsbridge.tsexporter.Main.TS_EXPORTER_PACKAGE;
+import static org.uberfire.jsbridge.tsexporter.Main.*;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.createFileIfNotExists;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.distinctBy;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.getResources;
@@ -117,13 +115,13 @@ public class TsCodegenExporter {
                 .map(properties -> Optional.ofNullable(properties.getProperty("errai.marshalling.serializableTypes")))
                 .filter(Optional::isPresent).map(Optional::get)
                 .flatMap(serializableTypes -> stream(serializableTypes.split(" \n?")))
-                .map(fqcn -> Main.elements.getTypeElement(fqcn.trim().replace("$", ".")))
+                .map(fqcn -> elements.getTypeElement(fqcn.trim().replace("$", ".")))
                 .collect(toList());
     }
 
     private List<TypeElement> getTsFilesFrom(final String exportFileName) {
         return readAllExportFiles(exportFileName).stream()
-                .map(Main.elements::getTypeElement)
+                .map(elements::getTypeElement)
                 .collect(toList());
     }
 

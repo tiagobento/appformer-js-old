@@ -22,9 +22,9 @@ import org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency;
 
 public class DecoratorDependency implements Dependency {
 
-    private String moduleName;
-    private String decoratorPath;
-    private String decoratedFqcn;
+    private final String moduleName;
+    private final String decoratorPath;
+    private final String decoratedFqcn;
 
     public DecoratorDependency(final String moduleName,
                                final String decoratorPath,

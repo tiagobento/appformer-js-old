@@ -21,18 +21,17 @@ import java.util.Set;
 
 import javax.lang.model.type.TypeMirror;
 
-import org.uberfire.jsbridge.tsexporter.Main;
-
 import static java.lang.String.format;
 import static java.util.Collections.emptySet;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
+import static org.uberfire.jsbridge.tsexporter.Main.*;
 
 public class DecoratorStore {
 
-    public static final DecoratorStore EMPTY = new DecoratorStore(emptySet());
+    public static final DecoratorStore NO_DECORATORS = new DecoratorStore(emptySet());
 
-    private Map<String, DecoratorDependency> decorators;
+    private final Map<String, DecoratorDependency> decorators;
 
     public DecoratorStore(final Set<DecoratorDependency> decorators) {
         this.decorators = decorators.stream()
@@ -43,10 +42,10 @@ public class DecoratorStore {
     }
 
     public boolean hasDecoratorFor(final TypeMirror type) {
-        return decorators.containsKey(Main.types.erasure(type).toString());
+        return decorators.containsKey(types.erasure(type).toString());
     }
 
     public DecoratorDependency getDecoratorFor(final TypeMirror type) {
-        return decorators.get(Main.types.erasure(type).toString());
+        return decorators.get(types.erasure(type).toString());
     }
 }

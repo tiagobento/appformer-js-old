@@ -17,6 +17,7 @@
 package org.uberfire.jsbridge.tsexporter.model;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import javax.lang.model.element.Element;
@@ -38,10 +39,11 @@ import static javax.lang.model.element.ElementKind.ENUM_CONSTANT;
 import static javax.lang.model.element.ElementKind.INTERFACE;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.STATIC;
-import static org.uberfire.jsbridge.tsexporter.util.Utils.formatRightToLeft;
-import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
+import static org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore.NO_DECORATORS;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_DECLARATION;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_USE;
+import static org.uberfire.jsbridge.tsexporter.util.Utils.formatRightToLeft;
+import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
 
 public class PojoTsClass implements TsClass {
 
@@ -55,7 +57,9 @@ public class PojoTsClass implements TsClass {
         return source.get();
     }
 
-    public PojoTsClass(final DeclaredType declaredType, final DecoratorStore decoratorStore) {
+    public PojoTsClass(final DeclaredType declaredType,
+                       final DecoratorStore decoratorStore) {
+
         this.declaredType = declaredType;
         this.decoratorStore = decoratorStore;
         this.importStore = new ImportStore();
@@ -130,7 +134,7 @@ public class PojoTsClass implements TsClass {
     }
 
     private String extractSimpleName(final TsTypeTarget tsTypeTarget) {
-        return importStore.with(new JavaType(declaredType, declaredType).translate(tsTypeTarget, DecoratorStore.EMPTY)).toTypeScript();
+        return importStore.with(new JavaType(declaredType, declaredType).translate(tsTypeTarget, NO_DECORATORS)).toTypeScript();
     }
 
     private String fqcn() {
@@ -154,7 +158,7 @@ public class PojoTsClass implements TsClass {
     }
 
     private JavaType.Translatable superclass() {
-        return new JavaType(asElement().getSuperclass(), declaredType).translate(TYPE_ARGUMENT_USE, DecoratorStore.EMPTY);
+        return new JavaType(asElement().getSuperclass(), declaredType).translate(TYPE_ARGUMENT_USE, NO_DECORATORS);
     }
 
     private String superConstructorCall() {
@@ -171,7 +175,7 @@ public class PojoTsClass implements TsClass {
         } else {
             return _extends + " " + format("implements %s, %s",
                                            interfaces().stream()
-                                                   .map(javaType -> importStore.with(javaType.translate(TYPE_ARGUMENT_USE, DecoratorStore.EMPTY)).toTypeScript())
+                                                   .map(javaType -> importStore.with(javaType.translate(TYPE_ARGUMENT_USE, NO_DECORATORS)).toTypeScript())
                                                    .collect(joining(", ")),
                                            format("Portable<%s>", extractSimpleName(TYPE_ARGUMENT_USE)));
         }
@@ -187,14 +191,14 @@ public class PojoTsClass implements TsClass {
         }
 
         return "extends " + interfaces().stream()
-                .map(javaType -> importStore.with(javaType.translate(TYPE_ARGUMENT_USE, DecoratorStore.EMPTY)).toTypeScript())
+                .map(javaType -> importStore.with(javaType.translate(TYPE_ARGUMENT_USE, NO_DECORATORS)).toTypeScript())
                 .collect(joining(", "));
     }
 
     private List<JavaType> interfaces() {
         return ((TypeElement) declaredType.asElement()).getInterfaces().stream()
                 .map(t -> new JavaType(t, declaredType))
-                .filter(s -> s.translate(TYPE_ARGUMENT_DECLARATION, DecoratorStore.EMPTY).canBeSubclassed())
+                .filter(s -> s.translate(TYPE_ARGUMENT_DECLARATION, NO_DECORATORS).canBeSubclassed())
                 .collect(toList());
     }
 
@@ -216,7 +220,7 @@ public class PojoTsClass implements TsClass {
     }
 
     @Override
-    public List<Dependency> getDependencies() {
+    public Set<Dependency> getDependencies() {
         source.get();
         return importStore.getImports(this);
     }

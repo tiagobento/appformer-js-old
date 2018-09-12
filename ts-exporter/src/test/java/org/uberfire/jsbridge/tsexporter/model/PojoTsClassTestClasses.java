@@ -8,13 +8,11 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import com.google.testing.compile.CompilationRule;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorDependency;
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
-import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;

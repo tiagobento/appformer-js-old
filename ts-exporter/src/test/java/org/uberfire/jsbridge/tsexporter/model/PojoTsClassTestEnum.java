@@ -6,7 +6,7 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
-import static org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore.EMPTY;
+import static org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore.NO_DECORATORS;
 import static org.uberfire.jsbridge.tsexporter.util.TestingUtils.init;
 import static org.uberfire.jsbridge.tsexporter.util.TestingUtils.type;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
@@ -29,7 +29,7 @@ public class PojoTsClassTestEnum {
 
     @Test
     public void testEnum() {
-        final PojoTsClass pojoTsClass = new PojoTsClass(type(E.class), EMPTY);
+        final PojoTsClass pojoTsClass = new PojoTsClass(type(E.class), NO_DECORATORS);
         assertEquals(lines("",
                            "enum E { A, B, C }",
                            "",
