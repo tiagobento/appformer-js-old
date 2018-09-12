@@ -16,6 +16,7 @@
 
 package org.uberfire.jsbridge.tsexporter.meta.dependency;
 
+import javax.lang.model.element.Element;
 import javax.lang.model.type.DeclaredType;
 
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
@@ -53,6 +54,11 @@ public class JavaDependency implements Dependency {
     @Override
     public String getModuleName() {
         return new PojoTsClass(declaredType, decoratorStore).getModuleName();
+    }
+
+    @Override
+    public Element asElement() {
+        return declaredType.asElement();
     }
 
     @Override

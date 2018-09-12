@@ -23,6 +23,7 @@ import javax.lang.model.type.DeclaredType;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 import org.uberfire.jsbridge.tsexporter.model.TsClass;
 import org.uberfire.jsbridge.tsexporter.util.IndirectHashMap;
+import org.uberfire.jsbridge.tsexporter.util.Utils;
 
 import static java.lang.String.format;
 import static java.util.Collections.singleton;
@@ -37,10 +38,7 @@ public class ImportStore {
     public JavaType.Translatable with(final Dependency.Kind kind,
                                       final JavaType.Translatable type) {
 
-        type.getAggregated().forEach(t -> {
-            dependencies.merge(t, singleton(kind), (prev, cur) -> concat(prev.stream(), cur.stream()).collect(toSet()));
-        });
-
+        type.getAggregated().forEach(t -> dependencies.merge(t, singleton(kind), Utils::mergeSets));
         return type;
     }
 

@@ -16,7 +16,6 @@
 
 package org.uberfire.jsbridge.tsexporter.meta.dependency;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -32,7 +31,7 @@ import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
 import org.uberfire.jsbridge.tsexporter.model.PojoTsClass;
 import org.uberfire.jsbridge.tsexporter.util.Utils;
 
-import static java.util.Arrays.*;
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
@@ -49,11 +48,7 @@ public class DependencyGraph {
     }
 
     public Vertex add(final Dependency dependency) {
-        if (dependency instanceof JavaDependency) {
-            return add(((JavaDependency) dependency).getDeclaredType().asElement());
-        } else {
-            return null;
-        }
+        return add(dependency == null ? null : dependency.asElement());
     }
 
     public Vertex add(final Element element) {
@@ -124,14 +119,15 @@ public class DependencyGraph {
             final Map<Vertex, Set<Dependency.Kind>> dependencies = pojoClass.getDependencies().stream()
                     .collect(toMap(relation -> DependencyGraph.this.add(relation.dependency),
                                    relation -> relation.kinds,
-                                   (prev, curr) -> concat(prev.stream(), curr.stream()).collect(toSet())));
+                                   Utils::mergeSets));
 
             dependencies.remove(null);
 
             this.dependencies.putAll(dependencies);
-            this.dependencies.forEach((vertex, kinds) -> vertex.dependents.merge(this, kinds, (prev, curr) -> concat(prev.stream(), curr.stream()).collect(toSet())));
+            this.dependencies.forEach((vertex, kinds) -> vertex.dependents.merge(this, kinds, Utils::mergeSets));
             return this;
         }
+
 
         public PojoTsClass getPojoClass() {
             return pojoClass;

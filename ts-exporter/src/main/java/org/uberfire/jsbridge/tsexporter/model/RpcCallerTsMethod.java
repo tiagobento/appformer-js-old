@@ -144,7 +144,12 @@ public class RpcCallerTsMethod {
     }
 
     private String factoriesOracle() {
-        final Set<Element> allDependencies = dependencyGraph.findAllDependencies(singleton(getReturnTypeJavaType().asElement()), FIELD).stream()
+
+        final Set<Element> dependencyElements = getReturnTypeJavaType().translate(TYPE_ARGUMENT_USE, decoratorStore).getAggregated().stream()
+                .map(Dependency::asElement)
+                .collect(toSet());
+
+        final Set<Element> allDependencies = dependencyGraph.findAllDependencies(dependencyElements, FIELD).stream()
                 .map(DependencyGraph.Vertex::getElement)
                 .collect(toSet());
 

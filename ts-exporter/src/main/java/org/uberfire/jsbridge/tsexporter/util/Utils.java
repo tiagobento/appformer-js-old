@@ -32,6 +32,8 @@ import java.util.function.Supplier;
 import static java.lang.String.format;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toSet;
+import static java.util.stream.Stream.concat;
 
 public class Utils {
 
@@ -90,5 +92,9 @@ public class Utils {
         final Set<T> tmp = new HashSet<>(a);
         tmp.removeAll(b);
         return tmp;
+    }
+
+    public static <T> Set<T> mergeSets(final Set<T> a, final Set<T> b) {
+        return concat(a.stream(), b.stream()).collect(toSet());
     }
 }

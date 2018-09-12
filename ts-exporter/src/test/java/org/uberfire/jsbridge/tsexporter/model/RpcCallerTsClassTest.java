@@ -1,6 +1,7 @@
 package org.uberfire.jsbridge.tsexporter.model;
 
 import java.util.HashSet;
+import java.util.List;
 
 import com.google.testing.compile.CompilationRule;
 import org.junit.After;
@@ -69,25 +70,76 @@ public class RpcCallerTsClassTest {
                         new DecoratorDependency("my-decorators", "decorators/pojo/impl/FooImpl2DEC", FooImpl2.class.getCanonicalName()))
                 )));
 
-        assertEquals(lines("",
-                           "import {rpc, marshall, unmarshall} from 'appformer/API';",
-                           "import decorators_pojo_FooDEC from 'my-decorators/decorators/pojo/FooDEC';",
-                           "import decorators_pojo_impl_FooImpl1DEC from 'my-decorators/decorators/pojo/impl/FooImpl1DEC';",
-                           "import decorators_pojo_impl_FooImpl2DEC from 'my-decorators/decorators/pojo/impl/FooImpl2DEC';",
-                           "",
-                           "export default class SomeInterface {",
-                           "",
-                           "public someMethod(args: {  }) {",
-                           "  return rpc(\"org.uberfire.jsbridge.tsexporter.model.RpcCallerTsClassTest.SomeInterface|someMethod:\", [])",
-                           "         .then((json: string) => {",
-                           "           return unmarshall(json, {",
-                           "\"org.uberfire.jsbridge.tsexporter.model.RpcCallerTsClassTest.FooImpl1\": (x: any) => new decorators_pojo_impl_FooImpl1DEC<any>(x),",
-                           "\"org.uberfire.jsbridge.tsexporter.model.RpcCallerTsClassTest.FooImpl2\": (x: any) => new decorators_pojo_impl_FooImpl2DEC(x)",
-                           "           }) as decorators_pojo_FooDEC<string>;",
-                           "         });",
-                           "}",
-                           "",
-                           "}"),
-                     tsClass.toSource());
+        assertEquals(
+                lines("",
+                      "import {rpc, marshall, unmarshall} from 'appformer/API';",
+                      "import decorators_pojo_FooDEC from 'my-decorators/decorators/pojo/FooDEC';",
+                      "import decorators_pojo_impl_FooImpl1DEC from 'my-decorators/decorators/pojo/impl/FooImpl1DEC';",
+                      "import decorators_pojo_impl_FooImpl2DEC from 'my-decorators/decorators/pojo/impl/FooImpl2DEC';",
+                      "",
+                      "export default class SomeInterface {",
+                      "",
+                      "public someMethod(args: {  }) {",
+                      "  return rpc(\"org.uberfire.jsbridge.tsexporter.model.RpcCallerTsClassTest.SomeInterface|someMethod:\", [])",
+                      "         .then((json: string) => {",
+                      "           return unmarshall(json, {",
+                      "\"org.uberfire.jsbridge.tsexporter.model.RpcCallerTsClassTest.FooImpl1\": (x: any) => new decorators_pojo_impl_FooImpl1DEC<any>(x),",
+                      "\"org.uberfire.jsbridge.tsexporter.model.RpcCallerTsClassTest.FooImpl2\": (x: any) => new decorators_pojo_impl_FooImpl2DEC(x)",
+                      "           }) as decorators_pojo_FooDEC<string>;",
+                      "         });",
+                      "}",
+                      "",
+                      "}"),
+                tsClass.toSource());
+    }
+
+    class FooImpl3 {
+
+        FooImpl1 fooImpl1;
+        FooImpl2 fooImpl2;
+    }
+
+    interface SomeOtherInterface {
+
+        List<FooImpl3> someMethod();
+    }
+
+    @Test
+    public void testDecoratorsIndirectly() {
+
+        final DependencyGraph dependencyGraph = new DependencyGraph(NO_DECORATORS);
+        dependencyGraph.add(element(FooImpl3.class));
+
+        final RpcCallerTsClass tsClass = new RpcCallerTsClass(
+                element(SomeOtherInterface.class),
+                dependencyGraph,
+                new DecoratorStore(new HashSet<>(asList(
+                        new DecoratorDependency("my-decorators", "decorators/pojo/FooDEC", Foo.class.getCanonicalName()),
+                        new DecoratorDependency("my-decorators", "decorators/pojo/impl/FooImpl1DEC", FooImpl1.class.getCanonicalName()),
+                        new DecoratorDependency("my-decorators", "decorators/pojo/impl/FooImpl2DEC", FooImpl2.class.getCanonicalName())
+                ))));
+
+        assertEquals(
+                lines("",
+                      "import {rpc, marshall, unmarshall} from 'appformer/API';",
+                      "import decorators_pojo_impl_FooImpl1DEC from 'my-decorators/decorators/pojo/impl/FooImpl1DEC';",
+                      "import decorators_pojo_impl_FooImpl2DEC from 'my-decorators/decorators/pojo/impl/FooImpl2DEC';",
+                      "import org_uberfire_jsbridge_tsexporter_model_RpcCallerTsClassTest_FooImpl3 from 'output/ts-exporter-test/org/uberfire/jsbridge/tsexporter/model/RpcCallerTsClassTest/FooImpl3';",
+                      "",
+                      "export default class SomeOtherInterface {",
+                      "",
+                      "public someMethod(args: {  }) {",
+                      "  return rpc(\"org.uberfire.jsbridge.tsexporter.model.RpcCallerTsClassTest.SomeOtherInterface|someMethod:\", [])",
+                      "         .then((json: string) => {",
+                      "           return unmarshall(json, {",
+                      "\"org.uberfire.jsbridge.tsexporter.model.RpcCallerTsClassTest.FooImpl1\": (x: any) => new decorators_pojo_impl_FooImpl1DEC<any>(x),",
+                      "\"org.uberfire.jsbridge.tsexporter.model.RpcCallerTsClassTest.FooImpl2\": (x: any) => new decorators_pojo_impl_FooImpl2DEC(x),",
+                      "\"org.uberfire.jsbridge.tsexporter.model.RpcCallerTsClassTest.FooImpl3\": (x: any) => new org_uberfire_jsbridge_tsexporter_model_RpcCallerTsClassTest_FooImpl3(x)",
+                      "           }) as Array<org_uberfire_jsbridge_tsexporter_model_RpcCallerTsClassTest_FooImpl3>;",
+                      "         });",
+                      "}",
+                      "",
+                      "}"),
+                tsClass.toSource());
     }
 }

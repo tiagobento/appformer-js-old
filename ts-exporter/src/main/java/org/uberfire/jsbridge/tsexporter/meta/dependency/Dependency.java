@@ -16,6 +16,7 @@
 
 package org.uberfire.jsbridge.tsexporter.meta.dependency;
 
+import javax.lang.model.element.Element;
 import javax.lang.model.type.DeclaredType;
 
 public interface Dependency {
@@ -29,6 +30,8 @@ public interface Dependency {
     default String sourcePath() {
         return (this instanceof JavaDependency ? "output/" : "") + getModuleName() + "/" + relativePath();
     }
+
+    Element asElement();
 
     boolean represents(final DeclaredType type);
 

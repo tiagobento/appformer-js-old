@@ -16,6 +16,7 @@
 
 package org.uberfire.jsbridge.tsexporter.meta.dependency;
 
+import javax.lang.model.element.Element;
 import javax.lang.model.type.DeclaredType;
 
 public class BuiltInDependency implements Dependency {
@@ -64,6 +65,11 @@ public class BuiltInDependency implements Dependency {
     @Override
     public String getModuleName() {
         return moduleName;
+    }
+
+    @Override
+    public Element asElement() {
+        return null;
     }
 
     @Override
