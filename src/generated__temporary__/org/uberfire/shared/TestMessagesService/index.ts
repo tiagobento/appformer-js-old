@@ -1,4 +1,5 @@
-import { rpc, marshall } from "appformer";
+import { rpc } from "appformer";
+import { marshall } from "appformer/marshalling";
 import { TestEvent } from "generated__temporary__/Model";
 
 export default class TestMessagesService {
