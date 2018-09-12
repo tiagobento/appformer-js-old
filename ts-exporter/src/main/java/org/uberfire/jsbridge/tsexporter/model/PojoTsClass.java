@@ -17,18 +17,17 @@
 package org.uberfire.jsbridge.tsexporter.model;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 
-import org.uberfire.jsbridge.tsexporter.meta.ImportableJavaType;
-import org.uberfire.jsbridge.tsexporter.meta.ImportableTsType;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget;
+import org.uberfire.jsbridge.tsexporter.meta.TranslatableJavaType;
 import org.uberfire.jsbridge.tsexporter.util.ImportStore;
+import org.uberfire.jsbridge.tsexporter.util.Lazy;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
@@ -38,147 +37,159 @@ import static javax.lang.model.element.ElementKind.ENUM_CONSTANT;
 import static javax.lang.model.element.ElementKind.INTERFACE;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.STATIC;
+import static org.uberfire.jsbridge.tsexporter.Utils.formatRightToLeft;
 import static org.uberfire.jsbridge.tsexporter.Utils.lines;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_DECLARATION;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_USE;
 
-public class PojoTsClass {
+public class PojoTsClass implements TsClass {
 
-    private final ImportableTsType importableTsType;
+    private final DeclaredType declaredType;
     private final ImportStore importStore;
+    private final Lazy<String> source;
 
-    public PojoTsClass(final ImportableTsType importableTsType) {
-        this.importableTsType = importableTsType;
-        this.importStore = new ImportStore();
-    }
-
+    @Override
     public String toSource() {
-
-        final Element element = importableTsType.getType().asElement();
-
-        if (element.getKind().equals(INTERFACE)) {
-            return generateInterface();
-        }
-
-        if (element.getKind().equals(ENUM)) {
-            return generateEnum();
-        }
-
-        return generateClass();
+        return source.get();
     }
 
-    private String generateClass() {
-        final DeclaredType type = importableTsType.getType();
-        final TypeElement element = (TypeElement) type.asElement();
-        final String simpleName = extractSimpleName(element, TYPE_ARGUMENT_DECLARATION);
+    public PojoTsClass(final DeclaredType declaredType) {
+        this.declaredType = declaredType;
+        this.importStore = new ImportStore();
+        this.source = new Lazy<>(() -> {
+            if (getElement().getKind().equals(INTERFACE)) {
+                return toInterface();
+            } else if (getElement().getKind().equals(ENUM)) {
+                return toEnum();
+            } else {
+                return toClass();
+            }
+        });
+    }
 
-        final Optional<ImportableTsType> importableSuperclassTsType = new JavaType(element.getSuperclass(), type)
-                .asImportableJavaType()
-                .flatMap(ImportableJavaType::asImportableTsType);
+    //FIXME: Enum extending interfaces?
+    private String toEnum() {
+        return formatRightToLeft(lines("",
+                                       "enum s% { s% }",
+                                       "",
+                                       "export default s%;"),
 
-        final List<JavaType> implementedInterfaces = extractInterfaces();
+                                 () -> extractSimpleName(TYPE_ARGUMENT_DECLARATION),
+                                 this::enumFields,
+                                 () -> extractSimpleName(TYPE_ARGUMENT_DECLARATION));
+    }
 
-        final String fields = element.getEnclosedElements().stream()
-                .filter(s -> s.getKind().isField())
-                .filter(s -> !s.getModifiers().contains(STATIC))
-                .filter(s -> !s.asType().toString().contains("java.util.function"))
-                .map(s -> format("public readonly %s?: %s;", s.getSimpleName(), importStore.importing(new JavaType(s.asType(), type)).toUniqueTsType(TYPE_ARGUMENT_USE)))
-                .collect(joining("\n"));
+    private String toInterface() {
+        return formatRightToLeft(lines("",
+                                       "s%",
+                                       "",
+                                       "export default interface s% s% {",
+                                       "}"),
 
-        final String constructorArgs = extractConstructorArgs(element);
+                                 this::imports,
+                                 () -> extractSimpleName(TYPE_ARGUMENT_DECLARATION),
+                                 this::interfaceHierarchy);
+    }
 
-        final String _extends = importableSuperclassTsType.map(t -> "extends " + importStore.importing(t).toUniqueTsType(TYPE_ARGUMENT_USE)).orElse("");
+    private String toClass() {
+        return formatRightToLeft(lines("",
+                                       "import { Portable } from 'generated__temporary__/Model';",
+                                       "s%",
+                                       "",
+                                       "export default s% class s% s% {",
+                                       "",
+                                       "  protected readonly _fqcn: string = 's%';",
+                                       "",
+                                       "s%",
+                                       "",
+                                       "  constructor(self: { s% }) {",
+                                       "    s%",
+                                       "    Object.assign(this, self);",
+                                       "  }",
+                                       "}"),
 
-        final String _implements = implementedInterfaces.isEmpty()
-                ? format("implements Portable<%s>", extractSimpleName(element, TYPE_ARGUMENT_USE))
-                : "implements " + implementedInterfaces.stream().peek(importStore::importing).map(javaType -> javaType.toUniqueTsType(TYPE_ARGUMENT_USE)).collect(joining(", ")) + format(", Portable<%s>", extractSimpleName(element, TYPE_ARGUMENT_USE));
-
-        //Has to be the last.
-        final String imports = importStore.getImportStatements();
-
-        return format(lines("",
-                            "import { Portable } from 'generated__temporary__/Model';",
-                            "%s",
-                            "",
-                            "export default %s class %s %s {",
-                            "",
-                            "  protected readonly _fqcn: string = '%s';",
-                            "",
-                            "%s",
-                            "",
-                            "  constructor(self: { %s }) {",
-                            "    %s",
-                            "    Object.assign(this, self); ",
-                            "  }",
-                            "}"),
-
-                      imports,
-                      element.getModifiers().contains(ABSTRACT) ? "abstract" : "",
-                      simpleName,
-                      _extends + " " + _implements,
-                      importableTsType.getCanonicalFqcn(),
-                      fields,
-                      constructorArgs,
-                      importableSuperclassTsType.map(t -> "super({...self.inherited});").orElse("")
+                                 this::imports,
+                                 this::abstractOrNot,
+                                 () -> extractSimpleName(TYPE_ARGUMENT_DECLARATION),
+                                 this::classHierarchy,
+                                 this::fqcn,
+                                 this::fields,
+                                 () -> extractConstructorArgs(getElement()),
+                                 this::superConstructorCall
         );
     }
 
-    private String generateEnum() {
-        final TypeElement element = (TypeElement) importableTsType.getType().asElement();
-        final String simpleName = extractSimpleName(element, TYPE_ARGUMENT_DECLARATION);
+    private String imports() {
+        return importStore.getImportStatements(this);
+    }
 
-        //FIXME: Enum extending interfaces?
-        final String enumFields = element.getEnclosedElements().stream()
+    private String extractSimpleName(final TsTypeTarget tsTypeTarget) {
+        return importStore.with(new JavaType(getElement().asType(), getElement().asType()).translate(tsTypeTarget)).toTypeScript();
+    }
+
+    private String fqcn() {
+        return getElement().getQualifiedName().toString();
+    }
+
+    private String enumFields() {
+        return getElement().getEnclosedElements().stream()
                 .filter(s -> s.getKind().equals(ENUM_CONSTANT))
                 .map(Element::getSimpleName)
                 .collect(joining(", "));
-
-        return format(lines("",
-                            "enum %s { %s }",
-                            "",
-                            "export default %s;"),
-
-                      simpleName,
-                      enumFields,
-                      simpleName);
     }
 
-    private String generateInterface() {
-        final List<JavaType> implementedInterfaces = extractInterfaces();
-        final DeclaredType type = importableTsType.getType();
-        final TypeElement element = (TypeElement) type.asElement();
-        final String simpleName = extractSimpleName(element, TYPE_ARGUMENT_DECLARATION);
-        final String _implements = !implementedInterfaces.isEmpty()
-                ? "extends " + implementedInterfaces.stream().peek(importStore::importing).map(javaType -> javaType.toUniqueTsType(TYPE_ARGUMENT_USE)).collect(joining(", "))
+    private String fields() {
+        return getElement().getEnclosedElements().stream()
+                .filter(s -> s.getKind().isField())
+                .filter(s -> !s.getModifiers().contains(STATIC))
+                .filter(s -> !s.asType().toString().contains("java.util.function"))
+                .map(s -> format("public readonly %s?: %s;", s.getSimpleName(), importStore.with(new JavaType(s.asType(), declaredType).translate(TYPE_ARGUMENT_USE)).toTypeScript()))
+                .collect(joining("\n"));
+    }
+
+    private TranslatableJavaType superclass() {
+        return new JavaType(getElement().getSuperclass(), declaredType).translate(TYPE_ARGUMENT_USE);
+    }
+
+    private String superConstructorCall() {
+        return superclass().canBeSubclassed() ? "super({...self.inherited});" : "";
+    }
+
+    private String classHierarchy() {
+        final String _extends = superclass().canBeSubclassed()
+                ? "extends " + importStore.with(superclass()).toTypeScript()
                 : "";
 
-        //Has to be the last
-        final String imports = importStore.getImportStatements();
-
-        return format(lines("",
-                            "%s",
-                            "",
-                            "export default interface %s %s {",
-                            "}"),
-
-                      imports,
-                      simpleName,
-                      _implements);
+        if (interfaces().isEmpty()) {
+            return _extends + " " + format("implements Portable<%s>", extractSimpleName(TYPE_ARGUMENT_USE));
+        } else {
+            return _extends + " " + format("implements %s, %s",
+                                           interfaces().stream()
+                                                   .map(javaType -> importStore.with(javaType.translate(TYPE_ARGUMENT_USE)).toTypeScript())
+                                                   .collect(joining(", ")),
+                                           format("Portable<%s>", extractSimpleName(TYPE_ARGUMENT_USE)));
+        }
     }
 
-    private List<JavaType> extractInterfaces() {
-        final DeclaredType type = importableTsType.getType();
-        final TypeElement element = (TypeElement) type.asElement();
-        return element.getInterfaces().stream()
-                .map(t -> new JavaType(t, t).asImportableJavaType())
-                .map(t -> t.flatMap(ImportableJavaType::asImportableTsType))
-                .filter(Optional::isPresent).map(Optional::get)
+    private String abstractOrNot() {
+        return getElement().getModifiers().contains(ABSTRACT) ? "abstract" : "";
+    }
+
+    private String interfaceHierarchy() {
+        if (interfaces().isEmpty()) {
+            return "";
+        }
+
+        return "extends " + interfaces().stream()
+                .map(javaType -> importStore.with(javaType.translate(TYPE_ARGUMENT_USE)).toTypeScript())
+                .collect(joining(", "));
+    }
+
+    private List<JavaType> interfaces() {
+        return ((TypeElement) declaredType.asElement()).getInterfaces().stream()
+                .map(t -> new JavaType(t, declaredType))
+                .filter(s -> s.translate().canBeSubclassed())
                 .collect(toList());
-    }
-
-    private String extractSimpleName(final TypeElement element, final TsTypeTarget tsTypeTarget) {
-        final String fqcn = importStore.importing(new JavaType(element.asType())).toUniqueTsType(tsTypeTarget);
-        return fqcn.substring(fqcn.indexOf(element.getSimpleName().toString()));
     }
 
     private String extractConstructorArgs(final TypeElement typeElement) {
@@ -187,7 +198,7 @@ public class PojoTsClass {
                 .filter(f -> f.getKind().isField())
                 .filter(f -> !f.getModifiers().contains(STATIC))
                 .filter(s -> !s.asType().toString().contains("java.util.function"))
-                .map(f -> format("%s?: %s", f.getSimpleName(), importStore.importing(new JavaType(f.asType(), importableTsType.getType())).toUniqueTsType(TYPE_ARGUMENT_USE)))
+                .map(f -> format("%s?: %s", f.getSimpleName(), importStore.with(new JavaType(f.asType(), declaredType).translate(TYPE_ARGUMENT_USE)).toTypeScript()))
                 .collect(toList());
 
         if (typeElement.getSuperclass().toString().equals("java.lang.Object")) {
@@ -198,7 +209,14 @@ public class PojoTsClass {
         return Stream.concat(fields.stream(), Stream.of("inherited?: {" + inheritedFields + "}")).collect(joining(", "));
     }
 
-    public List<ImportableTsType> getDependencies() {
-        return importStore.getImports();
+    @Override
+    public List<DeclaredType> getDependencies() {
+        source.get();
+        return importStore.getImports(this);
+    }
+
+    @Override
+    public DeclaredType getType() {
+        return declaredType;
     }
 }

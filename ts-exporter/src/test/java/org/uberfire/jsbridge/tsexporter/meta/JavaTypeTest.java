@@ -35,15 +35,18 @@ import static javax.lang.model.type.TypeKind.LONG;
 import static javax.lang.model.type.TypeKind.SHORT;
 import static javax.lang.model.type.TypeKind.VOID;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_IMPORT;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_USE;
-import static org.uberfire.jsbridge.tsexporter.meta.TestingUtils.array;
-import static org.uberfire.jsbridge.tsexporter.meta.TestingUtils.erased;
-import static org.uberfire.jsbridge.tsexporter.meta.TestingUtils.member;
-import static org.uberfire.jsbridge.tsexporter.meta.TestingUtils.param;
-import static org.uberfire.jsbridge.tsexporter.meta.TestingUtils.primitive;
-import static org.uberfire.jsbridge.tsexporter.meta.TestingUtils.type;
-import static org.uberfire.jsbridge.tsexporter.meta.TestingUtils.types;
-import static org.uberfire.jsbridge.tsexporter.meta.TestingUtils.wildcard;
+import static org.uberfire.jsbridge.tsexporter.TestingUtils.*;
+import static org.uberfire.jsbridge.tsexporter.TestingUtils.array;
+import static org.uberfire.jsbridge.tsexporter.TestingUtils.erased;
+import static org.uberfire.jsbridge.tsexporter.TestingUtils.member;
+import static org.uberfire.jsbridge.tsexporter.TestingUtils.param;
+import static org.uberfire.jsbridge.tsexporter.TestingUtils.primitive;
+import static org.uberfire.jsbridge.tsexporter.TestingUtils.type;
+import static org.uberfire.jsbridge.tsexporter.TestingUtils.types;
+import static org.uberfire.jsbridge.tsexporter.TestingUtils.wildcard;
 
 public class JavaTypeTest {
 
@@ -52,8 +55,8 @@ public class JavaTypeTest {
 
     @Before
     public void before() {
-        TestingUtils.init(compilationRule.getTypes(), compilationRule.getElements());
-        JavaType.simpleNames = true;
+        init(compilationRule.getTypes(), compilationRule.getElements());
+        JavaType.SIMPLE_NAMES.set(true);
     }
 
     @Test
@@ -78,34 +81,6 @@ public class JavaTypeTest {
         assertEquals("Map<any, any>[]", translate(array(erased(type(Map.class)))));
         assertEquals("E[][]", translate(array(type(List.class))));
         assertEquals("any[][]", translate(array(erased(type(List.class)))));
-    }
-
-    private abstract class Circle<T extends Circle<T>> {
-
-        T field1;
-        Circle<T> field2;
-
-        abstract void get1(T t);
-
-        abstract <U> void get2(T t, U u);
-
-        abstract <U extends T> void get3(T t, U u);
-
-        abstract <U extends T, S extends U> void get4(T t, U u, S s);
-
-        abstract <U extends T, S extends List<? extends T>> void get5(T t, U u, S s);
-
-        abstract <U extends T, S extends Circle<T>> void get6(T t, U u, S s);
-
-        abstract <U extends T, S extends Circle<T>> void get7(T t, U u, S s);
-    }
-
-    private abstract class Cylinder extends Circle<Cylinder> {
-
-    }
-
-    private abstract class Sphere<J> extends Circle<Sphere<J>> {
-
     }
 
     @Test
@@ -145,27 +120,6 @@ public class JavaTypeTest {
         assertEquals("U", translate(TYPE_ARGUMENT_USE, param(1, member("get2", type(Sphere.class)))));
     }
 
-    private abstract class DeclaredTypes {
-
-        Map<String, String> map;
-        List<String> list;
-        ArrayList<String> arrayList;
-        LinkedList<String> linkedList;
-        Set<String> set;
-        HashSet<String> hashSet;
-        TreeSet<String> treeSet;
-        Collection<String> collection;
-        Class<String> clazz;
-        Optional<String> optional;
-    }
-
-    private static class Foo {
-
-        private static class Bar {
-
-        }
-    }
-
     @Test
     public void testDeclared() {
         assertEquals("any /* object */", translate(type(Object.class)));
@@ -200,9 +154,13 @@ public class JavaTypeTest {
         assertEquals("any[]", translate(erased(type(ArrayList.class))));
         assertEquals("any[]", translate(erased(type(LinkedList.class))));
         assertEquals("any[]", translate(erased(type(Collection.class))));
+        assertEquals("any[]", translate(TYPE_ARGUMENT_IMPORT, erased(type(Collection.class))));
         assertEquals("Foo", translate(type(Foo.class)));
+        assertEquals("Foo", translate(TYPE_ARGUMENT_IMPORT, type(Foo.class)));
         assertEquals("Bar", translate(type(Foo.Bar.class)));
+        assertEquals("Bar", translate(TYPE_ARGUMENT_IMPORT, type(Foo.Bar.class)));
         assertEquals("Circle<any>", translate(erased(type(Circle.class))));
+        assertEquals("Circle", translate(TYPE_ARGUMENT_IMPORT, erased(type(Circle.class))));
         assertEquals("any", translate(erased(type(Optional.class))));
 
         assertEquals("string[]", translate(member("set", type(DeclaredTypes.class))));
@@ -228,57 +186,75 @@ public class JavaTypeTest {
     public void testExecutable() {
         assertEquals("", translate(member("get1", type(Circle.class))));
         assertEquals("", translate(TYPE_ARGUMENT_USE, member("get1", type(Circle.class))));
+        assertEquals("", translate(TYPE_ARGUMENT_IMPORT, member("get1", type(Circle.class))));
         assertEquals("<U>", translate(member("get2", type(Circle.class))));
         assertEquals("<U>", translate(TYPE_ARGUMENT_USE, member("get2", type(Circle.class))));
+        assertEquals("<U>", translate(TYPE_ARGUMENT_IMPORT, member("get2", type(Circle.class))));
         assertEquals("<U extends T>", translate(member("get3", type(Circle.class))));
         assertEquals("<U>", translate(TYPE_ARGUMENT_USE, member("get3", type(Circle.class))));
+        assertEquals("<U>", translate(TYPE_ARGUMENT_IMPORT, member("get3", type(Circle.class))));
         assertEquals("<U extends T, S extends U>", translate(member("get4", type(Circle.class))));
         assertEquals("<U, S>", translate(TYPE_ARGUMENT_USE, member("get4", type(Circle.class))));
+        assertEquals("<U, S>", translate(TYPE_ARGUMENT_IMPORT, member("get4", type(Circle.class))));
         assertEquals("<U extends T, S extends T[]>", translate(member("get5", type(Circle.class))));
         assertEquals("<U, S>", translate(TYPE_ARGUMENT_USE, member("get5", type(Circle.class))));
+        assertEquals("<U, S>", translate(TYPE_ARGUMENT_IMPORT, member("get5", type(Circle.class))));
         assertEquals("<U extends T, S extends Circle<T>>", translate(member("get6", type(Circle.class))));
         assertEquals("<U, S>", translate(TYPE_ARGUMENT_USE, member("get6", type(Circle.class))));
+        assertEquals("<U, S>", translate(TYPE_ARGUMENT_IMPORT, member("get6", type(Circle.class))));
 
         assertEquals("", translate(member("get1", type(Cylinder.class))));
         assertEquals("", translate(TYPE_ARGUMENT_USE, member("get1", type(Cylinder.class))));
+        assertEquals("", translate(TYPE_ARGUMENT_IMPORT, member("get1", type(Cylinder.class))));
         assertEquals("<U>", translate(member("get2", type(Cylinder.class))));
         assertEquals("<U>", translate(TYPE_ARGUMENT_USE, member("get2", type(Cylinder.class))));
+        assertEquals("<U>", translate(TYPE_ARGUMENT_IMPORT, member("get2", type(Cylinder.class))));
         assertEquals("<U extends Cylinder>", translate(member("get3", type(Cylinder.class))));
         assertEquals("<U>", translate(TYPE_ARGUMENT_USE, member("get3", type(Cylinder.class))));
+        assertEquals("<U>", translate(TYPE_ARGUMENT_IMPORT, member("get3", type(Cylinder.class))));
         assertEquals("<U extends Cylinder, S extends U>", translate(member("get4", type(Cylinder.class))));
         assertEquals("<U, S>", translate(TYPE_ARGUMENT_USE, member("get4", type(Cylinder.class))));
+        assertEquals("<U, S>", translate(TYPE_ARGUMENT_IMPORT, member("get4", type(Cylinder.class))));
         assertEquals("<U extends Cylinder, S extends Cylinder[]>", translate(member("get5", type(Cylinder.class))));
         assertEquals("<U, S>", translate(TYPE_ARGUMENT_USE, member("get5", type(Cylinder.class))));
+        assertEquals("<U, S>", translate(TYPE_ARGUMENT_IMPORT, member("get5", type(Cylinder.class))));
         assertEquals("<U extends Cylinder, S extends Circle<Cylinder>>", translate(member("get6", type(Cylinder.class))));
         assertEquals("<U, S>", translate(TYPE_ARGUMENT_USE, member("get6", type(Cylinder.class))));
+        assertEquals("<U, S>", translate(TYPE_ARGUMENT_IMPORT, member("get6", type(Cylinder.class))));
 
         assertEquals("", translate(member("get1", type(Sphere.class))));
         assertEquals("", translate(TYPE_ARGUMENT_USE, member("get1", type(Sphere.class))));
+        assertEquals("", translate(TYPE_ARGUMENT_IMPORT, member("get1", type(Sphere.class))));
         assertEquals("<U>", translate(member("get2", type(Sphere.class))));
         assertEquals("<U>", translate(TYPE_ARGUMENT_USE, member("get2", type(Sphere.class))));
+        assertEquals("<U>", translate(TYPE_ARGUMENT_IMPORT, member("get2", type(Sphere.class))));
         assertEquals("<U extends Sphere<J>>", translate(member("get3", type(Sphere.class))));
         assertEquals("<U>", translate(TYPE_ARGUMENT_USE, member("get3", type(Sphere.class))));
+        assertEquals("<U>", translate(TYPE_ARGUMENT_IMPORT, member("get3", type(Sphere.class))));
         assertEquals("<U extends Sphere<J>, S extends U>", translate(member("get4", type(Sphere.class))));
         assertEquals("<U, S>", translate(TYPE_ARGUMENT_USE, member("get4", type(Sphere.class))));
+        assertEquals("<U, S>", translate(TYPE_ARGUMENT_IMPORT, member("get4", type(Sphere.class))));
         assertEquals("<U extends Sphere<J>, S extends Sphere<J>[]>", translate(member("get5", type(Sphere.class))));
         assertEquals("<U, S>", translate(TYPE_ARGUMENT_USE, member("get5", type(Sphere.class))));
+        assertEquals("<U, S>", translate(TYPE_ARGUMENT_IMPORT, member("get5", type(Sphere.class))));
         assertEquals("<U extends Sphere<J>, S extends Circle<Sphere<J>>>", translate(member("get6", type(Sphere.class))));
         assertEquals("<U, S>", translate(TYPE_ARGUMENT_USE, member("get6", type(Sphere.class))));
+        assertEquals("<U, S>", translate(TYPE_ARGUMENT_IMPORT, member("get6", type(Sphere.class))));
     }
 
     private String translate(final TypeMirror type) {
-        return translate(new JavaType(type));
+        return translate(new JavaType(type, type));
     }
 
     private String translate(final JavaType type) {
-        return type.toUniqueTsType();
+        return type.translate().toTypeScript();
     }
 
     private String translate(final TsTypeTarget tsTypeTarget, final TypeMirror type) {
-        return translate(tsTypeTarget, new JavaType(type));
+        return translate(tsTypeTarget, new JavaType(type, type));
     }
 
     private String translate(final TsTypeTarget tsTypeTarget, final JavaType type) {
-        return type.toUniqueTsType(tsTypeTarget);
+        return type.translate(tsTypeTarget).toTypeScript();
     }
 }

@@ -16,95 +16,71 @@
 
 package org.uberfire.jsbridge.tsexporter.model;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
 
-import org.uberfire.jsbridge.tsexporter.meta.ImportableTsType;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType;
+import org.uberfire.jsbridge.tsexporter.meta.hierarchy.DependencyGraph;
 import org.uberfire.jsbridge.tsexporter.util.ImportStore;
 import org.uberfire.jsbridge.tsexporter.util.Lazy;
 
-import static java.lang.String.format;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.ElementKind.METHOD;
-import static org.uberfire.jsbridge.tsexporter.Main.types;
+import static org.uberfire.jsbridge.tsexporter.Main.elements;
+import static org.uberfire.jsbridge.tsexporter.Utils.formatRightToLeft;
 import static org.uberfire.jsbridge.tsexporter.Utils.lines;
 
-public class RpcCallerTsClass {
+public class RpcCallerTsClass implements TsClass {
 
-    private final TypeElement _interface;
-    private final Lazy<List<RpcCallerTsMethod>> tsMethods;
+    private final TypeElement typeElement;
+    private final DependencyGraph dependencyGraph;
     private final ImportStore importStore;
+    private final Lazy<String> source;
 
     private static final List<String> RESERVED_WORDS = Arrays.asList("delete", "copy");
 
-    public RpcCallerTsClass(final TypeElement _interface) {
-        this._interface = _interface;
-        this.tsMethods = new Lazy<>(this::initAllTsMethods);
+    public RpcCallerTsClass(final TypeElement typeElement, final DependencyGraph dependencyGraph) {
+        this.typeElement = typeElement;
+        this.dependencyGraph = dependencyGraph;
         this.importStore = new ImportStore();
+        this.source = new Lazy<>(() -> {
+
+            return formatRightToLeft(lines("",
+                                           "import {rpc, marshall, unmarshall} from 'appformer/API';",
+                                           "s%",
+                                           "",
+                                           "export default class s% {",
+                                           "s%",
+                                           "}"),
+
+                                     this::imports,
+                                     this::simpleName,
+                                     this::methods
+            );
+        });
     }
 
-    private List<RpcCallerTsMethod> initAllTsMethods() {
-        return getAllJavaMethods(_interface).stream()
-                .map(javaMethod -> new RpcCallerTsMethod(_interface, importStore, javaMethod))
-                .collect(toList());
-    }
-
-    private List<RpcJavaMethod> getJavaMethods(final TypeElement _interface) {
-        return _interface.getEnclosedElements().stream()
-                .filter(member -> member.getKind().equals(METHOD))
-                .map(member -> new RpcJavaMethod(this._interface, (ExecutableElement) member))
-                .collect(toList());
-    }
-
-    //TODO: Use elements.getAllMembers
-    private List<RpcJavaMethod> getAllJavaMethods(final TypeElement _interface) {
-        final List<RpcJavaMethod> methods = new ArrayList<>();
-
-        methods.addAll(getJavaMethods(_interface));
-        methods.addAll(_interface.getInterfaces().stream()
-                               .flatMap(iface -> getAllJavaMethods((TypeElement) types.asElement(iface)).stream())
-                               .collect(toList()));
-
-        return methods;
-    }
-
+    @Override
     public String toSource() {
-
-        final String methods = methods();
-        final String simpleName = simpleName();
-
-        //Has to be the last
-        final String imports = imports();
-
-        return format(lines("",
-                            "import {rpc, marshall, unmarshall} from 'appformer/API';",
-                            "%s",
-                            "",
-                            "export default class %s {",
-                            "%s",
-                            "}"),
-
-                      imports,
-                      simpleName,
-                      methods
-        );
+        return source.get();
     }
 
     private String simpleName() {
-        final String fqcn = importStore.importing(new JavaType(_interface.asType())).toUniqueTsType();
-        return fqcn.substring(fqcn.indexOf(_interface.getSimpleName().toString()));
+        return importStore.with(new JavaType(typeElement.asType(), typeElement.asType()).translate()).toTypeScript();
     }
 
     private String methods() {
-        return tsMethods.get().stream()
+        return elements.getAllMembers(typeElement).stream()
+                .filter(member -> member.getKind().equals(METHOD))
+                .filter(member -> !member.getEnclosingElement().toString().equals("java.lang.Object"))
+                .map(member -> new RpcCallerTsMethod((ExecutableElement) member, typeElement, importStore, dependencyGraph))
                 .collect(groupingBy(RpcCallerTsMethod::getName)).entrySet().stream()
                 .flatMap(e -> resolveOverloadsAndReservedWords(e.getKey(), e.getValue()).stream())
                 .map(RpcCallerTsMethod::toSource)
@@ -112,11 +88,7 @@ public class RpcCallerTsClass {
     }
 
     private String imports() {
-        return importStore.getImportStatements();
-    }
-
-    public List<ImportableTsType> getDependencies() {
-        return importStore.getImports();
+        return importStore.getImportStatements(this);
     }
 
     private List<RpcCallerTsMethod> resolveOverloadsAndReservedWords(final String name,
@@ -132,7 +104,14 @@ public class RpcCallerTsClass {
                 .collect(toList());
     }
 
-    public TypeElement getInterface() {
-        return _interface;
+    @Override
+    public List<DeclaredType> getDependencies() {
+        source.get();
+        return importStore.getImports(this);
+    }
+
+    @Override
+    public DeclaredType getType() {
+        return (DeclaredType) typeElement.asType();
     }
 }

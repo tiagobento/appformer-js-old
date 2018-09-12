@@ -2,13 +2,17 @@ package org.uberfire.jsbridge.tsexporter;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Writer;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Scanner;
 import java.util.Set;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -19,33 +23,42 @@ import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.DeclaredType;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
-import org.uberfire.jsbridge.tsexporter.meta.ImportableJavaType;
-import org.uberfire.jsbridge.tsexporter.meta.ImportableTsType;
-import org.uberfire.jsbridge.tsexporter.meta.JavaType;
-import org.uberfire.jsbridge.tsexporter.model.PojoTsClass;
+import org.uberfire.jsbridge.tsexporter.meta.PackageJson;
+import org.uberfire.jsbridge.tsexporter.meta.hierarchy.DependencyGraph;
 import org.uberfire.jsbridge.tsexporter.model.RpcCallerTsClass;
+import org.uberfire.jsbridge.tsexporter.model.TsClass;
 
+import static java.lang.Boolean.getBoolean;
 import static java.lang.String.format;
+import static java.util.Arrays.stream;
 import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
-import static javax.lang.model.element.ElementKind.PACKAGE;
+import static java.util.stream.Collectors.toSet;
+import static java.util.stream.Stream.concat;
+import static java.util.stream.Stream.empty;
 import static javax.tools.Diagnostic.Kind.ERROR;
+import static javax.tools.StandardLocation.CLASS_OUTPUT;
+import static org.uberfire.jsbridge.tsexporter.Main.ENTRY_POINT;
 import static org.uberfire.jsbridge.tsexporter.Main.PORTABLE;
 import static org.uberfire.jsbridge.tsexporter.Main.REMOTE;
 import static org.uberfire.jsbridge.tsexporter.Utils.createFileIfNotExists;
 import static org.uberfire.jsbridge.tsexporter.Utils.distinctBy;
-import static org.uberfire.jsbridge.tsexporter.Utils.getModuleName;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
-@SupportedAnnotationTypes({REMOTE, PORTABLE})
+@SupportedAnnotationTypes({REMOTE, PORTABLE, ENTRY_POINT})
 public class Main extends AbstractProcessor {
 
     static final String REMOTE = "org.jboss.errai.bus.server.annotations.Remote";
     static final String PORTABLE = "org.jboss.errai.common.client.api.annotations.Portable";
+    static final String ENTRY_POINT = "org.jboss.errai.ioc.client.api.EntryPoint";
+
+    private static final String TS_EXPORTER_PACKAGE = "TSExporter";
 
     public static Types types;
     public static Elements elements;
@@ -57,125 +70,152 @@ public class Main extends AbstractProcessor {
         Main.elements = processingEnv.getElementUtils();
     }
 
+    @Override
     public boolean process(final Set<? extends TypeElement> annotations,
                            final RoundEnvironment roundEnv) {
 
-        if (!Boolean.getBoolean("ts-export")) {
+        if (!getBoolean("ts-exporter")) {
             return false;
         }
 
         try {
-            return process(roundEnv, annotations.stream().collect(toMap(identity(), roundEnv::getElementsAnnotatedWith)));
+            process(roundEnv, annotations.stream().collect(toMap(identity(), roundEnv::getElementsAnnotatedWith)));
+            return false;
         } catch (final Exception e) {
-            processingEnv.getMessager().printMessage(ERROR, "Error on TS Exporter.");
             e.printStackTrace();
+            processingEnv.getMessager().printMessage(ERROR, "Error on TypeScript exporter.");
             return false;
         }
     }
 
-    private boolean process(final RoundEnvironment roundEnv,
-                            final Map<TypeElement, Set<? extends Element>> typesByAnnotations) {
+    private static List<Element> seenPortables = new ArrayList<>();
+    private static List<Element> seenRemotes = new ArrayList<>();
+
+    private void process(final RoundEnvironment roundEnv,
+                         final Map<TypeElement, Set<? extends Element>> typesByAnnotations) {
 
         if (!roundEnv.processingOver() && !roundEnv.errorRaised()) {
-            typesByAnnotations.forEach(this::processAnnotatedTypes);
+            typesByAnnotations.forEach((annotation, classes) -> {
+                if (REMOTE.equals(annotation.getQualifiedName().toString())) {
+                    seenRemotes.addAll(classes);
+                } else if (PORTABLE.equals(annotation.getQualifiedName().toString())) {
+                    seenPortables.addAll(classes);
+                } else if (ENTRY_POINT.equals(annotation.getQualifiedName().toString())) {
+                    System.out.println("EntryPoint detected.");
+                } else {
+                    throw new RuntimeException("Unsupported annotation type.");
+                }
+            });
         } else {
-            exportErraiAppPropertiesModules();
-        }
 
-        return false;
+            long start = System.currentTimeMillis();
+
+            writeExportFile(seenPortables, "portables.txt");
+            writeExportFile(seenRemotes, "remotes.txt");
+
+            if (!getBoolean("ts-exporter-generate")) {
+                return;
+            }
+
+            System.out.println("Generating TypeScript modules...");
+
+            final DependencyGraph dependencyGraph = new DependencyGraph();
+
+            concat(getTsFilesFrom("portables.txt").stream(),
+                   getClassesFromErraiAppPropertiesFiles().stream()
+            ).forEach(dependencyGraph::add);
+
+            final Set<TsClass> rpcTsClasses = getTsFilesFrom("remotes.txt").stream()
+                    .map(element -> new RpcCallerTsClass(element, dependencyGraph))
+                    .peek(TsClass::toSource)
+                    .collect(toSet());
+
+            concat(rpcTsClasses.stream().parallel(), dependencyGraph.vertices().stream().parallel().map(DependencyGraph.Vertex::getPojoClass))
+                    .parallel()
+                    .filter(distinctBy(tsClass -> tsClass.getType().toString()))
+                    .peek(this::write)
+                    .collect(groupingBy(TsClass::getModuleName))
+                    .entrySet().stream()
+                    .parallel()
+                    .forEach((e) -> write(new PackageJson(e.getKey(), e.getValue())));
+
+            System.out.println("TypeScript exporter has successfully run. (" + (System.currentTimeMillis() - start) + "ms)");
+        }
     }
 
-    private void processAnnotatedTypes(final TypeElement annotation,
-                                       final Set<? extends Element> classes) {
-
-        if (REMOTE.equals(annotation.getQualifiedName().toString())) {
-            classes.forEach(this::generateRpcCallerTsClass);
-        } else if (PORTABLE.equals(annotation.getQualifiedName().toString())) {
-            classes.forEach(this::generatePojoTsClass);
-        } else {
-            throw new RuntimeException("Unsupported annotation type.");
-        }
+    private List<TypeElement> getTsFilesFrom(final String exportFileName) {
+        return readAllExportFiles(exportFileName).stream().map(elements::getTypeElement).collect(toList());
     }
 
-    private void exportErraiAppPropertiesModules() {
+    private List<String> readAllExportFiles(final String fileName) {
         try {
-            Collections.list(getClass().getClassLoader().getResources("META-INF/ErraiApp.properties")).stream()
-                    .map(Utils::loadPropertiesFile)
-                    .map(properties -> Optional.ofNullable(properties.getProperty("errai.marshalling.serializableTypes")))
-                    .filter(Optional::isPresent).map(Optional::get)
-                    .flatMap(serializableTypes -> Arrays.stream(serializableTypes.split(" \n?")))
-                    .map(fqcn -> elements.getTypeElement(fqcn.trim().replace("$", ".")))
-                    .forEach(this::generatePojoTsClass);
-        } catch (IOException e) {
-            throw new RuntimeException("Error reading ErraiApp.properties files.", e);
-        }
-    }
-
-    private void generateRpcCallerTsClass(final Element element) {
-
-        if (!element.getKind().isInterface()) {
-            System.out.println(element.getSimpleName() + " is not an Interface. That's not supported.");
-            return;
-        }
-
-        if (!element.getEnclosingElement().getKind().equals(PACKAGE)) {
-            System.out.println(element.getSimpleName() + " is probably an inner Class. That's not supported.");
-            return;
-        }
-
-        final RpcCallerTsClass tsClass = new RpcCallerTsClass((TypeElement) element);
-        System.out.println("Generating source for " + tsClass.getInterface().getQualifiedName().toString());
-        final String source = tsClass.toSource();
-
-        final String targetDir = tsClass.getInterface().getQualifiedName().toString().replace(".", "/");
-        final Path path = Paths.get(format("/tmp/ts-exporter/%s/%s.ts", getModuleName(tsClass.getInterface()), targetDir).replace("/", File.separator));
-        System.out.println("Source generated. Saving to " + path.toString());
-
-        tsClass.getDependencies().stream()
-                .filter(distinctBy(ImportableTsType::getCanonicalFqcn))
-                .map(ImportableJavaType::getType)
-                .map(DeclaredType::asElement)
-                .forEach(this::generatePojoTsClass);
-
-        try {
-            Files.createDirectories(path.getParent());
-            Files.write(createFileIfNotExists(path), source.getBytes());
-            System.out.println("Saved.");
+            return Collections.list(getClass().getClassLoader().getResources(TS_EXPORTER_PACKAGE + "/" + fileName)).stream()
+                    .flatMap((URL url) -> {
+                        try {
+                            final Scanner scanner = new Scanner(url.openStream()).useDelimiter("\\A");
+                            return scanner.hasNext() ? stream(scanner.next().split("\n")) : empty();
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }).collect(toList());
         } catch (final IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private void generatePojoTsClass(final Element element) {
-
-        final Optional<ImportableTsType> importableTsType = new JavaType(element.asType())
-                .asImportableJavaType()
-                .flatMap(ImportableJavaType::asImportableTsType);
-
-        if (!importableTsType.isPresent()) {
-            return;
+    private List<TypeElement> getClassesFromErraiAppPropertiesFiles() {
+        try {
+            return Collections.list(getClass().getClassLoader().getResources("META-INF/ErraiApp.properties")).stream()
+                    .map(Utils::loadPropertiesFile)
+                    .map(properties -> Optional.ofNullable(properties.getProperty("errai.marshalling.serializableTypes")))
+                    .filter(Optional::isPresent).map(Optional::get)
+                    .flatMap(serializableTypes -> stream(serializableTypes.split(" \n?")))
+                    .map(fqcn -> elements.getTypeElement(fqcn.trim().replace("$", ".")))
+                    .collect(toList());
+        } catch (final IOException e) {
+            throw new RuntimeException("Error reading ErraiApp.properties files.", e);
         }
+    }
 
-        final PojoTsClass pojoTsClass = new PojoTsClass(importableTsType.get());
+    //
 
-        final String relativePath = importableTsType.get().getPath();
-        final Path path = Paths.get("/tmp/ts-exporter/" + relativePath + ".ts");
-        if (Files.exists(path)) {
-            System.out.println(format("Skipping generation of %s because it already exists", relativePath));
-            return;
+    private void writeExportFile(final List<Element> elements,
+                                 final String fileName) {
+
+        try {
+            System.out.print("Saving export file: " + fileName + "... ");
+            try (final Writer writer = processingEnv.getFiler().createResource(CLASS_OUTPUT, TS_EXPORTER_PACKAGE, fileName).openWriter()) {
+                writer.write(elements.stream().map(element -> ((TypeElement) element).getQualifiedName().toString()).distinct().collect(joining("\n")));
+                System.out.println("saved.");
+            }
+        } catch (final IOException e) {
+            throw new RuntimeException(e);
         }
+    }
+
+    private void write(final TsClass tsClass) {
+
+        System.out.println("Saving file: " + tsClass.getType() + "...");
+        final String targetDir = tsClass.getFqcn().replace(".", "/");
+        final Path path = Paths.get(format("/tmp/ts-exporter/%s/%s.ts", tsClass.getModuleName(), targetDir).replace("/", File.separator));
 
         try {
             Files.createDirectories(path.getParent());
-            Files.createFile(path);
-            Files.write(path, pojoTsClass.toSource().getBytes());
-        } catch (IOException e) {
+            Files.write(createFileIfNotExists(path), tsClass.toSource().getBytes());
+        } catch (final IOException e) {
             throw new RuntimeException(e);
         }
+    }
 
-        pojoTsClass.getDependencies().stream()
-                .map(ImportableJavaType::getType)
-                .map(DeclaredType::asElement)
-                .forEach(this::generatePojoTsClass);
+    private void write(final PackageJson packageJson) {
+        final Path path = Paths.get(format("/tmp/ts-exporter/%s/package.json", packageJson.getModuleName()).replace("/", File.separator));
+
+        try {
+            System.out.println("Saving file: " + packageJson.getModuleName() + "/package.json...");
+            Files.createDirectories(path.getParent());
+            Files.write(createFileIfNotExists(path), packageJson.toSource().getBytes());
+        } catch (final IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

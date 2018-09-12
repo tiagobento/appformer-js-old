@@ -14,22 +14,32 @@
  * limitations under the License.
  */
 
-package org.uberfire.jsbridge.tsexporter.util;
+package org.uberfire.jsbridge.tsexporter.model;
 
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.function.Supplier;
+import java.util.List;
 
-public class Lazy<T> {
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
 
-    private final Supplier<T> factory;
-    private final ConcurrentMap<Class<?>, T> map = new ConcurrentHashMap<>(1);
+import org.uberfire.jsbridge.tsexporter.Utils;
 
-    public Lazy(final Supplier<T> factory) {
-        this.factory = factory;
+public interface TsClass {
+
+    String toSource();
+
+    default String getModuleName() {
+        return Utils.getModuleName(getType());
     }
 
-    public T get() {
-        return map.computeIfAbsent(Lazy.class, k -> this.factory.get());
+    List<DeclaredType> getDependencies();
+
+    DeclaredType getType();
+
+    default TypeElement getElement() {
+        return ((TypeElement) getType().asElement());
+    }
+
+    default String getFqcn() {
+        return getElement().getQualifiedName().toString();
     }
 }
