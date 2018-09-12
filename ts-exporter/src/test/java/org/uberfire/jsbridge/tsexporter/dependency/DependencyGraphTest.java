@@ -55,8 +55,6 @@ public class DependencyGraphTest {
     @Test
     public void testInvalidElements() {
         final DependencyGraph graph = new DependencyGraph(NO_DECORATORS);
-        assertEquals(null, graph.add((Dependency) null));
-        assertEquals(0, graph.vertices().size());
         assertEquals(null, graph.add((Element) null));
         assertEquals(0, graph.vertices().size());
         assertEquals(null, graph.add(memberElement("field", type(X.class))));

@@ -14,24 +14,25 @@
  * limitations under the License.
  */
 
-package org.uberfire.jsbridge.tsexporter.dependency;
+package org.uberfire.jsbridge.tsexporter.meta.translatable;
 
-import javax.lang.model.element.Element;
-import javax.lang.model.type.DeclaredType;
+import java.util.List;
 
-public interface Dependency {
+import org.uberfire.jsbridge.tsexporter.dependency.ImportEntry;
 
-    String uniqueName(final DeclaredType owner);
+public interface Translatable {
 
-    String relativePath();
+    String toTypeScript(final SourceUsage sourceUsage);
 
-    String getModuleName();
+    default boolean canBeSubclassed() {
+        return false;
+    };
 
-    default String sourcePath() {
-        return (this instanceof JavaDependency ? "output/" : "") + getModuleName() + "/" + relativePath();
+    List<ImportEntry> getAggregatedImportEntries();
+
+    enum SourceUsage {
+        TYPE_ARGUMENT_USE,
+        TYPE_ARGUMENT_DECLARATION,
+        TYPE_ARGUMENT_IMPORT
     }
-
-    Element asElement();
-
-    boolean represents(final DeclaredType type);
 }

@@ -23,27 +23,23 @@ import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 import org.uberfire.jsbridge.tsexporter.model.PojoTsClass;
 
-import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_IMPORT;
+import static org.uberfire.jsbridge.tsexporter.meta.translatable.Translatable.SourceUsage.TYPE_ARGUMENT_IMPORT;
 
-public class JavaDependency implements Dependency {
+public class JavaImportEntry implements ImportEntry {
 
     private final DeclaredType declaredType;
     private final DecoratorStore decoratorStore;
 
-    public JavaDependency(final DeclaredType declaredType,
-                          final DecoratorStore decoratorStore) {
+    public JavaImportEntry(final DeclaredType declaredType,
+                           final DecoratorStore decoratorStore) {
 
         this.declaredType = declaredType;
         this.decoratorStore = decoratorStore;
     }
 
-    public DeclaredType getDeclaredType() {
-        return declaredType;
-    }
-
     @Override
     public String uniqueName(final DeclaredType owner) {
-        return new JavaType(declaredType, owner).translate(TYPE_ARGUMENT_IMPORT, decoratorStore).toTypeScript();
+        return new JavaType(declaredType, owner).translate(decoratorStore).toTypeScript(TYPE_ARGUMENT_IMPORT);
     }
 
     @Override
@@ -63,7 +59,7 @@ public class JavaDependency implements Dependency {
 
     @Override
     public boolean represents(final DeclaredType type) {
-        return declaredType.asElement().equals(type.asElement());
+        return asElement().equals(type.asElement());
     }
 
     @Override

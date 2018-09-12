@@ -11,7 +11,7 @@ import com.google.testing.compile.CompilationRule;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.uberfire.jsbridge.tsexporter.decorators.DecoratorDependency;
+import org.uberfire.jsbridge.tsexporter.decorators.DecoratorImportEntry;
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
 
 import static java.util.Arrays.asList;
@@ -88,8 +88,8 @@ public class PojoTsClassTestClasses {
     @Test
     public void testDecorators() {
         final PojoTsClass pojoTsClass = new PojoTsClass(type(C.class), new DecoratorStore(new HashSet<>(asList(
-                new DecoratorDependency("my-decorators", "decorators/simple/CDEC", C.class.getCanonicalName()),
-                new DecoratorDependency("my-decorators", "decorators/simple/ADEC", A.class.getCanonicalName())
+                new DecoratorImportEntry("my-decorators", "decorators/simple/CDEC", C.class.getCanonicalName()),
+                new DecoratorImportEntry("my-decorators", "decorators/simple/ADEC", A.class.getCanonicalName())
         ))));
 
         assertEquals(lines("",

@@ -16,31 +16,22 @@
 
 package org.uberfire.jsbridge.tsexporter.dependency;
 
-import java.util.Set;
+import javax.lang.model.element.Element;
+import javax.lang.model.type.DeclaredType;
 
-public class DependencyRelation {
+public interface ImportEntry {
 
-    private final ImportEntry importEntry;
-    private final Set<Kind> kinds;
+    String uniqueName(final DeclaredType owner);
 
-    DependencyRelation(final ImportEntry importEntry,
-                       final Set<Kind> kinds) {
+    String relativePath();
 
-        this.importEntry = importEntry;
-        this.kinds = kinds;
+    String getModuleName();
+
+    default String sourcePath() {
+        return (this instanceof JavaImportEntry ? "output/" : "") + getModuleName() + "/" + relativePath();
     }
 
-    public ImportEntry getImportEntry() {
-        return importEntry;
-    }
+    Element asElement();
 
-    public Set<Kind> getKinds() {
-        return kinds;
-    }
-
-    public enum Kind {
-        FIELD,
-        HIERARCHY,
-        CODE
-    }
+    boolean represents(final DeclaredType type);
 }

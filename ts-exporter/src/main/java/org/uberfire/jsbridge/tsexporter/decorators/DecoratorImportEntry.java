@@ -19,19 +19,19 @@ package org.uberfire.jsbridge.tsexporter.decorators;
 import javax.lang.model.element.Element;
 import javax.lang.model.type.DeclaredType;
 
-import org.uberfire.jsbridge.tsexporter.dependency.Dependency;
+import org.uberfire.jsbridge.tsexporter.dependency.ImportEntry;
 
 import static org.uberfire.jsbridge.tsexporter.Main.elements;
 
-public class DecoratorDependency implements Dependency {
+public class DecoratorImportEntry implements ImportEntry {
 
     private final String moduleName;
     private final String decoratorPath;
     private final String decoratedFqcn;
 
-    public DecoratorDependency(final String moduleName,
-                               final String decoratorPath,
-                               final String decoratedFqcn) {
+    public DecoratorImportEntry(final String moduleName,
+                                final String decoratorPath,
+                                final String decoratedFqcn) {
 
         this.moduleName = moduleName;
         this.decoratorPath = decoratorPath;

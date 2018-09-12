@@ -20,7 +20,7 @@ import java.util.Set;
 
 import javax.lang.model.type.DeclaredType;
 
-import org.uberfire.jsbridge.tsexporter.meta.JavaType;
+import org.uberfire.jsbridge.tsexporter.meta.translatable.Translatable;
 import org.uberfire.jsbridge.tsexporter.model.TsClass;
 import org.uberfire.jsbridge.tsexporter.util.IndirectHashMap;
 import org.uberfire.jsbridge.tsexporter.util.Utils;
@@ -32,18 +32,18 @@ import static java.util.stream.Collectors.toSet;
 
 public class ImportStore {
 
-    private final IndirectHashMap<Dependency, Set<DependencyRelation.Kind>> dependencies = new IndirectHashMap<>(Dependency::relativePath);
+    private final IndirectHashMap<ImportEntry, Set<DependencyRelation.Kind>> dependencies = new IndirectHashMap<>(ImportEntry::relativePath);
 
-    public JavaType.Translatable with(final DependencyRelation.Kind kind,
-                                      final JavaType.Translatable type) {
+    public Translatable with(final DependencyRelation.Kind kind,
+                             final Translatable type) {
 
-        type.getAggregated().forEach(t -> dependencies.merge(t, singleton(kind), Utils::mergeSets));
+        type.getAggregatedImportEntries().forEach(e -> dependencies.merge(e, singleton(kind), Utils::mergeSets));
         return type;
     }
 
     public String getImportStatements(final TsClass tsClass) {
         return getImports(tsClass).stream()
-                .map(relation -> toTypeScriptImportSource(relation.getDependency(), tsClass.getType()))
+                .map(relation -> toTypeScriptImportSource(relation.getImportEntry(), tsClass.getType()))
                 .sorted()
                 .collect(joining("\n"));
     }
@@ -55,7 +55,7 @@ public class ImportStore {
                 .collect(toSet());
     }
 
-    private String toTypeScriptImportSource(final Dependency dependency,
+    private String toTypeScriptImportSource(final ImportEntry dependency,
                                             final DeclaredType owner) {
 
         return format("import %s from '%s';", dependency.uniqueName(owner), dependency.sourcePath());

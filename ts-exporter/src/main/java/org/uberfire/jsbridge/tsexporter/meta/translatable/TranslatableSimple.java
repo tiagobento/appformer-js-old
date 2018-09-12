@@ -14,33 +14,28 @@
  * limitations under the License.
  */
 
-package org.uberfire.jsbridge.tsexporter.dependency;
+package org.uberfire.jsbridge.tsexporter.meta.translatable;
 
-import java.util.Set;
+import java.util.Arrays;
+import java.util.List;
 
-public class DependencyRelation {
+import org.uberfire.jsbridge.tsexporter.dependency.ImportEntry;
 
-    private final ImportEntry importEntry;
-    private final Set<Kind> kinds;
+public class TranslatableSimple implements Translatable {
 
-    DependencyRelation(final ImportEntry importEntry,
-                       final Set<Kind> kinds) {
+    private final String translated;
 
-        this.importEntry = importEntry;
-        this.kinds = kinds;
+    public TranslatableSimple(final String translated) {
+        this.translated = translated;
     }
 
-    public ImportEntry getImportEntry() {
-        return importEntry;
+    @Override
+    public String toTypeScript(final SourceUsage sourceUsage) {
+        return translated;
     }
 
-    public Set<Kind> getKinds() {
-        return kinds;
-    }
-
-    public enum Kind {
-        FIELD,
-        HIERARCHY,
-        CODE
+    @Override
+    public List<ImportEntry> getAggregatedImportEntries() {
+        return Arrays.asList();
     }
 }

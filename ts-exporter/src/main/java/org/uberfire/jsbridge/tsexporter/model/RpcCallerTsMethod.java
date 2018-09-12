@@ -26,11 +26,11 @@ import javax.lang.model.element.TypeElement;
 
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType;
-import org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget;
-import org.uberfire.jsbridge.tsexporter.dependency.Dependency;
+import org.uberfire.jsbridge.tsexporter.dependency.ImportEntry;
 import org.uberfire.jsbridge.tsexporter.dependency.DependencyGraph;
 import org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation;
 import org.uberfire.jsbridge.tsexporter.dependency.ImportStore;
+import org.uberfire.jsbridge.tsexporter.meta.translatable.Translatable;
 
 import static java.lang.String.format;
 import static java.util.Comparator.comparing;
@@ -41,8 +41,9 @@ import static javax.lang.model.element.ElementKind.CLASS;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static org.uberfire.jsbridge.tsexporter.Main.types;
 import static org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore.NO_DECORATORS;
-import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_DECLARATION;
-import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_USE;
+import static org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation.Kind.HIERARCHY;
+import static org.uberfire.jsbridge.tsexporter.meta.translatable.Translatable.SourceUsage.TYPE_ARGUMENT_DECLARATION;
+import static org.uberfire.jsbridge.tsexporter.meta.translatable.Translatable.SourceUsage.TYPE_ARGUMENT_USE;
 import static org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation.Kind.CODE;
 import static org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation.Kind.FIELD;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
@@ -113,12 +114,12 @@ public class RpcCallerTsMethod {
     }
 
     private String methodDeclaration() {
-        return name + importing(CODE, new JavaType(executableElement.asType(), owner.asType()), TYPE_ARGUMENT_DECLARATION, NO_DECORATORS).toTypeScript();
+        return name + importing(CODE, new JavaType(executableElement.asType(), owner.asType()), NO_DECORATORS).toTypeScript(TYPE_ARGUMENT_DECLARATION);
     }
 
     private String params() {
         return getParameterJavaTypesByNames().entrySet().stream()
-                .map(e -> format("%s: %s", e.getKey(), importing(CODE, e.getValue(), TYPE_ARGUMENT_USE, NO_DECORATORS).toTypeScript()))
+                .map(e -> format("%s: %s", e.getKey(), importing(CODE, e.getValue(), NO_DECORATORS).toTypeScript(TYPE_ARGUMENT_USE)))
                 .collect(joining(", "));
     }
 
@@ -145,15 +146,15 @@ public class RpcCallerTsMethod {
 
     private String factoriesOracle() {
 
-        final Set<Element> dependencyElements = getReturnTypeJavaType().translate(TYPE_ARGUMENT_USE, decoratorStore).getAggregated().stream()
-                .map(Dependency::asElement)
+        final Set<Element> dependencyElements = getReturnTypeJavaType().translate(decoratorStore).getAggregatedImportEntries().stream()
+                .map(ImportEntry::asElement)
                 .collect(toSet());
 
         final Set<Element> allDependencies = dependencyGraph.findAllDependencies(dependencyElements, FIELD).stream()
                 .map(DependencyGraph.Vertex::asElement)
                 .collect(toSet());
 
-        return dependencyGraph.findAllDependents(allDependencies).stream()
+        return dependencyGraph.findAllDependents(allDependencies, HIERARCHY).stream()
                 .map(DependencyGraph.Vertex::getPojoClass)
                 .sorted(comparing(TsClass::getRelativePath))
                 .filter(dependent -> allDependencies.stream().anyMatch(d -> types.isSubtype(types.erasure(dependent.getType()), types.erasure(d.asType()))))
@@ -161,25 +162,24 @@ public class RpcCallerTsMethod {
                 .distinct()
                 .map(c -> format("\"%s\": (x: any) => new %s(x)",
                                  c.asElement().getQualifiedName().toString(),
-                                 importing(CODE, new JavaType(types.erasure(c.getType()), owner.asType()), TYPE_ARGUMENT_USE, decoratorStore).toTypeScript()))
+                                 importing(CODE, new JavaType(types.erasure(c.getType()), owner.asType()), decoratorStore).toTypeScript(TYPE_ARGUMENT_USE)))
                 .collect(joining(",\n"));
     }
 
     private String returnType() {
-        return importing(CODE, getReturnTypeJavaType(), TYPE_ARGUMENT_USE, decoratorStore).toTypeScript();
+        return importing(CODE, getReturnTypeJavaType(), decoratorStore).toTypeScript(TYPE_ARGUMENT_USE);
     }
 
     private JavaType getReturnTypeJavaType() {
         return new JavaType(executableElement.getReturnType(), owner.asType());
     }
 
-    private JavaType.Translatable importing(final DependencyRelation.Kind kind,
-                                            final JavaType javaType,
-                                            final TsTypeTarget tsTypeTarget,
-                                            final DecoratorStore decoratorStore) {
+    private Translatable importing(final DependencyRelation.Kind kind,
+                                   final JavaType javaType,
+                                   final DecoratorStore decoratorStore) {
 
-        final JavaType.Translatable translatable = javaType.translate(tsTypeTarget, decoratorStore);
-        translatable.getAggregated().forEach(dependencyGraph::add);
+        final Translatable translatable = javaType.translate(decoratorStore);
+        translatable.getAggregatedImportEntries().forEach(importEntry -> dependencyGraph.add(importEntry.asElement()));
         return importStore.with(kind, translatable);
     }
 

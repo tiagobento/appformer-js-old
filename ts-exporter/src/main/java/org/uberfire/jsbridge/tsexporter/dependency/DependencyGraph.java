@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
@@ -47,10 +48,6 @@ public class DependencyGraph {
         graph = new HashMap<>();
     }
 
-    public Vertex add(final Dependency dependency) {
-        return add(dependency == null ? null : dependency.asElement());
-    }
-
     public Vertex add(final Element element) {
         if (!canBePartOfTheGraph(element)) {
             return null;
@@ -73,29 +70,29 @@ public class DependencyGraph {
     public Set<Vertex> findAllDependencies(final Set<? extends Element> elements,
                                            final DependencyRelation.Kind... kinds) {
 
-        return findAllConnections(elements, v -> v.dependencies, kinds);
+        return findAllRelations(elements, v -> v.dependencies, kinds);
     }
 
     public Set<Vertex> findAllDependents(final Set<? extends Element> elements,
                                          final DependencyRelation.Kind... kinds) {
 
-        return findAllConnections(elements, v -> v.dependents, kinds);
+        return findAllRelations(elements, v -> v.dependents, kinds);
     }
 
-    private Set<Vertex> findAllConnections(final Set<? extends Element> elements,
-                                           final Function<Vertex, Map<Vertex, Set<DependencyRelation.Kind>>> vertexMapFunction,
-                                           final DependencyRelation.Kind... kinds) {
+    private Set<Vertex> findAllRelations(final Set<? extends Element> elements,
+                                         final Function<Vertex, Map<Vertex, Set<DependencyRelation.Kind>>> relations,
+                                         final DependencyRelation.Kind... kinds) {
 
-        return findAllConnections(elements,
-                                  vertexMapFunction,
-                                  new HashSet<>(asList(kinds.length == 0 ? DependencyRelation.Kind.values() : kinds)),
-                                  new HashSet<>());
+        return findAllRelations(elements,
+                                relations,
+                                new HashSet<>(asList(kinds.length == 0 ? DependencyRelation.Kind.values() : kinds)),
+                                new HashSet<>());
     }
 
-    private Set<Vertex> findAllConnections(final Set<? extends Element> elements,
-                                           final Function<Vertex, Map<Vertex, Set<DependencyRelation.Kind>>> connections,
-                                           final Set<DependencyRelation.Kind> kinds,
-                                           final Set<Vertex> visited) {
+    private Set<Vertex> findAllRelations(final Set<? extends Element> elements,
+                                         final Function<Vertex, Map<Vertex, Set<DependencyRelation.Kind>>> relations,
+                                         final Set<DependencyRelation.Kind> kinds,
+                                         final Set<Vertex> visited) {
 
         final Set<Vertex> startingPoints = elements == null ? emptySet() : elements.stream()
                 .filter(this::canBePartOfTheGraph)
@@ -107,13 +104,19 @@ public class DependencyGraph {
         final Set<Vertex> toBeVisited = Utils.diff(startingPoints, visited);
         visited.addAll(toBeVisited);
 
-        return concat(startingPoints.stream(),
-                      toBeVisited.stream()
-                              .map(vertex -> connections.apply(vertex).entrySet().stream()
-                                      .filter(relation -> relation.getValue().stream().anyMatch(kinds::contains))
-                                      .map(relation -> relation.getKey().asElement())
-                                      .collect(toSet()))
-                              .flatMap(e -> findAllConnections(e, connections, kinds, visited).stream()))
+        final Stream<Vertex> traversal = toBeVisited.stream()
+                .map(vertex -> findRelevantRelations(relations.apply(vertex), kinds))
+                .flatMap(c -> findAllRelations(c, relations, kinds, visited).stream());
+
+        return concat(startingPoints.stream(), traversal).collect(toSet());
+    }
+
+    private Set<TypeElement> findRelevantRelations(final Map<Vertex, Set<DependencyRelation.Kind>> relations,
+                                                   final Set<DependencyRelation.Kind> kinds) {
+
+        return relations.entrySet().stream()
+                .filter(relation -> relation.getValue().stream().anyMatch(kinds::contains))
+                .map(relation -> relation.getKey().asElement())
                 .collect(toSet());
     }
 
@@ -131,7 +134,7 @@ public class DependencyGraph {
 
         private Vertex init() {
             final Map<Vertex, Set<DependencyRelation.Kind>> dependencies = pojoClass.getDependencies().stream()
-                    .collect(toMap(relation -> DependencyGraph.this.add(relation.getDependency()),
+                    .collect(toMap(relation -> DependencyGraph.this.add(relation.getImportEntry().asElement()),
                                    DependencyRelation::getKinds,
                                    Utils::mergeSets));
 

@@ -19,7 +19,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
-import org.uberfire.jsbridge.tsexporter.decorators.DecoratorDependency;
+import org.uberfire.jsbridge.tsexporter.decorators.DecoratorImportEntry;
 
 import static java.lang.Boolean.getBoolean;
 import static java.util.Arrays.asList;
@@ -103,12 +103,12 @@ public class Main extends AbstractProcessor {
         }
     }
 
-    private Set<DecoratorDependency> readDecoratorFiles() {
+    private Set<DecoratorImportEntry> readDecoratorFiles() {
         return new HashSet<>(asList(
-                new DecoratorDependency("appformer", "decorators/PathDEC", "org.uberfire.backend.vfs.Path"),
-                new DecoratorDependency("appformer", "decorators/PathImplDEC", "org.uberfire.backend.vfs.PathFactory.PathImpl"),
-                new DecoratorDependency("appformer", "decorators/ObservablePathDEC", "org.uberfire.backend.vfs.ObservablePath"),
-                new DecoratorDependency("appformer", "decorators/ObservablePathImplDEC", "org.uberfire.backend.vfs.impl.ObservablePathImpl")
+                new DecoratorImportEntry("appformer", "decorators/PathDEC", "org.uberfire.backend.vfs.Path"),
+                new DecoratorImportEntry("appformer", "decorators/PathImplDEC", "org.uberfire.backend.vfs.PathFactory.PathImpl"),
+                new DecoratorImportEntry("appformer", "decorators/ObservablePathDEC", "org.uberfire.backend.vfs.ObservablePath"),
+                new DecoratorImportEntry("appformer", "decorators/ObservablePathImplDEC", "org.uberfire.backend.vfs.impl.ObservablePathImpl")
         ));
     }
 

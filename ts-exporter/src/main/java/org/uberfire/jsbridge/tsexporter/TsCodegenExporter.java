@@ -30,7 +30,7 @@ import java.util.Set;
 import javax.lang.model.element.TypeElement;
 
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
-import org.uberfire.jsbridge.tsexporter.decorators.DecoratorDependency;
+import org.uberfire.jsbridge.tsexporter.decorators.DecoratorImportEntry;
 import org.uberfire.jsbridge.tsexporter.meta.PackageJson;
 import org.uberfire.jsbridge.tsexporter.meta.TsExporterResource;
 import org.uberfire.jsbridge.tsexporter.dependency.DependencyGraph;
@@ -55,7 +55,7 @@ public class TsCodegenExporter {
     private final DependencyGraph dependencyGraph;
     private final DecoratorStore decoratorStore;
 
-    public TsCodegenExporter(final Set<DecoratorDependency> decorators) {
+    public TsCodegenExporter(final Set<DecoratorImportEntry> decorators) {
         this.decoratorStore = new DecoratorStore(decorators);
         this.dependencyGraph = new DependencyGraph(decoratorStore);
     }

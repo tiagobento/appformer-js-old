@@ -38,7 +38,7 @@ import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.ElementKind.METHOD;
 import static org.uberfire.jsbridge.tsexporter.Main.elements;
 import static org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore.NO_DECORATORS;
-import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_DECLARATION;
+import static org.uberfire.jsbridge.tsexporter.meta.translatable.Translatable.SourceUsage.TYPE_ARGUMENT_DECLARATION;
 import static org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation.Kind.HIERARCHY;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.formatRightToLeft;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
@@ -82,7 +82,9 @@ public class RpcCallerTsClass implements TsClass {
     }
 
     private String simpleName() {
-        return importStore.with(HIERARCHY, new JavaType(typeElement.asType(), typeElement.asType()).translate(TYPE_ARGUMENT_DECLARATION, NO_DECORATORS)).toTypeScript();
+        return importStore.with(HIERARCHY, new JavaType(typeElement.asType(), typeElement.asType())
+                .translate(NO_DECORATORS))
+                .toTypeScript(TYPE_ARGUMENT_DECLARATION);
     }
 
     private String methods() {
