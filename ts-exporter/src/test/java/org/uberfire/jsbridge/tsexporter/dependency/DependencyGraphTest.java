@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.uberfire.jsbridge.tsexporter.meta.dependency;
+package org.uberfire.jsbridge.tsexporter.dependency;
 
 import java.util.List;
 import java.util.Set;
@@ -205,7 +205,7 @@ public class DependencyGraphTest {
     }
 
     private static List<String> simpleNames(final Set<DependencyGraph.Vertex> vertex) {
-        return ordered(vertex).stream().map(s -> s.getElement().getSimpleName().toString()).collect(toList());
+        return ordered(vertex).stream().map(s -> s.asElement().getSimpleName().toString()).collect(toList());
     }
 
     private static <T> List<T> ordered(final Set<T> set) {

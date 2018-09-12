@@ -10,8 +10,8 @@ import com.google.testing.compile.CompilationRule;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency;
-import org.uberfire.jsbridge.tsexporter.meta.dependency.ImportStore;
+import org.uberfire.jsbridge.tsexporter.dependency.Dependency;
+import org.uberfire.jsbridge.tsexporter.dependency.ImportStore;
 import org.uberfire.jsbridge.tsexporter.model.PojoTsClass;
 import org.uberfire.jsbridge.tsexporter.util.TestingUtils;
 
@@ -21,8 +21,8 @@ import static org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore.*;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_DECLARATION;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_USE;
-import static org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency.Kind.FIELD;
-import static org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency.Kind.HIERARCHY;
+import static org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation.Kind.FIELD;
+import static org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation.Kind.HIERARCHY;
 import static org.uberfire.jsbridge.tsexporter.util.TestingUtils.member;
 import static org.uberfire.jsbridge.tsexporter.util.TestingUtils.type;
 
@@ -66,7 +66,7 @@ public class TranslatableJavaTypeTest {
         assertEquals(1, aggregated3.size());
         assertTrue(aggregated3.get(0).toString().endsWith("Circle<T>"));
 
-        final List<Dependency> imports = store.getImports(new PojoTsClass(type(TranslatableJavaTypeTest.class), NO_DECORATORS)).stream().map(s->s.dependency).sorted(Comparator.comparing(Dependency::sourcePath)).collect(Collectors.toList());
+        final List<Dependency> imports = store.getImports(new PojoTsClass(type(TranslatableJavaTypeTest.class), NO_DECORATORS)).stream().map(s-> s.getDependency()).sorted(Comparator.comparing(Dependency::sourcePath)).collect(Collectors.toList());
         assertEquals(2, imports.size());
         assertTrue(imports.get(0).toString().endsWith("Circle<T>"));
         assertTrue(imports.get(1).toString().endsWith("Sphere<J>"));

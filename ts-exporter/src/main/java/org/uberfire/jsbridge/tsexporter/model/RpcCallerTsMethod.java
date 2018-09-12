@@ -27,12 +27,12 @@ import javax.lang.model.element.TypeElement;
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget;
-import org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency;
-import org.uberfire.jsbridge.tsexporter.meta.dependency.DependencyGraph;
-import org.uberfire.jsbridge.tsexporter.meta.dependency.ImportStore;
+import org.uberfire.jsbridge.tsexporter.dependency.Dependency;
+import org.uberfire.jsbridge.tsexporter.dependency.DependencyGraph;
+import org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation;
+import org.uberfire.jsbridge.tsexporter.dependency.ImportStore;
 
 import static java.lang.String.format;
-import static java.util.Collections.singleton;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
@@ -43,8 +43,8 @@ import static org.uberfire.jsbridge.tsexporter.Main.types;
 import static org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore.NO_DECORATORS;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_DECLARATION;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_USE;
-import static org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency.Kind.CODE;
-import static org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency.Kind.FIELD;
+import static org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation.Kind.CODE;
+import static org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation.Kind.FIELD;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
 
 public class RpcCallerTsMethod {
@@ -150,7 +150,7 @@ public class RpcCallerTsMethod {
                 .collect(toSet());
 
         final Set<Element> allDependencies = dependencyGraph.findAllDependencies(dependencyElements, FIELD).stream()
-                .map(DependencyGraph.Vertex::getElement)
+                .map(DependencyGraph.Vertex::asElement)
                 .collect(toSet());
 
         return dependencyGraph.findAllDependents(allDependencies).stream()
@@ -173,7 +173,7 @@ public class RpcCallerTsMethod {
         return new JavaType(executableElement.getReturnType(), owner.asType());
     }
 
-    private JavaType.Translatable importing(final Dependency.Kind kind,
+    private JavaType.Translatable importing(final DependencyRelation.Kind kind,
                                             final JavaType javaType,
                                             final TsTypeTarget tsTypeTarget,
                                             final DecoratorStore decoratorStore) {

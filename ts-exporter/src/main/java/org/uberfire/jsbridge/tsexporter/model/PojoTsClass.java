@@ -27,7 +27,8 @@ import javax.lang.model.type.DeclaredType;
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget;
-import org.uberfire.jsbridge.tsexporter.meta.dependency.ImportStore;
+import org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation;
+import org.uberfire.jsbridge.tsexporter.dependency.ImportStore;
 import org.uberfire.jsbridge.tsexporter.util.Lazy;
 
 import static java.lang.String.format;
@@ -41,8 +42,8 @@ import static javax.lang.model.element.Modifier.STATIC;
 import static org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore.NO_DECORATORS;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_DECLARATION;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_USE;
-import static org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency.Kind.FIELD;
-import static org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency.Kind.HIERARCHY;
+import static org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation.Kind.FIELD;
+import static org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation.Kind.HIERARCHY;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.formatRightToLeft;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
 
@@ -221,7 +222,7 @@ public class PojoTsClass implements TsClass {
     }
 
     @Override
-    public Set<ImportStore.DependencyRelation> getDependencies() {
+    public Set<DependencyRelation> getDependencies() {
         source.get();
         return importStore.getImports(this);
     }

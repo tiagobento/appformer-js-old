@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.uberfire.jsbridge.tsexporter.meta.dependency;
+package org.uberfire.jsbridge.tsexporter.dependency;
 
 import java.util.Set;
 
@@ -29,13 +29,12 @@ import static java.lang.String.format;
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toSet;
-import static java.util.stream.Stream.concat;
 
 public class ImportStore {
 
-    private final IndirectHashMap<Dependency, Set<Dependency.Kind>> dependencies = new IndirectHashMap<>(Dependency::relativePath);
+    private final IndirectHashMap<Dependency, Set<DependencyRelation.Kind>> dependencies = new IndirectHashMap<>(Dependency::relativePath);
 
-    public JavaType.Translatable with(final Dependency.Kind kind,
+    public JavaType.Translatable with(final DependencyRelation.Kind kind,
                                       final JavaType.Translatable type) {
 
         type.getAggregated().forEach(t -> dependencies.merge(t, singleton(kind), Utils::mergeSets));
@@ -44,7 +43,7 @@ public class ImportStore {
 
     public String getImportStatements(final TsClass tsClass) {
         return getImports(tsClass).stream()
-                .map(s -> toTypeScriptImportSource(s.dependency, tsClass.getType()))
+                .map(relation -> toTypeScriptImportSource(relation.getDependency(), tsClass.getType()))
                 .sorted()
                 .collect(joining("\n"));
     }
@@ -56,18 +55,9 @@ public class ImportStore {
                 .collect(toSet());
     }
 
-    private String toTypeScriptImportSource(final Dependency dependency, final DeclaredType owner) {
+    private String toTypeScriptImportSource(final Dependency dependency,
+                                            final DeclaredType owner) {
+
         return format("import %s from '%s';", dependency.uniqueName(owner), dependency.sourcePath());
-    }
-
-    public static class DependencyRelation {
-
-        public final Dependency dependency;
-        public final Set<Dependency.Kind> kinds;
-
-        DependencyRelation(Dependency dependency, Set<Dependency.Kind> kinds) {
-            this.dependency = dependency;
-            this.kinds = kinds;
-        }
     }
 }

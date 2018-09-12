@@ -19,7 +19,7 @@ package org.uberfire.jsbridge.tsexporter.decorators;
 import javax.lang.model.element.Element;
 import javax.lang.model.type.DeclaredType;
 
-import org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency;
+import org.uberfire.jsbridge.tsexporter.dependency.Dependency;
 
 import static org.uberfire.jsbridge.tsexporter.Main.elements;
 

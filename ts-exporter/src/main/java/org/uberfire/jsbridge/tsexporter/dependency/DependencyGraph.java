@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.uberfire.jsbridge.tsexporter.meta.dependency;
+package org.uberfire.jsbridge.tsexporter.dependency;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -70,18 +70,32 @@ public class DependencyGraph {
         return element != null && (element.getKind().isClass() || element.getKind().isInterface());
     }
 
-    public Set<Vertex> findAllDependencies(final Set<? extends Element> elements, final Dependency.Kind... kinds) {
-        return findAllConnections(elements, v -> v.dependencies, new HashSet<>(), new HashSet<>(asList(kinds.length == 0 ? Dependency.Kind.values() : kinds)));
+    public Set<Vertex> findAllDependencies(final Set<? extends Element> elements,
+                                           final DependencyRelation.Kind... kinds) {
+
+        return findAllConnections(elements, v -> v.dependencies, kinds);
     }
 
-    public Set<Vertex> findAllDependents(final Set<? extends Element> elements, final Dependency.Kind... kinds) {
-        return findAllConnections(elements, v -> v.dependents, new HashSet<>(), new HashSet<>(asList(kinds.length == 0 ? Dependency.Kind.values() : kinds)));
+    public Set<Vertex> findAllDependents(final Set<? extends Element> elements,
+                                         final DependencyRelation.Kind... kinds) {
+
+        return findAllConnections(elements, v -> v.dependents, kinds);
     }
 
     private Set<Vertex> findAllConnections(final Set<? extends Element> elements,
-                                           final Function<Vertex, Map<Vertex, Set<Dependency.Kind>>> connections,
-                                           final Set<Vertex> visited,
-                                           final Set<Dependency.Kind> kinds) {
+                                           final Function<Vertex, Map<Vertex, Set<DependencyRelation.Kind>>> vertexMapFunction,
+                                           final DependencyRelation.Kind... kinds) {
+
+        return findAllConnections(elements,
+                                  vertexMapFunction,
+                                  new HashSet<>(asList(kinds.length == 0 ? DependencyRelation.Kind.values() : kinds)),
+                                  new HashSet<>());
+    }
+
+    private Set<Vertex> findAllConnections(final Set<? extends Element> elements,
+                                           final Function<Vertex, Map<Vertex, Set<DependencyRelation.Kind>>> connections,
+                                           final Set<DependencyRelation.Kind> kinds,
+                                           final Set<Vertex> visited) {
 
         final Set<Vertex> startingPoints = elements == null ? emptySet() : elements.stream()
                 .filter(this::canBePartOfTheGraph)
@@ -96,18 +110,18 @@ public class DependencyGraph {
         return concat(startingPoints.stream(),
                       toBeVisited.stream()
                               .map(vertex -> connections.apply(vertex).entrySet().stream()
-                                      .filter(e -> e.getValue().stream().anyMatch(kinds::contains))
-                                      .map(Map.Entry::getKey).map(Vertex::getElement)
+                                      .filter(relation -> relation.getValue().stream().anyMatch(kinds::contains))
+                                      .map(relation -> relation.getKey().asElement())
                                       .collect(toSet()))
-                              .flatMap(e -> findAllConnections(e, connections, visited, kinds).stream()))
+                              .flatMap(e -> findAllConnections(e, connections, kinds, visited).stream()))
                 .collect(toSet());
     }
 
     public class Vertex {
 
-        final Map<Vertex, Set<Dependency.Kind>> dependencies;
-        final Map<Vertex, Set<Dependency.Kind>> dependents;
         private final PojoTsClass pojoClass;
+        final Map<Vertex, Set<DependencyRelation.Kind>> dependencies;
+        final Map<Vertex, Set<DependencyRelation.Kind>> dependents;
 
         private Vertex(final TypeElement typeElement) {
             this.pojoClass = new PojoTsClass((DeclaredType) typeElement.asType(), decoratorStore);
@@ -116,9 +130,9 @@ public class DependencyGraph {
         }
 
         private Vertex init() {
-            final Map<Vertex, Set<Dependency.Kind>> dependencies = pojoClass.getDependencies().stream()
-                    .collect(toMap(relation -> DependencyGraph.this.add(relation.dependency),
-                                   relation -> relation.kinds,
+            final Map<Vertex, Set<DependencyRelation.Kind>> dependencies = pojoClass.getDependencies().stream()
+                    .collect(toMap(relation -> DependencyGraph.this.add(relation.getDependency()),
+                                   DependencyRelation::getKinds,
                                    Utils::mergeSets));
 
             dependencies.remove(null);
@@ -128,12 +142,11 @@ public class DependencyGraph {
             return this;
         }
 
-
         public PojoTsClass getPojoClass() {
             return pojoClass;
         }
 
-        public TypeElement getElement() {
+        public TypeElement asElement() {
             return pojoClass.asElement();
         }
 

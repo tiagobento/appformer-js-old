@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.uberfire.jsbridge.tsexporter.meta.dependency;
+package org.uberfire.jsbridge.tsexporter.dependency;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.type.DeclaredType;

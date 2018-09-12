@@ -11,7 +11,7 @@ import org.junit.Test;
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorDependency;
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType;
-import org.uberfire.jsbridge.tsexporter.meta.dependency.DependencyGraph;
+import org.uberfire.jsbridge.tsexporter.dependency.DependencyGraph;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;

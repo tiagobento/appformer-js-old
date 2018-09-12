@@ -33,7 +33,7 @@ import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorDependency;
 import org.uberfire.jsbridge.tsexporter.meta.PackageJson;
 import org.uberfire.jsbridge.tsexporter.meta.TsExporterResource;
-import org.uberfire.jsbridge.tsexporter.meta.dependency.DependencyGraph;
+import org.uberfire.jsbridge.tsexporter.dependency.DependencyGraph;
 import org.uberfire.jsbridge.tsexporter.model.RpcCallerTsClass;
 import org.uberfire.jsbridge.tsexporter.model.TsClass;
 import org.uberfire.jsbridge.tsexporter.util.Utils;

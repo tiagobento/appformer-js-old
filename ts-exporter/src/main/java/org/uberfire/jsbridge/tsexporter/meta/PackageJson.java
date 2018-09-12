@@ -18,7 +18,8 @@ package org.uberfire.jsbridge.tsexporter.meta;
 
 import java.util.List;
 
-import org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency;
+import org.uberfire.jsbridge.tsexporter.dependency.Dependency;
+import org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation;
 import org.uberfire.jsbridge.tsexporter.model.TsClass;
 
 import static java.lang.String.format;
@@ -43,7 +44,7 @@ public class PackageJson implements TsExporterResource {
 
         final String dependencies = classes.stream()
                 .flatMap(c -> c.getDependencies().stream())
-                .map(s -> s.dependency)
+                .map(DependencyRelation::getDependency)
                 .collect(groupingBy(Dependency::getModuleName))
                 .keySet().stream()
                 .filter(s -> !s.equals(moduleName))

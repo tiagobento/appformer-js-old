@@ -14,28 +14,33 @@
  * limitations under the License.
  */
 
-package org.uberfire.jsbridge.tsexporter.meta.dependency;
+package org.uberfire.jsbridge.tsexporter.dependency;
 
-import javax.lang.model.element.Element;
-import javax.lang.model.type.DeclaredType;
+import java.util.Set;
 
-public interface Dependency {
+public class DependencyRelation {
 
-    String uniqueName(final DeclaredType owner);
+    private final Dependency dependency;
+    private final Set<Kind> kinds;
 
-    String relativePath();
+    DependencyRelation(final Dependency dependency,
+                       final Set<Kind> kinds) {
 
-    String getModuleName();
-
-    default String sourcePath() {
-        return (this instanceof JavaDependency ? "output/" : "") + getModuleName() + "/" + relativePath();
+        this.dependency = dependency;
+        this.kinds = kinds;
     }
 
-    Element asElement();
+    public Dependency getDependency() {
+        return dependency;
+    }
 
-    boolean represents(final DeclaredType type);
+    public Set<Kind> getKinds() {
+        return kinds;
+    }
 
-    enum Kind {
-        FIELD, HIERARCHY, CODE
+    public enum Kind {
+        FIELD,
+        HIERARCHY,
+        CODE
     }
 }
