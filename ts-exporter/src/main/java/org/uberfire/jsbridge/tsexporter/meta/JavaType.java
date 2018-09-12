@@ -31,6 +31,7 @@ import javax.lang.model.type.WildcardType;
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorDependency;
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
 import org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency;
+import org.uberfire.jsbridge.tsexporter.meta.dependency.JavaDependency;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
@@ -47,19 +48,19 @@ import static org.uberfire.jsbridge.tsexporter.Main.types;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_DECLARATION;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_IMPORT;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_USE;
-import static org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency.BuiltIn.JAVA_BIG_DECIMAL;
-import static org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency.BuiltIn.JAVA_BIG_INTEGER;
-import static org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency.BuiltIn.JAVA_BYTE;
-import static org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency.BuiltIn.JAVA_DOUBLE;
-import static org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency.BuiltIn.JAVA_FLOAT;
-import static org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency.BuiltIn.JAVA_INTEGER;
-import static org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency.BuiltIn.JAVA_LINKED_LIST;
-import static org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency.BuiltIn.JAVA_LONG;
-import static org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency.BuiltIn.JAVA_NUMBER;
-import static org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency.BuiltIn.JAVA_OPTIONAL;
-import static org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency.BuiltIn.JAVA_SHORT;
-import static org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency.BuiltIn.JAVA_TREE_MAP;
-import static org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency.BuiltIn.JAVA_TREE_SET;
+import static org.uberfire.jsbridge.tsexporter.meta.dependency.BuiltInDependency.JAVA_BIG_DECIMAL;
+import static org.uberfire.jsbridge.tsexporter.meta.dependency.BuiltInDependency.JAVA_BIG_INTEGER;
+import static org.uberfire.jsbridge.tsexporter.meta.dependency.BuiltInDependency.JAVA_BYTE;
+import static org.uberfire.jsbridge.tsexporter.meta.dependency.BuiltInDependency.JAVA_DOUBLE;
+import static org.uberfire.jsbridge.tsexporter.meta.dependency.BuiltInDependency.JAVA_FLOAT;
+import static org.uberfire.jsbridge.tsexporter.meta.dependency.BuiltInDependency.JAVA_INTEGER;
+import static org.uberfire.jsbridge.tsexporter.meta.dependency.BuiltInDependency.JAVA_LINKED_LIST;
+import static org.uberfire.jsbridge.tsexporter.meta.dependency.BuiltInDependency.JAVA_LONG;
+import static org.uberfire.jsbridge.tsexporter.meta.dependency.BuiltInDependency.JAVA_NUMBER;
+import static org.uberfire.jsbridge.tsexporter.meta.dependency.BuiltInDependency.JAVA_OPTIONAL;
+import static org.uberfire.jsbridge.tsexporter.meta.dependency.BuiltInDependency.JAVA_SHORT;
+import static org.uberfire.jsbridge.tsexporter.meta.dependency.BuiltInDependency.JAVA_TREE_MAP;
+import static org.uberfire.jsbridge.tsexporter.meta.dependency.BuiltInDependency.JAVA_TREE_SET;
 
 public class JavaType {
 
@@ -244,7 +245,7 @@ public class JavaType {
                                 : declaredType.asElement().toString().replace(".", "_");
 
                         return new Translatable(format("%s%s", name, typeArgumentsPart),
-                                                singleton(new Dependency.Java(declaredType, decoratorStore)),
+                                                singleton(new JavaDependency(declaredType, decoratorStore)),
                                                 translatedTypeArguments);
                     }
                 }
@@ -252,12 +253,14 @@ public class JavaType {
                 final WildcardType wildcardType = (WildcardType) type;
                 if (wildcardType.getExtendsBound() != null) {
                     return translate(wildcardType.getExtendsBound(), tsTypeTarget, decoratorStore);
-                } else if (wildcardType.getSuperBound() != null) {
+                }
+
+                if (wildcardType.getSuperBound() != null) {
                     final Translatable superBound = translate(wildcardType.getSuperBound(), tsTypeTarget, decoratorStore);
                     return new Translatable(format("Partial<%s>", superBound.toTypeScript()), emptySet(), singletonList(superBound));
-                } else {
-                    return simpleTranslatable("any /* wildcard */");
                 }
+
+                return simpleTranslatable("any /* wildcard */");
             case EXECUTABLE:
                 if (((ExecutableType) type).getTypeVariables().isEmpty()) {
                     return simpleTranslatable("");

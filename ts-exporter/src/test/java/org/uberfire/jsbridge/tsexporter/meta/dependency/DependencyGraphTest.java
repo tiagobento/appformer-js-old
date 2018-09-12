@@ -104,13 +104,13 @@ public class DependencyGraphTest {
         graph.add(element(A2.class));
         assertEquals(3, graph.vertices().size());
 
-        assertEquals(list(), simpleNames(graph.vertex(element(A0.class)).dependencies));
-        assertEquals(list("A0"), simpleNames(graph.vertex(element(A1.class)).dependencies));
-        assertEquals(list("A1"), simpleNames(graph.vertex(element(A2.class)).dependencies));
+        assertEquals(list(), simpleNames(graph.vertex(element(A0.class)).dependencies.keySet()));
+        assertEquals(list("A0"), simpleNames(graph.vertex(element(A1.class)).dependencies.keySet()));
+        assertEquals(list("A1"), simpleNames(graph.vertex(element(A2.class)).dependencies.keySet()));
 
-        assertEquals(list("A1"), simpleNames(graph.vertex(element(A0.class)).dependents));
-        assertEquals(list("A2"), simpleNames(graph.vertex(element(A1.class)).dependents));
-        assertEquals(list(), simpleNames(graph.vertex(element(A2.class)).dependents));
+        assertEquals(list("A1"), simpleNames(graph.vertex(element(A0.class)).dependents.keySet()));
+        assertEquals(list("A2"), simpleNames(graph.vertex(element(A1.class)).dependents.keySet()));
+        assertEquals(list(), simpleNames(graph.vertex(element(A2.class)).dependents.keySet()));
     }
 
     @Test
@@ -129,19 +129,19 @@ public class DependencyGraphTest {
         graph.add(element(A2.class));
         assertEquals(6, graph.vertices().size());
 
-        assertEquals(list(), simpleNames(graph.vertex(element(A0.class)).dependencies));
-        assertEquals(list("A0"), simpleNames(graph.vertex(element(A1.class)).dependencies));
-        assertEquals(list("A0", "B0"), simpleNames(graph.vertex(element(A1B1.class)).dependencies));
-        assertEquals(list("A1"), simpleNames(graph.vertex(element(A2.class)).dependencies));
-        assertEquals(list("A1", "B0"), simpleNames(graph.vertex(element(A2B1.class)).dependencies));
-        assertEquals(list(), simpleNames(graph.vertex(element(B0.class)).dependencies));
+        assertEquals(list(), simpleNames(graph.vertex(element(A0.class)).dependencies.keySet()));
+        assertEquals(list("A0"), simpleNames(graph.vertex(element(A1.class)).dependencies.keySet()));
+        assertEquals(list("A0", "B0"), simpleNames(graph.vertex(element(A1B1.class)).dependencies.keySet()));
+        assertEquals(list("A1"), simpleNames(graph.vertex(element(A2.class)).dependencies.keySet()));
+        assertEquals(list("A1", "B0"), simpleNames(graph.vertex(element(A2B1.class)).dependencies.keySet()));
+        assertEquals(list(), simpleNames(graph.vertex(element(B0.class)).dependencies.keySet()));
 
-        assertEquals(list("A1", "A1B1"), simpleNames(graph.vertex(element(A0.class)).dependents));
-        assertEquals(list("A2", "A2B1"), simpleNames(graph.vertex(element(A1.class)).dependents));
-        assertEquals(list(), simpleNames(graph.vertex(element(A1B1.class)).dependents));
-        assertEquals(list(), simpleNames(graph.vertex(element(A2.class)).dependents));
-        assertEquals(list(), simpleNames(graph.vertex(element(A2B1.class)).dependents));
-        assertEquals(list("A1B1", "A2B1"), simpleNames(graph.vertex(element(B0.class)).dependents));
+        assertEquals(list("A1", "A1B1"), simpleNames(graph.vertex(element(A0.class)).dependents.keySet()));
+        assertEquals(list("A2", "A2B1"), simpleNames(graph.vertex(element(A1.class)).dependents.keySet()));
+        assertEquals(list(), simpleNames(graph.vertex(element(A1B1.class)).dependents.keySet()));
+        assertEquals(list(), simpleNames(graph.vertex(element(A2.class)).dependents.keySet()));
+        assertEquals(list(), simpleNames(graph.vertex(element(A2B1.class)).dependents.keySet()));
+        assertEquals(list("A1B1", "A2B1"), simpleNames(graph.vertex(element(B0.class)).dependents.keySet()));
     }
 
     class c0 {

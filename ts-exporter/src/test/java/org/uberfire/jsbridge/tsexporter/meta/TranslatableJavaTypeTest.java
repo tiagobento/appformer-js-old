@@ -21,6 +21,8 @@ import static org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore.*;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_DECLARATION;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_USE;
+import static org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency.Kind.FIELD;
+import static org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency.Kind.HIERARCHY;
 import static org.uberfire.jsbridge.tsexporter.util.TestingUtils.member;
 import static org.uberfire.jsbridge.tsexporter.util.TestingUtils.type;
 
@@ -39,32 +41,32 @@ public class TranslatableJavaTypeTest {
         final ImportStore store = new ImportStore();
 
         final List<Dependency> aggregated0 = store.with(
-                member("field2", type(TestingUtils.Sphere.class)).translate(TYPE_ARGUMENT_DECLARATION, NO_DECORATORS))
+                FIELD, member("field2", type(TestingUtils.Sphere.class)).translate(TYPE_ARGUMENT_DECLARATION, NO_DECORATORS))
                 .getAggregated();
         assertEquals(2, aggregated0.size());
         assertTrue(aggregated0.get(0).toString().endsWith("Circle<T>"));
         assertTrue(aggregated0.get(1).toString().endsWith("Sphere<J>"));
 
         final List<Dependency> aggregated1 = store.with(
-                translatable(type(TestingUtils.Circle.class)))
+                HIERARCHY, translatable(type(TestingUtils.Circle.class)))
                 .getAggregated();
         assertEquals(2, aggregated1.size());
         assertTrue(aggregated1.get(0).toString().endsWith("Circle<T>"));
         assertTrue(aggregated1.get(1).toString().endsWith("Circle<T>"));
 
         final List<Dependency> aggregated2 = store.with(
-                translatable(type(TestingUtils.Circle.class), TYPE_ARGUMENT_USE))
+                HIERARCHY, translatable(type(TestingUtils.Circle.class), TYPE_ARGUMENT_USE))
                 .getAggregated();
         assertEquals(1, aggregated2.size());
         assertTrue(aggregated2.get(0).toString().endsWith("Circle<T>"));
 
         List<Dependency> aggregated3 = store.with(
-                member("get6", type(TestingUtils.Circle.class)).translate(TYPE_ARGUMENT_DECLARATION, NO_DECORATORS))
+                HIERARCHY, member("get6", type(TestingUtils.Circle.class)).translate(TYPE_ARGUMENT_DECLARATION, NO_DECORATORS))
                 .getAggregated();
         assertEquals(1, aggregated3.size());
         assertTrue(aggregated3.get(0).toString().endsWith("Circle<T>"));
 
-        final List<Dependency> imports = store.getImports(new PojoTsClass(type(TranslatableJavaTypeTest.class), NO_DECORATORS)).stream().sorted(Comparator.comparing(Dependency::sourcePath)).collect(Collectors.toList());
+        final List<Dependency> imports = store.getImports(new PojoTsClass(type(TranslatableJavaTypeTest.class), NO_DECORATORS)).stream().map(s->s.dependency).sorted(Comparator.comparing(Dependency::sourcePath)).collect(Collectors.toList());
         assertEquals(2, imports.size());
         assertTrue(imports.get(0).toString().endsWith("Circle<T>"));
         assertTrue(imports.get(1).toString().endsWith("Sphere<J>"));

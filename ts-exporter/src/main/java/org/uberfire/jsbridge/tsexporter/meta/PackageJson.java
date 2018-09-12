@@ -43,6 +43,7 @@ public class PackageJson implements TsExporterResource {
 
         final String dependencies = classes.stream()
                 .flatMap(c -> c.getDependencies().stream())
+                .map(s -> s.dependency)
                 .collect(groupingBy(Dependency::getModuleName))
                 .keySet().stream()
                 .filter(s -> !s.equals(moduleName))

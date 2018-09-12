@@ -27,6 +27,7 @@ import javax.lang.model.element.TypeElement;
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget;
+import org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency;
 import org.uberfire.jsbridge.tsexporter.meta.dependency.DependencyGraph;
 import org.uberfire.jsbridge.tsexporter.meta.dependency.ImportStore;
 
@@ -42,6 +43,8 @@ import static org.uberfire.jsbridge.tsexporter.Main.types;
 import static org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore.NO_DECORATORS;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_DECLARATION;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_USE;
+import static org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency.Kind.CODE;
+import static org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency.Kind.FIELD;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
 
 public class RpcCallerTsMethod {
@@ -110,12 +113,12 @@ public class RpcCallerTsMethod {
     }
 
     private String methodDeclaration() {
-        return name + importing(new JavaType(executableElement.asType(), owner.asType()), TYPE_ARGUMENT_DECLARATION, NO_DECORATORS).toTypeScript();
+        return name + importing(CODE, new JavaType(executableElement.asType(), owner.asType()), TYPE_ARGUMENT_DECLARATION, NO_DECORATORS).toTypeScript();
     }
 
     private String params() {
         return getParameterJavaTypesByNames().entrySet().stream()
-                .map(e -> format("%s: %s", e.getKey(), importing(e.getValue(), TYPE_ARGUMENT_USE, NO_DECORATORS).toTypeScript()))
+                .map(e -> format("%s: %s", e.getKey(), importing(CODE, e.getValue(), TYPE_ARGUMENT_USE, NO_DECORATORS).toTypeScript()))
                 .collect(joining(", "));
     }
 
@@ -141,7 +144,7 @@ public class RpcCallerTsMethod {
     }
 
     private String factoriesOracle() {
-        final Set<Element> allDependencies = dependencyGraph.findAllDependencies(singleton(getReturnTypeJavaType().asElement())).stream()
+        final Set<Element> allDependencies = dependencyGraph.findAllDependencies(singleton(getReturnTypeJavaType().asElement()), FIELD).stream()
                 .map(DependencyGraph.Vertex::getElement)
                 .collect(toSet());
 
@@ -153,25 +156,26 @@ public class RpcCallerTsMethod {
                 .distinct()
                 .map(c -> format("\"%s\": (x: any) => new %s(x)",
                                  c.asElement().getQualifiedName().toString(),
-                                 importing(new JavaType(types.erasure(c.getType()), owner.asType()), TYPE_ARGUMENT_USE, decoratorStore).toTypeScript()))
+                                 importing(CODE, new JavaType(types.erasure(c.getType()), owner.asType()), TYPE_ARGUMENT_USE, decoratorStore).toTypeScript()))
                 .collect(joining(",\n"));
     }
 
     private String returnType() {
-        return importing(getReturnTypeJavaType(), TYPE_ARGUMENT_USE, decoratorStore).toTypeScript();
+        return importing(CODE, getReturnTypeJavaType(), TYPE_ARGUMENT_USE, decoratorStore).toTypeScript();
     }
 
     private JavaType getReturnTypeJavaType() {
         return new JavaType(executableElement.getReturnType(), owner.asType());
     }
 
-    private JavaType.Translatable importing(final JavaType javaType,
+    private JavaType.Translatable importing(final Dependency.Kind kind,
+                                            final JavaType javaType,
                                             final TsTypeTarget tsTypeTarget,
                                             final DecoratorStore decoratorStore) {
 
         final JavaType.Translatable translatable = javaType.translate(tsTypeTarget, decoratorStore);
         translatable.getAggregated().forEach(dependencyGraph::add);
-        return importStore.with(translatable);
+        return importStore.with(kind, translatable);
     }
 
     private LinkedHashMap<String, JavaType> getParameterJavaTypesByNames() {

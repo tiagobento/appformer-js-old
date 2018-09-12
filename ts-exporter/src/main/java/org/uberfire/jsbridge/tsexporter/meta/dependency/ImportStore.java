@@ -16,43 +16,60 @@
 
 package org.uberfire.jsbridge.tsexporter.meta.dependency;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import javax.lang.model.type.DeclaredType;
 
 import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 import org.uberfire.jsbridge.tsexporter.model.TsClass;
+import org.uberfire.jsbridge.tsexporter.util.IndirectHashMap;
 
 import static java.lang.String.format;
+import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toSet;
-import static org.uberfire.jsbridge.tsexporter.util.Utils.distinctBy;
+import static java.util.stream.Stream.concat;
 
 public class ImportStore {
 
-    private final Set<Dependency> dependencies = new HashSet<>();
+    private final IndirectHashMap<Dependency, Set<Dependency.Kind>> dependencies = new IndirectHashMap<>(Dependency::relativePath);
 
-    public JavaType.Translatable with(final JavaType.Translatable type) {
-        dependencies.addAll(type.getAggregated());
+    public JavaType.Translatable with(final Dependency.Kind kind,
+                                      final JavaType.Translatable type) {
+
+        type.getAggregated().forEach(t -> {
+            dependencies.merge(t, singleton(kind), (prev, cur) -> concat(prev.stream(), cur.stream()).collect(toSet()));
+        });
+
         return type;
     }
 
     public String getImportStatements(final TsClass tsClass) {
         return getImports(tsClass).stream()
-                .map(declaredType -> toTypeScriptImportSource(declaredType, tsClass.getType()))
+                .map(s -> toTypeScriptImportSource(s.dependency, tsClass.getType()))
                 .sorted()
                 .collect(joining("\n"));
     }
 
-    public Set<Dependency> getImports(final TsClass tsClass) {
-        return dependencies.stream()
-                .filter(distinctBy(Dependency::sourcePath))
-                .filter(dependency -> !dependency.represents(tsClass.getType()))
+    public Set<DependencyRelation> getImports(final TsClass tsClass) {
+        return dependencies.entrySet().stream()
+                .filter(e -> !e.getKey().represents(tsClass.getType()))
+                .map(e -> new DependencyRelation(e.getKey(), e.getValue()))
                 .collect(toSet());
     }
 
     private String toTypeScriptImportSource(final Dependency dependency, final DeclaredType owner) {
         return format("import %s from '%s';", dependency.uniqueName(owner), dependency.sourcePath());
+    }
+
+    public static class DependencyRelation {
+
+        public final Dependency dependency;
+        public final Set<Dependency.Kind> kinds;
+
+        DependencyRelation(Dependency dependency, Set<Dependency.Kind> kinds) {
+            this.dependency = dependency;
+            this.kinds = kinds;
+        }
     }
 }

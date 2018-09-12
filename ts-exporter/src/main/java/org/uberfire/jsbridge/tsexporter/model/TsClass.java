@@ -24,13 +24,13 @@ import javax.lang.model.type.DeclaredType;
 
 import com.sun.tools.javac.code.Symbol;
 import org.uberfire.jsbridge.tsexporter.meta.TsExporterResource;
-import org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency;
+import org.uberfire.jsbridge.tsexporter.meta.dependency.ImportStore;
 
 import static org.uberfire.jsbridge.tsexporter.util.Utils.get;
 
 public interface TsClass extends TsExporterResource {
 
-    Set<Dependency> getDependencies();
+    Set<ImportStore.DependencyRelation> getDependencies();
 
     DeclaredType getType();
 

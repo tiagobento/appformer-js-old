@@ -27,7 +27,6 @@ import javax.lang.model.type.DeclaredType;
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget;
-import org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency;
 import org.uberfire.jsbridge.tsexporter.meta.dependency.ImportStore;
 import org.uberfire.jsbridge.tsexporter.util.Lazy;
 
@@ -42,6 +41,8 @@ import static javax.lang.model.element.Modifier.STATIC;
 import static org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore.NO_DECORATORS;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_DECLARATION;
 import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_USE;
+import static org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency.Kind.FIELD;
+import static org.uberfire.jsbridge.tsexporter.meta.dependency.Dependency.Kind.HIERARCHY;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.formatRightToLeft;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
 
@@ -134,7 +135,7 @@ public class PojoTsClass implements TsClass {
     }
 
     private String extractSimpleName(final TsTypeTarget tsTypeTarget) {
-        return importStore.with(new JavaType(declaredType, declaredType).translate(tsTypeTarget, NO_DECORATORS)).toTypeScript();
+        return importStore.with(HIERARCHY, new JavaType(declaredType, declaredType).translate(tsTypeTarget, NO_DECORATORS)).toTypeScript();
     }
 
     private String fqcn() {
@@ -153,7 +154,7 @@ public class PojoTsClass implements TsClass {
                 .filter(s -> s.getKind().isField())
                 .filter(s -> !s.getModifiers().contains(STATIC))
                 .filter(s -> !s.asType().toString().contains("java.util.function"))
-                .map(s -> format("public readonly %s?: %s;", s.getSimpleName(), importStore.with(new JavaType(s.asType(), declaredType).translate(TYPE_ARGUMENT_USE, decoratorStore)).toTypeScript()))
+                .map(s -> format("public readonly %s?: %s;", s.getSimpleName(), importStore.with(FIELD, new JavaType(s.asType(), declaredType).translate(TYPE_ARGUMENT_USE, decoratorStore)).toTypeScript()))
                 .collect(joining("\n"));
     }
 
@@ -167,7 +168,7 @@ public class PojoTsClass implements TsClass {
 
     private String classHierarchy() {
         final String _extends = superclass().canBeSubclassed()
-                ? "extends " + importStore.with(superclass()).toTypeScript()
+                ? "extends " + importStore.with(HIERARCHY, superclass()).toTypeScript()
                 : "";
 
         if (interfaces().isEmpty()) {
@@ -175,7 +176,7 @@ public class PojoTsClass implements TsClass {
         } else {
             return _extends + " " + format("implements %s, %s",
                                            interfaces().stream()
-                                                   .map(javaType -> importStore.with(javaType.translate(TYPE_ARGUMENT_USE, NO_DECORATORS)).toTypeScript())
+                                                   .map(javaType -> importStore.with(HIERARCHY, javaType.translate(TYPE_ARGUMENT_USE, NO_DECORATORS)).toTypeScript())
                                                    .collect(joining(", ")),
                                            format("Portable<%s>", extractSimpleName(TYPE_ARGUMENT_USE)));
         }
@@ -191,7 +192,7 @@ public class PojoTsClass implements TsClass {
         }
 
         return "extends " + interfaces().stream()
-                .map(javaType -> importStore.with(javaType.translate(TYPE_ARGUMENT_USE, NO_DECORATORS)).toTypeScript())
+                .map(javaType -> importStore.with(HIERARCHY, javaType.translate(TYPE_ARGUMENT_USE, NO_DECORATORS)).toTypeScript())
                 .collect(joining(", "));
     }
 
@@ -208,7 +209,7 @@ public class PojoTsClass implements TsClass {
                 .filter(f -> f.getKind().isField())
                 .filter(f -> !f.getModifiers().contains(STATIC))
                 .filter(s -> !s.asType().toString().contains("java.util.function"))
-                .map(f -> format("%s?: %s", f.getSimpleName(), importStore.with(new JavaType(f.asType(), declaredType).translate(TYPE_ARGUMENT_USE, decoratorStore)).toTypeScript()))
+                .map(f -> format("%s?: %s", f.getSimpleName(), importStore.with(FIELD, new JavaType(f.asType(), declaredType).translate(TYPE_ARGUMENT_USE, decoratorStore)).toTypeScript()))
                 .collect(toList());
 
         if (typeElement.getSuperclass().toString().equals("java.lang.Object")) {
@@ -220,7 +221,7 @@ public class PojoTsClass implements TsClass {
     }
 
     @Override
-    public Set<Dependency> getDependencies() {
+    public Set<ImportStore.DependencyRelation> getDependencies() {
         source.get();
         return importStore.getImports(this);
     }
