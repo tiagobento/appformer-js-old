@@ -16,6 +16,7 @@
 
 package org.uberfire.jsbridge.tsexporter.util;
 
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -40,11 +41,16 @@ public class IndirectHashMap<DK, V> {
         return map.get(keyMapper.apply(directKey));
     }
 
-    public Set<DK> keySet() {
-        return directKeys.stream().filter(distinctBy(keyMapper)).collect(toSet());
+    private Set<DK> keySet() {
+        return directKeys.stream()
+                .filter(distinctBy(keyMapper))
+                .collect(toSet());
     }
 
-    public V merge(final DK directKey, final V value, final BiFunction<V, V, V> mergeFunction) {
+    public V merge(final DK directKey,
+                   final V value,
+                   final BiFunction<V, V, V> mergeFunction) {
+
         final V merged = map.merge(keyMapper.apply(directKey), value, mergeFunction);
         if (merged != null) {
             directKeys.add(directKey);
@@ -56,7 +62,7 @@ public class IndirectHashMap<DK, V> {
 
     public Set<Map.Entry<DK, V>> entrySet() {
         return keySet().stream()
-                .map(dk -> new HashMap.SimpleImmutableEntry<>(dk, map.get(keyMapper.apply(dk))))
+                .map(dk -> new SimpleImmutableEntry<>(dk, map.get(keyMapper.apply(dk))))
                 .collect(toSet());
     }
 }

@@ -25,11 +25,10 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
-import org.uberfire.jsbridge.tsexporter.meta.JavaType;
-import org.uberfire.jsbridge.tsexporter.dependency.ImportEntry;
 import org.uberfire.jsbridge.tsexporter.dependency.DependencyGraph;
-import org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation;
-import org.uberfire.jsbridge.tsexporter.dependency.ImportStore;
+import org.uberfire.jsbridge.tsexporter.dependency.ImportEntriesStore;
+import org.uberfire.jsbridge.tsexporter.dependency.ImportEntry;
+import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 import org.uberfire.jsbridge.tsexporter.meta.translatable.Translatable;
 
 import static java.lang.String.format;
@@ -41,24 +40,24 @@ import static javax.lang.model.element.ElementKind.CLASS;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static org.uberfire.jsbridge.tsexporter.Main.types;
 import static org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore.NO_DECORATORS;
+import static org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation.Kind.CODE;
+import static org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation.Kind.FIELD;
 import static org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation.Kind.HIERARCHY;
 import static org.uberfire.jsbridge.tsexporter.meta.translatable.Translatable.SourceUsage.TYPE_ARGUMENT_DECLARATION;
 import static org.uberfire.jsbridge.tsexporter.meta.translatable.Translatable.SourceUsage.TYPE_ARGUMENT_USE;
-import static org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation.Kind.CODE;
-import static org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation.Kind.FIELD;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
 
 public class RpcCallerTsMethod {
 
     private final ExecutableElement executableElement;
     private final TypeElement owner;
-    private final ImportStore importStore;
+    private final ImportEntriesStore importStore;
     private final String name;
     private final DependencyGraph dependencyGraph;
     private final DecoratorStore decoratorStore;
 
-    public RpcCallerTsMethod(final RpcCallerTsMethod tsMethod,
-                             final String name) {
+    RpcCallerTsMethod(final RpcCallerTsMethod tsMethod,
+                      final String name) {
 
         this.owner = tsMethod.owner;
         this.executableElement = tsMethod.executableElement;
@@ -68,11 +67,11 @@ public class RpcCallerTsMethod {
         this.name = name;
     }
 
-    public RpcCallerTsMethod(final ExecutableElement executableElement,
-                             final TypeElement owner,
-                             final ImportStore importStore,
-                             final DependencyGraph dependencyGraph,
-                             final DecoratorStore decoratorStore) {
+    RpcCallerTsMethod(final ExecutableElement executableElement,
+                      final TypeElement owner,
+                      final ImportEntriesStore importStore,
+                      final DependencyGraph dependencyGraph,
+                      final DecoratorStore decoratorStore) {
 
         this.executableElement = executableElement;
         this.owner = owner;
@@ -114,12 +113,13 @@ public class RpcCallerTsMethod {
     }
 
     private String methodDeclaration() {
-        return name + importing(CODE, new JavaType(executableElement.asType(), owner.asType()), NO_DECORATORS).toTypeScript(TYPE_ARGUMENT_DECLARATION);
+        final JavaType methodType = new JavaType(executableElement.asType(), owner.asType());
+        return name + importing(methodType.translate(NO_DECORATORS)).toTypeScript(TYPE_ARGUMENT_DECLARATION);
     }
 
     private String params() {
         return getParameterJavaTypesByNames().entrySet().stream()
-                .map(e -> format("%s: %s", e.getKey(), importing(CODE, e.getValue(), NO_DECORATORS).toTypeScript(TYPE_ARGUMENT_USE)))
+                .map(e -> format("%s: %s", e.getKey(), importing(e.getValue().translate(NO_DECORATORS)).toTypeScript(TYPE_ARGUMENT_USE)))
                 .collect(joining(", "));
     }
 
@@ -146,41 +146,54 @@ public class RpcCallerTsMethod {
 
     private String factoriesOracle() {
 
-        final Set<Element> dependencyElements = getReturnTypeJavaType().translate(decoratorStore).getAggregatedImportEntries().stream()
+        final Set<Element> directDependencyElements = translatedReturnType().getAggregatedImportEntries().stream()
                 .map(ImportEntry::asElement)
                 .collect(toSet());
 
-        final Set<Element> allDependencies = dependencyGraph.findAllDependencies(dependencyElements, FIELD).stream()
+        final Set<Element> allDependenciesElements = dependencyGraph.findAllDependencies(directDependencyElements, FIELD).stream()
                 .map(DependencyGraph.Vertex::asElement)
                 .collect(toSet());
 
-        return dependencyGraph.findAllDependents(allDependencies, HIERARCHY).stream()
+        return dependencyGraph.findAllDependents(allDependenciesElements, HIERARCHY).stream()
                 .map(DependencyGraph.Vertex::getPojoClass)
                 .sorted(comparing(TsClass::getRelativePath))
-                .filter(dependent -> allDependencies.stream().anyMatch(d -> types.isSubtype(types.erasure(dependent.getType()), types.erasure(d.asType()))))
-                .filter(dependent -> dependent.getType().asElement().getKind().equals(CLASS) && !dependent.getType().asElement().getModifiers().contains(ABSTRACT))
+                .filter(this::isConcreteClass)
+                .filter(dependent -> allDependenciesElements.stream().anyMatch(element -> isSubtype(dependent, element)))
                 .distinct()
-                .map(c -> format("\"%s\": (x: any) => new %s(x)",
-                                 c.asElement().getQualifiedName().toString(),
-                                 importing(CODE, new JavaType(types.erasure(c.getType()), owner.asType()), decoratorStore).toTypeScript(TYPE_ARGUMENT_USE)))
+                .map(this::toFactoriesOracleEntry)
                 .collect(joining(",\n"));
     }
 
+    private String toFactoriesOracleEntry(final PojoTsClass tsClass) {
+        final JavaType javaType = new JavaType(types.erasure(tsClass.getType()), owner.asType());
+        return format("\"%s\": (x: any) => new %s(x)",
+                      tsClass.asElement().getQualifiedName().toString(),
+                      importing(javaType.translate(decoratorStore)).toTypeScript(TYPE_ARGUMENT_USE));
+    }
+
+    private boolean isConcreteClass(final PojoTsClass tsClass) {
+        return tsClass.asElement().getKind().equals(CLASS) &&
+                !tsClass.asElement().getModifiers().contains(ABSTRACT);
+    }
+
+    private boolean isSubtype(final PojoTsClass tsClass, final Element element) {
+        return types.isSubtype(types.erasure(tsClass.getType()), types.erasure(element.asType()));
+    }
+
     private String returnType() {
-        return importing(CODE, getReturnTypeJavaType(), decoratorStore).toTypeScript(TYPE_ARGUMENT_USE);
+        return importing(translatedReturnType()).toTypeScript(TYPE_ARGUMENT_USE);
     }
 
-    private JavaType getReturnTypeJavaType() {
-        return new JavaType(executableElement.getReturnType(), owner.asType());
+    private Translatable translatedReturnType() {
+        return new JavaType(executableElement.getReturnType(), owner.asType()).translate(decoratorStore);
     }
 
-    private Translatable importing(final DependencyRelation.Kind kind,
-                                   final JavaType javaType,
-                                   final DecoratorStore decoratorStore) {
+    private Translatable importing(final Translatable translatable) {
+        translatable.getAggregatedImportEntries().stream()
+                .map(ImportEntry::asElement)
+                .forEach(dependencyGraph::add);
 
-        final Translatable translatable = javaType.translate(decoratorStore);
-        translatable.getAggregatedImportEntries().forEach(importEntry -> dependencyGraph.add(importEntry.asElement()));
-        return importStore.with(kind, translatable);
+        return importStore.with(CODE, translatable);
     }
 
     private LinkedHashMap<String, JavaType> getParameterJavaTypesByNames() {

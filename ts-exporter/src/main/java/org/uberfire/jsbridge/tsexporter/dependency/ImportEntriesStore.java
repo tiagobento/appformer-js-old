@@ -30,9 +30,13 @@ import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toSet;
 
-public class ImportStore {
+public class ImportEntriesStore {
 
-    private final IndirectHashMap<ImportEntry, Set<DependencyRelation.Kind>> dependencies = new IndirectHashMap<>(ImportEntry::relativePath);
+    private final IndirectHashMap<ImportEntry, Set<DependencyRelation.Kind>> dependencies;
+
+    public ImportEntriesStore() {
+        this.dependencies = new IndirectHashMap<>(ImportEntry::relativePath);
+    }
 
     public Translatable with(final DependencyRelation.Kind kind,
                              final Translatable type) {

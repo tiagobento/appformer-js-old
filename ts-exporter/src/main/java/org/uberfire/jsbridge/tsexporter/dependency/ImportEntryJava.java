@@ -25,12 +25,12 @@ import org.uberfire.jsbridge.tsexporter.model.PojoTsClass;
 
 import static org.uberfire.jsbridge.tsexporter.meta.translatable.Translatable.SourceUsage.TYPE_ARGUMENT_IMPORT;
 
-public class JavaImportEntry implements ImportEntry {
+public class ImportEntryJava implements ImportEntry {
 
     private final DeclaredType declaredType;
     private final DecoratorStore decoratorStore;
 
-    public JavaImportEntry(final DeclaredType declaredType,
+    public ImportEntryJava(final DeclaredType declaredType,
                            final DecoratorStore decoratorStore) {
 
         this.declaredType = declaredType;

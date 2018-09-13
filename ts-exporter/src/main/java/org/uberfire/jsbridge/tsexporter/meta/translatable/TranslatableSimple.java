@@ -16,10 +16,11 @@
 
 package org.uberfire.jsbridge.tsexporter.meta.translatable;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.uberfire.jsbridge.tsexporter.dependency.ImportEntry;
+
+import static java.util.Collections.emptyList;
 
 public class TranslatableSimple implements Translatable {
 
@@ -36,6 +37,6 @@ public class TranslatableSimple implements Translatable {
 
     @Override
     public List<ImportEntry> getAggregatedImportEntries() {
-        return Arrays.asList();
+        return emptyList();
     }
 }

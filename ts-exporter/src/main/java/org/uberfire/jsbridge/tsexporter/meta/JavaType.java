@@ -31,36 +31,34 @@ import javax.lang.model.type.WildcardType;
 import org.uberfire.jsbridge.tsexporter.Main;
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorImportEntry;
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
-import org.uberfire.jsbridge.tsexporter.dependency.JavaImportEntry;
+import org.uberfire.jsbridge.tsexporter.dependency.ImportEntryJava;
 import org.uberfire.jsbridge.tsexporter.meta.translatable.Translatable;
 import org.uberfire.jsbridge.tsexporter.meta.translatable.TranslatableArray;
 import org.uberfire.jsbridge.tsexporter.meta.translatable.TranslatableDefault;
 import org.uberfire.jsbridge.tsexporter.meta.translatable.TranslatableSimple;
 import org.uberfire.jsbridge.tsexporter.meta.translatable.TranslatableTypeVar;
 
-import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static javax.lang.model.type.TypeKind.NONE;
 import static javax.lang.model.type.TypeKind.TYPEVAR;
 import static org.uberfire.jsbridge.tsexporter.Main.types;
-import static org.uberfire.jsbridge.tsexporter.dependency.BuiltInImportEntry.JAVA_BIG_DECIMAL;
-import static org.uberfire.jsbridge.tsexporter.dependency.BuiltInImportEntry.JAVA_BIG_INTEGER;
-import static org.uberfire.jsbridge.tsexporter.dependency.BuiltInImportEntry.JAVA_BYTE;
-import static org.uberfire.jsbridge.tsexporter.dependency.BuiltInImportEntry.JAVA_DOUBLE;
-import static org.uberfire.jsbridge.tsexporter.dependency.BuiltInImportEntry.JAVA_FLOAT;
-import static org.uberfire.jsbridge.tsexporter.dependency.BuiltInImportEntry.JAVA_INTEGER;
-import static org.uberfire.jsbridge.tsexporter.dependency.BuiltInImportEntry.JAVA_LINKED_LIST;
-import static org.uberfire.jsbridge.tsexporter.dependency.BuiltInImportEntry.JAVA_LONG;
-import static org.uberfire.jsbridge.tsexporter.dependency.BuiltInImportEntry.JAVA_NUMBER;
-import static org.uberfire.jsbridge.tsexporter.dependency.BuiltInImportEntry.JAVA_OPTIONAL;
-import static org.uberfire.jsbridge.tsexporter.dependency.BuiltInImportEntry.JAVA_SHORT;
-import static org.uberfire.jsbridge.tsexporter.dependency.BuiltInImportEntry.JAVA_TREE_MAP;
-import static org.uberfire.jsbridge.tsexporter.dependency.BuiltInImportEntry.JAVA_TREE_SET;
+import static org.uberfire.jsbridge.tsexporter.dependency.ImportEntryBuiltIn.JAVA_BIG_DECIMAL;
+import static org.uberfire.jsbridge.tsexporter.dependency.ImportEntryBuiltIn.JAVA_BIG_INTEGER;
+import static org.uberfire.jsbridge.tsexporter.dependency.ImportEntryBuiltIn.JAVA_BYTE;
+import static org.uberfire.jsbridge.tsexporter.dependency.ImportEntryBuiltIn.JAVA_DOUBLE;
+import static org.uberfire.jsbridge.tsexporter.dependency.ImportEntryBuiltIn.JAVA_FLOAT;
+import static org.uberfire.jsbridge.tsexporter.dependency.ImportEntryBuiltIn.JAVA_INTEGER;
+import static org.uberfire.jsbridge.tsexporter.dependency.ImportEntryBuiltIn.JAVA_LINKED_LIST;
+import static org.uberfire.jsbridge.tsexporter.dependency.ImportEntryBuiltIn.JAVA_LONG;
+import static org.uberfire.jsbridge.tsexporter.dependency.ImportEntryBuiltIn.JAVA_NUMBER;
+import static org.uberfire.jsbridge.tsexporter.dependency.ImportEntryBuiltIn.JAVA_OPTIONAL;
+import static org.uberfire.jsbridge.tsexporter.dependency.ImportEntryBuiltIn.JAVA_SHORT;
+import static org.uberfire.jsbridge.tsexporter.dependency.ImportEntryBuiltIn.JAVA_TREE_MAP;
+import static org.uberfire.jsbridge.tsexporter.dependency.ImportEntryBuiltIn.JAVA_TREE_SET;
 
 public class JavaType {
 
@@ -217,18 +215,14 @@ public class JavaType {
                     default: {
                         if (decoratorStore.hasDecoratorFor(type)) {
                             final DecoratorImportEntry decorator = decoratorStore.getDecoratorFor(type);
-                            return new TranslatableDefault(decorator.uniqueName(declaredType),
-                                                           singleton(decorator),
-                                                           translatableTypeArguments);
+                            return new TranslatableDefault(decorator.uniqueName(declaredType), singleton(decorator), translatableTypeArguments);
                         }
 
                         final String translated = (SIMPLE_NAMES.get() || types.asElement(declaredType).equals(types.asElement(owner)))
                                 ? declaredType.asElement().getSimpleName().toString()
                                 : declaredType.asElement().toString().replace(".", "_");
 
-                        return new TranslatableDefault(translated,
-                                                       singleton(new JavaImportEntry(declaredType, decoratorStore)),
-                                                       translatableTypeArguments
+                        return new TranslatableDefault(translated, singleton(new ImportEntryJava(declaredType, decoratorStore)), translatableTypeArguments
                         );
                     }
                 }

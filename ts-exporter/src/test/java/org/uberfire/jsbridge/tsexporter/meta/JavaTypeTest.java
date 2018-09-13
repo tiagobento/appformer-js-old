@@ -11,7 +11,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation;
 import org.uberfire.jsbridge.tsexporter.dependency.ImportEntry;
-import org.uberfire.jsbridge.tsexporter.dependency.ImportStore;
+import org.uberfire.jsbridge.tsexporter.dependency.ImportEntriesStore;
 import org.uberfire.jsbridge.tsexporter.meta.translatable.Translatable;
 import org.uberfire.jsbridge.tsexporter.model.PojoTsClass;
 import org.uberfire.jsbridge.tsexporter.util.TestingUtils;
@@ -37,7 +37,7 @@ public class JavaTypeTest {
 
     @Test
     public void testAggregated() {
-        final ImportStore store = new ImportStore();
+        final ImportEntriesStore store = new ImportEntriesStore();
 
         final List<ImportEntry> aggregated0 = store.with(
                 FIELD, member("field2", type(TestingUtils.Sphere.class)).translate(NO_DECORATORS))

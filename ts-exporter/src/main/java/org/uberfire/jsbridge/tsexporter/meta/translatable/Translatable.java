@@ -24,11 +24,11 @@ public interface Translatable {
 
     String toTypeScript(final SourceUsage sourceUsage);
 
+    List<ImportEntry> getAggregatedImportEntries();
+
     default boolean canBeSubclassed() {
         return false;
-    };
-
-    List<ImportEntry> getAggregatedImportEntries();
+    }
 
     enum SourceUsage {
         TYPE_ARGUMENT_USE,

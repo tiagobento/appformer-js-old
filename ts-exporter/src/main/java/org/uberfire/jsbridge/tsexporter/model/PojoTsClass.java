@@ -26,9 +26,8 @@ import javax.lang.model.type.DeclaredType;
 
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType;
-import org.uberfire.jsbridge.tsexporter.meta.translatable.Translatable.SourceUsage;
 import org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation;
-import org.uberfire.jsbridge.tsexporter.dependency.ImportStore;
+import org.uberfire.jsbridge.tsexporter.dependency.ImportEntriesStore;
 import org.uberfire.jsbridge.tsexporter.meta.translatable.Translatable;
 import org.uberfire.jsbridge.tsexporter.util.Lazy;
 
@@ -52,8 +51,9 @@ public class PojoTsClass implements TsClass {
 
     private final DeclaredType declaredType;
     private final DecoratorStore decoratorStore;
-    private final ImportStore importStore;
+    private final ImportEntriesStore importStore;
     private final Lazy<String> source;
+    private final Lazy<Translatable> translatableSelf;
 
     @Override
     public String toSource() {
@@ -65,7 +65,8 @@ public class PojoTsClass implements TsClass {
 
         this.declaredType = declaredType;
         this.decoratorStore = decoratorStore;
-        this.importStore = new ImportStore();
+        this.importStore = new ImportEntriesStore();
+        this.translatableSelf = new Lazy<>(() -> importStore.with(HIERARCHY, new JavaType(declaredType, declaredType).translate(NO_DECORATORS)));
         this.source = new Lazy<>(() -> {
             if (asElement().getKind().equals(INTERFACE)) {
                 return toInterface();
@@ -85,9 +86,9 @@ public class PojoTsClass implements TsClass {
                       "",
                       "export default %s;"),
 
-                () -> extractSimpleName(TYPE_ARGUMENT_DECLARATION),
+                () -> translatableSelf.get().toTypeScript(TYPE_ARGUMENT_DECLARATION),
                 this::enumFields,
-                () -> extractSimpleName(TYPE_ARGUMENT_DECLARATION));
+                () -> translatableSelf.get().toTypeScript(TYPE_ARGUMENT_DECLARATION));
     }
 
     private String toInterface() {
@@ -99,7 +100,7 @@ public class PojoTsClass implements TsClass {
                       "}"),
 
                 this::imports,
-                () -> extractSimpleName(TYPE_ARGUMENT_DECLARATION),
+                () -> translatableSelf.get().toTypeScript(TYPE_ARGUMENT_DECLARATION),
                 this::interfaceHierarchy);
     }
 
@@ -123,7 +124,7 @@ public class PojoTsClass implements TsClass {
 
                 this::imports,
                 this::abstractOrNot,
-                () -> extractSimpleName(TYPE_ARGUMENT_DECLARATION),
+                () -> translatableSelf.get().toTypeScript(TYPE_ARGUMENT_DECLARATION),
                 this::classHierarchy,
                 this::fqcn,
                 this::fields,
@@ -134,10 +135,6 @@ public class PojoTsClass implements TsClass {
 
     private String imports() {
         return importStore.getImportStatements(this);
-    }
-
-    private String extractSimpleName(final SourceUsage sourceUsage) {
-        return importStore.with(HIERARCHY, new JavaType(declaredType, declaredType).translate(NO_DECORATORS)).toTypeScript(sourceUsage);
     }
 
     private String fqcn() {
@@ -174,13 +171,13 @@ public class PojoTsClass implements TsClass {
                 : "";
 
         if (interfaces().isEmpty()) {
-            return _extends + " " + format("implements Portable<%s>", extractSimpleName(TYPE_ARGUMENT_USE));
+            return _extends + " " + format("implements Portable<%s>", translatableSelf.get().toTypeScript(TYPE_ARGUMENT_USE));
         } else {
             return _extends + " " + format("implements %s, %s",
                                            interfaces().stream()
                                                    .map(javaType -> importStore.with(HIERARCHY, javaType.translate(NO_DECORATORS)).toTypeScript(TYPE_ARGUMENT_USE))
                                                    .collect(joining(", ")),
-                                           format("Portable<%s>", extractSimpleName(TYPE_ARGUMENT_USE)));
+                                           format("Portable<%s>", translatableSelf.get().toTypeScript(TYPE_ARGUMENT_USE)));
         }
     }
 

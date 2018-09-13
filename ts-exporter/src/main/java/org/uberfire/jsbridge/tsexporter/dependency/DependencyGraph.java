@@ -37,6 +37,7 @@ import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 import static java.util.stream.Stream.concat;
+import static org.uberfire.jsbridge.tsexporter.util.Utils.*;
 
 public class DependencyGraph {
 
@@ -45,7 +46,7 @@ public class DependencyGraph {
 
     public DependencyGraph(final DecoratorStore decoratorStore) {
         this.decoratorStore = decoratorStore;
-        graph = new HashMap<>();
+        this.graph = new HashMap<>();
     }
 
     public Vertex add(final Element element) {
@@ -101,12 +102,12 @@ public class DependencyGraph {
                 .filter(Objects::nonNull)
                 .collect(toSet());
 
-        final Set<Vertex> toBeVisited = Utils.diff(startingPoints, visited);
+        final Set<Vertex> toBeVisited = diff(startingPoints, visited);
         visited.addAll(toBeVisited);
 
         final Stream<Vertex> traversal = toBeVisited.stream()
                 .map(vertex -> findRelevantRelations(relations.apply(vertex), kinds))
-                .flatMap(c -> findAllRelations(c, relations, kinds, visited).stream());
+                .flatMap(trav -> findAllRelations(trav, relations, kinds, visited).stream());
 
         return concat(startingPoints.stream(), traversal).collect(toSet());
     }
