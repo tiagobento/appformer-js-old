@@ -1,9 +1,9 @@
 import * as React from "react";
 import * as AppFormer from "appformer";
 import ShowcaseReactComponent from "showcase-components/DemoReactComponent";
-import { Foo, TestEvent } from "generated__temporary__/Model";
-import TestMessagesService from "generated__temporary__/org/uberfire/shared/TestMessagesService";
-// import ObeservablePathImpl from "uberfire-api/org/uberfire/backend/vfs/impl/ObservablePathImpl";
+import TestMessagesService from "output/uberfire-webapp/org/uberfire/shared/TestMessagesService";
+import TestEvent from "output/uberfire-webapp/org/uberfire/shared/TestEvent";
+import Foo from "output/uberfire-webapp/org/uberfire/shared/Foo";
 
 // import homePerspectiveTemplate from "showcase-components/HomePerspective.html";
 // import otherPerspectiveTemplate from "showcase-components/other-perspective.html";
@@ -29,28 +29,15 @@ export class ReactComponentScreen extends AppFormer.Screen {
       }
     };
 
-    // new ObeservablePathImpl({}).path;
+    const service = new TestMessagesService();
 
-    // const servce = new TestMessagesService();
-    // const drlTextLends = new GlobalsEditorService();
-    // const MyPathImpl = class implements Path {
-    //     public readonly path: string;
-    //     constructor(s: string) {
-    //         this.path = s;
-    //     }
-    // };
-    //
-    // drlTextLends.loadContent({ path: new MyPathImpl("/tmp/test") }).then(e => {
-    //   console.info(e);
-    // });
-    //
-    // this.af_componentService = {
-    //   sayHello: servce.sayHello,
-    //   sayHelloToSomething: servce.sayHelloToSomething,
-    //   sayHelloOnServer: servce.sayHelloOnServer,
-    //   fireServerEvent: servce.fireServerEvent,
-    //   sendTestPojo: servce.sendTestPojo
-    // };
+    this.af_componentService = {
+      sayHello: service.hello0,
+      sayHelloToSomething: service.hello1,
+      sayHelloOnServer: service.muteHello,
+      fireServerEvent: service.helloFromEvent,
+      sendTestPojo: service.postTestEvent
+    };
   }
 
   public af_onStartup() {
@@ -58,7 +45,7 @@ export class ReactComponentScreen extends AppFormer.Screen {
   }
 
   public af_onOpen() {
-    const testEvent = new TestEvent({
+    const testEventInstance = new TestEvent({
       bar: "hello1",
       foo: new Foo({ foo: "a" }),
       child: new TestEvent({
@@ -75,7 +62,7 @@ export class ReactComponentScreen extends AppFormer.Screen {
       })
       .then(msg => {
         console.info(`First call returned (${msg})`);
-        return this.af_componentService.sayHelloToSomething("foo");
+        return this.af_componentService.sayHelloToSomething({who: "foo"});
       })
       .then(msg => {
         console.info(`Second call returned (${msg})`);
@@ -83,7 +70,7 @@ export class ReactComponentScreen extends AppFormer.Screen {
       })
       .then(msg => {
         console.info(`Third call returned (${msg})`);
-        return this.af_componentService.sendTestPojo(testEvent);
+        return this.af_componentService.sendTestPojo({testEvent: testEventInstance});
       })
       .then(msg => {
         console.info(`Fourth call returned (${msg})`);
@@ -135,7 +122,7 @@ export class PureDomElementScreen extends AppFormer.Screen {
     this.span = document.createElement("span");
     const sv = new TestMessagesService();
     this.af_componentService = {
-      fireServerEvent: sv.fireServerEvent
+      fireServerEvent: sv.helloFromEvent
     };
   }
 

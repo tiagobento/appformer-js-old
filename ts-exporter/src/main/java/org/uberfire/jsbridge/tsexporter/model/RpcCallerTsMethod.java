@@ -135,6 +135,7 @@ public class RpcCallerTsMethod {
                         .filter(Optional::isPresent).map(Optional::get)
                         .map(Object::toString) //FIXME: This is probably not 100% right
                         .collect(joining(":")) +
+                ':' +
                 '"';
     }
 
