@@ -6,7 +6,7 @@ interface Props {
   status: { eventsConsole: boolean; rpcConsole: boolean };
 }
 
-export default class ConsoleDock extends React.Component<Props, {}> {
+export class ConsoleDock extends React.Component<Props, {}> {
   public render() {
     return (
       <div

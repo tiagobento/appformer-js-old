@@ -1,8 +1,8 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { Screen, Perspective, DefaultScreenContainerId } from "api/Components";
-import JsBridge from "internal/JsBridge";
-import ScreenContainer from "internal/ScreenContainer";
+import {JsBridge} from "internal/JsBridge";
+import {ScreenContainer} from "internal/ScreenContainer";
 
 interface Props {
   root: { ss: Screen[]; ps: Perspective[] };
@@ -26,7 +26,7 @@ interface LastStateSnapshot {
   kept: KeptScreen[];
 }
 
-export default class PerspectiveContainer extends React.Component<Props, State> {
+export class PerspectiveContainer extends React.Component<Props, State> {
   public static AfOpenScreenAttr = "af-open-screen";
 
   public ref: HTMLDivElement;

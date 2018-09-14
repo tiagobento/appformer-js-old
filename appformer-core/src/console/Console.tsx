@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Screen, DefaultScreenContainerId } from "api/Components";
-import ConsoleDock from "console/ConsoleDock";
-import EventsSimulationConsole from "console/EventsSimulationConsole";
+import {ConsoleDock} from "console/ConsoleDock";
+import {EventsSimulationConsole} from "console/EventsSimulationConsole";
 import { RPCConsole } from "console/RpcSimulationConsole";
 
 interface State {
@@ -16,7 +16,7 @@ const actions = {
   })
 };
 
-export default class Console extends React.Component<{ screens: Screen[] }, State> {
+export class Console extends React.Component<{ screens: Screen[] }, State> {
   constructor(props: { screens: Screen[] }) {
     super(props);
     this.state = { rpcConsole: false, eventsConsole: false };
