@@ -16,7 +16,6 @@
 
 package org.uberfire.jsbridge.tsexporter.meta.translatable;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
@@ -26,6 +25,7 @@ import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
 import org.uberfire.jsbridge.tsexporter.dependency.ImportEntry;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
 import static javax.lang.model.type.TypeKind.NULL;
 import static javax.lang.model.type.TypeKind.TYPEVAR;
@@ -33,9 +33,9 @@ import static org.uberfire.jsbridge.tsexporter.meta.translatable.Translatable.So
 
 public class TranslatableTypeVar implements Translatable {
 
-    private String translatedUse;
-    private String translatedDeclaration;
-    private List<ImportEntry> aggregated = new ArrayList<>();
+    private final String translatedUse;
+    private final String translatedDeclaration;
+    private final List<ImportEntry> upperBoundImportEntries;
 
     public TranslatableTypeVar(final JavaType javaType,
                                final DecoratorStore decoratorStore) {
@@ -44,20 +44,22 @@ public class TranslatableTypeVar implements Translatable {
 
         if (!javaType.getType().getKind().equals(TYPEVAR)) {
             this.translatedDeclaration = this.translatedUse;
+            this.upperBoundImportEntries = emptyList();
             return;
         }
 
         final TypeVariable typeVariable = (TypeVariable) javaType.getType();
         if (!hasRelevantUpperBound(typeVariable)) {
             this.translatedDeclaration = this.translatedUse;
+            this.upperBoundImportEntries = emptyList();
             return;
         }
 
         final Translatable upperBound = new JavaType(typeVariable.getUpperBound(), javaType.getOwner())
                 .translate(decoratorStore, new HashSet<>(singleton(typeVariable.asElement())));
 
-        this.aggregated.addAll(upperBound.getAggregatedImportEntries());
         this.translatedDeclaration = typeVariable.toString() + " extends " + upperBound.toTypeScript(TYPE_ARGUMENT_USE);
+        this.upperBoundImportEntries = upperBound.getAggregatedImportEntries();
     }
 
     private boolean hasRelevantUpperBound(final TypeVariable typeVariable) {
@@ -81,6 +83,6 @@ public class TranslatableTypeVar implements Translatable {
 
     @Override
     public List<ImportEntry> getAggregatedImportEntries() {
-        return aggregated;
+        return upperBoundImportEntries;
     }
 }

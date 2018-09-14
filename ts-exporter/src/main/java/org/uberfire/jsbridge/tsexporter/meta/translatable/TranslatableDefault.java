@@ -29,14 +29,14 @@ public class TranslatableDefault implements Translatable {
 
     private final String translated;
     private final Set<ImportEntry> importEntries;
-    private final List<Translatable> aggregatedTypes;
+    private final List<Translatable> translatableTypeArguments;
 
     public TranslatableDefault(final String translated,
                                final Set<ImportEntry> importEntries,
-                               final List<Translatable> aggregatedTypes) {
+                               final List<Translatable> translatableTypeArguments) {
 
         this.translated = translated;
-        this.aggregatedTypes = aggregatedTypes;
+        this.translatableTypeArguments = translatableTypeArguments;
         this.importEntries = importEntries;
     }
 
@@ -48,8 +48,8 @@ public class TranslatableDefault implements Translatable {
             case FIELD_DECLARATION:
             case TYPE_ARGUMENT_USE:
             case TYPE_ARGUMENT_DECLARATION:
-                return translated + (aggregatedTypes.size() > 0
-                        ? "<" + aggregatedTypes.stream().map(s -> s.toTypeScript(sourceUsage)).collect(joining(", ")) + ">"
+                return translated + (translatableTypeArguments.size() > 0
+                        ? "<" + translatableTypeArguments.stream().map(s -> s.toTypeScript(sourceUsage)).collect(joining(", ")) + ">"
                         : "");
             default:
                 throw new RuntimeException();
@@ -59,7 +59,7 @@ public class TranslatableDefault implements Translatable {
     @Override
     public List<ImportEntry> getAggregatedImportEntries() {
         return concat(importEntries.stream(),
-                      aggregatedTypes.stream().flatMap(t -> t.getAggregatedImportEntries().stream()))
+                      translatableTypeArguments.stream().flatMap(t -> t.getAggregatedImportEntries().stream()))
                 .collect(toList());
     }
 

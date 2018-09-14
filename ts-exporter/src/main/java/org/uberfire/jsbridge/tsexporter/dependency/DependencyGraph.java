@@ -60,8 +60,9 @@ public class DependencyGraph {
             return existingVertex;
         }
 
-        graph.put(typeElement, new Vertex(typeElement));
-        return graph.computeIfPresent(typeElement, (k, vertex) -> vertex.init());
+        final Vertex vertex = new Vertex(typeElement);
+        graph.put(typeElement, vertex);
+        return vertex.init();
     }
 
     private boolean canBePartOfTheGraph(final Element element) {

@@ -64,7 +64,7 @@ public class PojoTsClassTestClasses {
                            "",
                            "public readonly a?: org_uberfire_jsbridge_tsexporter_model_PojoTsClassTestClasses_A;",
                            "public readonly b?: B;",
-                           "public readonly c?: JavaInteger = new JavaInteger(0);",
+                           "public readonly c?: JavaInteger = new JavaInteger(\"0\");",
                            "public readonly d?: JavaTreeSet<string>;",
                            "public readonly e?: JavaLinkedList<string>;",
                            "public readonly f?: JavaTreeMap<string, string>;",
@@ -93,7 +93,7 @@ public class PojoTsClassTestClasses {
         ))));
 
         assertEquals(lines("",
-                           "import { Portable } from 'generated__temporary__/Model';",
+                           "import Portable from 'appformer/internal/model/Portable';",
                            "import decorators_simple_ADEC from 'my-decorators/decorators/simple/ADEC';",
                            "import decorators_simple_CDEC from 'my-decorators/decorators/simple/CDEC';",
                            "import org_uberfire_jsbridge_tsexporter_model_PojoTsClassTestClasses_A from 'output/ts-exporter-test/org/uberfire/jsbridge/tsexporter/model/PojoTsClassTestClasses/A';",
