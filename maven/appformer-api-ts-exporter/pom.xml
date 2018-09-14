@@ -3,13 +3,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.uberfire</groupId>
-    <artifactId>appformer-js-ts-exporter</artifactId>
+    <groupId>org.appformer</groupId>
+    <artifactId>appformer-api-ts-exporter</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>AppFormer JS :: TS Exporter</name>
-    <description>TypeScript exporter for AppFormer.js</description>
+    <name>AppFormer JS :: API TypeScript Exporter</name>
+    <description>TypeScript API exporter for AppFormer.js</description>
 
     <dependencies>
         <dependency>
