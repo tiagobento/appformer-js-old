@@ -6,4 +6,3 @@ export enum ErraiObjectConstants {
   JSON = "^${$JSON$}$::",
   NULL = "^NullVal"
 }
-export ErraiObjectConstants;
