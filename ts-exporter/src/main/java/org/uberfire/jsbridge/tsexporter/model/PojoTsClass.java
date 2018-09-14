@@ -25,6 +25,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
+import org.uberfire.jsbridge.tsexporter.dependency.ImportEntryBuiltIn;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 import org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation;
 import org.uberfire.jsbridge.tsexporter.dependency.ImportEntriesStore;
@@ -40,6 +41,7 @@ import static javax.lang.model.element.ElementKind.INTERFACE;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.STATIC;
 import static org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore.NO_DECORATORS;
+import static org.uberfire.jsbridge.tsexporter.meta.translatable.Translatable.SourceUsage.FIELD_DECLARATION;
 import static org.uberfire.jsbridge.tsexporter.meta.translatable.Translatable.SourceUsage.TYPE_ARGUMENT_DECLARATION;
 import static org.uberfire.jsbridge.tsexporter.meta.translatable.Translatable.SourceUsage.TYPE_ARGUMENT_USE;
 import static org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation.Kind.FIELD;
@@ -107,7 +109,7 @@ public class PojoTsClass implements TsClass {
     private String toClass() {
         return formatRightToLeft(
                 lines("",
-                      "import { Portable } from 'generated__temporary__/Model';",
+                      "import Portable from 'internal/Portable';",
                       "%s",
                       "",
                       "export default %s class %s %s {",
@@ -153,8 +155,15 @@ public class PojoTsClass implements TsClass {
                 .filter(s -> s.getKind().isField())
                 .filter(s -> !s.getModifiers().contains(STATIC))
                 .filter(s -> !s.asType().toString().contains("java.util.function"))
-                .map(s -> format("public readonly %s?: %s;", s.getSimpleName(), importStore.with(FIELD, new JavaType(s.asType(), declaredType).translate(decoratorStore)).toTypeScript(TYPE_ARGUMENT_USE)))
+                .map(this::toFieldSource)
                 .collect(joining("\n"));
+    }
+
+    private String toFieldSource(final Element fieldElement) {
+        return format("public readonly %s?: %s;",
+                      fieldElement.getSimpleName(),
+                      importStore.with(FIELD, new JavaType(fieldElement.asType(), declaredType)
+                              .translate(decoratorStore)).toTypeScript(FIELD_DECLARATION));
     }
 
     private Translatable superclass() {

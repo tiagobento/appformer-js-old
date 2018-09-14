@@ -23,7 +23,7 @@ import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 import org.uberfire.jsbridge.tsexporter.model.PojoTsClass;
 
-import static org.uberfire.jsbridge.tsexporter.meta.translatable.Translatable.SourceUsage.TYPE_ARGUMENT_IMPORT;
+import static org.uberfire.jsbridge.tsexporter.meta.translatable.Translatable.SourceUsage.IMPORT_STATEMENT;
 
 public class ImportEntryJava implements ImportEntry {
 
@@ -39,7 +39,7 @@ public class ImportEntryJava implements ImportEntry {
 
     @Override
     public String uniqueName(final DeclaredType owner) {
-        return new JavaType(declaredType, owner).translate(decoratorStore).toTypeScript(TYPE_ARGUMENT_IMPORT);
+        return new JavaType(declaredType, owner).translate(decoratorStore).toTypeScript(IMPORT_STATEMENT);
     }
 
     @Override

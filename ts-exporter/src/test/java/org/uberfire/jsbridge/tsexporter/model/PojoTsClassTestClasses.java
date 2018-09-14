@@ -64,7 +64,7 @@ public class PojoTsClassTestClasses {
                            "",
                            "public readonly a?: org_uberfire_jsbridge_tsexporter_model_PojoTsClassTestClasses_A;",
                            "public readonly b?: B;",
-                           "public readonly c?: JavaInteger;",
+                           "public readonly c?: JavaInteger = new JavaInteger(0);",
                            "public readonly d?: JavaTreeSet<string>;",
                            "public readonly e?: JavaLinkedList<string>;",
                            "public readonly f?: JavaTreeMap<string, string>;",

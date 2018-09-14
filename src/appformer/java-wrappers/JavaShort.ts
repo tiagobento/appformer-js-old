@@ -1,1 +1,5 @@
-export default class JavaShort {}
+export default class JavaShort {
+  constructor(n: string) {
+      n = n;
+  }
+}

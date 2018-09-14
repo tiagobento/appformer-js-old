@@ -33,6 +33,7 @@ public interface Translatable {
     enum SourceUsage {
         TYPE_ARGUMENT_USE,
         TYPE_ARGUMENT_DECLARATION,
-        TYPE_ARGUMENT_IMPORT
+        IMPORT_STATEMENT,
+        FIELD_DECLARATION,
     }
 }

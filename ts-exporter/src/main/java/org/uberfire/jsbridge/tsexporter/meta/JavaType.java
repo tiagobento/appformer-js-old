@@ -35,6 +35,7 @@ import org.uberfire.jsbridge.tsexporter.dependency.ImportEntryJava;
 import org.uberfire.jsbridge.tsexporter.meta.translatable.Translatable;
 import org.uberfire.jsbridge.tsexporter.meta.translatable.TranslatableArray;
 import org.uberfire.jsbridge.tsexporter.meta.translatable.TranslatableDefault;
+import org.uberfire.jsbridge.tsexporter.meta.translatable.TranslatableJavaNumberWithDefaultInstantiation;
 import org.uberfire.jsbridge.tsexporter.meta.translatable.TranslatableSimple;
 import org.uberfire.jsbridge.tsexporter.meta.translatable.TranslatableTypeVar;
 
@@ -103,15 +104,15 @@ public class JavaType {
 
         switch (type.getKind()) {
             case INT:
-                return new TranslatableDefault(JAVA_INTEGER.getUniqueName(), singleton(JAVA_INTEGER), emptyList());
+                return new TranslatableJavaNumberWithDefaultInstantiation(JAVA_INTEGER);
             case BYTE:
-                return new TranslatableDefault(JAVA_BYTE.getUniqueName(), singleton(JAVA_BYTE), emptyList());
+                return new TranslatableJavaNumberWithDefaultInstantiation(JAVA_BYTE);
             case DOUBLE:
-                return new TranslatableDefault(JAVA_DOUBLE.getUniqueName(), singleton(JAVA_DOUBLE), emptyList());
+                return new TranslatableJavaNumberWithDefaultInstantiation(JAVA_DOUBLE);
             case FLOAT:
-                return new TranslatableDefault(JAVA_FLOAT.getUniqueName(), singleton(JAVA_FLOAT), emptyList());
+                return new TranslatableJavaNumberWithDefaultInstantiation(JAVA_FLOAT);
             case SHORT:
-                return new TranslatableDefault(JAVA_SHORT.getUniqueName(), singleton(JAVA_SHORT), emptyList());
+                return new TranslatableJavaNumberWithDefaultInstantiation(JAVA_SHORT);
             case LONG:
                 return new TranslatableDefault(JAVA_LONG.getUniqueName(), singleton(JAVA_LONG), emptyList());
             case VOID:
@@ -123,7 +124,8 @@ public class JavaType {
             case BOOLEAN:
                 return new TranslatableSimple("boolean");
             case ARRAY:
-                return new TranslatableArray(translate(((ArrayType) type).getComponentType(), decoratorStore, visitedTypeArgumentElements));
+                final TypeMirror componentType = ((ArrayType) type).getComponentType();
+                return new TranslatableArray(translate(componentType, decoratorStore, visitedTypeArgumentElements));
             case TYPEVAR:
                 final Element element = Main.types.asElement(type);
                 if (visitedTypeArgumentElements.contains(element)) {
@@ -152,25 +154,25 @@ public class JavaType {
 
                 switch (declaredType.asElement().toString()) {
                     case "java.lang.Integer":
-                        return new TranslatableDefault(JAVA_INTEGER.getUniqueName(), singleton(JAVA_INTEGER), emptyList());
+                        return new TranslatableJavaNumberWithDefaultInstantiation(JAVA_INTEGER);
                     case "java.lang.Byte":
-                        return new TranslatableDefault(JAVA_BYTE.getUniqueName(), singleton(JAVA_BYTE), emptyList());
+                        return new TranslatableJavaNumberWithDefaultInstantiation(JAVA_BYTE);
                     case "java.lang.Double":
-                        return new TranslatableDefault(JAVA_DOUBLE.getUniqueName(), singleton(JAVA_DOUBLE), emptyList());
+                        return new TranslatableJavaNumberWithDefaultInstantiation(JAVA_DOUBLE);
                     case "java.lang.Float":
-                        return new TranslatableDefault(JAVA_FLOAT.getUniqueName(), singleton(JAVA_FLOAT), emptyList());
+                        return new TranslatableJavaNumberWithDefaultInstantiation(JAVA_FLOAT);
                     case "java.lang.Long":
                         return new TranslatableDefault(JAVA_LONG.getUniqueName(), singleton(JAVA_LONG), emptyList());
                     case "java.lang.Number":
                         return new TranslatableDefault(JAVA_NUMBER.getUniqueName(), singleton(JAVA_NUMBER), emptyList());
                     case "java.lang.Short":
-                        return new TranslatableDefault(JAVA_SHORT.getUniqueName(), singleton(JAVA_SHORT), emptyList());
+                        return new TranslatableJavaNumberWithDefaultInstantiation(JAVA_SHORT);
                     case "java.math.BigInteger":
                         return new TranslatableDefault(JAVA_BIG_INTEGER.getUniqueName(), singleton(JAVA_BIG_INTEGER), emptyList());
                     case "java.math.BigDecimal":
                         return new TranslatableDefault(JAVA_BIG_DECIMAL.getUniqueName(), singleton(JAVA_BIG_DECIMAL), emptyList());
                     case "java.util.OptionalInt":
-                        return new TranslatableSimple("number");
+                        return new TranslatableSimple("number"); //FIXME: !
                     case "java.lang.Object":
                         return new TranslatableSimple("any /* object */");
                     case "java.util.Date":

@@ -1,1 +1,5 @@
-export default class JavaInteger {}
+export default class JavaInteger {
+  constructor(n: string) {
+      n = n;
+  }
+}

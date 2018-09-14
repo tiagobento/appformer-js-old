@@ -43,8 +43,9 @@ public class TranslatableDefault implements Translatable {
     @Override
     public String toTypeScript(final SourceUsage sourceUsage) {
         switch (sourceUsage) {
-            case TYPE_ARGUMENT_IMPORT:
+            case IMPORT_STATEMENT:
                 return translated;
+            case FIELD_DECLARATION:
             case TYPE_ARGUMENT_USE:
             case TYPE_ARGUMENT_DECLARATION:
                 return translated + (aggregatedTypes.size() > 0
