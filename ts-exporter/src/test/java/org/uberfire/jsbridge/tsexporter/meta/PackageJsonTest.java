@@ -13,9 +13,10 @@ import org.uberfire.jsbridge.tsexporter.model.PojoTsClass;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
-import static org.uberfire.jsbridge.tsexporter.TestingUtils.init;
-import static org.uberfire.jsbridge.tsexporter.TestingUtils.type;
-import static org.uberfire.jsbridge.tsexporter.Utils.lines;
+import static org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore.NO_DECORATORS;
+import static org.uberfire.jsbridge.tsexporter.util.TestingUtils.init;
+import static org.uberfire.jsbridge.tsexporter.util.TestingUtils.type;
+import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
 
 public class PackageJsonTest {
 
@@ -43,21 +44,21 @@ public class PackageJsonTest {
                      packageJson.toSource());
     }
 
-
     private static abstract class A {
+
         ImmutableList<?> field;
     }
 
     private static abstract class B {
+
         ImmutableList<?> field1;
         ImmutableMultimap<?, ?> field2;
     }
 
-
     @Test
     public void testOneDependency() {
-        final PackageJson packageJsonA = new PackageJson("test-module", singletonList(new PojoTsClass(type(A.class))));
-        final PackageJson packageJsonB = new PackageJson("test-module", singletonList(new PojoTsClass(type(B.class))));
+        final PackageJson packageJsonA = new PackageJson("test-module", singletonList(new PojoTsClass(type(A.class), NO_DECORATORS)));
+        final PackageJson packageJsonB = new PackageJson("test-module", singletonList(new PojoTsClass(type(B.class), NO_DECORATORS)));
 
         assertEquals(lines("{",
                            "  \"name\": \"test-module\",",
@@ -74,13 +75,14 @@ public class PackageJsonTest {
     }
 
     private static abstract class C {
+
         ImmutableList<?> field1;
         AbstractList<?> field2;
     }
 
     @Test
     public void testTwoDependencies() {
-        final PackageJson packageJsonC = new PackageJson("test-module", singletonList(new PojoTsClass(type(C.class))));
+        final PackageJson packageJsonC = new PackageJson("test-module", singletonList(new PojoTsClass(type(C.class), NO_DECORATORS)));
 
         assertEquals(lines("{",
                            "  \"name\": \"test-module\",",

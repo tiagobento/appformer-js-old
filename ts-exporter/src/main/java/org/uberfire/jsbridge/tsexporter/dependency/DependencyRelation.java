@@ -14,22 +14,33 @@
  * limitations under the License.
  */
 
-package org.uberfire.jsbridge.tsexporter.util;
+package org.uberfire.jsbridge.tsexporter.dependency;
 
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.function.Supplier;
+import java.util.Set;
 
-public class Lazy<T> {
+public class DependencyRelation {
 
-    private final Supplier<T> delegate;
-    private final ConcurrentMap<Class<?>, T> map = new ConcurrentHashMap<>(1);
+    private final ImportEntry importEntry;
+    private final Set<Kind> kinds;
 
-    public Lazy(final Supplier<T> delegate) {
-        this.delegate = delegate;
+    DependencyRelation(final ImportEntry importEntry,
+                       final Set<Kind> kinds) {
+
+        this.importEntry = importEntry;
+        this.kinds = kinds;
     }
 
-    public T get() {
-        return map.computeIfAbsent(Lazy.class, k -> delegate.get());
+    public ImportEntry getImportEntry() {
+        return importEntry;
+    }
+
+    public Set<Kind> getKinds() {
+        return kinds;
+    }
+
+    public enum Kind {
+        FIELD,
+        HIERARCHY,
+        CODE
     }
 }

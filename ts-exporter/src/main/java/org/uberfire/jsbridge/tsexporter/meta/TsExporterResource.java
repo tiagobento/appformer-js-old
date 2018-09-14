@@ -14,22 +14,11 @@
  * limitations under the License.
  */
 
-package org.uberfire.jsbridge.tsexporter.util;
+package org.uberfire.jsbridge.tsexporter.meta;
 
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.function.Supplier;
+public interface TsExporterResource {
 
-public class Lazy<T> {
+    String toSource();
 
-    private final Supplier<T> delegate;
-    private final ConcurrentMap<Class<?>, T> map = new ConcurrentHashMap<>(1);
-
-    public Lazy(final Supplier<T> delegate) {
-        this.delegate = delegate;
-    }
-
-    public T get() {
-        return map.computeIfAbsent(Lazy.class, k -> delegate.get());
-    }
+    String getModuleName();
 }

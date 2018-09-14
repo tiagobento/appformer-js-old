@@ -16,30 +16,83 @@
 
 package org.uberfire.jsbridge.tsexporter.model;
 
-import java.util.List;
+import java.lang.reflect.Field;
+import java.util.Set;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 
-import org.uberfire.jsbridge.tsexporter.Utils;
+import com.sun.tools.javac.code.Symbol;
+import org.uberfire.jsbridge.tsexporter.meta.TsExporterResource;
+import org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation;
 
-public interface TsClass {
+import static org.uberfire.jsbridge.tsexporter.util.Utils.get;
 
-    String toSource();
+public interface TsClass extends TsExporterResource {
 
-    default String getModuleName() {
-        return Utils.getModuleName(getType());
-    }
-
-    List<DeclaredType> getDependencies();
+    Set<DependencyRelation> getDependencies();
 
     DeclaredType getType();
 
-    default TypeElement getElement() {
+    default TypeElement asElement() {
         return ((TypeElement) getType().asElement());
     }
 
-    default String getFqcn() {
-        return getElement().getQualifiedName().toString();
+    default String getRelativePath() {
+        return asElement().getQualifiedName().toString().replace(".", "/");
+    }
+
+    @Override
+    default String getModuleName() {
+
+        if (getType().toString().matches("^javax?.*")) {
+            return "java";
+        }
+
+        try {
+            final Class<?> clazz = Class.forName(((Symbol) asElement()).flatName().toString());
+            return getModuleNameFromSourceFilePath(clazz.getResource('/' + clazz.getName().replace('.', '/') + ".class").toString());
+        } catch (final ClassNotFoundException e) {
+            try {
+                final Field sourceFileField = asElement().getClass().getField("sourcefile");
+                sourceFileField.setAccessible(true);
+                return getModuleNameFromSourceFilePath(sourceFileField.get(asElement()).toString());
+            } catch (final Exception e1) {
+                throw new RuntimeException("Error while reading [sourcefile] field from @Remote interface element.", e1);
+            }
+        }
+    }
+
+    static String getModuleNameFromSourceFilePath(final String sourceFilePath) {
+
+        if (sourceFilePath.contains("jar!")) {
+            return get(-2, sourceFilePath.split("(/)[\\w-]+(-)[\\d.]+(.*)\\.jar!")[0].split("/"));
+        }
+
+        if (sourceFilePath.contains("/src/main/java")) {
+            return get(-1, sourceFilePath.split("/src/main/java")[0].split("/"));
+        }
+
+        if (sourceFilePath.contains("/target/generated-sources")) {
+            return get(-1, sourceFilePath.split("/target/generated-sources")[0].split("/"));
+        }
+
+        if (sourceFilePath.contains("/target/classes")) {
+            return get(-1, sourceFilePath.split("/target/classes")[0].split("/"));
+        }
+
+        if (sourceFilePath.contains("/src/test/java")) {
+            return get(-1, sourceFilePath.split("/src/test/java")[0].split("/")) + "-test";
+        }
+
+        if (sourceFilePath.contains("/target/generated-test-sources")) {
+            return get(-1, sourceFilePath.split("/target/generated-test-sources")[0].split("/")) + "-test";
+        }
+
+        if (sourceFilePath.contains("/target/test-classes")) {
+            return get(-1, sourceFilePath.split("/target/test-classes")[0].split("/")) + "-test";
+        }
+
+        throw new RuntimeException("Module name unretrievable from [" + sourceFilePath + "]");
     }
 }

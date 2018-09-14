@@ -14,23 +14,28 @@
  * limitations under the License.
  */
 
-package org.uberfire.jsbridge.tsexporter.meta.hierarchy;
+package org.uberfire.jsbridge.tsexporter.dependency;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+
+import javax.lang.model.element.Element;
 
 import com.google.testing.compile.CompilationRule;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.uberfire.jsbridge.tsexporter.TestingUtils;
+import org.uberfire.jsbridge.tsexporter.util.TestingUtils;
 
+import static java.util.Arrays.stream;
 import static java.util.Collections.singleton;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertEquals;
-import static org.uberfire.jsbridge.tsexporter.TestingUtils.element;
+import static org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore.NO_DECORATORS;
+import static org.uberfire.jsbridge.tsexporter.util.TestingUtils.element;
+import static org.uberfire.jsbridge.tsexporter.util.TestingUtils.memberElement;
+import static org.uberfire.jsbridge.tsexporter.util.TestingUtils.type;
 
 public class DependencyGraphTest {
 
@@ -40,6 +45,25 @@ public class DependencyGraphTest {
     @Before
     public void before() {
         TestingUtils.init(compilationRule.getTypes(), compilationRule.getElements());
+    }
+
+    class X {
+
+        X field;
+    }
+
+    @Test
+    public void testInvalidElements() {
+        final DependencyGraph graph = new DependencyGraph(NO_DECORATORS);
+        assertEquals(null, graph.add((Element) null));
+        assertEquals(0, graph.vertices().size());
+        assertEquals(null, graph.add(memberElement("field", type(X.class))));
+        assertEquals(0, graph.vertices().size());
+
+        assertEquals(list(), ordered(graph.findAllDependencies(null)));
+        assertEquals(list(), ordered(graph.findAllDependents(null)));
+        assertEquals(list(), ordered(graph.findAllDependencies(singleton(memberElement("field", type(X.class))))));
+        assertEquals(list(), ordered(graph.findAllDependents(singleton(memberElement("field", type(X.class))))));
     }
 
     interface A0 {
@@ -70,7 +94,7 @@ public class DependencyGraphTest {
 
     @Test
     public void testSimpleGraphVertices() {
-        final DependencyGraph graph = new DependencyGraph();
+        final DependencyGraph graph = new DependencyGraph(NO_DECORATORS);
         graph.add(element(A0.class));
         assertEquals(1, graph.vertices().size());
         graph.add(element(A1.class));
@@ -78,18 +102,18 @@ public class DependencyGraphTest {
         graph.add(element(A2.class));
         assertEquals(3, graph.vertices().size());
 
-        assertEquals(list(), simpleNames(graph.vertex(element(A0.class)).dependencies));
-        assertEquals(list("A0"), simpleNames(graph.vertex(element(A1.class)).dependencies));
-        assertEquals(list("A1"), simpleNames(graph.vertex(element(A2.class)).dependencies));
+        assertEquals(list(), simpleNames(graph.vertex(element(A0.class)).dependencies.keySet()));
+        assertEquals(list("A0"), simpleNames(graph.vertex(element(A1.class)).dependencies.keySet()));
+        assertEquals(list("A1"), simpleNames(graph.vertex(element(A2.class)).dependencies.keySet()));
 
-        assertEquals(list("A1"), simpleNames(graph.vertex(element(A0.class)).dependents));
-        assertEquals(list("A2"), simpleNames(graph.vertex(element(A1.class)).dependents));
-        assertEquals(list(), simpleNames(graph.vertex(element(A2.class)).dependents));
+        assertEquals(list("A1"), simpleNames(graph.vertex(element(A0.class)).dependents.keySet()));
+        assertEquals(list("A2"), simpleNames(graph.vertex(element(A1.class)).dependents.keySet()));
+        assertEquals(list(), simpleNames(graph.vertex(element(A2.class)).dependents.keySet()));
     }
 
     @Test
     public void testGraphVerticesComplex() {
-        final DependencyGraph graph = new DependencyGraph();
+        final DependencyGraph graph = new DependencyGraph(NO_DECORATORS);
         graph.add(element(A2B1.class));
         assertEquals(4, graph.vertices().size());
         graph.add(element(A1.class));
@@ -103,19 +127,19 @@ public class DependencyGraphTest {
         graph.add(element(A2.class));
         assertEquals(6, graph.vertices().size());
 
-        assertEquals(list(), simpleNames(graph.vertex(element(A0.class)).dependencies));
-        assertEquals(list("A0"), simpleNames(graph.vertex(element(A1.class)).dependencies));
-        assertEquals(list("A0", "B0"), simpleNames(graph.vertex(element(A1B1.class)).dependencies));
-        assertEquals(list("A1"), simpleNames(graph.vertex(element(A2.class)).dependencies));
-        assertEquals(list("A1", "B0"), simpleNames(graph.vertex(element(A2B1.class)).dependencies));
-        assertEquals(list(), simpleNames(graph.vertex(element(B0.class)).dependencies));
+        assertEquals(list(), simpleNames(graph.vertex(element(A0.class)).dependencies.keySet()));
+        assertEquals(list("A0"), simpleNames(graph.vertex(element(A1.class)).dependencies.keySet()));
+        assertEquals(list("A0", "B0"), simpleNames(graph.vertex(element(A1B1.class)).dependencies.keySet()));
+        assertEquals(list("A1"), simpleNames(graph.vertex(element(A2.class)).dependencies.keySet()));
+        assertEquals(list("A1", "B0"), simpleNames(graph.vertex(element(A2B1.class)).dependencies.keySet()));
+        assertEquals(list(), simpleNames(graph.vertex(element(B0.class)).dependencies.keySet()));
 
-        assertEquals(list("A1", "A1B1"), simpleNames(graph.vertex(element(A0.class)).dependents));
-        assertEquals(list("A2", "A2B1"), simpleNames(graph.vertex(element(A1.class)).dependents));
-        assertEquals(list(), simpleNames(graph.vertex(element(A1B1.class)).dependents));
-        assertEquals(list(), simpleNames(graph.vertex(element(A2.class)).dependents));
-        assertEquals(list(), simpleNames(graph.vertex(element(A2B1.class)).dependents));
-        assertEquals(list("A1B1", "A2B1"), simpleNames(graph.vertex(element(B0.class)).dependents));
+        assertEquals(list("A1", "A1B1"), simpleNames(graph.vertex(element(A0.class)).dependents.keySet()));
+        assertEquals(list("A2", "A2B1"), simpleNames(graph.vertex(element(A1.class)).dependents.keySet()));
+        assertEquals(list(), simpleNames(graph.vertex(element(A1B1.class)).dependents.keySet()));
+        assertEquals(list(), simpleNames(graph.vertex(element(A2.class)).dependents.keySet()));
+        assertEquals(list(), simpleNames(graph.vertex(element(A2B1.class)).dependents.keySet()));
+        assertEquals(list("A1B1", "A2B1"), simpleNames(graph.vertex(element(B0.class)).dependents.keySet()));
     }
 
     class c0 {
@@ -130,7 +154,7 @@ public class DependencyGraphTest {
 
     @Test
     public void testCycle() {
-        final DependencyGraph graph = new DependencyGraph();
+        final DependencyGraph graph = new DependencyGraph(NO_DECORATORS);
         graph.add(element(c0.class));
         assertEquals(2, graph.vertices().size());
         graph.add(element(c1.class));
@@ -155,7 +179,7 @@ public class DependencyGraphTest {
 
     @Test
     public void testCycleComplex() {
-        final DependencyGraph graph = new DependencyGraph();
+        final DependencyGraph graph = new DependencyGraph(NO_DECORATORS);
         graph.add(element(a2b2.class));
         assertEquals(7, graph.vertices().size());
         graph.add(element(a3b2.class));
@@ -179,7 +203,7 @@ public class DependencyGraphTest {
     }
 
     private static List<String> simpleNames(final Set<DependencyGraph.Vertex> vertex) {
-        return ordered(vertex).stream().map(s -> s.getElement().getSimpleName().toString()).collect(toList());
+        return ordered(vertex).stream().map(s -> s.asElement().getSimpleName().toString()).collect(toList());
     }
 
     private static <T> List<T> ordered(final Set<T> set) {
@@ -187,7 +211,7 @@ public class DependencyGraphTest {
     }
 
     @SafeVarargs
-    private static <T> List<T> list(T... ts) {
-        return Arrays.stream(ts).collect(toList());
+    private static <T> List<T> list(final T... ts) {
+        return stream(ts).collect(toList());
     }
 }

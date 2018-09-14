@@ -14,22 +14,26 @@
  * limitations under the License.
  */
 
-package org.uberfire.jsbridge.tsexporter.util;
+package org.uberfire.jsbridge.tsexporter.meta.translatable;
 
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.function.Supplier;
+import java.util.List;
 
-public class Lazy<T> {
+import org.uberfire.jsbridge.tsexporter.dependency.ImportEntry;
 
-    private final Supplier<T> delegate;
-    private final ConcurrentMap<Class<?>, T> map = new ConcurrentHashMap<>(1);
+public interface Translatable {
 
-    public Lazy(final Supplier<T> delegate) {
-        this.delegate = delegate;
+    String toTypeScript(final SourceUsage sourceUsage);
+
+    List<ImportEntry> getAggregatedImportEntries();
+
+    default boolean canBeSubclassed() {
+        return false;
     }
 
-    public T get() {
-        return map.computeIfAbsent(Lazy.class, k -> delegate.get());
+    enum SourceUsage {
+        TYPE_ARGUMENT_USE,
+        TYPE_ARGUMENT_DECLARATION,
+        IMPORT_STATEMENT,
+        FIELD_DECLARATION,
     }
 }

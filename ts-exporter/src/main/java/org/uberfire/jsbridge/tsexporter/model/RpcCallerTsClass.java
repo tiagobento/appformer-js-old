@@ -18,15 +18,18 @@ package org.uberfire.jsbridge.tsexporter.model;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 
+import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType;
-import org.uberfire.jsbridge.tsexporter.meta.hierarchy.DependencyGraph;
-import org.uberfire.jsbridge.tsexporter.util.ImportStore;
+import org.uberfire.jsbridge.tsexporter.dependency.DependencyGraph;
+import org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation;
+import org.uberfire.jsbridge.tsexporter.dependency.ImportEntriesStore;
 import org.uberfire.jsbridge.tsexporter.util.Lazy;
 
 import static java.util.stream.Collectors.groupingBy;
@@ -34,37 +37,43 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.ElementKind.METHOD;
 import static org.uberfire.jsbridge.tsexporter.Main.elements;
-import static org.uberfire.jsbridge.tsexporter.Utils.formatRightToLeft;
-import static org.uberfire.jsbridge.tsexporter.Utils.lines;
+import static org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore.NO_DECORATORS;
+import static org.uberfire.jsbridge.tsexporter.meta.translatable.Translatable.SourceUsage.TYPE_ARGUMENT_DECLARATION;
+import static org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation.Kind.HIERARCHY;
+import static org.uberfire.jsbridge.tsexporter.util.Utils.formatRightToLeft;
+import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
 
 public class RpcCallerTsClass implements TsClass {
 
     private final TypeElement typeElement;
     private final DependencyGraph dependencyGraph;
-    private final ImportStore importStore;
+    private final DecoratorStore decoratorStore;
+    private final ImportEntriesStore importEntriesStore;
     private final Lazy<String> source;
 
     private static final List<String> RESERVED_WORDS = Arrays.asList("delete", "copy");
 
-    public RpcCallerTsClass(final TypeElement typeElement, final DependencyGraph dependencyGraph) {
+    public RpcCallerTsClass(final TypeElement typeElement,
+                            final DependencyGraph dependencyGraph,
+                            final DecoratorStore decoratorStore) {
+
         this.typeElement = typeElement;
         this.dependencyGraph = dependencyGraph;
-        this.importStore = new ImportStore();
-        this.source = new Lazy<>(() -> {
+        this.decoratorStore = decoratorStore;
+        this.importEntriesStore = new ImportEntriesStore();
+        this.source = new Lazy<>(() -> formatRightToLeft(
+                lines("",
+                      "import {rpc, marshall, unmarshall} from 'appformer/API';",
+                      "%s",
+                      "",
+                      "export default class %s {",
+                      "%s",
+                      "}"),
 
-            return formatRightToLeft(lines("",
-                                           "import {rpc, marshall, unmarshall} from 'appformer/API';",
-                                           "s%",
-                                           "",
-                                           "export default class s% {",
-                                           "s%",
-                                           "}"),
-
-                                     this::imports,
-                                     this::simpleName,
-                                     this::methods
-            );
-        });
+                this::imports,
+                this::simpleName,
+                this::methods
+        ));
     }
 
     @Override
@@ -73,14 +82,16 @@ public class RpcCallerTsClass implements TsClass {
     }
 
     private String simpleName() {
-        return importStore.with(new JavaType(typeElement.asType(), typeElement.asType()).translate()).toTypeScript();
+        return importEntriesStore.with(HIERARCHY, new JavaType(typeElement.asType(), typeElement.asType())
+                .translate(NO_DECORATORS))
+                .toTypeScript(TYPE_ARGUMENT_DECLARATION);
     }
 
     private String methods() {
         return elements.getAllMembers(typeElement).stream()
                 .filter(member -> member.getKind().equals(METHOD))
                 .filter(member -> !member.getEnclosingElement().toString().equals("java.lang.Object"))
-                .map(member -> new RpcCallerTsMethod((ExecutableElement) member, typeElement, importStore, dependencyGraph))
+                .map(member -> new RpcCallerTsMethod((ExecutableElement) member, typeElement, importEntriesStore, dependencyGraph, decoratorStore))
                 .collect(groupingBy(RpcCallerTsMethod::getName)).entrySet().stream()
                 .flatMap(e -> resolveOverloadsAndReservedWords(e.getKey(), e.getValue()).stream())
                 .map(RpcCallerTsMethod::toSource)
@@ -88,26 +99,26 @@ public class RpcCallerTsClass implements TsClass {
     }
 
     private String imports() {
-        return importStore.getImportStatements(this);
+        return importEntriesStore.getImportStatements(this);
     }
 
     private List<RpcCallerTsMethod> resolveOverloadsAndReservedWords(final String name,
-                                                                     final List<RpcCallerTsMethod> methods) {
+                                                                     final List<RpcCallerTsMethod> methodsWithTheSameName) {
 
-        if (methods.size() <= 1 && !RESERVED_WORDS.contains(name)) {
-            return methods;
+        if (methodsWithTheSameName.size() <= 1 && !RESERVED_WORDS.contains(name)) {
+            return methodsWithTheSameName;
         }
 
         final AtomicInteger i = new AtomicInteger(0);
-        return methods.stream()
+        return methodsWithTheSameName.stream()
                 .map(tsMethod -> new RpcCallerTsMethod(tsMethod, tsMethod.getName() + i.getAndIncrement()))
                 .collect(toList());
     }
 
     @Override
-    public List<DeclaredType> getDependencies() {
+    public Set<DependencyRelation> getDependencies() {
         source.get();
-        return importStore.getImports(this);
+        return importEntriesStore.getImports(this);
     }
 
     @Override

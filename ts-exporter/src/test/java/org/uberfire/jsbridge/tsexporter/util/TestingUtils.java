@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.uberfire.jsbridge.tsexporter;
+package org.uberfire.jsbridge.tsexporter.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,8 +24,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
+import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
@@ -37,6 +39,7 @@ import javax.lang.model.type.WildcardType;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
+import org.uberfire.jsbridge.tsexporter.Main;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 
 import static java.util.stream.Collectors.toList;
@@ -76,13 +79,14 @@ public class TestingUtils {
     }
 
     public static JavaType member(final String name, final TypeMirror owner) {
-        final TypeMirror member = elements.getAllMembers((TypeElement) types.asElement(owner)).stream()
+        return new JavaType(memberElement(name, owner).asType(), owner);
+    }
+
+    public static Element memberElement(final String name, final TypeMirror owner) {
+        return elements.getAllMembers((TypeElement) types.asElement(owner)).stream()
                 .filter(s -> s.getSimpleName().toString().equals(name))
                 .collect(toList())
-                .get(0)
-                .asType();
-
-        return new JavaType(member, owner);
+                .get(0);
     }
 
     public static JavaType param(final int i, final JavaType owner) {
@@ -99,6 +103,7 @@ public class TestingUtils {
     public abstract static class DeclaredTypes {
 
         Map<String, String> map;
+        TreeMap<String, String> treeMap;
         List<String> list;
         ArrayList<String> arrayList;
         LinkedList<String> linkedList;

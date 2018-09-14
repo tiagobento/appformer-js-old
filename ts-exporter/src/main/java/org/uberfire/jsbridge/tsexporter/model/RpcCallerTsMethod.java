@@ -24,52 +24,61 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 
-import org.uberfire.jsbridge.tsexporter.Main;
+import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
+import org.uberfire.jsbridge.tsexporter.dependency.DependencyGraph;
+import org.uberfire.jsbridge.tsexporter.dependency.ImportEntriesStore;
+import org.uberfire.jsbridge.tsexporter.dependency.ImportEntry;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType;
-import org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget;
-import org.uberfire.jsbridge.tsexporter.meta.TranslatableJavaType;
-import org.uberfire.jsbridge.tsexporter.meta.hierarchy.DependencyGraph;
-import org.uberfire.jsbridge.tsexporter.util.ImportStore;
+import org.uberfire.jsbridge.tsexporter.meta.translatable.Translatable;
 
 import static java.lang.String.format;
-import static java.util.Collections.singleton;
+import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 import static javax.lang.model.element.ElementKind.CLASS;
 import static javax.lang.model.element.Modifier.ABSTRACT;
-import static org.uberfire.jsbridge.tsexporter.Utils.lines;
-import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_DECLARATION;
-import static org.uberfire.jsbridge.tsexporter.meta.JavaType.TsTypeTarget.TYPE_ARGUMENT_USE;
+import static org.uberfire.jsbridge.tsexporter.Main.types;
+import static org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore.NO_DECORATORS;
+import static org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation.Kind.CODE;
+import static org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation.Kind.FIELD;
+import static org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation.Kind.HIERARCHY;
+import static org.uberfire.jsbridge.tsexporter.meta.translatable.Translatable.SourceUsage.TYPE_ARGUMENT_DECLARATION;
+import static org.uberfire.jsbridge.tsexporter.meta.translatable.Translatable.SourceUsage.TYPE_ARGUMENT_USE;
+import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
 
 public class RpcCallerTsMethod {
 
     private final ExecutableElement executableElement;
-    private final TypeElement typeElement;
-    private final ImportStore importStore;
+    private final TypeElement owner;
+    private final ImportEntriesStore importStore;
     private final String name;
     private final DependencyGraph dependencyGraph;
+    private final DecoratorStore decoratorStore;
 
-    public RpcCallerTsMethod(final RpcCallerTsMethod tsMethod,
-                             final String name) {
+    RpcCallerTsMethod(final RpcCallerTsMethod tsMethod,
+                      final String name) {
 
-        this.typeElement = tsMethod.typeElement;
+        this.owner = tsMethod.owner;
         this.executableElement = tsMethod.executableElement;
         this.importStore = tsMethod.importStore;
         this.dependencyGraph = tsMethod.dependencyGraph;
+        this.decoratorStore = tsMethod.decoratorStore;
         this.name = name;
     }
 
-    public RpcCallerTsMethod(final ExecutableElement executableElement,
-                             final TypeElement typeElement,
-                             final ImportStore importStore,
-                             final DependencyGraph dependencyGraph) {
+    RpcCallerTsMethod(final ExecutableElement executableElement,
+                      final TypeElement owner,
+                      final ImportEntriesStore importStore,
+                      final DependencyGraph dependencyGraph,
+                      final DecoratorStore decoratorStore) {
+
         this.executableElement = executableElement;
-        this.typeElement = typeElement;
+        this.owner = owner;
         this.importStore = importStore;
         this.name = executableElement.getSimpleName().toString();
         this.dependencyGraph = dependencyGraph;
+        this.decoratorStore = decoratorStore;
     }
 
     public String getName() {
@@ -82,17 +91,16 @@ public class RpcCallerTsMethod {
         final String erraiBusString = erraiBusString();
         final String rpcCallParams = rpcCallParams();
         final String returnType = returnType();
-
         final String factoriesOracle = factoriesOracle(); //Has to be the last
 
         return format(lines("",
                             "public %s(args: { %s }) {",
                             "  return rpc(%s, [%s])",
-                            "         .then((json: string) => { ",
+                            "         .then((json: string) => {",
                             "           return unmarshall(json, {",
                             "%s",
-                            "           }) as %s; ",
-                            "         }); ",
+                            "           }) as %s;",
+                            "         });",
                             "}",
                             ""),
 
@@ -105,27 +113,28 @@ public class RpcCallerTsMethod {
     }
 
     private String methodDeclaration() {
-        return name + importing(new JavaType(executableElement.asType(), typeElement.asType()), TYPE_ARGUMENT_DECLARATION).toTypeScript();
+        final JavaType methodType = new JavaType(executableElement.asType(), owner.asType());
+        return name + importing(methodType.translate(NO_DECORATORS)).toTypeScript(TYPE_ARGUMENT_DECLARATION);
     }
 
     private String params() {
         return getParameterJavaTypesByNames().entrySet().stream()
-                .map(e -> format("%s: %s", e.getKey(), importing(e.getValue(), TYPE_ARGUMENT_USE).toTypeScript()))
+                .map(e -> format("%s: %s", e.getKey(), importing(e.getValue().translate(NO_DECORATORS)).toTypeScript(TYPE_ARGUMENT_USE)))
                 .collect(joining(", "));
     }
 
     private String erraiBusString() {
         return '"' +
-                typeElement.getQualifiedName().toString() +
+                owner.getQualifiedName().toString() +
                 "|" +
                 executableElement.getSimpleName() +
                 ":" +
                 executableElement.getParameters().stream()
                         .map(Element::asType)
-                        .map(s -> Optional.ofNullable(Main.types.asElement(s)))
+                        .map(s -> Optional.ofNullable(types.asElement(s)))
                         .filter(Optional::isPresent).map(Optional::get)
-                        .map(Object::toString)
-                        .collect(toList()).stream().collect(joining(":")) +
+                        .map(element -> element.toString() + ":") //FIXME: This is probably not 100% right
+                        .collect(joining("")) +
                 '"';
     }
 
@@ -136,42 +145,61 @@ public class RpcCallerTsMethod {
     }
 
     private String factoriesOracle() {
-        final Element element = Main.types.asElement(getReturnTypeJavaType().getType());
-        final Set<Element> allDependencies = dependencyGraph.findAllDependencies(singleton(element)).stream()
-                .map(DependencyGraph.Vertex::getElement)
+
+        final Set<Element> directDependencyElements = translatedReturnType().getAggregatedImportEntries().stream()
+                .map(ImportEntry::asElement)
                 .collect(toSet());
 
-        return dependencyGraph.findAllDependents(allDependencies).stream()
+        final Set<Element> allDependenciesElements = dependencyGraph.findAllDependencies(directDependencyElements, FIELD).stream()
+                .map(DependencyGraph.Vertex::asElement)
+                .collect(toSet());
+
+        return dependencyGraph.findAllDependents(allDependenciesElements, HIERARCHY).stream()
                 .map(DependencyGraph.Vertex::getPojoClass)
-                .filter(dependent -> allDependencies.stream().anyMatch(d -> Main.types.isSubtype(dependent.getType(), d.asType())))
-                .filter(dependent -> dependent.getType().asElement().getKind().equals(CLASS) && !dependent.getType().asElement().getModifiers().contains(ABSTRACT))
+                .sorted(comparing(TsClass::getRelativePath))
+                .filter(this::isConcreteClass)
+                .filter(dependent -> allDependenciesElements.stream().anyMatch(element -> isSubtype(dependent, element)))
                 .distinct()
-                .map(c -> format("\"%s\": (x: any) => new %s(x)",
-                                 c.getElement().getQualifiedName().toString(),
-                                 importing(new JavaType(Main.types.erasure(c.getType()), typeElement.asType()), TYPE_ARGUMENT_USE).toTypeScript()))
+                .map(this::toFactoriesOracleEntry)
                 .collect(joining(",\n"));
     }
 
+    private String toFactoriesOracleEntry(final PojoTsClass tsClass) {
+        final JavaType javaType = new JavaType(types.erasure(tsClass.getType()), owner.asType());
+        return format("\"%s\": (x: any) => new %s(x)",
+                      tsClass.asElement().getQualifiedName().toString(),
+                      importing(javaType.translate(decoratorStore)).toTypeScript(TYPE_ARGUMENT_USE));
+    }
+
+    private boolean isConcreteClass(final PojoTsClass tsClass) {
+        return tsClass.asElement().getKind().equals(CLASS) &&
+                !tsClass.asElement().getModifiers().contains(ABSTRACT);
+    }
+
+    private boolean isSubtype(final PojoTsClass tsClass, final Element element) {
+        return types.isSubtype(types.erasure(tsClass.getType()), types.erasure(element.asType()));
+    }
+
     private String returnType() {
-        return importing(getReturnTypeJavaType(), TYPE_ARGUMENT_USE).toTypeScript();
+        return importing(translatedReturnType()).toTypeScript(TYPE_ARGUMENT_USE);
     }
 
-    private JavaType getReturnTypeJavaType() {
-        return new JavaType(executableElement.getReturnType(), typeElement.asType());
+    private Translatable translatedReturnType() {
+        return new JavaType(executableElement.getReturnType(), owner.asType()).translate(decoratorStore);
     }
 
-    private TranslatableJavaType importing(final JavaType javaType,
-                                           final TsTypeTarget tsTypeTarget) {
+    private Translatable importing(final Translatable translatable) {
+        translatable.getAggregatedImportEntries().stream()
+                .map(ImportEntry::asElement)
+                .forEach(dependencyGraph::add);
 
-        final TranslatableJavaType translatable = javaType.translate(tsTypeTarget);
-        translatable.getAggregated().forEach(t -> dependencyGraph.add(t.asElement()));
-        return importStore.with(translatable);
+        return importStore.with(CODE, translatable);
     }
 
     private LinkedHashMap<String, JavaType> getParameterJavaTypesByNames() {
         return this.executableElement.getParameters().stream().collect(
                 toMap(arg -> arg.getSimpleName().toString(),
-                      arg -> new JavaType(arg.asType(), typeElement.asType()),
+                      arg -> new JavaType(arg.asType(), owner.asType()),
                       (a, b) -> b, //default map behavior
                       LinkedHashMap::new)); //order is important!
     }

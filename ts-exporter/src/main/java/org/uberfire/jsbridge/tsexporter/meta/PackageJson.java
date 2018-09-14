@@ -18,16 +18,16 @@ package org.uberfire.jsbridge.tsexporter.meta;
 
 import java.util.List;
 
-import org.uberfire.jsbridge.tsexporter.Utils;
-import org.uberfire.jsbridge.tsexporter.model.PojoTsClass;
+import org.uberfire.jsbridge.tsexporter.dependency.ImportEntry;
+import org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation;
 import org.uberfire.jsbridge.tsexporter.model.TsClass;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.joining;
-import static org.uberfire.jsbridge.tsexporter.Utils.lines;
+import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
 
-public class PackageJson {
+public class PackageJson implements TsExporterResource {
 
     private final String moduleName;
     private final List<? extends TsClass> classes;
@@ -39,11 +39,13 @@ public class PackageJson {
         this.classes = classes;
     }
 
+    @Override
     public String toSource() {
 
         final String dependencies = classes.stream()
                 .flatMap(c -> c.getDependencies().stream())
-                .collect(groupingBy(Utils::getModuleName))
+                .map(DependencyRelation::getImportEntry)
+                .collect(groupingBy(ImportEntry::getModuleName))
                 .keySet().stream()
                 .filter(s -> !s.equals(moduleName))
                 .map(moduleName -> format("\"%s\": \"file:../%s\"", moduleName, moduleName))
@@ -65,6 +67,7 @@ public class PackageJson {
         );
     }
 
+    @Override
     public String getModuleName() {
         return moduleName;
     }
