@@ -24,6 +24,7 @@ import org.uberfire.jsbridge.tsexporter.dependency.ImportEntry;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
+import static org.uberfire.jsbridge.tsexporter.meta.translatable.Translatable.SourceUsage.TYPE_ARGUMENT_USE;
 
 public class TranslatableDefault implements Translatable {
 
@@ -45,15 +46,20 @@ public class TranslatableDefault implements Translatable {
         switch (sourceUsage) {
             case IMPORT_STATEMENT:
                 return translated;
-            case FIELD_DECLARATION:
             case TYPE_ARGUMENT_USE:
             case TYPE_ARGUMENT_DECLARATION:
-                return translated + (translatableTypeArguments.size() > 0
-                        ? "<" + translatableTypeArguments.stream().map(s -> s.toTypeScript(sourceUsage)).collect(joining(", ")) + ">"
-                        : "");
+                return translate(sourceUsage);
+            case FIELD_DECLARATION:
+                return translate(TYPE_ARGUMENT_USE);
             default:
                 throw new RuntimeException();
         }
+    }
+
+    private String translate(final SourceUsage usage) {
+        return translated + (translatableTypeArguments.size() > 0
+                ? "<" + translatableTypeArguments.stream().map(s -> s.toTypeScript(usage)).collect(joining(", ")) + ">"
+                : "");
     }
 
     @Override

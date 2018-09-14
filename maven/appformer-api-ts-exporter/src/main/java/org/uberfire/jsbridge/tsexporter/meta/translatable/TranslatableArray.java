@@ -21,6 +21,7 @@ import java.util.List;
 import org.uberfire.jsbridge.tsexporter.dependency.ImportEntry;
 
 import static java.lang.String.format;
+import static org.uberfire.jsbridge.tsexporter.meta.translatable.Translatable.SourceUsage.TYPE_ARGUMENT_USE;
 
 public class TranslatableArray implements Translatable {
 
@@ -32,7 +33,17 @@ public class TranslatableArray implements Translatable {
 
     @Override
     public String toTypeScript(final SourceUsage sourceUsage) {
-        return format("%s[]", componentTranslatable.toTypeScript(sourceUsage));
+        switch (sourceUsage) {
+            case TYPE_ARGUMENT_USE:
+            case TYPE_ARGUMENT_DECLARATION:
+                return format("%s[]", componentTranslatable.toTypeScript(sourceUsage));
+            case FIELD_DECLARATION:
+                return format("%s[]", componentTranslatable.toTypeScript(TYPE_ARGUMENT_USE));
+            case IMPORT_STATEMENT:
+                return componentTranslatable.toTypeScript(sourceUsage);
+            default:
+                throw new RuntimeException();
+        }
     }
 
     @Override
