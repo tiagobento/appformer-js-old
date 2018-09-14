@@ -12,6 +12,6 @@ export function marshall(obj: Portable<any>): string | null {
 }
 
 // TODO: Implement to return an object from the Model file
-export function unmarshall(json: any) {
+export function unmarshall(json: any, oracle: any) {
   return JSON.parse(json); //TODO: Implement
 }
