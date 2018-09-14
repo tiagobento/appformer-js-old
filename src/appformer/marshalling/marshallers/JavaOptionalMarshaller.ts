@@ -7,7 +7,7 @@ import ErraiObjectConstants from "appformer/marshalling/model/ErraiObjectConstan
 
 export default class JavaOptionalMarshaller<T> extends NullableMarshaller<JavaOptional<T>, ErraiObject> {
   public notNullMarshall(input: JavaOptional<T>, ctx: MarshallingContext): ErraiObject {
-    const innerValue = this.retrieveOptionalInnerValue(input.get(), ctx);
+    const innerValue = this.retrieveOptionalInnerValue(input, ctx);
 
     return {
       [ErraiObjectConstants.ENCODED_TYPE]: (input as any)._fqcn,
@@ -16,11 +16,11 @@ export default class JavaOptionalMarshaller<T> extends NullableMarshaller<JavaOp
     };
   }
 
-  private retrieveOptionalInnerValue(input: T | undefined, ctx: MarshallingContext) {
-    if (input === undefined) {
+  private retrieveOptionalInnerValue(input: JavaOptional<T>, ctx: MarshallingContext) {
+    if (!input.isPresent()) {
       return null;
     }
 
-    return GenericsTypeMarshallingUtils.marshallGenericsTypeElement(input, ctx);
+    return GenericsTypeMarshallingUtils.marshallGenericsTypeElement(input.get(), ctx);
   }
 }

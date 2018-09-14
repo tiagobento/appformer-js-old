@@ -1,7 +1,7 @@
 import BigNumber from "bignumber.js";
 import JavaWrapper from "appformer/java-wrappers/JavaWrapper";
 
-export default abstract class JavaBigNumber extends JavaWrapper<BigNumber> {
+export default abstract class BigNumberWrapper extends JavaWrapper<BigNumber> {
   private readonly _value: BigNumber;
 
   public constructor(value: string) {

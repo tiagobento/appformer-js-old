@@ -10,7 +10,15 @@ export default class JavaOptional<T> extends JavaWrapper<T | undefined> {
     this._value = value;
   }
 
-  public get(): T | undefined {
-    return this._value;
+  public get(): T {
+    if (!this._value) {
+      throw new Error("No value present");
+    }
+
+    return this._value!;
+  }
+
+  public isPresent(): boolean {
+    return this._value !== undefined;
   }
 }

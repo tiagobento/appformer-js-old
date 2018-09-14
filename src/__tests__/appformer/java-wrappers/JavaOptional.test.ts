@@ -10,13 +10,31 @@ describe("get", () => {
       expect(output).toBe("foo");
     });
 
-    test("undefined element, should return undefined", () => {
+    test("undefined element, should throw error", () => {
       const input = undefined;
 
-      const output = new JavaOptional<string>(input).get();
+      const optional = new JavaOptional<string>(input);
 
-      expect(output).toBeUndefined();
+      expect(() => optional.get()).toThrowError();
     });
+  });
+});
+
+describe("ifPresent", () => {
+  test("with defined element, should return true", () => {
+    const input = new JavaOptional<string>("str");
+
+    const output = input.isPresent();
+
+    expect(output).toBeTruthy();
+  });
+
+  test("with undefined element, should return true", () => {
+    const input = new JavaOptional<string>(undefined);
+
+    const output = input.isPresent();
+
+    expect(output).toBeFalsy();
   });
 });
 

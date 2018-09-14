@@ -1,4 +1,4 @@
-import JavaNumber from "appformer/java-wrappers/JavaNumber";
+import NumberWrapper from "appformer/java-wrappers/NumberWrapper";
 import JavaBoolean from "appformer/java-wrappers/JavaBoolean";
 import Portable from "appformer/internal/model/Portable";
 import ErraiObjectConstants from "appformer/marshalling/model/ErraiObjectConstants";
@@ -9,7 +9,7 @@ import JavaWrapperUtils from "appformer/java-wrappers/JavaWrapperUtils";
 
 export default class GenericsTypeMarshallingUtils {
   private static shouldWrapWhenUsedAsGenericsType(value: Portable<any>) {
-    return value instanceof JavaNumber || value instanceof JavaBoolean;
+    return value instanceof NumberWrapper || value instanceof JavaBoolean;
   }
 
   private static wrapGenericsTypeElement(value: Portable<any>, marshalledValue: any): ErraiObject {

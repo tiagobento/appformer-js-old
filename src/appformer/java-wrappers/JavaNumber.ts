@@ -1,24 +1,40 @@
-import JavaWrapper from "appformer/java-wrappers/JavaWrapper";
+import JavaDouble from "appformer/java-wrappers/JavaDouble";
+import JavaInteger from "appformer/java-wrappers/JavaInteger";
+import JavaShort from "appformer/java-wrappers/JavaShort";
+import JavaByte from "appformer/java-wrappers/JavaByte";
+import JavaFloat from "appformer/java-wrappers/JavaFloat";
+import BigNumber from "bignumber.js";
+import JavaLong from "appformer/java-wrappers/JavaLong";
 
-export default abstract class JavaNumber extends JavaWrapper<number> {
-  private readonly _value: number;
+export default interface JavaNumber {
+  doubleValue(): JavaDouble;
+  intValue(): JavaInteger;
+  shortValue(): JavaShort;
+  byteValue(): JavaByte;
+  floatValue(): JavaFloat;
+  longValue(): JavaLong;
+}
 
-  public constructor(value: string) {
-    super();
-    const valueAsNumber = this.from(value);
+export function asDouble(n: number | BigNumber) {
+  return new JavaDouble(n.toString(10));
+}
 
-    if (!this.isInRange(valueAsNumber)) {
-      this._value = Number.NaN;
-    } else {
-      this._value = valueAsNumber;
-    }
-  }
+export function asInteger(n: number | BigNumber) {
+  return new JavaInteger(n.toString(10));
+}
 
-  public get(): number {
-    return this._value;
-  }
+export function asShort(n: number | BigNumber) {
+  return new JavaShort(n.toString(10));
+}
 
-  protected abstract from(asString: string): number;
+export function asByte(n: number | BigNumber) {
+  return new JavaByte(n.toString(10));
+}
 
-  protected abstract isInRange(n: number): boolean;
+export function asFloat(n: number | BigNumber) {
+  return new JavaFloat(n.toString(10));
+}
+
+export function asLong(n: number | BigNumber) {
+  return new JavaLong(n.toString(10));
 }

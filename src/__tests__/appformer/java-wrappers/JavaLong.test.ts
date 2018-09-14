@@ -117,6 +117,66 @@ describe("get", () => {
   });
 });
 
+describe("doubleValue", () => {
+  test("should convert successfully", () => {
+    const input = new JavaLong("1");
+
+    const output = input.doubleValue();
+
+    expect(output.get()).toBe(1);
+  });
+});
+
+describe("intValue", () => {
+  test("should convert successfully", () => {
+    const input = new JavaLong("1");
+
+    const output = input.intValue();
+
+    expect(output.get()).toBe(1);
+  });
+});
+
+describe("shortValue", () => {
+  test("should convert successfully", () => {
+    const input = new JavaLong("1");
+
+    const output = input.shortValue();
+
+    expect(output.get()).toBe(1);
+  });
+});
+
+describe("byteValue", () => {
+  test("should convert successfully", () => {
+    const input = new JavaLong("1");
+
+    const output = input.byteValue();
+
+    expect(output.get()).toBe(1);
+  });
+});
+
+describe("floatValue", () => {
+  test("should convert successfully", () => {
+    const input = new JavaLong("1");
+
+    const output = input.floatValue();
+
+    expect(output.get()).toBe(1);
+  });
+});
+
+describe("longValue", () => {
+  test("should convert successfully", () => {
+    const input = new JavaLong("1");
+
+    const output = input.longValue();
+
+    expect(output.get().toNumber()).toBe(1);
+  });
+});
+
 describe("_fqcn", () => {
   test("must be the same than in Java", () => {
     const fqcn = (new JavaLong("1") as any)._fqcn;
