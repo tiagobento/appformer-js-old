@@ -1,4 +1,4 @@
-import JavaArrayList from "java-wrappers/JavaArrayList";
+import {JavaArrayList} from "java-wrappers/JavaArrayList";
 
 describe("get", () => {
   test("with populated array, returns the same array", () => {

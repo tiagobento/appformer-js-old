@@ -1,4 +1,4 @@
-import JavaFloat from "java-wrappers/JavaFloat";
+import {JavaFloat} from "java-wrappers/JavaFloat";
 
 describe("get", () => {
   describe("with valid input", () => {

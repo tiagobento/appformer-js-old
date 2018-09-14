@@ -1,4 +1,4 @@
-import JavaHashSet from "java-wrappers/JavaHashSet";
+import {JavaHashSet} from "java-wrappers/JavaHashSet";
 
 describe("get", () => {
   test("with populated set, returns the same set", () => {

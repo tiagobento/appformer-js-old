@@ -2,17 +2,17 @@ import {
   JavaArrayListMarshaller,
   JavaHashSetMarshaller
 } from "marshalling/marshallers/JavaCollectionMarshaller";
-import JavaArrayList from "java-wrappers/JavaArrayList";
-import MarshallingContext from "marshalling/MarshallingContext";
+import {JavaArrayList} from "java-wrappers/JavaArrayList";
+import {MarshallingContext} from "marshalling/MarshallingContext";
 import {JavaInteger} from "java-wrappers/JavaInteger";
-import ErraiObjectConstants from "marshalling/model/ErraiObjectConstants";
-import MarshallerProvider from "marshalling/MarshallerProvider";
-import JavaBigInteger from "java-wrappers/JavaBigInteger";
-import JavaBigIntegerMarshaller from "marshalling/marshallers/JavaBigIntegerMarshaller";
-import Portable from "internal/model/Portable";
-import JavaHashSet from "java-wrappers/JavaHashSet";
-import TestUtils from "__tests__/util/TestUtils";
-import JavaBoolean from "java-wrappers/JavaBoolean";
+import {ErraiObjectConstants} from "marshalling/model/ErraiObjectConstants";
+import {MarshallerProvider} from "marshalling/MarshallerProvider";
+import {JavaBigInteger} from "java-wrappers/JavaBigInteger";
+import {JavaBigIntegerMarshaller} from "marshalling/marshallers/JavaBigIntegerMarshaller";
+import {Portable} from "internal/model/Portable";
+import {JavaHashSet} from "java-wrappers/JavaHashSet";
+import {TestUtils} from "__tests__/util/TestUtils";
+import {JavaBoolean} from "java-wrappers/JavaBoolean";
 
 describe("marshall", () => {
   const encodedType = ErraiObjectConstants.ENCODED_TYPE;

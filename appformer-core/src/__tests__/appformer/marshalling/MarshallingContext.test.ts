@@ -1,7 +1,7 @@
-import MarshallingContext from "marshalling/MarshallingContext";
-import ErraiObject from "marshalling/model/ErraiObject";
-import ErraiObjectConstants from "marshalling/model/ErraiObjectConstants";
-import JavaWrapper from "java-wrappers/JavaWrapper";
+import {MarshallingContext} from "marshalling/MarshallingContext";
+import {ErraiObject} from "marshalling/model/ErraiObject";
+import {ErraiObjectConstants} from "marshalling/model/ErraiObjectConstants";
+import {JavaWrapper} from "java-wrappers/JavaWrapper";
 
 describe("incrementAndGetObjectId", () => {
   test("with sequential calls, should return different ids", () => {

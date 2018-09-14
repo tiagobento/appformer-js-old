@@ -1,4 +1,4 @@
-import JavaDouble from "java-wrappers/JavaDouble";
+import {JavaDouble} from "java-wrappers/JavaDouble";
 
 describe("get", () => {
   describe("with valid input", () => {

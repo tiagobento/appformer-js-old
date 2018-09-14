@@ -1,8 +1,8 @@
-import MarshallingContext from "marshalling/MarshallingContext";
-import ErraiObjectConstants from "marshalling/model/ErraiObjectConstants";
-import TestUtils from "__tests__/util/TestUtils";
-import JavaBigInteger from "java-wrappers/JavaBigInteger";
-import JavaBigIntegerMarshaller from "marshalling/marshallers/JavaBigIntegerMarshaller";
+import {MarshallingContext} from "marshalling/MarshallingContext";
+import {ErraiObjectConstants} from "marshalling/model/ErraiObjectConstants";
+import {TestUtils} from "__tests__/util/TestUtils";
+import {JavaBigInteger} from "java-wrappers/JavaBigInteger";
+import {JavaBigIntegerMarshaller} from "marshalling/marshallers/JavaBigIntegerMarshaller";
 
 describe("marshall", () => {
   test("with regular big integer, should serialize it normally", () => {

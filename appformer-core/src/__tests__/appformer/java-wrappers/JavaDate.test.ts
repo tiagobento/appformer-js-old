@@ -1,4 +1,4 @@
-import JavaDate from "java-wrappers/JavaDate";
+import {JavaDate} from "java-wrappers/JavaDate";
 
 describe("get", () => {
   test("with date, should return same value as Date", () => {

@@ -1,7 +1,7 @@
-import MarshallingContext from "marshalling/MarshallingContext";
-import JavaLong from "java-wrappers/JavaLong";
-import JavaLongMarshaller from "marshalling/marshallers/JavaLongMarshaller";
-import ErraiObjectConstants from "marshalling/model/ErraiObjectConstants";
+import {MarshallingContext} from "marshalling/MarshallingContext";
+import {JavaLong} from "java-wrappers/JavaLong";
+import {JavaLongMarshaller} from "marshalling/marshallers/JavaLongMarshaller";
+import {ErraiObjectConstants} from "marshalling/model/ErraiObjectConstants";
 
 describe("marshall", () => {
   test("with regular long, should should serialize it normally", () => {

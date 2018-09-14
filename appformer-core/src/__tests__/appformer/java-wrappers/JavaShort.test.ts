@@ -1,4 +1,4 @@
-import JavaShort from "java-wrappers/JavaShort";
+import {JavaShort} from "java-wrappers/JavaShort";
 
 describe("get", () => {
   describe("with valid input", () => {

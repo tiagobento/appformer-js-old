@@ -1,6 +1,6 @@
-import MarshallingContext from "marshalling/MarshallingContext";
-import JavaShort from "java-wrappers/JavaShort";
-import JavaShortMarshaller from "marshalling/marshallers/JavaShortMarshaller";
+import {MarshallingContext} from "marshalling/MarshallingContext";
+import {JavaShort} from "java-wrappers/JavaShort";
+import {JavaShortMarshaller} from "marshalling/marshallers/JavaShortMarshaller";
 
 describe("marshall", () => {
   test("with regular short, should return the same value", () => {

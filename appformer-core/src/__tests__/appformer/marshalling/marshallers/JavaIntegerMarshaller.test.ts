@@ -1,6 +1,6 @@
-import MarshallingContext from "marshalling/MarshallingContext";
+import {MarshallingContext} from "marshalling/MarshallingContext";
 import {JavaInteger} from "java-wrappers/JavaInteger";
-import JavaIntegerMarshaller from "marshalling/marshallers/JavaIntegerMarshaller";
+import {JavaIntegerMarshaller} from "marshalling/marshallers/JavaIntegerMarshaller";
 
 describe("marshall", () => {
   test("with regular integer, should return the same value", () => {

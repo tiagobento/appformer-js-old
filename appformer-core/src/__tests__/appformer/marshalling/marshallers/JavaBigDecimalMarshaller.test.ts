@@ -1,8 +1,8 @@
-import JavaBigDecimal from "java-wrappers/JavaBigDecimal";
-import JavaBigDecimalMarshaller from "marshalling/marshallers/JavaBigDecimalMarshaller";
-import MarshallingContext from "marshalling/MarshallingContext";
-import ErraiObjectConstants from "marshalling/model/ErraiObjectConstants";
-import TestUtils from "__tests__/util/TestUtils";
+import {JavaBigDecimal} from "java-wrappers/JavaBigDecimal";
+import {JavaBigDecimalMarshaller} from "marshalling/marshallers/JavaBigDecimalMarshaller";
+import {MarshallingContext} from "marshalling/MarshallingContext";
+import {ErraiObjectConstants} from "marshalling/model/ErraiObjectConstants";
+import {TestUtils} from "__tests__/util/TestUtils";
 
 describe("marshall", () => {
   test("with regular big decimal, should serialize it normally", () => {

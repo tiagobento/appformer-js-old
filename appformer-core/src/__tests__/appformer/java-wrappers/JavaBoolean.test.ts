@@ -1,4 +1,4 @@
-import JavaBoolean from "java-wrappers/JavaBoolean";
+import {JavaBoolean} from "java-wrappers/JavaBoolean";
 
 describe("get", () => {
   describe("with valid input", () => {

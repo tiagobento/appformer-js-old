@@ -1,6 +1,6 @@
-import MarshallingContext from "marshalling/MarshallingContext";
-import JavaBoolean from "java-wrappers/JavaBoolean";
-import JavaBooleanMarshaller from "marshalling/marshallers/JavaBooleanMarshaller";
+import {MarshallingContext} from "marshalling/MarshallingContext";
+import {JavaBoolean} from "java-wrappers/JavaBoolean";
+import {JavaBooleanMarshaller} from "marshalling/marshallers/JavaBooleanMarshaller";
 
 describe("marshall", () => {
   test("with regular boolean, should return the same value", () => {

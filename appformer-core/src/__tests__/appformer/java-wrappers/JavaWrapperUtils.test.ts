@@ -1,10 +1,10 @@
-import JavaWrapperUtils from "java-wrappers/JavaWrapperUtils";
-import JavaArrayList from "java-wrappers/JavaArrayList";
-import JavaHashSet from "java-wrappers/JavaHashSet";
-import JavaHashMap from "java-wrappers/JavaHashMap";
-import JavaBoolean from "java-wrappers/JavaBoolean";
-import JavaString from "java-wrappers/JavaString";
-import JavaDate from "java-wrappers/JavaDate";
+import {JavaWrapperUtils} from "java-wrappers/JavaWrapperUtils";
+import {JavaArrayList} from "java-wrappers/JavaArrayList";
+import {JavaHashSet} from "java-wrappers/JavaHashSet";
+import {JavaHashMap} from "java-wrappers/JavaHashMap";
+import {JavaBoolean} from "java-wrappers/JavaBoolean";
+import {JavaString} from "java-wrappers/JavaString";
+import {JavaDate} from "java-wrappers/JavaDate";
 
 describe("needsWrapping", () => {
   test("with array object, should return true", () => {

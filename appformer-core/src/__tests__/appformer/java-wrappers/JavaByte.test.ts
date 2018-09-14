@@ -1,4 +1,4 @@
-import JavaByte from "java-wrappers/JavaByte";
+import {JavaByte} from "java-wrappers/JavaByte";
 
 describe("get", () => {
   describe("with valid input", () => {

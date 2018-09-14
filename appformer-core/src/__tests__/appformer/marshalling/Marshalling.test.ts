@@ -1,7 +1,7 @@
-import MarshallerProvider from "marshalling/MarshallerProvider";
+import {MarshallerProvider} from "marshalling/MarshallerProvider";
 import * as Marshalling from "marshalling/Marshalling";
 import {JavaInteger} from "java-wrappers/JavaInteger";
-import ErraiObjectConstants from "marshalling/model/ErraiObjectConstants";
+import {ErraiObjectConstants} from "marshalling/model/ErraiObjectConstants";
 
 describe("marshall", () => {
   test("with regular input, should return an errai object json-string version of it", () => {

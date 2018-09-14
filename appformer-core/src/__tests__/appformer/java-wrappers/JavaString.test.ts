@@ -1,4 +1,4 @@
-import JavaString from "java-wrappers/JavaString";
+import {JavaString} from "java-wrappers/JavaString";
 
 describe("get", () => {
   describe("with valid input", () => {

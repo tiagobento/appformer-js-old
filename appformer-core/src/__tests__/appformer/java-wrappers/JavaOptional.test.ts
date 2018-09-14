@@ -1,4 +1,4 @@
-import JavaOptional from "java-wrappers/JavaOptional";
+import {JavaOptional} from "java-wrappers/JavaOptional";
 
 describe("get", () => {
   describe("with valid input", () => {
