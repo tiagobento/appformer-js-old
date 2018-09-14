@@ -109,7 +109,7 @@ public class PojoTsClass implements TsClass {
     private String toClass() {
         return formatRightToLeft(
                 lines("",
-                      "import Portable from 'internal/Portable';",
+                      "import Portable from 'appformer/internal/model/Portable';",
                       "%s",
                       "",
                       "export default %s class %s %s {",

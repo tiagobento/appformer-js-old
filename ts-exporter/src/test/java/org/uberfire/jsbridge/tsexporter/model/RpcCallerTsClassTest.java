@@ -72,7 +72,8 @@ public class RpcCallerTsClassTest {
 
         assertEquals(
                 lines("",
-                      "import {rpc, marshall, unmarshall} from 'appformer/API';",
+                      "import {rpc} from 'appformer/API';",
+                      "import {marshall, unmarshall} from 'appformer/marshalling';",
                       "import decorators_pojo_FooDEC from 'my-decorators/decorators/pojo/FooDEC';",
                       "import decorators_pojo_impl_FooImpl1DEC from 'my-decorators/decorators/pojo/impl/FooImpl1DEC';",
                       "import decorators_pojo_impl_FooImpl2DEC from 'my-decorators/decorators/pojo/impl/FooImpl2DEC';",
@@ -121,7 +122,8 @@ public class RpcCallerTsClassTest {
 
         assertEquals(
                 lines("",
-                      "import {rpc, marshall, unmarshall} from 'appformer/API';",
+                      "import {rpc} from 'appformer/API';",
+                      "import {marshall, unmarshall} from 'appformer/marshalling';",
                       "import decorators_pojo_impl_FooImpl1DEC from 'my-decorators/decorators/pojo/impl/FooImpl1DEC';",
                       "import decorators_pojo_impl_FooImpl2DEC from 'my-decorators/decorators/pojo/impl/FooImpl2DEC';",
                       "import org_uberfire_jsbridge_tsexporter_model_RpcCallerTsClassTest_FooImpl3 from 'output/ts-exporter-test/org/uberfire/jsbridge/tsexporter/model/RpcCallerTsClassTest/FooImpl3';",

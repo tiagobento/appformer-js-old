@@ -50,7 +50,7 @@ public class PojoTsClassTestClasses {
     public void testNormalClass() {
         final PojoTsClass pojoTsClass = new PojoTsClass(type(B.class), new DecoratorStore(emptySet()));
         assertEquals(lines("",
-                           "import { Portable } from 'generated__temporary__/Model';",
+                           "import Portable from 'appformer/internal/model/Portable';",
                            "import JavaInteger from 'appformer/java-wrappers/JavaInteger';",
                            "import JavaLinkedList from 'appformer/java-wrappers/JavaLinkedList';",
                            "import JavaOptional from 'appformer/java-wrappers/JavaOptional';",
