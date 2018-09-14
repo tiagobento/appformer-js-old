@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Screen, Perspective, GenericComponent } from "api/Components";
-import JsBridge from "internal/JsBridge";
-import PerspectiveContainer from "internal/PerspectiveContainer";
+import {JsBridge} from "internal/JsBridge";
+import {PerspectiveContainer} from "internal/PerspectiveContainer";
 
 interface Props {
   exposing: (self: () => Root) => void;
@@ -125,7 +125,7 @@ const actions = {
   }
 };
 
-export default class Root extends React.Component<Props, State> {
+export class Root extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.props.exposing(() => this);

@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Perspective, Screen } from "api/Components";
-import JsBridge from "internal/JsBridge";
+import {JsBridge} from "internal/JsBridge";
 
 interface Props {
   root: { ss: Screen[]; ps: Perspective[] };
@@ -9,7 +9,7 @@ interface Props {
   bridge: JsBridge;
 }
 
-export default class ScreenContainer extends React.Component<Props, {}> {
+export class ScreenContainer extends React.Component<Props, {}> {
   private ref: HTMLDivElement;
 
   public componentDidMount(): void {

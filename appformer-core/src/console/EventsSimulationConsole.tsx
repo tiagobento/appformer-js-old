@@ -16,7 +16,7 @@ const actions = {
   setEvent: (e: string) => (state: State) => ({ event: e })
 };
 
-export default class EventsSimulationConsole extends React.Component<Props, State> {
+export class EventsSimulationConsole extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
