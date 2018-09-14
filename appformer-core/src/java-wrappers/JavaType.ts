@@ -15,4 +15,3 @@ export enum JavaType {
   HASH_MAP = "java.util.HashMap",
   OPTIONAL = "java.util.Optional"
 }
-export default JavaType;

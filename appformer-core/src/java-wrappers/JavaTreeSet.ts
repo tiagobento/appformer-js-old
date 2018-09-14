@@ -1,1 +1,1 @@
-export default class JavaTreeSet<T> {}
+export class JavaTreeSet<T> {}

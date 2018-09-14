@@ -1,14 +1,14 @@
 import { BigNumber } from "bignumber.js";
-import BigNumberWrapper from "java-wrappers/BigNumberWrapper";
-import JavaByte from "java-wrappers/JavaByte";
-import JavaNumber, { asByte, asDouble, asFloat, asInteger, asLong, asShort } from "java-wrappers/JavaNumber";
-import JavaDouble from "java-wrappers/JavaDouble";
-import JavaFloat from "java-wrappers/JavaFloat";
-import {JavaInteger} from "java-wrappers/JavaInteger";
-import JavaShort from "java-wrappers/JavaShort";
-import JavaLong from "java-wrappers/JavaLong";
+import { BigNumberWrapper } from "java-wrappers/BigNumberWrapper";
+import { JavaByte } from "java-wrappers/JavaByte";
+import { asByte, asDouble, asFloat, asInteger, asLong, asShort, JavaNumber } from "java-wrappers/JavaNumber";
+import { JavaDouble } from "java-wrappers/JavaDouble";
+import { JavaFloat } from "java-wrappers/JavaFloat";
+import { JavaInteger } from "java-wrappers/JavaInteger";
+import { JavaShort } from "java-wrappers/JavaShort";
+import { JavaLong } from "java-wrappers/JavaLong";
 
-export default class JavaBigInteger extends BigNumberWrapper implements JavaNumber {
+export class JavaBigInteger extends BigNumberWrapper implements JavaNumber {
   private readonly _fqcn = "java.math.BigInteger";
 
   public from(asString: string): BigNumber {

@@ -1,14 +1,14 @@
-import JavaWrapper from "java-wrappers/JavaWrapper";
-import JavaType from "java-wrappers/JavaType";
+import { JavaWrapper } from "java-wrappers/JavaWrapper";
+import { JavaType } from "java-wrappers/JavaType";
 import { isArray, isBoolean, isDate, isMap, isSet, isString } from "util/TypeUtils";
-import JavaArrayList from "java-wrappers/JavaArrayList";
-import JavaHashSet from "java-wrappers/JavaHashSet";
-import JavaHashMap from "java-wrappers/JavaHashMap";
-import JavaBoolean from "java-wrappers/JavaBoolean";
-import JavaString from "java-wrappers/JavaString";
-import JavaDate from "java-wrappers/JavaDate";
+import { JavaArrayList } from "java-wrappers/JavaArrayList";
+import { JavaHashSet } from "java-wrappers/JavaHashSet";
+import { JavaHashMap } from "java-wrappers/JavaHashMap";
+import { JavaBoolean } from "java-wrappers/JavaBoolean";
+import { JavaString } from "java-wrappers/JavaString";
+import { JavaDate } from "java-wrappers/JavaDate";
 
-export default class JavaWrapperUtils {
+export class JavaWrapperUtils {
   private static wrappingFuncForType: Map<(obj: any) => boolean, (obj: any) => JavaWrapper<any>> = new Map([
     [isArray, (obj: any) => new JavaArrayList(obj) as JavaWrapper<any>],
     [isSet, (obj: any) => new JavaHashSet(obj) as JavaWrapper<any>],

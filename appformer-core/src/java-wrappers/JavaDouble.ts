@@ -1,12 +1,12 @@
-import FloatBasedJavaNumber from "java-wrappers/FloatBasedJavaNumber";
-import JavaByte from "java-wrappers/JavaByte";
-import JavaNumber, { asByte, asDouble, asFloat, asInteger, asLong, asShort } from "java-wrappers/JavaNumber";
-import JavaFloat from "java-wrappers/JavaFloat";
-import {JavaInteger} from "java-wrappers/JavaInteger";
-import JavaShort from "java-wrappers/JavaShort";
-import JavaLong from "java-wrappers/JavaLong";
+import { FloatBasedJavaNumber } from "java-wrappers/FloatBasedJavaNumber";
+import { JavaByte } from "java-wrappers/JavaByte";
+import { asByte, asDouble, asFloat, asInteger, asLong, asShort, JavaNumber } from "java-wrappers/JavaNumber";
+import { JavaFloat } from "java-wrappers/JavaFloat";
+import { JavaInteger } from "java-wrappers/JavaInteger";
+import { JavaShort } from "java-wrappers/JavaShort";
+import { JavaLong } from "java-wrappers/JavaLong";
 
-export default class JavaDouble extends FloatBasedJavaNumber implements JavaNumber {
+export class JavaDouble extends FloatBasedJavaNumber implements JavaNumber {
   private readonly _fqcn = "java.lang.Double";
 
   protected isInRange(n: number): boolean {

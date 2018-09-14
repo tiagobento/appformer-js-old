@@ -1,7 +1,7 @@
-import BigNumber from "bignumber.js";
-import JavaWrapper from "java-wrappers/JavaWrapper";
+import { BigNumber } from "bignumber.js";
+import { JavaWrapper } from "java-wrappers/JavaWrapper";
 
-export default abstract class BigNumberWrapper extends JavaWrapper<BigNumber> {
+export abstract class BigNumberWrapper extends JavaWrapper<BigNumber> {
   private readonly _value: BigNumber;
 
   public constructor(value: string) {

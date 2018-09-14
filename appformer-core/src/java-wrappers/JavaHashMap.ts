@@ -1,6 +1,6 @@
-import JavaWrapper from "java-wrappers/JavaWrapper";
+import { JavaWrapper } from "java-wrappers/JavaWrapper";
 
-export default class JavaHashMap<T, U> extends JavaWrapper<Map<T, U>> {
+export class JavaHashMap<T, U> extends JavaWrapper<Map<T, U>> {
   private readonly _fqcn = "java.util.HashMap";
 
   private readonly _value: Map<T, U>;

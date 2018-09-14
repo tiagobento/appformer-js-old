@@ -1,1 +1,1 @@
-export default class JavaTreeMap<K, V> {}
+export class JavaTreeMap<K, V> {}

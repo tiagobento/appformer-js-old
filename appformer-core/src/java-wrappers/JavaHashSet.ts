@@ -1,6 +1,6 @@
-import JavaCollection from "java-wrappers/JavaCollection";
+import { JavaCollection } from "java-wrappers/JavaCollection";
 
-export default class JavaHashSet<T> extends JavaCollection<Set<T>> {
+export class JavaHashSet<T> extends JavaCollection<Set<T>> {
   private readonly _fqcn = "java.util.HashSet";
 
   private readonly _value: Set<T>;

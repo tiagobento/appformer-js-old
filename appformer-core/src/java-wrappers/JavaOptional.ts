@@ -1,6 +1,6 @@
-import JavaWrapper from "java-wrappers/JavaWrapper";
+import { JavaWrapper } from "java-wrappers/JavaWrapper";
 
-export default class JavaOptional<T> extends JavaWrapper<T | undefined> {
+export class JavaOptional<T> extends JavaWrapper<T | undefined> {
   private readonly _fqcn = "java.util.Optional";
 
   private readonly _value: T | undefined;

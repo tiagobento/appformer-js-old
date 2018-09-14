@@ -1,6 +1,6 @@
-import JavaWrapper from "java-wrappers/JavaWrapper";
+import { JavaWrapper } from "java-wrappers/JavaWrapper";
 
-export default abstract class NumberWrapper extends JavaWrapper<number> {
+export abstract class NumberWrapper extends JavaWrapper<number> {
   private readonly _value: number;
 
   public constructor(value: string) {

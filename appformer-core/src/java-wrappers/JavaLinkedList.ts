@@ -1,1 +1,1 @@
-export default class JavaLinkedList<T> {}
+export class JavaLinkedList<T> {}

@@ -1,6 +1,6 @@
-import JavaWrapper from "java-wrappers/JavaWrapper";
+import { JavaWrapper } from "java-wrappers/JavaWrapper";
 
-export default class JavaBoolean extends JavaWrapper<boolean> {
+export class JavaBoolean extends JavaWrapper<boolean> {
   private readonly _fqcn = "java.lang.Boolean";
 
   private readonly _value: boolean;

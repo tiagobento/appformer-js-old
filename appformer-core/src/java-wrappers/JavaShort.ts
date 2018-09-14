@@ -1,12 +1,12 @@
-import IntegerBasedJavaNumber from "java-wrappers/IntegerBasedJavaNumber";
-import JavaNumber, { asByte, asDouble, asFloat, asInteger, asLong, asShort } from "java-wrappers/JavaNumber";
-import JavaByte from "java-wrappers/JavaByte";
-import JavaDouble from "java-wrappers/JavaDouble";
-import JavaFloat from "java-wrappers/JavaFloat";
-import {JavaInteger} from "java-wrappers/JavaInteger";
-import JavaLong from "java-wrappers/JavaLong";
+import { IntegerBasedJavaNumber } from "java-wrappers/IntegerBasedJavaNumber";
+import { JavaNumber, asByte, asDouble, asFloat, asInteger, asLong, asShort } from "java-wrappers/JavaNumber";
+import { JavaByte } from "java-wrappers/JavaByte";
+import { JavaDouble } from "java-wrappers/JavaDouble";
+import { JavaFloat } from "java-wrappers/JavaFloat";
+import { JavaInteger } from "java-wrappers/JavaInteger";
+import { JavaLong } from "java-wrappers/JavaLong";
 
-export default class JavaShort extends IntegerBasedJavaNumber implements JavaNumber {
+export class JavaShort extends IntegerBasedJavaNumber implements JavaNumber {
   public static readonly MIN_VALUE = -32768;
   public static readonly MAX_VALUE = 32767;
 
