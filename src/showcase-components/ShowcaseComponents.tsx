@@ -10,10 +10,6 @@ import Foo from "output/uberfire-webapp/org/uberfire/shared/Foo";
 
 export class InoffensiveNonScreenClass {}
 
-enum Asd {
-  A2
-}
-
 export class ReactComponentScreen extends AppFormer.Screen {
   public onFoo: (e: any) => void;
 
@@ -120,9 +116,9 @@ export class PureDomElementScreen extends AppFormer.Screen {
     this.af_componentId = "dom-elements-screen";
     this.af_componentTitle = "DOM Elements Component";
     this.span = document.createElement("span");
-    const sv = new TestMessagesService();
+    const testMessagesService = new TestMessagesService();
     this.af_componentService = {
-      fireServerEvent: sv.helloFromEvent
+      fireServerEvent: testMessagesService.helloFromEvent
     };
   }
 

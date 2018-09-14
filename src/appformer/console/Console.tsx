@@ -40,7 +40,8 @@ export default class Console extends React.Component<{ screens: Screen[] }, Stat
         </aside>
 
         <span style={{ gridColumn: "span 6" }} hidden={!this.state.rpcConsole}>
-          <RPCConsole screens={this.props.screens} onClose={() => this.setState(actions.toggleRpcConsole)} />
+          {/*<RPCConsole screens={this.props.screens} onClose={() => this.setState(actions.toggleRpcConsole)} />*/}
+          RPC Console is not working at the moment.
         </span>
 
         <span style={{ gridColumn: "span 6" }} hidden={!this.state.eventsConsole}>
