@@ -1,6 +1,6 @@
 import * as React from "react";
-import { Perspective, Screen } from "api/Components";
-import {JsBridge} from "internal/JsBridge";
+import { Perspective, Screen } from "../api/Components";
+import {JsBridge} from "../internal/JsBridge";
 
 interface Props {
   root: { ss: Screen[]; ps: Perspective[] };

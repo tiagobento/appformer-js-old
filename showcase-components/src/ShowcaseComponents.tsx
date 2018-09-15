@@ -1,6 +1,6 @@
 import * as React from "react";
 import DemoReactComponent from "DemoReactComponent";
-import { JavaInteger, Screen } from "appformer-core";
+import { JavaInteger, Screen,  } from "appformer-core";
 // import TestMessagesService from "output/uberfire-webapp/org/uberfire/shared/TestMessagesService";
 // import TestEvent from "output/uberfire-webapp/org/uberfire/shared/TestEvent";
 // import Foo from "output/uberfire-webapp/org/uberfire/shared/Foo";
@@ -19,7 +19,7 @@ export class ReactComponentScreen extends Screen {
     this.af_componentId = "A-react-screen";
     this.af_componentTitle = "React Component";
 
-    const javaInteger = new JavaInteger();
+    const javaInteger = new JavaInteger("0");
 
     this.af_subscriptions = {
       // "org.uberfire.shared.TestEvent": (testEvent: TestEvent) => {

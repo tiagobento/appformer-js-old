@@ -1,8 +1,7 @@
 import * as React from "react";
-import { Screen, DefaultScreenContainerId } from "api/Components";
-import {ConsoleDock} from "console/ConsoleDock";
-import {EventsSimulationConsole} from "console/EventsSimulationConsole";
-import { RPCConsole } from "console/RpcSimulationConsole";
+import {DefaultScreenContainerId, Screen} from "../api/Components";
+import {ConsoleDock} from "./ConsoleDock";
+import {EventsSimulationConsole} from "./EventsSimulationConsole";
 
 interface State {
   rpcConsole: boolean;

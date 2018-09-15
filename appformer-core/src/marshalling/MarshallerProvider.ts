@@ -1,24 +1,24 @@
-import { JavaWrapperUtils } from "java-wrappers/JavaWrapperUtils";
-import { JavaType } from "java-wrappers/JavaType";
-import { Marshaller } from "marshalling/Marshaller";
-import { JavaHashMapMarshaller } from "marshalling/marshallers/JavaHashMapMarshaller";
-import { JavaShortMarshaller } from "marshalling/marshallers/JavaShortMarshaller";
-import { JavaDoubleMarshaller } from "marshalling/marshallers/JavaDoubleMarshaller";
-import { DefaultMarshaller } from "marshalling/marshallers/DefaultMarshaller";
-import { JavaStringMarshaller } from "marshalling/marshallers/JavaStringMarshaller";
-import { JavaIntegerMarshaller } from "marshalling/marshallers/JavaIntegerMarshaller";
-import { JavaBigIntegerMarshaller } from "marshalling/marshallers/JavaBigIntegerMarshaller";
-import { JavaFloatMarshaller } from "marshalling/marshallers/JavaFloatMarshaller";
-import { JavaBooleanMarshaller } from "marshalling/marshallers/JavaBooleanMarshaller";
-import { JavaLongMarshaller } from "marshalling/marshallers/JavaLongMarshaller";
-import { JavaBigDecimalMarshaller } from "marshalling/marshallers/JavaBigDecimalMarshaller";
-import { JavaByteMarshaller } from "marshalling/marshallers/JavaByteMarshaller";
-import { JavaDateMarshaller } from "marshalling/marshallers/JavaDateMarshaller";
-import { JavaOptionalMarshaller } from "marshalling/marshallers/JavaOptionalMarshaller";
+import { JavaWrapperUtils } from "../java-wrappers/JavaWrapperUtils";
+import { JavaType } from "../java-wrappers/JavaType";
+import { Marshaller } from "./Marshaller";
+import { JavaHashMapMarshaller } from "./marshallers/JavaHashMapMarshaller";
+import { JavaShortMarshaller } from "./marshallers/JavaShortMarshaller";
+import { JavaDoubleMarshaller } from "./marshallers/JavaDoubleMarshaller";
+import { DefaultMarshaller } from "./marshallers/DefaultMarshaller";
+import { JavaStringMarshaller } from "./marshallers/JavaStringMarshaller";
+import { JavaIntegerMarshaller } from "./marshallers/JavaIntegerMarshaller";
+import { JavaBigIntegerMarshaller } from "./marshallers/JavaBigIntegerMarshaller";
+import { JavaFloatMarshaller } from "./marshallers/JavaFloatMarshaller";
+import { JavaBooleanMarshaller } from "./marshallers/JavaBooleanMarshaller";
+import { JavaLongMarshaller } from "./marshallers/JavaLongMarshaller";
+import { JavaBigDecimalMarshaller } from "./marshallers/JavaBigDecimalMarshaller";
+import { JavaByteMarshaller } from "./marshallers/JavaByteMarshaller";
+import { JavaDateMarshaller } from "./marshallers/JavaDateMarshaller";
+import { JavaOptionalMarshaller } from "./marshallers/JavaOptionalMarshaller";
 import {
     JavaArrayListMarshaller,
     JavaHashSetMarshaller
-} from "marshalling/marshallers/JavaCollectionMarshaller";
+} from "./marshallers/JavaCollectionMarshaller";
 
 export class MarshallerProvider {
   private static initialized: boolean = false;

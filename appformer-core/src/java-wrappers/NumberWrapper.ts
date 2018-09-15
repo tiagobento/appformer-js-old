@@ -1,4 +1,4 @@
-import { JavaWrapper } from "java-wrappers/JavaWrapper";
+import { JavaWrapper } from "./JavaWrapper";
 
 export abstract class NumberWrapper extends JavaWrapper<number> {
   private readonly _value: number;

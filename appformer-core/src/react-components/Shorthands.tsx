@@ -1,4 +1,4 @@
-import * as AppFormer from "index";
+import * as AppFormer from "../";
 import * as React from "react";
 
 export const Link = (props: { to: string; children: any }) => (

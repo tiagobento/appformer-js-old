@@ -1,10 +1,10 @@
-import { FloatBasedJavaNumber } from "java-wrappers/FloatBasedJavaNumber";
-import { JavaByte } from "java-wrappers/JavaByte";
-import { asByte, asDouble, asFloat, asInteger, asLong, asShort, JavaNumber } from "java-wrappers/JavaNumber";
-import { JavaDouble } from "java-wrappers/JavaDouble";
-import { JavaInteger } from "java-wrappers/JavaInteger";
-import { JavaShort } from "java-wrappers/JavaShort";
-import { JavaLong } from "java-wrappers/JavaLong";
+import { FloatBasedJavaNumber } from "./FloatBasedJavaNumber";
+import { JavaByte } from "./JavaByte";
+import { asByte, asDouble, asFloat, asInteger, asLong, asShort, JavaNumber } from "./JavaNumber";
+import { JavaDouble } from "./JavaDouble";
+import { JavaInteger } from "./JavaInteger";
+import { JavaShort } from "./JavaShort";
+import { JavaLong } from "./JavaLong";
 
 export class JavaFloat extends FloatBasedJavaNumber implements JavaNumber {
   public static readonly MIN_VALUE = -3.40282347e38;

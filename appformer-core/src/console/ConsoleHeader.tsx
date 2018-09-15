@@ -1,5 +1,5 @@
-import { Screen, Perspective, Element } from "api/Components";
-import { Link } from "react-components/Shorthands";
+import { Screen, Perspective, Element } from "../api/Components";
+import { Link } from "../react-components/Shorthands";
 import * as React from "react";
 
 export class ConsoleHeader extends Screen {

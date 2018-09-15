@@ -1,5 +1,5 @@
 import { BigNumber } from "bignumber.js";
-import { JavaWrapper } from "java-wrappers/JavaWrapper";
+import { JavaWrapper } from "./JavaWrapper";
 
 export abstract class BigNumberWrapper extends JavaWrapper<BigNumber> {
   private readonly _value: BigNumber;

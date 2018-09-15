@@ -1,10 +1,10 @@
-import { JavaDouble } from "java-wrappers/JavaDouble";
-import { JavaInteger } from "java-wrappers/JavaInteger";
-import { JavaShort } from "java-wrappers/JavaShort";
-import { JavaByte } from "java-wrappers/JavaByte";
-import { JavaFloat } from "java-wrappers/JavaFloat";
+import { JavaDouble } from "./JavaDouble";
+import { JavaInteger } from "./JavaInteger";
+import { JavaShort } from "./JavaShort";
+import { JavaByte } from "./JavaByte";
+import { JavaFloat } from "./JavaFloat";
 import { BigNumber } from "bignumber.js";
-import { JavaLong } from "java-wrappers/JavaLong";
+import { JavaLong } from "./JavaLong";
 
 export interface JavaNumber {
   doubleValue(): JavaDouble;

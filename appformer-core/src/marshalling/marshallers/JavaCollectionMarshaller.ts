@@ -1,10 +1,10 @@
-import { JavaCollection } from "java-wrappers/JavaCollection";
-import { ErraiObject } from "marshalling/model/ErraiObject";
-import { MarshallingContext } from "marshalling/MarshallingContext";
-import { ErraiObjectConstants } from "marshalling/model/ErraiObjectConstants";
-import { Portable } from "internal/model/Portable";
-import { NullableMarshaller } from "marshalling/marshallers/NullableMarshaller";
-import { GenericsTypeMarshallingUtils } from "marshalling/marshallers/util/GenericsTypeMarshallingUtils";
+import { JavaCollection } from "../../java-wrappers/JavaCollection";
+import { ErraiObject } from "../model/ErraiObject";
+import { MarshallingContext } from "../MarshallingContext";
+import { ErraiObjectConstants } from "../model/ErraiObjectConstants";
+import { Portable } from "../../internal/model/Portable";
+import { NullableMarshaller } from "../marshallers/NullableMarshaller";
+import { GenericsTypeMarshallingUtils } from "../marshallers/util/GenericsTypeMarshallingUtils";
 
 class JavaCollectionMarshaller<T extends Iterable<Portable<any> | null>> extends NullableMarshaller<
   JavaCollection<T>,

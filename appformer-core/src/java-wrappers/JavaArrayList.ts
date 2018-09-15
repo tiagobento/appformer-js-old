@@ -1,4 +1,4 @@
-import { JavaCollection } from "java-wrappers/JavaCollection";
+import { JavaCollection } from "./JavaCollection";
 
 export class JavaArrayList<T> extends JavaCollection<T[]> {
   private readonly _fqcn = "java.util.ArrayList";

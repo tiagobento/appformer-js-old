@@ -1,12 +1,12 @@
 import { BigNumber } from "bignumber.js";
-import { BigNumberWrapper } from "java-wrappers/BigNumberWrapper";
-import { JavaByte } from "java-wrappers/JavaByte";
-import { asByte, asDouble, asFloat, asInteger, asLong, asShort, JavaNumber } from "java-wrappers/JavaNumber";
-import { JavaDouble } from "java-wrappers/JavaDouble";
-import { JavaFloat } from "java-wrappers/JavaFloat";
-import { JavaInteger } from "java-wrappers/JavaInteger";
-import { JavaShort } from "java-wrappers/JavaShort";
-import { JavaLong } from "java-wrappers/JavaLong";
+import { BigNumberWrapper } from "./BigNumberWrapper";
+import { JavaByte } from "./JavaByte";
+import { asByte, asDouble, asFloat, asInteger, asLong, asShort, JavaNumber } from "./JavaNumber";
+import { JavaDouble } from "./JavaDouble";
+import { JavaFloat } from "./JavaFloat";
+import { JavaInteger } from "./JavaInteger";
+import { JavaShort } from "./JavaShort";
+import { JavaLong } from "./JavaLong";
 
 export class JavaBigDecimal extends BigNumberWrapper implements JavaNumber {
   private readonly _fqcn = "java.math.BigDecimal";

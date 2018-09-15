@@ -1,10 +1,10 @@
-import { MarshallerProvider } from "marshalling/MarshallerProvider";
-import { MarshallingContext } from "marshalling/MarshallingContext";
-import { ErraiObject } from "marshalling/model/ErraiObject";
-import { JavaWrapperUtils } from "java-wrappers/JavaWrapperUtils";
-import { ErraiObjectConstants } from "marshalling/model/ErraiObjectConstants";
-import { Portable } from "internal/model/Portable";
-import { NullableMarshaller } from "marshalling/marshallers/NullableMarshaller";
+import { MarshallerProvider } from "../MarshallerProvider";
+import { MarshallingContext } from "../MarshallingContext";
+import { ErraiObject } from "../model/ErraiObject";
+import { JavaWrapperUtils } from "../../java-wrappers/JavaWrapperUtils";
+import { ErraiObjectConstants } from "../model/ErraiObjectConstants";
+import { Portable } from "../../internal/model/Portable";
+import { NullableMarshaller } from "../marshallers/NullableMarshaller";
 
 export class DefaultMarshaller<T extends Portable<T>> extends NullableMarshaller<T, ErraiObject> {
   public notNullMarshall(input: T, ctx: MarshallingContext): ErraiObject {

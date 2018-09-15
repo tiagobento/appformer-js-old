@@ -1,6 +1,6 @@
-import { Portable } from "internal/model/Portable";
-import { MarshallerProvider } from "marshalling/MarshallerProvider";
-import { MarshallingContext } from "marshalling/MarshallingContext";
+import { Portable } from "../internal/model/Portable";
+import { MarshallerProvider } from "./MarshallerProvider";
+import { MarshallingContext } from "./MarshallingContext";
 
 export function marshall(obj: Portable<any>): string | null {
   if (obj === null || obj === undefined) {

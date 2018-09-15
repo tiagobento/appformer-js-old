@@ -1,4 +1,4 @@
-import { Screen, Subscriptions } from "api/Components";
+import { Screen, Subscriptions } from "../api/Components";
 import * as React from "react";
 
 interface Props {

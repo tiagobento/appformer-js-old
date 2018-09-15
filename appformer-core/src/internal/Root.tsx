@@ -1,7 +1,7 @@
 import * as React from "react";
-import { Screen, Perspective, GenericComponent } from "api/Components";
-import {JsBridge} from "internal/JsBridge";
-import {PerspectiveContainer} from "internal/PerspectiveContainer";
+import { Screen, Perspective, GenericComponent } from "../api/Components";
+import {JsBridge} from "../internal/JsBridge";
+import {PerspectiveContainer} from "../internal/PerspectiveContainer";
 
 interface Props {
   exposing: (self: () => Root) => void;

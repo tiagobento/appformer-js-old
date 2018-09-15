@@ -1,9 +1,9 @@
-import { MarshallingContext } from "marshalling/MarshallingContext";
-import { NullableMarshaller } from "marshalling/marshallers/NullableMarshaller";
-import { JavaOptional } from "java-wrappers/JavaOptional";
-import { ErraiObject } from "marshalling/model/ErraiObject";
-import { GenericsTypeMarshallingUtils } from "marshalling/marshallers/util/GenericsTypeMarshallingUtils";
-import { ErraiObjectConstants } from "marshalling/model/ErraiObjectConstants";
+import { MarshallingContext } from "../MarshallingContext";
+import { NullableMarshaller } from "../marshallers/NullableMarshaller";
+import { JavaOptional } from "../../java-wrappers/JavaOptional";
+import { ErraiObject } from "../model/ErraiObject";
+import { GenericsTypeMarshallingUtils } from "../marshallers/util/GenericsTypeMarshallingUtils";
+import { ErraiObjectConstants } from "../model/ErraiObjectConstants";
 
 export class JavaOptionalMarshaller<T> extends NullableMarshaller<JavaOptional<T>, ErraiObject> {
   public notNullMarshall(input: JavaOptional<T>, ctx: MarshallingContext): ErraiObject {

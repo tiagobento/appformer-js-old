@@ -1,6 +1,6 @@
-import { JavaShort } from "java-wrappers/JavaShort";
-import { MarshallingContext } from "marshalling/MarshallingContext";
-import { NullableMarshaller } from "marshalling/marshallers/NullableMarshaller";
+import { JavaShort } from "../../java-wrappers/JavaShort";
+import { MarshallingContext } from "../MarshallingContext";
+import { NullableMarshaller } from "../marshallers/NullableMarshaller";
 
 export class JavaShortMarshaller extends NullableMarshaller<JavaShort, number> {
   public notNullMarshall(input: JavaShort, ctx: MarshallingContext): number {

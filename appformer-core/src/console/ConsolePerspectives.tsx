@@ -1,5 +1,5 @@
-import { Screen, Perspective, Element } from "api/Components";
-import {Console} from "console/Console";
+import { Screen, Perspective, Element } from "../api/Components";
+import {Console} from "./Console";
 import * as React from "react";
 
 export class ConsoleDefaultPerspective extends Perspective {
