@@ -31,10 +31,7 @@ module.exports = {
   },
   resolve: {
     extensions: [".tsx", ".ts", ".js", ".jsx"],
-    modules: [path.resolve("./node_modules"), path.resolve("./src")],
-    alias: {
-        javaWrappers: path.resolve(__dirname, 'src/java-wrappers/')
-    }
+    modules: [path.resolve("./node_modules"), path.resolve("./src")]
   },
   plugins: [
     new CleanWebpackPlugin(["dist"]),
