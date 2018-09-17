@@ -10,7 +10,10 @@ module.exports = merge(common, {
   },
   output: {
     path: path.resolve(__dirname, "dist"),
-    filename: "appformer.js"
+    filename: "appformer.js",
+    library: "AppFormer",
+    libraryTarget: "umd",
+    umdNamedDefine: true
   },
   plugins: [
     new CleanWebpackPlugin(["dist"]),

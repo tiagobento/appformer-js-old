@@ -13,11 +13,19 @@ module.exports = merge(common, {
   externals: {
     react: "React",
     "react-dom": "ReactDOM",
-    "appformer-core": "AppFormer"
+    "appformer-core": {
+      commonjs: "appformer-core",
+      commonjs2: "appformer-core",
+      amd: "appformer-core",
+      root: "AppFormer" // indicates global variable
+    }
   },
   output: {
     path: path.resolve(__dirname, "dist"),
-    filename: "showcase.js"
+    filename: "showcase.js",
+    library: "Showcase",
+    libraryTarget: "umd",
+    umdNamedDefine: true
   },
   devtool: "inline-source-map",
   devServer: {
