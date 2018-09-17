@@ -4,10 +4,12 @@
   "description": "",
   "private": true,
   "license": "Apache-2.0",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "dependencies": {
-    "appformer-core": "file:../appformer-core",
     "@types/react": "^16.4.6",
     "@types/react-dom": "^16.0.6",
+    "appformer-core": "file:../appformer-core",
     "react": "^16.4.1",
     "react-dom": "^16.4.1"
   },
@@ -27,13 +29,14 @@
     "tslint-react": "^3.6.0",
     "typescript": "^2.9.2",
     "webpack": "^4.15.1",
-    "webpack-cli": "^3.0.8"
+    "webpack-cli": "^3.1.0",
+    "webpack-merge": "^4.1.4"
   },
   "scripts": {
     "lint": "tslint -c tslint.json 'src/**/*.{ts,tsx,js,jsx}'",
     "test": "jest",
     "build:dev": "webpack",
-    "build:prod": "npm run lint && npm run test && webpack --mode production"
+    "build:prod": "npm run lint && npm test && webpack --mode production"
   },
   "babel": {
     "presets": [

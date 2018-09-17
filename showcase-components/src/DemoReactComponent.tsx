@@ -1,26 +1,36 @@
-import React from "react";
+import * as React from "react";
 import { ExampleList } from "appformer-core";
 
-export default class DemoComponent extends React.Component {
-  constructor(props) {
+interface Props {
+  number: string;
+  onFoo(f: (message: string) => void): void;
+}
+
+interface State {
+  count: number;
+  lastMessage: string;
+}
+
+export class DemoReactComponent extends React.Component<Props, State> {
+  constructor(props: Props) {
     super(props);
     this.state = { count: 0, lastMessage: "No messages were received yet.." };
     this.props.onFoo(message => this.setState({ lastMessage: message }));
   }
 
-  add() {
+  private add() {
     this.setState(prevState => ({
       count: prevState.count + 1
     }));
   }
 
-  subtract() {
+  private subtract() {
     this.setState(prevState => ({
       count: Math.max(0, prevState.count - 1)
     }));
   }
 
-  render() {
+  public render() {
     return (
       <div className="react-app-example">
         <ExampleList name={"Random stuff"} id={this.props.number} />

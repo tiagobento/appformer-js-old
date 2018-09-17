@@ -1,39 +1,14 @@
 const path = require("path");
+const merge = require("webpack-merge");
+const common = require("../webpack.common.js");
 const CleanWebpackPlugin = require("clean-webpack-plugin");
 
-module.exports = {
-  mode: "development",
+module.exports = merge(common, {
   entry: {
-    "appformer-core": "./src/index.ts",
-  },
-  externals: {
-    react: "React",
-    "react-dom": "ReactDOM"
+    "appformer-core": "./src/index.ts"
   },
   output: {
-    path: path.resolve(__dirname, "dist"),
-    filename: "index.js",
-    library: "all"
+    path: path.resolve(__dirname, "dist")
   },
-  // devtool: "inline-source-map",
-  module: {
-    rules: [
-      {
-        test: /\.tsx?$/,
-        loader: "ts-loader"
-      },
-      {
-        test: /\.jsx?$/,
-        exclude: /node_modules/,
-        use: ["babel-loader"]
-      },
-    ]
-  },
-  resolve: {
-    extensions: [".tsx", ".ts", ".js", ".jsx"],
-    modules: [path.resolve("./node_modules"), path.resolve("./src")]
-  },
-  plugins: [
-    new CleanWebpackPlugin(["dist"]),
-  ]
-};
+  plugins: [new CleanWebpackPlugin(["dist"])]
+});

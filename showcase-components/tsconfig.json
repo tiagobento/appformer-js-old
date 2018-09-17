@@ -1,18 +1,5 @@
 {
-  "compilerOptions": {
-    "lib": ["es6", "dom"],
-    "baseUrl": "./src/",
-    "module": "commonjs",
-    "target": "es5",
-    "sourceMap": true,
-    "outDir": "./",
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "experimentalDecorators": true,
-    "allowJs": true,
-    "jsx": "react"
-  },
-
-  "exclude": ["node_modules", "src/__test__"],
-  "include": ["src"]
+  "extends": "../tsconfig.common.json",
+  "exclude": ["./node_modules", "./src/**/__tests__"],
+  "include": ["./src"]
 }

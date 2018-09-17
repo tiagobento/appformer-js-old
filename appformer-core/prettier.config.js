@@ -1,3 +1,1 @@
-module.exports = {
-  printWidth: 120
-};
+../prettier.config.common.js
