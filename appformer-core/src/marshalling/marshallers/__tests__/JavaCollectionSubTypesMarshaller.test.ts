@@ -1,18 +1,12 @@
-import {
-  JavaArrayListMarshaller,
-  JavaHashSetMarshaller
-} from "..//JavaCollectionMarshaller";
-import {JavaArrayList} from "../../../java-wrappers/JavaArrayList";
-import {MarshallingContext} from "marshalling/MarshallingContext";
-import {JavaInteger} from "../../../java-wrappers/JavaInteger";
-import {ErraiObjectConstants} from "marshalling/model/ErraiObjectConstants";
-import {MarshallerProvider} from "marshalling/MarshallerProvider";
-import {JavaBigInteger} from "../../../java-wrappers/JavaBigInteger";
-import {JavaBigIntegerMarshaller} from "..//JavaBigIntegerMarshaller";
-import {Portable} from "internal/model/Portable";
-import {JavaHashSet} from "../../../java-wrappers/JavaHashSet";
-import {TestUtils} from "__tests__/util/TestUtils";
-import {JavaBoolean} from "../../../java-wrappers/JavaBoolean";
+import { JavaArrayListMarshaller, JavaHashSetMarshaller } from "../JavaCollectionMarshaller";
+import { JavaArrayList } from "../../../java-wrappers/JavaArrayList";
+import { MarshallingContext } from "../../MarshallingContext";
+import { JavaInteger, JavaBigInteger, JavaHashSet, JavaBoolean } from "../../../java-wrappers";
+import { ErraiObjectConstants } from "../../model/ErraiObjectConstants";
+import { MarshallerProvider } from "../../MarshallerProvider";
+import { JavaBigIntegerMarshaller } from "../JavaBigIntegerMarshaller";
+import { Portable } from "../../../internal";
+import { TestUtils } from "../../../__tests__/util/TestUtils";
 
 describe("marshall", () => {
   const encodedType = ErraiObjectConstants.ENCODED_TYPE;

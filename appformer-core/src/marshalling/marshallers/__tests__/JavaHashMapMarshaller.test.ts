@@ -1,14 +1,13 @@
-import {MarshallerProvider} from "marshalling/MarshallerProvider";
-import {JavaHashMap} from "../../../java-wrappers/JavaHashMap";
-import {JavaHashMapMarshaller} from "..//JavaHashMapMarshaller";
-import {MarshallingContext} from "marshalling/MarshallingContext";
-import {ErraiObjectConstants} from "marshalling/model/ErraiObjectConstants";
-import {TestUtils} from "__tests__/util/TestUtils";
-import {JavaInteger} from "../../../java-wrappers/JavaInteger";
-import {JavaBoolean} from "../../../java-wrappers/JavaBoolean";
-import {JavaBigInteger} from "../../../java-wrappers/JavaBigInteger";
-import {Portable} from "internal/model/Portable";
-import {DefaultMarshaller} from "..//DefaultMarshaller";
+import { MarshallerProvider } from "../../MarshallerProvider";
+import { JavaHashMap, JavaBoolean } from "../../../java-wrappers";
+import { JavaHashMapMarshaller } from "../JavaHashMapMarshaller";
+import { MarshallingContext } from "../../MarshallingContext";
+import { ErraiObjectConstants } from "../../model/ErraiObjectConstants";
+import { TestUtils } from "../../../__tests__/util/TestUtils";
+import { JavaInteger } from "../../../java-wrappers";
+import { JavaBigInteger } from "../../../java-wrappers";
+import { Portable } from "../../../internal";
+import { DefaultMarshaller } from "../DefaultMarshaller";
 
 describe("marshall", () => {
   const encodedType = ErraiObjectConstants.ENCODED_TYPE;

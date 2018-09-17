@@ -15,7 +15,7 @@ module.exports = {
     filename: "index.js",
     library: "all"
   },
-  devtool: "inline-source-map",
+  // devtool: "inline-source-map",
   module: {
     rules: [
       {

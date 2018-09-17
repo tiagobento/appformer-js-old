@@ -1,6 +1,6 @@
-import {MarshallingContext} from "marshalling/MarshallingContext";
-import {JavaDouble} from "../../../java-wrappers/JavaDouble";
-import {JavaDoubleMarshaller} from "..//JavaDoubleMarshaller";
+import {MarshallingContext} from "../../MarshallingContext";
+import {JavaDouble} from "../../../java-wrappers";
+import {JavaDoubleMarshaller} from "../JavaDoubleMarshaller";
 
 describe("marshall", () => {
   test("with regular double, should return the same value", () => {

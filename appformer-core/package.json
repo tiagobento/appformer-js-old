@@ -41,7 +41,7 @@
     "test": "jest",
     "start": "npx webpack-dev-server --open",
     "build:dev": "webpack",
-    "build:prod": "npm run lint  && webpack --mode production && mvn clean install -f ../appformer-js-maven/pom.xml"
+    "build:prod": "npm run lint && npm test && webpack --mode production && mvn clean install -f ../appformer-js-maven/pom.xml"
   },
   "babel": {
     "presets": [

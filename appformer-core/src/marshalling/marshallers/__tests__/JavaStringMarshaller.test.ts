@@ -1,6 +1,6 @@
-import {MarshallingContext} from "marshalling/MarshallingContext";
-import {JavaString} from "../../../java-wrappers/JavaString";
-import {JavaStringMarshaller} from "..//JavaStringMarshaller";
+import {MarshallingContext} from "../../MarshallingContext";
+import {JavaString} from "../../../java-wrappers";
+import {JavaStringMarshaller} from "../JavaStringMarshaller";
 
 describe("marshall", () => {
   test("with regular string, should return the same value", () => {
