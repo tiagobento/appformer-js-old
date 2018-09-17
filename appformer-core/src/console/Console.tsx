@@ -1,5 +1,5 @@
 import * as React from "react";
-import {DefaultScreenContainerId, Screen} from "../api/Components";
+import {DefaultScreenContainerId, Screen} from "../api";
 import {ConsoleDock} from "./ConsoleDock";
 import {EventsSimulationConsole} from "./EventsSimulationConsole";
 

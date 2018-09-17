@@ -1,6 +1,6 @@
 import * as ReactDOM from "react-dom";
-import { Perspective, Screen } from "./Components";
-import { JsBridge }from "../internal/JsBridge";
+import {Perspective, Screen} from "./Components";
+import {JsBridge} from "../internal/JsBridge";
 
 export * from "./Components";
 

@@ -1,13 +1,11 @@
-import { MarshallerProvider } from "../../MarshallerProvider";
-import { JavaHashMap, JavaBoolean } from "../../../java-wrappers";
-import { JavaHashMapMarshaller } from "../JavaHashMapMarshaller";
-import { MarshallingContext } from "../../MarshallingContext";
-import { ErraiObjectConstants } from "../../model/ErraiObjectConstants";
-import { TestUtils } from "../../../__tests__/util/TestUtils";
-import { JavaInteger } from "../../../java-wrappers";
-import { JavaBigInteger } from "../../../java-wrappers";
-import { Portable } from "../../../internal";
-import { DefaultMarshaller } from "../DefaultMarshaller";
+import {MarshallerProvider} from "../../MarshallerProvider";
+import {JavaBigInteger, JavaBoolean, JavaHashMap, JavaInteger} from "../../../java-wrappers";
+import {JavaHashMapMarshaller} from "../JavaHashMapMarshaller";
+import {MarshallingContext} from "../../MarshallingContext";
+import {ErraiObjectConstants} from "../../model/ErraiObjectConstants";
+import {TestUtils} from "../../../__tests__/util/TestUtils";
+import {Portable} from "../../../internal";
+import {DefaultMarshaller} from "../DefaultMarshaller";
 
 describe("marshall", () => {
   const encodedType = ErraiObjectConstants.ENCODED_TYPE;

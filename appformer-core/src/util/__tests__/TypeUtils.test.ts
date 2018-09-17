@@ -1,4 +1,4 @@
-import { isArray, isBoolean, isDate, isMap, isSet, isString } from "../TypeUtils";
+import {isArray, isBoolean, isDate, isMap, isSet, isString} from "../TypeUtils";
 
 describe("isString", () => {
   test("with direct assigned string, should return true", () => {

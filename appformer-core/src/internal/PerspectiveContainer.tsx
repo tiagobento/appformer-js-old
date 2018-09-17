@@ -1,8 +1,8 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import { Screen, Perspective, DefaultScreenContainerId } from "../api/Components";
-import {JsBridge} from "../internal/JsBridge";
-import {ScreenContainer} from "../internal/ScreenContainer";
+import {DefaultScreenContainerId, Perspective, Screen} from "../api";
+import {JsBridge} from "./JsBridge";
+import {ScreenContainer} from "./ScreenContainer";
 
 interface Props {
   root: { ss: Screen[]; ps: Perspective[] };

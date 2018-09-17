@@ -1,6 +1,6 @@
 import {MarshallerProvider} from "../MarshallerProvider";
 import * as Marshalling from "../Marshalling";
-import {JavaInteger} from "../../java-wrappers/JavaInteger";
+import {JavaInteger} from "../../java-wrappers";
 import {ErraiObjectConstants} from "../model/ErraiObjectConstants";
 
 describe("marshall", () => {

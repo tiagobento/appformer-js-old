@@ -1,24 +1,26 @@
-import {DefaultMarshaller} from "..//DefaultMarshaller";
-import {MarshallingContext} from "../..//MarshallingContext";
-import {ErraiObjectConstants} from "../..//model/ErraiObjectConstants";
+import {
+    JavaArrayList,
+    JavaBigDecimal,
+    JavaBigInteger,
+    JavaBoolean,
+    JavaByte,
+    JavaDate,
+    JavaDouble,
+    JavaFloat,
+    JavaHashMap,
+    JavaHashSet,
+    JavaInteger,
+    JavaLong,
+    JavaOptional,
+    JavaShort,
+    JavaString
+} from "../../../java-wrappers";
+import {DefaultMarshaller} from "../DefaultMarshaller";
+import {MarshallingContext} from "../../MarshallingContext";
+import {ErraiObjectConstants} from "../../model/ErraiObjectConstants";
 import {TestUtils} from "../../../__tests__/util/TestUtils";
-import {MarshallerProvider} from "../..//MarshallerProvider";
-import {JavaInteger} from "../../../java-wrappers/JavaInteger";
-import {JavaBigDecimal} from "../../../java-wrappers/JavaBigDecimal";
-import {JavaBigInteger} from "../../../java-wrappers/JavaBigInteger";
-import {JavaBoolean} from "../../../java-wrappers/JavaBoolean";
-import {JavaByte} from "../../../java-wrappers/JavaByte";
-import {JavaDouble} from "../../../java-wrappers/JavaDouble";
-import {JavaFloat} from "../../../java-wrappers/JavaFloat";
-import {JavaLong} from "../../../java-wrappers/JavaLong";
-import {JavaShort} from "../../../java-wrappers/JavaShort";
-import {JavaString} from "../../../java-wrappers/JavaString";
-import {JavaArrayList} from "../../../java-wrappers/JavaArrayList";
-import {JavaHashSet} from "../../../java-wrappers/JavaHashSet";
-import {Portable} from "../../../internal/model/Portable";
-import {JavaDate} from "../../../java-wrappers/JavaDate";
-import {JavaOptional} from "../../../java-wrappers/JavaOptional";
-import {JavaHashMap} from "../../../java-wrappers/JavaHashMap";
+import {MarshallerProvider} from "../../MarshallerProvider";
+import {Portable} from "../../../internal";
 
 describe("marshall", () => {
   const objectId = ErraiObjectConstants.OBJECT_ID;

@@ -1,10 +1,10 @@
-import { NullableMarshaller } from "../marshallers/NullableMarshaller";
-import { ErraiObjectConstants } from "../model/ErraiObjectConstants";
-import { GenericsTypeMarshallingUtils } from "../marshallers/util/GenericsTypeMarshallingUtils";
-import { JavaHashMap } from "../../java-wrappers/JavaHashMap";
-import { MarshallingContext } from "../MarshallingContext";
-import { ErraiObject } from "../model/ErraiObject";
-import { isString } from "../../util/TypeUtils";
+import {NullableMarshaller} from "./NullableMarshaller";
+import {ErraiObjectConstants} from "../model/ErraiObjectConstants";
+import {GenericsTypeMarshallingUtils} from "./util/GenericsTypeMarshallingUtils";
+import {JavaHashMap} from "../../java-wrappers";
+import {MarshallingContext} from "../MarshallingContext";
+import {ErraiObject} from "../model/ErraiObject";
+import {isString} from "../../util/TypeUtils";
 
 export class JavaHashMapMarshaller<T, U> extends NullableMarshaller<
   JavaHashMap<T | null, U | null>,

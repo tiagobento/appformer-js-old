@@ -1,4 +1,4 @@
-import { Screen, Perspective, Element } from "../api/Components";
+import {Element, Perspective, Screen} from "../api";
 import {Console} from "./Console";
 import * as React from "react";
 
