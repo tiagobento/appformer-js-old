@@ -1,6 +1,6 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import {DefaultScreenContainerId, Perspective, Screen} from "../api";
+import {DefaultScreenContainerId, Perspective, Screen} from "../api/Components";
 import {JsBridge} from "./JsBridge";
 import {ScreenContainer} from "./ScreenContainer";
 

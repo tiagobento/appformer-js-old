@@ -6,17 +6,25 @@ const CircularDependencyPlugin = require("circular-dependency-plugin");
 
 module.exports = merge(common, {
   entry: {
-    "appformer-core": "./src/index.ts"
+    "showcase_components": "./src/index.ts"
   },
+
+  externals: {
+    react: "React",
+    "react-dom": "ReactDOM",
+    "appformer-core": "AppFormer"
+  },
+
   output: {
     path: path.resolve(__dirname, "dist"),
-    filename: "appformer.js"
+    filename: "showcase_components.js"
   },
+
   plugins: [
     new CleanWebpackPlugin(["dist"]),
     new CircularDependencyPlugin({
       exclude: /node_modules/, // exclude detection of files based on a RegExp
-      failOnError: false, // add errors to webpack instead of warnings
+      failOnError: true, // add errors to webpack instead of warnings
       cwd: process.cwd() // set the current working directory for displaying module paths
     })
   ]

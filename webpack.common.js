@@ -7,9 +7,9 @@ module.exports = {
     "react-dom": "ReactDOM"
   },
   output: {
-    filename: "index.js",
     library: "all"
   },
+  devtool: "inline-source-map",
   module: {
     rules: [
       {

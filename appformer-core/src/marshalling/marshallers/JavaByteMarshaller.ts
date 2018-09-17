@@ -1,5 +1,5 @@
 import {NullableMarshaller} from "./NullableMarshaller";
-import {JavaByte} from "../../java-wrappers";
+import {JavaByte} from "../../java-wrappers/JavaByte";
 import {MarshallingContext} from "../MarshallingContext";
 
 export  class JavaByteMarshaller extends NullableMarshaller<JavaByte, number> {

@@ -1,5 +1,5 @@
 import {NullableMarshaller} from "./NullableMarshaller";
-import {JavaBigDecimal} from "../../java-wrappers";
+import {JavaBigDecimal} from "../../java-wrappers/JavaBigDecimal";
 import {ErraiObjectConstants} from "../model/ErraiObjectConstants";
 import {ErraiObject} from "../model/ErraiObject";
 import {MarshallingContext} from "../MarshallingContext";

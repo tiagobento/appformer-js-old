@@ -1,5 +1,5 @@
 import {NullableMarshaller} from "./NullableMarshaller";
-import {JavaDate} from "../../java-wrappers";
+import {JavaDate} from "../../java-wrappers/JavaDate";
 import {ErraiObject} from "../model/ErraiObject";
 import {ErraiObjectConstants} from "../model/ErraiObjectConstants";
 import {MarshallingContext} from "../MarshallingContext";

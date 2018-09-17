@@ -1,6 +1,6 @@
 import {MarshallingContext} from "../MarshallingContext";
 import {NullableMarshaller} from "./NullableMarshaller";
-import {JavaOptional} from "../../java-wrappers";
+import {JavaOptional} from "../../java-wrappers/JavaOptional";
 import {ErraiObject} from "../model/ErraiObject";
 import {GenericsTypeMarshallingUtils} from "./util/GenericsTypeMarshallingUtils";
 import {ErraiObjectConstants} from "../model/ErraiObjectConstants";

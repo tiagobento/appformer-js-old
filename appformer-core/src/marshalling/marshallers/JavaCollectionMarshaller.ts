@@ -2,7 +2,7 @@ import {JavaCollection} from "../../java-wrappers/JavaCollection";
 import {ErraiObject} from "../model/ErraiObject";
 import {MarshallingContext} from "../MarshallingContext";
 import {ErraiObjectConstants} from "../model/ErraiObjectConstants";
-import {Portable} from "../../internal";
+import {Portable} from "../../internal/model/Portable";
 import {NullableMarshaller} from "./NullableMarshaller";
 import {GenericsTypeMarshallingUtils} from "./util/GenericsTypeMarshallingUtils";
 

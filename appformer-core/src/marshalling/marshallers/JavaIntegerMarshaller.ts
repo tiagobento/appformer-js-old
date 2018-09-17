@@ -1,5 +1,5 @@
 import {MarshallingContext} from "../MarshallingContext";
-import {JavaInteger} from "../../java-wrappers";
+import {JavaInteger} from "../../java-wrappers/JavaInteger";
 import {NullableMarshaller} from "./NullableMarshaller";
 
 export class JavaIntegerMarshaller extends NullableMarshaller<JavaInteger, number> {

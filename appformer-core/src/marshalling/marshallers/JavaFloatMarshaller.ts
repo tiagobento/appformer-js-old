@@ -1,5 +1,5 @@
 import {NullableMarshaller} from "./NullableMarshaller";
-import {JavaFloat} from "../../java-wrappers";
+import {JavaFloat} from "../../java-wrappers/JavaFloat";
 import {MarshallingContext} from "../MarshallingContext";
 
 export class JavaFloatMarshaller extends NullableMarshaller<JavaFloat, number> {

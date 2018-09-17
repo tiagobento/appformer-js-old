@@ -1,4 +1,4 @@
-import {JavaLong} from "../../java-wrappers";
+import {JavaLong} from "../../java-wrappers/JavaLong";
 import {ErraiObject} from "../model/ErraiObject";
 import {MarshallingContext} from "../MarshallingContext";
 import {ErraiObjectConstants} from "../model/ErraiObjectConstants";

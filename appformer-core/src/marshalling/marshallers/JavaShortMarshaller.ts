@@ -1,4 +1,4 @@
-import {JavaShort} from "../../java-wrappers";
+import {JavaShort} from "../../java-wrappers/JavaShort";
 import {MarshallingContext} from "../MarshallingContext";
 import {NullableMarshaller} from "./NullableMarshaller";
 

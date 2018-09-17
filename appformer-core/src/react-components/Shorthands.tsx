@@ -1,11 +1,11 @@
-import * as AppFormer from "../";
+import * as API from "../API";
 import * as React from "react";
 
 export const Link = (props: { to: string; children: any }) => (
-  <span onClick={() => AppFormer.goTo(props.to)}>{props.children}</span>
+  <span onClick={() => API.goTo(props.to)}>{props.children}</span>
 );
 
-export const __i18 = (props: { tkey: string }) => <>{AppFormer.translate(props.tkey)}</>;
+export const __i18 = (props: { tkey: string }) => <>{API.translate(props.tkey)}</>;
 
 interface Props {
   name: string;

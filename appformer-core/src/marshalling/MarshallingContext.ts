@@ -1,6 +1,6 @@
 import {ErraiObject} from "./model/ErraiObject";
 import {ErraiObjectConstants} from "./model/ErraiObjectConstants";
-import {Portable} from "../internal";
+import {Portable} from "../internal/model/Portable";
 import {JavaWrapper} from "../java-wrappers/JavaWrapper";
 
 export class MarshallingContext {

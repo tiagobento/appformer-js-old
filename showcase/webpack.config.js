@@ -1,61 +1,53 @@
 const path = require("path");
+const merge = require("webpack-merge");
+const common = require("../webpack.common");
 const CleanWebpackPlugin = require("clean-webpack-plugin");
+const CircularDependencyPlugin = require("circular-dependency-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 
-module.exports = {
+module.exports = merge(common, {
   mode: "development",
   entry: {
-    appformer: "./src/appformer/index.ts",
-    "showcase/showcase-components": "./src/showcase-components/index.jsx",
-    "showcase/showcase": "./src/showcase/index.ts"
+    showcase: "./src/index.ts"
   },
   externals: {
-    // 'core': "core", //FIXME: Do we want to exclude core from the build?
     react: "React",
-    "react-dom": "ReactDOM"
+    "react-dom": "ReactDOM",
+    "appformer-core": "AppFormer"
   },
   output: {
     path: path.resolve(__dirname, "dist"),
-    filename: "[name].bundle.js",
-    library: "all"
+    filename: "showcase.js"
   },
   devtool: "inline-source-map",
   devServer: {
-    contentBase: path.join(__dirname, "./dist/showcase"),
+    contentBase: [path.join(__dirname, "./dist"), path.join(__dirname, "../appformer-core/dist")],
     compress: true,
     port: 9000,
     historyApiFallback: {
-      index: "/showcase/index.html"
+      index: "/index.html"
     }
   },
   module: {
     rules: [
-      {
-        test: /\.tsx?$/,
-        loader: "ts-loader"
-      },
-      {
-        test: /\.jsx?$/,
-        exclude: /node_modules/,
-        use: ["babel-loader"]
-      },
       {
         test: /-?[Pp]erspective\.(html)$/,
         use: ["html-loader"]
       }
     ]
   },
-  resolve: {
-    extensions: [".tsx", ".ts", ".js", ".jsx"],
-    modules: [path.resolve("./node_modules"), path.resolve("./src/")]
-  },
   plugins: [
     new CleanWebpackPlugin(["dist"]),
     new HtmlWebpackPlugin({
-      title: "AppFormer.js :: Core Screens",
-      filename: "showcase/index.html",
-      chunks: ["showcase/showcase"],
-      template: "./src/showcase/index.template.html"
+      title: "AppFormer.js :: Showcase",
+      filename: "index.html",
+      chunks: ["showcase"],
+      template: "./src/index.template.html"
+    }),
+    new CircularDependencyPlugin({
+      exclude: /node_modules/, // exclude detection of files based on a RegExp
+      failOnError: true, // add errors to webpack instead of warnings
+      cwd: process.cwd() // set the current working directory for displaying module paths
     })
   ]
-};
+});

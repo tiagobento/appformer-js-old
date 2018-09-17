@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Perspective, Screen} from "../api";
+import {Perspective, Screen} from "../api/Components";
 import {JsBridge} from "./JsBridge";
 
 interface Props {
