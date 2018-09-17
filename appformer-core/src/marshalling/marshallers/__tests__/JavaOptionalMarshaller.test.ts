@@ -1,12 +1,9 @@
 import {MarshallingContext} from "../../MarshallingContext";
-import {JavaInteger} from "../../../java-wrappers";
+import {JavaBigInteger, JavaBoolean, JavaInteger, JavaOptional} from "../../../java-wrappers";
 import {ErraiObjectConstants} from "../../model/ErraiObjectConstants";
 import {MarshallerProvider} from "../../MarshallerProvider";
-import {JavaBigInteger} from "../../../java-wrappers";
 import {Portable} from "../../../internal";
 import {TestUtils} from "../../../__tests__/util/TestUtils";
-import {JavaBoolean} from "../../../java-wrappers";
-import {JavaOptional} from "../../../java-wrappers";
 import {JavaOptionalMarshaller} from "../JavaOptionalMarshaller";
 
 describe("marshall", () => {

@@ -1,11 +1,11 @@
-import { BigNumber } from "bignumber.js";
-import { BigNumberWrapper } from "./BigNumberWrapper";
-import { JavaByte } from "./JavaByte";
-import { JavaNumber, asByte, asDouble, asFloat, asInteger, asLong, asShort } from "./JavaNumber";
-import { JavaDouble } from "./JavaDouble";
-import { JavaFloat } from "./JavaFloat";
-import { JavaInteger } from "./JavaInteger";
-import { JavaShort } from "./JavaShort";
+import {BigNumber} from "bignumber.js";
+import {BigNumberWrapper} from "./BigNumberWrapper";
+import {JavaByte} from "./JavaByte";
+import {asByte, asDouble, asFloat, asInteger, asLong, asShort, JavaNumber} from "./JavaNumber";
+import {JavaDouble} from "./JavaDouble";
+import {JavaFloat} from "./JavaFloat";
+import {JavaInteger} from "./JavaInteger";
+import {JavaShort} from "./JavaShort";
 
 export class JavaLong extends BigNumberWrapper implements JavaNumber {
   public static readonly MIN_VALUE = new BigNumber("-9223372036854775808", 10);

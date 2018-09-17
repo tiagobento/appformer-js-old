@@ -1,4 +1,4 @@
-import { NumberWrapper } from "./NumberWrapper";
+import {NumberWrapper} from "./NumberWrapper";
 
 export abstract class IntegerBasedJavaNumber extends NumberWrapper {
   protected from(asString: string): number {

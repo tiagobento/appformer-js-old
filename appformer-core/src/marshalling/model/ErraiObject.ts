@@ -1,4 +1,4 @@
-import { ErraiObjectConstants } from "./ErraiObjectConstants";
+import {ErraiObjectConstants} from "./ErraiObjectConstants";
 
 export interface ErraiObject {
   [ErraiObjectConstants.ENCODED_TYPE]?: string;

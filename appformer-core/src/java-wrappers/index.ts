@@ -1,4 +1,4 @@
-export {JavaArrayList as List} from "./JavaArrayList";
+export * from "./JavaArrayList";
 export * from "./JavaHashMap";
 export * from "./JavaHashSet";
 export * from "./JavaByte";

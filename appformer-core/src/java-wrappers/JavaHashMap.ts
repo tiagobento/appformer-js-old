@@ -1,4 +1,4 @@
-import { JavaWrapper } from "./JavaWrapper";
+import {JavaWrapper} from "./JavaWrapper";
 
 export class JavaHashMap<T, U> extends JavaWrapper<Map<T, U>> {
   private readonly _fqcn = "java.util.HashMap";

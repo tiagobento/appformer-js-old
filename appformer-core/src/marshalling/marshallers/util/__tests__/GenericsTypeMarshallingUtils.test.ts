@@ -1,31 +1,33 @@
-import {JavaArrayList} from "../../../../java-wrappers/JavaArrayList";
+import {
+    JavaArrayList,
+    JavaBigDecimal,
+    JavaBigInteger,
+    JavaBoolean,
+    JavaByte,
+    JavaDate,
+    JavaDouble,
+    JavaFloat,
+    JavaHashMap,
+    JavaHashSet,
+    JavaInteger,
+    JavaLong,
+    JavaOptional,
+    JavaShort,
+    JavaString
+} from "../../../../java-wrappers";
 import {GenericsTypeMarshallingUtils} from "../GenericsTypeMarshallingUtils";
 import {MarshallingContext} from "../../../MarshallingContext";
 import {JavaArrayListMarshaller, JavaHashSetMarshaller} from "../../JavaCollectionMarshaller";
 import {ErraiObjectConstants} from "../../../model/ErraiObjectConstants";
-import {MarshallerProvider} from "../../..//MarshallerProvider";
-import {JavaBigDecimal} from "../../../../java-wrappers/JavaBigDecimal";
-import {JavaBigDecimalMarshaller} from "../..//JavaBigDecimalMarshaller";
-import {JavaBigInteger} from "../../../../java-wrappers/JavaBigInteger";
-import {JavaBigIntegerMarshaller} from "../..//JavaBigIntegerMarshaller";
-import {JavaHashMap} from "../../../../java-wrappers/JavaHashMap";
+import {MarshallerProvider} from "../../../MarshallerProvider";
+import {JavaBigDecimalMarshaller} from "../../JavaBigDecimalMarshaller";
+import {JavaBigIntegerMarshaller} from "../../JavaBigIntegerMarshaller";
 import {JavaHashMapMarshaller} from "../../JavaHashMapMarshaller";
-import {JavaHashSet} from "../../../../java-wrappers/JavaHashSet";
-import {JavaLong} from "../../../../java-wrappers/JavaLong";
-import {JavaDate} from "../../../../java-wrappers/JavaDate";
-import {JavaString} from "../../../../java-wrappers/JavaString";
 import {JavaLongMarshaller} from "../../JavaLongMarshaller";
 import {JavaStringMarshaller} from "../../JavaStringMarshaller";
 import {JavaDateMarshaller} from "../../JavaDateMarshaller";
 import {DefaultMarshaller} from "../../DefaultMarshaller";
-import {Portable} from "../../../../internal/model/Portable";
-import {JavaBoolean} from "../../../../java-wrappers/JavaBoolean";
-import {JavaByte} from "../../../../java-wrappers/JavaByte";
-import {JavaFloat} from "../../../../java-wrappers/JavaFloat";
-import {JavaInteger} from "../../../../java-wrappers/JavaInteger";
-import {JavaShort} from "../../../../java-wrappers/JavaShort";
-import {JavaDouble} from "../../../../java-wrappers/JavaDouble";
-import {JavaOptional} from "../../../../java-wrappers/JavaOptional";
+import {Portable} from "../../../../internal";
 import {JavaOptionalMarshaller} from "../../JavaOptionalMarshaller";
 
 describe("marshallGenericsTypeElement", () => {

@@ -1,7 +1,7 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import { Perspective, Screen, Element } from "../api/Components";
-import {Root} from "../internal/Root";
+import {Element, Perspective, Screen} from "../api";
+import {Root} from "./Root";
 
 export class JsBridge {
   public root: () => Root;

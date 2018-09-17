@@ -1,4 +1,4 @@
-import { Portable } from "../internal/model/Portable";
+import {Portable} from "../internal";
 
 export abstract class JavaWrapper<T> implements Portable<JavaWrapper<T>> {
   private static readonly javaWrapperInstanceIdentifier = "fbeef485-6129-4c23-a047-166c6d2fb7a9";
