@@ -1,4 +1,4 @@
-import * as API from "../API";
+import * as API from "../";
 import * as React from "react";
 
 export const Link = (props: { to: string; children: any }) => (

@@ -4,7 +4,7 @@ import {Element, Perspective, Screen} from "../api/Components";
 import {Root} from "./Root";
 
 export class JsBridge {
-  public root: () => Root;
+  private root: () => Root;
 
   public init(callback: () => void) {
     const root = <Root exposing={r => (this.root = r)} bridge={this} />;

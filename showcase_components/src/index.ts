@@ -1,13 +1,5 @@
-// export * from "./ShowcaseComponents";
+export * from "./ShowcaseComponents";
+import * as AppFormer from "appformer-core";
+import * as Components from "./ShowcaseComponents";
 
-export function Caio() {
-    return "aew";
-    // public readonly asd:string;
-
-    // constructor() {
-    //     this.asd = "UHUL!!!!";
-    // }
-}
-
-
-console.info("CAio");
+AppFormer.register(Components);

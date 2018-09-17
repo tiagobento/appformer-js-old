@@ -6,10 +6,9 @@
   "main": "./dist/showcase.js",
   "types": "./dist/index.d.ts",
   "dependencies": {
-    "@types/lodash": "^4.14.116",
     "@types/react": "^16.4.6",
     "@types/react-dom": "^16.0.6",
-    "lodash": "^4.17.11",
+    "appformer-core": "file:../appformer-core",
     "react": "^16.4.1",
     "react-dom": "^16.4.1",
     "showcase_components": "file:../showcase_components"

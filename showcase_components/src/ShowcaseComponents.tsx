@@ -97,7 +97,6 @@ export class ReactComponentScreen extends Screen {
   }
 
   public af_componentRoot() {
-    const Component = DemoReactComponent as any;
     return (
       <div>
         <br />
@@ -106,7 +105,7 @@ export class ReactComponentScreen extends Screen {
         </button>
         <br />
 
-        <Component number={this.af_componentId} onFoo={(x: any) => (this.onFoo = x)} />
+        <DemoReactComponent number={this.af_componentId} onFoo={(x: any) => (this.onFoo = x)} />
       </div>
     );
   }
