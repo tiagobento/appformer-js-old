@@ -1,4 +1,5 @@
 import { JavaOptional } from "../JavaOptional";
+import { JavaHashSet } from "../JavaHashSet";
 
 describe("get", () => {
   describe("with valid input", () => {
@@ -17,6 +18,45 @@ describe("get", () => {
 
       expect(() => optional.get()).toThrowError();
     });
+  });
+});
+
+describe("set", () => {
+  test("with defined direct value, should set", () => {
+    const input = new JavaOptional("foo");
+    expect(input.get()).toEqual("foo");
+
+    input.set("bar");
+
+    expect(input.get()).toEqual("bar");
+  });
+
+  test("with undefined direct value, should set", () => {
+    const input = new JavaOptional("foo");
+    expect(input.get()).toEqual("foo");
+
+    input.set(undefined);
+
+    expect(() => input.get()).toThrowError();
+  });
+
+
+  test("with defined value from function, should set", () => {
+    const input = new JavaOptional("foo");
+    expect(input.get()).toEqual("foo");
+
+    input.set(cur => cur + "bar");
+
+    expect(input.get()).toEqual("foobar");
+  });
+
+  test("with undefined value from function, should set", () => {
+    const input = new JavaOptional("foo");
+    expect(input.get()).toEqual("foo");
+
+    input.set(_ => undefined);
+
+    expect(() => input.get()).toThrowError();
   });
 });
 

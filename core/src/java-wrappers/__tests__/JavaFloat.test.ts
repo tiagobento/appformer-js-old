@@ -82,6 +82,44 @@ describe("get", () => {
   });
 });
 
+describe("set", () => {
+  test("with valid direct value, should set", () => {
+    const input = new JavaFloat("1");
+    expect(input.get()).toEqual(1);
+
+    input.set(2);
+
+    expect(input.get()).toEqual(2);
+  });
+
+  test("with invalid direct value, should set NaN", () => {
+    const input = new JavaFloat("1");
+    expect(input.get()).toEqual(1);
+
+    input.set(JavaFloat.MAX_VALUE * 2);
+
+    expect(input.get()).toEqual(NaN);
+  });
+
+  test("with valid value from function, should set", () => {
+    const input = new JavaFloat("1");
+    expect(input.get()).toEqual(1);
+
+    input.set(cur => 2 + cur);
+
+    expect(input.get()).toEqual(3);
+  });
+
+  test("with invalid value from function, should set NaN", () => {
+    const input = new JavaFloat("2");
+    expect(input.get()).toEqual(2);
+
+    input.set(cur => JavaFloat.MAX_VALUE * cur);
+
+    expect(input.get()).toEqual(NaN);
+  });
+});
+
 describe("doubleValue", () => {
   test("should convert successfully", () => {
     const input = new JavaFloat("1.1");

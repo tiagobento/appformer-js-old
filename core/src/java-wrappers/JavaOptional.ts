@@ -3,11 +3,11 @@ import { JavaWrapper } from "./JavaWrapper";
 export class JavaOptional<T> extends JavaWrapper<T | undefined> {
   private readonly _fqcn = "java.util.Optional";
 
-  private readonly _value: T | undefined;
+  private _value: T | undefined;
 
   constructor(value?: T) {
     super();
-    this._value = value;
+    this.set(value);
   }
 
   public get(): T {
@@ -20,5 +20,13 @@ export class JavaOptional<T> extends JavaWrapper<T | undefined> {
 
   public isPresent(): boolean {
     return this._value !== undefined;
+  }
+
+  public set(val: ((current: T | undefined) => T | undefined) | T | undefined): void {
+    if (typeof val === "function") {
+      this._value = val(this.get());
+    } else {
+      this._value = val;
+    }
   }
 }

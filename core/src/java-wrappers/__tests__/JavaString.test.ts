@@ -20,6 +20,26 @@ describe("get", () => {
   });
 });
 
+describe("set", () => {
+  test("with direct value, should set", () => {
+    const input = new JavaString("foo");
+    expect(input.get()).toBe("foo");
+
+    input.set("bar");
+
+    expect(input.get()).toBe("bar");
+  });
+
+  test("with value from function, should set", () => {
+    const input = new JavaString("foo");
+    expect(input.get()).toBe("foo");
+
+    input.set(cur => cur + "bar");
+
+    expect(input.get()).toBe("foobar");
+  });
+});
+
 describe("_fqcn", () => {
   test("must be the same than in Java", () => {
     const fqcn = (new JavaString("foo") as any)._fqcn;

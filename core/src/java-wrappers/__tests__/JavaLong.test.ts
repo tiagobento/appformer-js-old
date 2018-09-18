@@ -117,6 +117,44 @@ describe("get", () => {
   });
 });
 
+describe("set", () => {
+  test("with valid direct value, should set", () => {
+    const input = new JavaLong("1");
+    expect(input.get()).toEqual(new BigNumber("1"));
+
+    input.set(new BigNumber("2"));
+
+    expect(input.get()).toEqual(new BigNumber("2"));
+  });
+
+  test("with invalid direct value, should set NaN", () => {
+    const input = new JavaLong("1");
+    expect(input.get()).toEqual(new BigNumber("1"));
+
+    input.set(new BigNumber(`${JavaLong.MAX_VALUE}`).plus(1, 10));
+
+    expect(input.get()).toEqual(new BigNumber(NaN));
+  });
+
+  test("with valid value from function, should set", () => {
+    const input = new JavaLong("1");
+    expect(input.get()).toEqual(new BigNumber("1"));
+
+    input.set(cur => new BigNumber("2").plus(cur));
+
+    expect(input.get()).toEqual(new BigNumber("3"));
+  });
+
+  test("with invalid value from function, should set NaN", () => {
+    const input = new JavaLong(`${JavaLong.MAX_VALUE}`);
+    expect(input.get()).toEqual(new BigNumber(`${JavaLong.MAX_VALUE}`));
+
+    input.set(cur => new BigNumber(`${JavaLong.MAX_VALUE}`).plus(cur));
+
+    expect(input.get()).toEqual(new BigNumber(NaN));
+  });
+});
+
 describe("doubleValue", () => {
   test("should convert successfully", () => {
     const input = new JavaLong("1");

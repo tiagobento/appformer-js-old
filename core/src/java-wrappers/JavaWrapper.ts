@@ -5,6 +5,8 @@ export abstract class JavaWrapper<T> implements Portable<JavaWrapper<T>> {
 
   public abstract get(): T;
 
+  public abstract set(val: T | ((current: T) => T)): void;
+
   private instanceIdentifier(): string {
     return JavaWrapper.javaWrapperInstanceIdentifier;
   }

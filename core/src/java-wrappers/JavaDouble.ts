@@ -10,7 +10,8 @@ export class JavaDouble extends FloatBasedJavaNumber implements JavaNumber {
   private readonly _fqcn = "java.lang.Double";
 
   protected isInRange(n: number): boolean {
-    return true; // JS' numbers are 64 bits long like Java's Double
+    // JS' numbers are 64 bits long like Java's Double
+    return n >= -1 * Number.MAX_VALUE && n <= Number.MAX_VALUE;
   }
 
   public byteValue(): JavaByte {

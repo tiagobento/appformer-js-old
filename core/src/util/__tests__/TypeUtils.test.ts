@@ -1,4 +1,17 @@
-import { isArray, isBoolean, isDate, isMap, isSet, isString } from "../TypeUtils";
+import {
+  instanceOfArray,
+  instanceOfBoolean,
+  instanceOfDate,
+  instanceOfMap,
+  instanceOfSet,
+  instanceOfString,
+  isArray,
+  isBoolean,
+  isDate,
+  isMap,
+  isSet,
+  isString
+} from "../TypeUtils";
 
 describe("isString", () => {
   test("with direct assigned string, should return true", () => {
@@ -21,6 +34,32 @@ describe("isString", () => {
     const input = 1;
 
     const output = isString(input);
+
+    expect(output).toBeFalsy();
+  });
+});
+
+describe("instanceOfString", () => {
+  test("with direct assigned string, should return true", () => {
+    const input = "str";
+
+    const output = instanceOfString(input);
+
+    expect(output).toBeTruthy();
+  });
+
+  test("with string created via constructor, should return true", () => {
+    const input = String("str");
+
+    const output = instanceOfString(input);
+
+    expect(output).toBeTruthy();
+  });
+
+  test("with non-string input, should return false", () => {
+    const input = 1;
+
+    const output = instanceOfString(input);
 
     expect(output).toBeFalsy();
   });
@@ -52,6 +91,32 @@ describe("isArray", () => {
   });
 });
 
+describe("instanceOfArray", () => {
+  test("with direct assigned array, should return true", () => {
+    const input = [1, 2, 3];
+
+    const output = instanceOfArray(input);
+
+    expect(output).toBeTruthy();
+  });
+
+  test("with array created via constructor, should return true", () => {
+    const input = new Array(1, 2, 3);
+
+    const output = instanceOfArray(input);
+
+    expect(output).toBeTruthy();
+  });
+
+  test("with non-array input, should return false", () => {
+    const input = 1;
+
+    const output = instanceOfArray(input);
+
+    expect(output).toBeFalsy();
+  });
+});
+
 describe("isSet", () => {
   test("with set created via constructor, should return true", () => {
     const input = new Set([1, 2, 3]);
@@ -70,6 +135,24 @@ describe("isSet", () => {
   });
 });
 
+describe("instanceOfSet", () => {
+  test("with set created via constructor, should return true", () => {
+    const input = new Set([1, 2, 3]);
+
+    const output = instanceOfSet(input);
+
+    expect(output).toBeTruthy();
+  });
+
+  test("with non-set input, should return false", () => {
+    const input = 1;
+
+    const output = instanceOfSet(input);
+
+    expect(output).toBeFalsy();
+  });
+});
+
 describe("isMap", () => {
   test("with map created via constructor, should return true", () => {
     const input = new Map([[1, 2]]);
@@ -83,6 +166,24 @@ describe("isMap", () => {
     const input = 1;
 
     const output = isMap(input);
+
+    expect(output).toBeFalsy();
+  });
+});
+
+describe("instanceOfMap", () => {
+  test("with map created via constructor, should return true", () => {
+    const input = new Map([[1, 2]]);
+
+    const output = instanceOfMap(input);
+
+    expect(output).toBeTruthy();
+  });
+
+  test("with non-set input, should return false", () => {
+    const input = 1;
+
+    const output = instanceOfMap(input);
 
     expect(output).toBeFalsy();
   });
@@ -114,6 +215,32 @@ describe("isBoolean", () => {
   });
 });
 
+describe("instanceOfBoolean", () => {
+  test("with direct assigned boolean, should return true", () => {
+    const input = false;
+
+    const output = instanceOfBoolean(input);
+
+    expect(output).toBeTruthy();
+  });
+
+  test("with boolean created via constructor, should return true", () => {
+    const input = Boolean(false);
+
+    const output = instanceOfBoolean(input);
+
+    expect(output).toBeTruthy();
+  });
+
+  test("with non-boolean input, should return false", () => {
+    const input = 1;
+
+    const output = instanceOfBoolean(input);
+
+    expect(output).toBeFalsy();
+  });
+});
+
 describe("isDate", () => {
   test("with date created via constructor, should return true", () => {
     const input = new Date();
@@ -127,6 +254,24 @@ describe("isDate", () => {
     const input = 1;
 
     const output = isDate(input);
+
+    expect(output).toBeFalsy();
+  });
+});
+
+describe("instanceOfDate", () => {
+  test("with date created via constructor, should return true", () => {
+    const input = new Date();
+
+    const output = instanceOfDate(input);
+
+    expect(output).toBeTruthy();
+  });
+
+  test("with non-date input, should return false", () => {
+    const input = 1;
+
+    const output = instanceOfDate(input);
 
     expect(output).toBeFalsy();
   });
