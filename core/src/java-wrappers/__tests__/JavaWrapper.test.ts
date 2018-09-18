@@ -30,5 +30,9 @@ describe("extendsJavaWrapper", () => {
     public get(): number {
       return this._value;
     }
+
+    public set(val: ((current: number) => number) | number): void {
+      // not used
+    }
   }
 });
