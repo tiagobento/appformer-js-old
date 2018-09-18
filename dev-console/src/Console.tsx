@@ -1,5 +1,5 @@
 import * as React from "react";
-import {DefaultScreenContainerId, Screen} from "appformer-core";
+import {DefaultScreenContainerId, Screen} from "appformer-js";
 import {ConsoleDock} from "./ConsoleDock";
 import {EventsSimulationConsole} from "./EventsSimulationConsole";
 

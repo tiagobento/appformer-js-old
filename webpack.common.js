@@ -3,8 +3,18 @@ const path = require("path");
 module.exports = {
   mode: "development",
   externals: {
-    react: "React",
-    "react-dom": "ReactDOM"
+    react: {
+      root: "React", //indicates global variable
+      commonjs: "react",
+      commonjs2: "react",
+      amd: "react"
+    },
+    "react-dom": {
+      root: "ReactDOM", //indicates global variable
+      commonjs: "react-dom",
+      commonjs2: "react-dom",
+      amd: "react-dom"
+    }
   },
   devtool: "inline-source-map",
   module: {

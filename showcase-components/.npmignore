@@ -1,2 +1,7 @@
 tsconfig.json
 src
+jar
+prettier.config.js
+webpack.config.js
+package-lock.json
+jest.config.js

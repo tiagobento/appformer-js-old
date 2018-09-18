@@ -1,5 +1,5 @@
 {
-  "name": "dev-console",
+  "name": "appformer-js-dev-console",
   "version": "1.0.0",
   "description": "",
   "license": "Apache-2.0",
@@ -8,7 +8,7 @@
   "dependencies": {
     "@types/react": "^16.4.6",
     "@types/react-dom": "^16.0.6",
-    "appformer-core": "file:../core",
+    "appformer-js": "file:../core",
     "react": "^16.4.1",
     "react-dom": "^16.4.1"
   },

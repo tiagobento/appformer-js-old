@@ -11,13 +11,11 @@ module.exports = merge(common, {
     showcase: "./src/index.ts"
   },
   externals: {
-    react: "React",
-    "react-dom": "ReactDOM",
-    "appformer-core": {
-      commonjs: "appformer-core",
-      commonjs2: "appformer-core",
-      amd: "appformer-core",
-      root: "AppFormer" // indicates global variable
+    "appformer-js": {
+      root: "AppFormer", // indicates global variable
+      amd: "appformer-js",
+      commonjs: "appformer-js",
+      commonjs2: "appformer-js"
     }
   },
   output: {

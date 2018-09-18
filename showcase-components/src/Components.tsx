@@ -1,6 +1,6 @@
 import * as React from "react";
 import { DemoReactComponent } from "./DemoReactComponent";
-import { JavaInteger, Screen } from "appformer-core";
+import { JavaInteger, Screen } from "appformer-js";
 // import TestMessagesService from "output/uberfire-webapp/org/uberfire/shared/TestMessagesService";
 // import TestEvent from "output/uberfire-webapp/org/uberfire/shared/TestEvent";
 // import Foo from "output/uberfire-webapp/org/uberfire/shared/Foo";

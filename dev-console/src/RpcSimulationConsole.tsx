@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Screen} from "appformer-core";
+import {Screen} from "appformer-js";
 
 interface Props {
   screens: Screen[];

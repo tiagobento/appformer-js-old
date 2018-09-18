@@ -6,7 +6,7 @@ const CircularDependencyPlugin = require("circular-dependency-plugin");
 
 module.exports = merge(common, {
   entry: {
-    "appformer-core": "./src/index.ts"
+    "appformer-js": "./src/index.ts"
   },
   output: {
     path: path.resolve(__dirname, "dist"),

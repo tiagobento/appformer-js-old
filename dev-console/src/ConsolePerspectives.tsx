@@ -1,6 +1,6 @@
 import * as React from "react";
 import {Console} from "./Console";
-import {Element, Perspective, Screen} from "appformer-core";
+import {Element, Perspective, Screen} from "appformer-js";
 
 export class ConsoleDefaultPerspective extends Perspective {
   constructor() {

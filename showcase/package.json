@@ -1,5 +1,5 @@
 {
-  "name": "showcase",
+  "name": "appformer-js-showcase",
   "version": "1.0.0",
   "description": "",
   "license": "Apache-2.0",
@@ -8,11 +8,11 @@
   "dependencies": {
     "@types/react": "^16.4.6",
     "@types/react-dom": "^16.0.6",
-    "appformer-core": "file:../core",
-    "dev-console": "file:../dev-console",
+    "appformer-js": "file:../core",
+    "appformer-js-dev-console": "file:../dev-console",
+    "appformer-js-showcase-components": "file:../showcase-components",
     "react": "^16.4.1",
-    "react-dom": "^16.4.1",
-    "showcase-components": "file:../showcase-components"
+    "react-dom": "^16.4.1"
   },
   "devDependencies": {
     "@types/jest": "^23.3.1",

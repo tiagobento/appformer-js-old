@@ -1,5 +1,5 @@
 import * as React from "react";
-import { ExampleList } from "appformer-core";
+import { ExampleList } from "appformer-js";
 
 interface Props {
   number: string;
