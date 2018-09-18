@@ -16,7 +16,7 @@ module.exports = {
       amd: "react-dom"
     }
   },
-  devtool: "inline-source-map",
+  // devtool: "inline-source-map",
   module: {
     rules: [
       {

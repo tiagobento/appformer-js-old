@@ -4,4 +4,3 @@ import { ConsoleHeader, ConsoleDefaultPerspective } from "appformer-js-dev-conso
 
 //Registers the AppFormer components and the DevConsole components
 AppFormer.register({ ...ShowcaseComponents,  ConsoleDefaultPerspective, ConsoleHeader });
-
