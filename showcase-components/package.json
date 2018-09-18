@@ -1,14 +1,14 @@
 {
-  "name": "showcase_components",
+  "name": "showcase-components",
   "version": "1.0.0",
   "description": "",
   "license": "Apache-2.0",
-  "main": "./dist/showcase_components.js",
+  "main": "./dist/showcase-components.js",
   "types": "./dist/index.d.ts",
   "dependencies": {
     "@types/react": "^16.4.6",
     "@types/react-dom": "^16.0.6",
-    "appformer-core": "file:../appformer-core",
+    "appformer-core": "file:../core",
     "react": "^16.4.1",
     "react-dom": "^16.4.1"
   },

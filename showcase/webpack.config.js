@@ -29,7 +29,7 @@ module.exports = merge(common, {
   },
   devtool: "inline-source-map",
   devServer: {
-    contentBase: [path.join(__dirname, "./dist"), path.join(__dirname, "../appformer-core/dist")],
+    contentBase: [path.join(__dirname, "./dist"), path.join(__dirname, "../core/dist")],
     compress: true,
     port: 9000,
     historyApiFallback: {

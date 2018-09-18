@@ -8,10 +8,10 @@
   "dependencies": {
     "@types/react": "^16.4.6",
     "@types/react-dom": "^16.0.6",
-    "appformer-core": "file:../appformer-core",
+    "appformer-core": "file:../core",
     "react": "^16.4.1",
     "react-dom": "^16.4.1",
-    "showcase_components": "file:../showcase_components"
+    "showcase-components": "file:../showcase-components"
   },
   "devDependencies": {
     "@types/jest": "^23.3.1",
