@@ -34,9 +34,8 @@ public class PackageJsonTest {
         final PackageJson packageJson = new PackageJson("test-module", emptyList());
 
         assertEquals(lines("{",
-                           "  \"name\": \"test-module\",",
+                           "  \"name\": \"@kiegroup-ts-generated/test-module\",",
                            "  \"version\": \"1.0.0\",",
-                           "  \"private\": true,",
                            "  \"license\": \"Apache-2.0\",",
                            "  \"dependencies\": {",
                            "",
@@ -62,9 +61,8 @@ public class PackageJsonTest {
         final PackageJson packageJsonB = new PackageJson("test-module", singletonList(new PojoTsClass(type(B.class), NO_DECORATORS)));
 
         assertEquals(lines("{",
-                           "  \"name\": \"test-module\",",
+                           "  \"name\": \"@kiegroup-ts-generated/test-module\",",
                            "  \"version\": \"1.0.0\",",
-                           "  \"private\": true,",
                            "  \"license\": \"Apache-2.0\",",
                            "  \"dependencies\": {",
                            "\"guava\": \"file:../guava\"",
@@ -86,9 +84,8 @@ public class PackageJsonTest {
         final PackageJson packageJsonC = new PackageJson("test-module", singletonList(new PojoTsClass(type(C.class), NO_DECORATORS)));
 
         assertEquals(lines("{",
-                           "  \"name\": \"test-module\",",
+                           "  \"name\": \"@kiegroup-ts-generated/test-module\",",
                            "  \"version\": \"1.0.0\",",
-                           "  \"private\": true,",
                            "  \"license\": \"Apache-2.0\",",
                            "  \"dependencies\": {",
                            "\"java\": \"file:../java\",",

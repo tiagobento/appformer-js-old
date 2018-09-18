@@ -63,8 +63,7 @@ public class RpcCallerTsClass implements TsClass {
         this.importEntriesStore = new ImportEntriesStore();
         this.source = new Lazy<>(() -> formatRightToLeft(
                 lines("",
-                      "import {rpc} from 'appformer/API';",
-                      "import {marshall, unmarshall} from 'appformer/marshalling';",
+                      "import {rpc, marshall, unmarshall} from 'appformer-js';",
                       "%s",
                       "",
                       "export default class %s {",

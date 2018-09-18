@@ -50,7 +50,7 @@ public class PojoTsClassTestClasses {
     public void testNormalClass() {
         final PojoTsClass pojoTsClass = new PojoTsClass(type(B.class), new DecoratorStore(emptySet()));
         assertEquals(lines("",
-                           "import Portable from 'appformer/internal/model/Portable';",
+                           "import Portable from 'appformer-js';",
                            "import JavaInteger from 'appformer/java-wrappers/JavaInteger';",
                            "import JavaLinkedList from 'appformer/java-wrappers/JavaLinkedList';",
                            "import JavaOptional from 'appformer/java-wrappers/JavaOptional';",
@@ -93,7 +93,7 @@ public class PojoTsClassTestClasses {
         ))));
 
         assertEquals(lines("",
-                           "import Portable from 'appformer/internal/model/Portable';",
+                           "import Portable from 'appformer-js';",
                            "import decorators_simple_ADEC from 'my-decorators/decorators/simple/ADEC';",
                            "import decorators_simple_CDEC from 'my-decorators/decorators/simple/CDEC';",
                            "import org_uberfire_jsbridge_tsexporter_model_PojoTsClassTestClasses_A from 'output/ts-exporter-test/org/uberfire/jsbridge/tsexporter/model/PojoTsClassTestClasses/A';",

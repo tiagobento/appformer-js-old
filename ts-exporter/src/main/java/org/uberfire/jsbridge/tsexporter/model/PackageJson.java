@@ -55,14 +55,13 @@ public class PackageJson implements TsExporterResource {
         return format(lines("{",
                             "  \"name\": \"%s\",",
                             "  \"version\": \"%s\",",
-                            "  \"private\": true,",
                             "  \"license\": \"Apache-2.0\",",
                             "  \"dependencies\": {",
                             "%s",
                             "  }",
                             "}"),
 
-                      moduleName,
+                      "@kiegroup-ts-generated/" + moduleName,
                       "1.0.0",
                       dependencies
         );
