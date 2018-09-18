@@ -1,6 +1,5 @@
 import * as React from "react";
-import { Link } from "../react-components";
-import { Element, Perspective, Screen } from "../api/Components";
+import {Link, Element, Perspective, Screen} from "appformer-core";
 
 export class ConsoleHeader extends Screen {
   constructor() {

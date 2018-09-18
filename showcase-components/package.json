@@ -33,7 +33,7 @@
     "webpack-merge": "^4.1.4"
   },
   "scripts": {
-    "lint": "tslint -c tslint.json 'src/**/*.{ts,tsx,js,jsx}'",
+    "lint": "tslint -c ../tslint.common.json 'src/**/*.{ts,tsx,js,jsx}'",
     "test": "jest",
     "build:dev": "webpack",
     "build:prod": "npm run lint && npm test && webpack --mode production && mvn clean install -f jar/pom.xml"

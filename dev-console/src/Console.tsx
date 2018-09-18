@@ -1,7 +1,7 @@
 import * as React from "react";
-import { DefaultScreenContainerId, Screen } from "../api/Components";
-import { ConsoleDock } from "./ConsoleDock";
-import { EventsSimulationConsole } from "./EventsSimulationConsole";
+import {DefaultScreenContainerId, Screen} from "appformer-core";
+import {ConsoleDock} from "./ConsoleDock";
+import {EventsSimulationConsole} from "./EventsSimulationConsole";
 
 interface State {
   rpcConsole: boolean;
