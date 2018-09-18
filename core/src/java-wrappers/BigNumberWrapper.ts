@@ -23,10 +23,6 @@ export abstract class BigNumberWrapper extends JavaWrapper<BigNumber> {
     }
   }
 
-  private instanceOfBigNumber(value: any): value is BigNumber {
-    return BigNumber.isBigNumber(value);
-  }
-
   protected abstract from(asString: string): BigNumber;
 
   protected abstract isInRange(n: BigNumber): boolean;
@@ -36,5 +32,9 @@ export abstract class BigNumberWrapper extends JavaWrapper<BigNumber> {
       return new BigNumber(NaN);
     }
     return value;
+  }
+
+  private instanceOfBigNumber(value: any): value is BigNumber {
+    return BigNumber.isBigNumber(value);
   }
 }
