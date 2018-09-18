@@ -36,7 +36,7 @@
     "lint": "tslint -c tslint.json 'src/**/*.{ts,tsx,js,jsx}'",
     "test": "jest",
     "build:dev": "webpack",
-    "build:prod": "npm run lint && npm test && webpack --mode production"
+    "build:prod": "npm run lint && npm test && webpack --mode production && mvn clean install -f jar/pom.xml"
   },
   "babel": {
     "presets": [
