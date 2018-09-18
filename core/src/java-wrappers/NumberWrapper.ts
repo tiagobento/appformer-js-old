@@ -7,7 +7,7 @@ export abstract class NumberWrapper extends JavaWrapper<number> {
     super();
     const valueAsNumber = this.from(value);
 
-    this._value = this.applyNumericRange(valueAsNumber);
+    this.set(valueAsNumber);
   }
 
   public get(): number {

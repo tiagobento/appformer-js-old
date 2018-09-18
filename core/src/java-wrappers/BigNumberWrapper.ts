@@ -8,7 +8,7 @@ export abstract class BigNumberWrapper extends JavaWrapper<BigNumber> {
     super();
     const valueAsNumber = this.from(value);
 
-    this._value = this.applyNumericRange(valueAsNumber);
+    this.set(valueAsNumber);
   }
 
   public get(): BigNumber {
@@ -16,11 +16,15 @@ export abstract class BigNumberWrapper extends JavaWrapper<BigNumber> {
   }
 
   public set(value: BigNumber | ((current: BigNumber) => BigNumber)): void {
-    if (value instanceof BigNumber) {
+    if (this.instanceOfBigNumber(value)) {
       this._value = this.applyNumericRange(value);
     } else {
       this._value = this.applyNumericRange(value(this.get()));
     }
+  }
+
+  private instanceOfBigNumber(value: any): value is BigNumber {
+    return BigNumber.isBigNumber(value);
   }
 
   protected abstract from(asString: string): BigNumber;
