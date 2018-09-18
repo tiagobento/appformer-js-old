@@ -1,11 +1,11 @@
-import {NumberWrapper} from "../../../java-wrappers/NumberWrapper";
-import {JavaBoolean} from "../../../java-wrappers";
-import {Portable} from "../../../internal";
-import {ErraiObjectConstants} from "../../model/ErraiObjectConstants";
-import {ErraiObject} from "../../model/ErraiObject";
-import {MarshallingContext} from "../../MarshallingContext";
-import {MarshallerProvider} from "../../MarshallerProvider";
-import {JavaWrapperUtils} from "../../../java-wrappers/JavaWrapperUtils";
+import { NumberWrapper } from "../../../java-wrappers/NumberWrapper";
+import { JavaBoolean } from "../../../java-wrappers";
+import { Portable } from "../../../internal";
+import { ErraiObjectConstants } from "../../model/ErraiObjectConstants";
+import { ErraiObject } from "../../model/ErraiObject";
+import { MarshallingContext } from "../../MarshallingContext";
+import { MarshallerProvider } from "../../MarshallerProvider";
+import { JavaWrapperUtils } from "../../../java-wrappers/JavaWrapperUtils";
 
 export class GenericsTypeMarshallingUtils {
   private static shouldWrapWhenUsedAsGenericsType(value: Portable<any>) {

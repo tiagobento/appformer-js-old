@@ -1,4 +1,4 @@
-import {JavaDate} from "../JavaDate";
+import { JavaDate } from "../JavaDate";
 
 describe("get", () => {
   test("with date, should return same value as Date", () => {

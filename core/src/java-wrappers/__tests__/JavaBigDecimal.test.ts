@@ -1,5 +1,5 @@
-import {JavaBigDecimal} from "../JavaBigDecimal";
-import {BigNumber} from "bignumber.js";
+import { JavaBigDecimal } from "../JavaBigDecimal";
+import { BigNumber } from "bignumber.js";
 
 describe("get", () => {
   describe("with valid input", () => {

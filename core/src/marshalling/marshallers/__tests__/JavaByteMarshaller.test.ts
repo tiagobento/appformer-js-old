@@ -1,6 +1,6 @@
-import {MarshallingContext} from "../../MarshallingContext";
-import {JavaByte} from "../../../java-wrappers";
-import {JavaByteMarshaller} from "../JavaByteMarshaller";
+import { MarshallingContext } from "../../MarshallingContext";
+import { JavaByte } from "../../../java-wrappers";
+import { JavaByteMarshaller } from "../JavaByteMarshaller";
 
 describe("marshall", () => {
   test("with regular byte, should return same value", () => {

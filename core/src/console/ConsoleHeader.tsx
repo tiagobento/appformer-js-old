@@ -1,6 +1,6 @@
 import * as React from "react";
-import {Link} from "../react-components";
-import {Element, Perspective, Screen} from "../api/Components";
+import { Link } from "../react-components";
+import { Element, Perspective, Screen } from "../api/Components";
 
 export class ConsoleHeader extends Screen {
   constructor() {

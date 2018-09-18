@@ -1,8 +1,8 @@
-import {JavaLong} from "../../java-wrappers/JavaLong";
-import {ErraiObject} from "../model/ErraiObject";
-import {MarshallingContext} from "../MarshallingContext";
-import {ErraiObjectConstants} from "../model/ErraiObjectConstants";
-import {NullableMarshaller} from "./NullableMarshaller";
+import { JavaLong } from "../../java-wrappers/JavaLong";
+import { ErraiObject } from "../model/ErraiObject";
+import { MarshallingContext } from "../MarshallingContext";
+import { ErraiObjectConstants } from "../model/ErraiObjectConstants";
+import { NullableMarshaller } from "./NullableMarshaller";
 
 export class JavaLongMarshaller extends NullableMarshaller<JavaLong, ErraiObject> {
   public notNullMarshall(input: JavaLong, ctx: MarshallingContext): ErraiObject {

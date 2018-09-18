@@ -1,8 +1,8 @@
-import {MarshallingContext} from "../MarshallingContext";
-import {Marshaller} from "../Marshaller";
-import {Portable} from "../../internal/model/Portable";
+import { MarshallingContext } from "../MarshallingContext";
+import { Marshaller } from "../Marshaller";
+import { Portable } from "../../internal/model/Portable";
 
-export  abstract class NullableMarshaller<T extends Portable<T>, U> implements Marshaller<T, U> {
+export abstract class NullableMarshaller<T extends Portable<T>, U> implements Marshaller<T, U> {
   public marshall(input: T, ctx: MarshallingContext): U | null {
     if (input === null || input === undefined) {
       return null;

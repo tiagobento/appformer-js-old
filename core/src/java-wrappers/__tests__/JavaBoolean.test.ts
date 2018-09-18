@@ -1,4 +1,4 @@
-import {JavaBoolean} from "../JavaBoolean";
+import { JavaBoolean } from "../JavaBoolean";
 
 describe("get", () => {
   describe("with valid input", () => {

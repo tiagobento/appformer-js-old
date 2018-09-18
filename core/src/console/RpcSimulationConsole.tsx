@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Screen} from "../api";
+import { Screen } from "../api";
 
 interface Props {
   screens: Screen[];

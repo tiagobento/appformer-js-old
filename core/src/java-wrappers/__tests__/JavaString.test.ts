@@ -1,4 +1,4 @@
-import {JavaString} from "../JavaString";
+import { JavaString } from "../JavaString";
 
 describe("get", () => {
   describe("with valid input", () => {

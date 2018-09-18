@@ -1,7 +1,7 @@
-import {MarshallingContext} from "../../MarshallingContext";
-import {ErraiObjectConstants} from "../../model/ErraiObjectConstants";
-import {JavaDate} from "../../../java-wrappers";
-import {JavaDateMarshaller} from "../JavaDateMarshaller";
+import { MarshallingContext } from "../../MarshallingContext";
+import { ErraiObjectConstants } from "../../model/ErraiObjectConstants";
+import { JavaDate } from "../../../java-wrappers";
+import { JavaDateMarshaller } from "../JavaDateMarshaller";
 
 describe("marshall", () => {
   test("with regular date, should should serialize it normally", () => {

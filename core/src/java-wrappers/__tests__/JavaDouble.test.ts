@@ -1,4 +1,4 @@
-import {JavaDouble} from "../JavaDouble";
+import { JavaDouble } from "../JavaDouble";
 
 describe("get", () => {
   describe("with valid input", () => {

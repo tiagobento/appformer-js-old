@@ -1,5 +1,5 @@
-import {BigNumber} from "bignumber.js";
-import {JavaBigInteger} from "../JavaBigInteger";
+import { BigNumber } from "bignumber.js";
+import { JavaBigInteger } from "../JavaBigInteger";
 
 describe("get", () => {
   describe("with valid input", () => {

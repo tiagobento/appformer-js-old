@@ -1,4 +1,4 @@
-import {JavaByte} from "../JavaByte";
+import { JavaByte } from "../JavaByte";
 
 describe("get", () => {
   describe("with valid input", () => {

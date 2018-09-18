@@ -1,4 +1,4 @@
-import {JavaOptional} from "../JavaOptional";
+import { JavaOptional } from "../JavaOptional";
 
 describe("get", () => {
   describe("with valid input", () => {

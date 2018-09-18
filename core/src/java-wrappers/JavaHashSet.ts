@@ -1,4 +1,4 @@
-import {JavaCollection} from "./JavaCollection";
+import { JavaCollection } from "./JavaCollection";
 
 export class JavaHashSet<T> extends JavaCollection<Set<T>> {
   private readonly _fqcn = "java.util.HashSet";

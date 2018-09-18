@@ -1,4 +1,4 @@
-import {JavaInteger} from "../JavaInteger";
+import { JavaInteger } from "../JavaInteger";
 
 describe("get", () => {
   describe("with valid input", () => {

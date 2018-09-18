@@ -1,4 +1,4 @@
-import {JavaArrayList} from "../JavaArrayList";
+import { JavaArrayList } from "../JavaArrayList";
 
 describe("get", () => {
   test("with populated array, returns the same array", () => {

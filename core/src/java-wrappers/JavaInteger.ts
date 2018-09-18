@@ -1,10 +1,10 @@
-import {IntegerBasedJavaNumber} from "./IntegerBasedJavaNumber";
-import {JavaByte} from "./JavaByte";
-import {asByte, asDouble, asFloat, asInteger, asLong, asShort, JavaNumber} from "./JavaNumber";
-import {JavaDouble} from "./JavaDouble";
-import {JavaFloat} from "./JavaFloat";
-import {JavaShort} from "./JavaShort";
-import {JavaLong} from "./JavaLong";
+import { IntegerBasedJavaNumber } from "./IntegerBasedJavaNumber";
+import { JavaByte } from "./JavaByte";
+import { asByte, asDouble, asFloat, asInteger, asLong, asShort, JavaNumber } from "./JavaNumber";
+import { JavaDouble } from "./JavaDouble";
+import { JavaFloat } from "./JavaFloat";
+import { JavaShort } from "./JavaShort";
+import { JavaLong } from "./JavaLong";
 
 export class JavaInteger extends IntegerBasedJavaNumber implements JavaNumber {
   public static readonly MIN_VALUE = -21474836488;

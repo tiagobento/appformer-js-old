@@ -1,4 +1,4 @@
-import {JavaWrapper} from "./JavaWrapper";
+import { JavaWrapper } from "./JavaWrapper";
 
 export class JavaString extends JavaWrapper<string> {
   private readonly _fqcn = "java.lang.String";

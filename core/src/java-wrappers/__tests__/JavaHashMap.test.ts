@@ -1,4 +1,4 @@
-import {JavaHashMap} from "../JavaHashMap";
+import { JavaHashMap } from "../JavaHashMap";
 
 describe("get", () => {
   test("with populated map, returns the same map", () => {

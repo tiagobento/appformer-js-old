@@ -1,10 +1,10 @@
-import {NullableMarshaller} from "./NullableMarshaller";
-import {JavaDate} from "../../java-wrappers/JavaDate";
-import {ErraiObject} from "../model/ErraiObject";
-import {ErraiObjectConstants} from "../model/ErraiObjectConstants";
-import {MarshallingContext} from "../MarshallingContext";
+import { NullableMarshaller } from "./NullableMarshaller";
+import { JavaDate } from "../../java-wrappers/JavaDate";
+import { ErraiObject } from "../model/ErraiObject";
+import { ErraiObjectConstants } from "../model/ErraiObjectConstants";
+import { MarshallingContext } from "../MarshallingContext";
 
-export  class JavaDateMarshaller extends NullableMarshaller<JavaDate, ErraiObject> {
+export class JavaDateMarshaller extends NullableMarshaller<JavaDate, ErraiObject> {
   public notNullMarshall(input: JavaDate, ctx: MarshallingContext): ErraiObject {
     return {
       [ErraiObjectConstants.ENCODED_TYPE]: (input as any)._fqcn,

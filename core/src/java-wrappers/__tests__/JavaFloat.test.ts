@@ -1,4 +1,4 @@
-import {JavaFloat} from "../JavaFloat";
+import { JavaFloat } from "../JavaFloat";
 
 describe("get", () => {
   describe("with valid input", () => {

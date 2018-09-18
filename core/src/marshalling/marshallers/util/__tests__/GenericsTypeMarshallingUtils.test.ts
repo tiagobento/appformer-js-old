@@ -1,34 +1,34 @@
 import {
-    JavaArrayList,
-    JavaBigDecimal,
-    JavaBigInteger,
-    JavaBoolean,
-    JavaByte,
-    JavaDate,
-    JavaDouble,
-    JavaFloat,
-    JavaHashMap,
-    JavaHashSet,
-    JavaInteger,
-    JavaLong,
-    JavaOptional,
-    JavaShort,
-    JavaString
+  JavaArrayList,
+  JavaBigDecimal,
+  JavaBigInteger,
+  JavaBoolean,
+  JavaByte,
+  JavaDate,
+  JavaDouble,
+  JavaFloat,
+  JavaHashMap,
+  JavaHashSet,
+  JavaInteger,
+  JavaLong,
+  JavaOptional,
+  JavaShort,
+  JavaString
 } from "../../../../java-wrappers";
-import {GenericsTypeMarshallingUtils} from "../GenericsTypeMarshallingUtils";
-import {MarshallingContext} from "../../../MarshallingContext";
-import {JavaArrayListMarshaller, JavaHashSetMarshaller} from "../../JavaCollectionMarshaller";
-import {ErraiObjectConstants} from "../../../model/ErraiObjectConstants";
-import {MarshallerProvider} from "../../../MarshallerProvider";
-import {JavaBigDecimalMarshaller} from "../../JavaBigDecimalMarshaller";
-import {JavaBigIntegerMarshaller} from "../../JavaBigIntegerMarshaller";
-import {JavaHashMapMarshaller} from "../../JavaHashMapMarshaller";
-import {JavaLongMarshaller} from "../../JavaLongMarshaller";
-import {JavaStringMarshaller} from "../../JavaStringMarshaller";
-import {JavaDateMarshaller} from "../../JavaDateMarshaller";
-import {DefaultMarshaller} from "../../DefaultMarshaller";
-import {Portable} from "../../../../internal";
-import {JavaOptionalMarshaller} from "../../JavaOptionalMarshaller";
+import { GenericsTypeMarshallingUtils } from "../GenericsTypeMarshallingUtils";
+import { MarshallingContext } from "../../../MarshallingContext";
+import { JavaArrayListMarshaller, JavaHashSetMarshaller } from "../../JavaCollectionMarshaller";
+import { ErraiObjectConstants } from "../../../model/ErraiObjectConstants";
+import { MarshallerProvider } from "../../../MarshallerProvider";
+import { JavaBigDecimalMarshaller } from "../../JavaBigDecimalMarshaller";
+import { JavaBigIntegerMarshaller } from "../../JavaBigIntegerMarshaller";
+import { JavaHashMapMarshaller } from "../../JavaHashMapMarshaller";
+import { JavaLongMarshaller } from "../../JavaLongMarshaller";
+import { JavaStringMarshaller } from "../../JavaStringMarshaller";
+import { JavaDateMarshaller } from "../../JavaDateMarshaller";
+import { DefaultMarshaller } from "../../DefaultMarshaller";
+import { Portable } from "../../../../internal";
+import { JavaOptionalMarshaller } from "../../JavaOptionalMarshaller";
 
 describe("marshallGenericsTypeElement", () => {
   const encodedType = ErraiObjectConstants.ENCODED_TYPE;

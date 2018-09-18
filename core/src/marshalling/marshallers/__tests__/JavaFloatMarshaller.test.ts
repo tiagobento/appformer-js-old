@@ -1,6 +1,6 @@
-import {MarshallingContext} from "../../MarshallingContext";
-import {JavaFloat} from "../../../java-wrappers";
-import {JavaFloatMarshaller} from "../JavaFloatMarshaller";
+import { MarshallingContext } from "../../MarshallingContext";
+import { JavaFloat } from "../../../java-wrappers";
+import { JavaFloatMarshaller } from "../JavaFloatMarshaller";
 
 describe("marshall", () => {
   test("with regular float, should return the same value", () => {

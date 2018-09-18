@@ -1,4 +1,4 @@
-import {JavaHashSet} from "../JavaHashSet";
+import { JavaHashSet } from "../JavaHashSet";
 
 describe("get", () => {
   test("with populated set, returns the same set", () => {

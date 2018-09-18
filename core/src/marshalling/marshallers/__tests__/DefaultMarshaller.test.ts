@@ -1,26 +1,26 @@
 import {
-    JavaArrayList,
-    JavaBigDecimal,
-    JavaBigInteger,
-    JavaBoolean,
-    JavaByte,
-    JavaDate,
-    JavaDouble,
-    JavaFloat,
-    JavaHashMap,
-    JavaHashSet,
-    JavaInteger,
-    JavaLong,
-    JavaOptional,
-    JavaShort,
-    JavaString
+  JavaArrayList,
+  JavaBigDecimal,
+  JavaBigInteger,
+  JavaBoolean,
+  JavaByte,
+  JavaDate,
+  JavaDouble,
+  JavaFloat,
+  JavaHashMap,
+  JavaHashSet,
+  JavaInteger,
+  JavaLong,
+  JavaOptional,
+  JavaShort,
+  JavaString
 } from "../../../java-wrappers";
-import {DefaultMarshaller} from "../DefaultMarshaller";
-import {MarshallingContext} from "../../MarshallingContext";
-import {ErraiObjectConstants} from "../../model/ErraiObjectConstants";
-import {TestUtils} from "../../../__tests__/util/TestUtils";
-import {MarshallerProvider} from "../../MarshallerProvider";
-import {Portable} from "../../../internal";
+import { DefaultMarshaller } from "../DefaultMarshaller";
+import { MarshallingContext } from "../../MarshallingContext";
+import { ErraiObjectConstants } from "../../model/ErraiObjectConstants";
+import { TestUtils } from "../../../__tests__/util/TestUtils";
+import { MarshallerProvider } from "../../MarshallerProvider";
+import { Portable } from "../../../internal";
 
 describe("marshall", () => {
   const objectId = ErraiObjectConstants.OBJECT_ID;

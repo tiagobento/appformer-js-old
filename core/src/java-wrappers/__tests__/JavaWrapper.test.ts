@@ -1,4 +1,4 @@
-import {JavaWrapper} from "../JavaWrapper";
+import { JavaWrapper } from "../JavaWrapper";
 
 describe("extendsJavaWrapper", () => {
   test("with class extending java wrapper, should return true", () => {

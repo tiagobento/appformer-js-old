@@ -1,5 +1,5 @@
-import {JavaLong} from "../JavaLong";
-import {BigNumber} from "bignumber.js";
+import { JavaLong } from "../JavaLong";
+import { BigNumber } from "bignumber.js";
 
 describe("get", () => {
   describe("with valid input", () => {

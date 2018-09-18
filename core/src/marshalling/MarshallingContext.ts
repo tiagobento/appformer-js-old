@@ -1,7 +1,7 @@
-import {ErraiObject} from "./model/ErraiObject";
-import {ErraiObjectConstants} from "./model/ErraiObjectConstants";
-import {Portable} from "../internal/model/Portable";
-import {JavaWrapper} from "../java-wrappers/JavaWrapper";
+import { ErraiObject } from "./model/ErraiObject";
+import { ErraiObjectConstants } from "./model/ErraiObjectConstants";
+import { Portable } from "../internal/model/Portable";
+import { JavaWrapper } from "../java-wrappers/JavaWrapper";
 
 export class MarshallingContext {
   private objContext: Map<Portable<any>, ErraiObject>;

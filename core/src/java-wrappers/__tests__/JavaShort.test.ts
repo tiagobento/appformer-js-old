@@ -1,4 +1,4 @@
-import {JavaShort} from "../JavaShort";
+import { JavaShort } from "../JavaShort";
 
 describe("get", () => {
   describe("with valid input", () => {

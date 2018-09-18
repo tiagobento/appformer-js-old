@@ -1,5 +1,4 @@
-import {MarshallerProvider} from "./MarshallerProvider";
-
+import { MarshallerProvider } from "./MarshallerProvider";
 
 export * from "./Marshalling";
 

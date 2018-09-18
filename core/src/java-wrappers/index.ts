@@ -13,4 +13,3 @@ export * from "./JavaBoolean";
 export * from "./JavaString";
 export * from "./JavaDate";
 export * from "./JavaOptional";
-

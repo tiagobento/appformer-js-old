@@ -1,8 +1,8 @@
-import {NullableMarshaller} from "./NullableMarshaller";
-import {JavaBigDecimal} from "../../java-wrappers/JavaBigDecimal";
-import {ErraiObjectConstants} from "../model/ErraiObjectConstants";
-import {ErraiObject} from "../model/ErraiObject";
-import {MarshallingContext} from "../MarshallingContext";
+import { NullableMarshaller } from "./NullableMarshaller";
+import { JavaBigDecimal } from "../../java-wrappers/JavaBigDecimal";
+import { ErraiObjectConstants } from "../model/ErraiObjectConstants";
+import { ErraiObject } from "../model/ErraiObject";
+import { MarshallingContext } from "../MarshallingContext";
 
 export class JavaBigDecimalMarshaller extends NullableMarshaller<JavaBigDecimal, ErraiObject> {
   public notNullMarshall(input: JavaBigDecimal, ctx: MarshallingContext): ErraiObject {

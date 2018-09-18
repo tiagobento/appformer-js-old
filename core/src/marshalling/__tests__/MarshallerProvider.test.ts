@@ -1,38 +1,38 @@
 import {
-    JavaArrayList,
-    JavaBigDecimal,
-    JavaBigInteger,
-    JavaBoolean,
-    JavaByte,
-    JavaDate,
-    JavaDouble,
-    JavaFloat,
-    JavaHashMap,
-    JavaHashSet,
-    JavaInteger,
-    JavaLong,
-    JavaOptional,
-    JavaShort,
-    JavaString
+  JavaArrayList,
+  JavaBigDecimal,
+  JavaBigInteger,
+  JavaBoolean,
+  JavaByte,
+  JavaDate,
+  JavaDouble,
+  JavaFloat,
+  JavaHashMap,
+  JavaHashSet,
+  JavaInteger,
+  JavaLong,
+  JavaOptional,
+  JavaShort,
+  JavaString
 } from "../../java-wrappers";
-import {MarshallerProvider} from "../MarshallerProvider";
-import {JavaBigIntegerMarshaller} from "../marshallers/JavaBigIntegerMarshaller";
-import {JavaHashMapMarshaller} from "../marshallers/JavaHashMapMarshaller";
-import {JavaByteMarshaller} from "../marshallers/JavaByteMarshaller";
-import {JavaBigDecimalMarshaller} from "../marshallers/JavaBigDecimalMarshaller";
-import {JavaStringMarshaller} from "../marshallers/JavaStringMarshaller";
-import {JavaBooleanMarshaller} from "../marshallers/JavaBooleanMarshaller";
-import {JavaShortMarshaller} from "../marshallers/JavaShortMarshaller";
-import {JavaLongMarshaller} from "../marshallers/JavaLongMarshaller";
-import {JavaIntegerMarshaller} from "../marshallers/JavaIntegerMarshaller";
-import {JavaFloatMarshaller} from "../marshallers/JavaFloatMarshaller";
-import {JavaDoubleMarshaller} from "../marshallers/JavaDoubleMarshaller";
-import {DefaultMarshaller} from "../marshallers/DefaultMarshaller";
-import {JavaWrapperUtils} from "../../java-wrappers/JavaWrapperUtils";
-import {JavaType} from "../../java-wrappers/JavaType";
+import { MarshallerProvider } from "../MarshallerProvider";
+import { JavaBigIntegerMarshaller } from "../marshallers/JavaBigIntegerMarshaller";
+import { JavaHashMapMarshaller } from "../marshallers/JavaHashMapMarshaller";
+import { JavaByteMarshaller } from "../marshallers/JavaByteMarshaller";
+import { JavaBigDecimalMarshaller } from "../marshallers/JavaBigDecimalMarshaller";
+import { JavaStringMarshaller } from "../marshallers/JavaStringMarshaller";
+import { JavaBooleanMarshaller } from "../marshallers/JavaBooleanMarshaller";
+import { JavaShortMarshaller } from "../marshallers/JavaShortMarshaller";
+import { JavaLongMarshaller } from "../marshallers/JavaLongMarshaller";
+import { JavaIntegerMarshaller } from "../marshallers/JavaIntegerMarshaller";
+import { JavaFloatMarshaller } from "../marshallers/JavaFloatMarshaller";
+import { JavaDoubleMarshaller } from "../marshallers/JavaDoubleMarshaller";
+import { DefaultMarshaller } from "../marshallers/DefaultMarshaller";
+import { JavaWrapperUtils } from "../../java-wrappers/JavaWrapperUtils";
+import { JavaType } from "../../java-wrappers/JavaType";
 import * as JavaCollectionMarshaller from "../marshallers/JavaCollectionMarshaller";
-import {JavaDateMarshaller} from "../marshallers/JavaDateMarshaller";
-import {JavaOptionalMarshaller} from "../marshallers/JavaOptionalMarshaller";
+import { JavaDateMarshaller } from "../marshallers/JavaDateMarshaller";
+import { JavaOptionalMarshaller } from "../marshallers/JavaOptionalMarshaller";
 
 describe("getFor", () => {
   test("without initialize, should return Error", () => {

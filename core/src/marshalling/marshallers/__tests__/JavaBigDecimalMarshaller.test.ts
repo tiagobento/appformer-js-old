@@ -1,8 +1,8 @@
-import {JavaBigDecimal} from "../../../java-wrappers";
-import {JavaBigDecimalMarshaller} from "../JavaBigDecimalMarshaller";
-import {MarshallingContext} from "../../MarshallingContext";
-import {ErraiObjectConstants} from "../../model/ErraiObjectConstants";
-import {TestUtils} from "../../../__tests__/util/TestUtils";
+import { JavaBigDecimal } from "../../../java-wrappers";
+import { JavaBigDecimalMarshaller } from "../JavaBigDecimalMarshaller";
+import { MarshallingContext } from "../../MarshallingContext";
+import { ErraiObjectConstants } from "../../model/ErraiObjectConstants";
+import { TestUtils } from "../../../__tests__/util/TestUtils";
 
 describe("marshall", () => {
   test("with regular big decimal, should serialize it normally", () => {
