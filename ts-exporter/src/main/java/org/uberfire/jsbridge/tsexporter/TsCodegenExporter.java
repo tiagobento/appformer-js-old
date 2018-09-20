@@ -79,30 +79,45 @@ public class TsCodegenExporter {
                 .peek(TsClass::toSource)
                 .collect(toSet());
 
-        final Set<PackageJson> generatedPackages = concat(rpcTsClasses.stream().parallel(),
-                                                          dependencyGraph.vertices().stream().parallel().map(DependencyGraph.Vertex::getPojoClass))
+        concat(rpcTsClasses.stream().parallel(),
+               dependencyGraph.vertices().stream().parallel().map(DependencyGraph.Vertex::getPojoClass))
                 .parallel()
                 .filter(distinctBy(tsClass -> tsClass.getType().toString()))
-                .peek(tsClass -> write(tsClass, "src/" + tsClass.getRelativePath() + ".ts"))
-                .collect(groupingBy(TsClass::getModuleName))
+                .peek(tsClass -> write(tsClass, buildPath("packages/" + tsClass.getSimpleNpmPackageName(), "src/" + tsClass.getRelativePath() + ".ts")))
+                .collect(groupingBy(TsClass::getScopedNpmPackageName))
                 .entrySet().stream()
                 .parallel()
-                .peek(e -> write(new IndexTs(e.getKey(), e.getValue()), "src/index.ts"))
-                .peek(e -> write(new WebpackConfigJs(e.getKey(), e.getValue()), "webpack.config.js"))
-                .peek(e -> write(new TsConfigJson(e.getKey(), e.getValue()), "tsconfig.json"))
-                .map(e -> new PackageJson(e.getKey(), e.getValue()))
-                .peek(packageJson -> write(packageJson, "package.json"))
-                .collect(toSet());
+                .peek(e -> {
+                    final TsExporterResource tsExporterResource = new IndexTs(e.getKey(), e.getValue());
+                    write(tsExporterResource, buildPath("packages/" + tsExporterResource.getSimpleNpmPackageName(), "src/index.ts"));
+                })
+                .peek(e -> {
+                    final TsExporterResource tsExporterResource = new WebpackConfigJs(e.getKey(), e.getValue());
+                    write(tsExporterResource, buildPath("packages/" + tsExporterResource.getSimpleNpmPackageName(), "webpack.config.js"));
+                })
+                .peek(e -> {
+                    final TsExporterResource tsExporterResource = new TsConfigJson(e.getKey(), e.getValue());
+                    write(tsExporterResource, buildPath("packages/" + tsExporterResource.getSimpleNpmPackageName(), "tsconfig.json"));
+                })
+                .peek(e -> {
+                    final PackageJson packageJson = new PackageJson(e.getKey(), e.getValue());
+                    write(packageJson, buildPath("packages/" + packageJson.getSimpleNpmPackageName(), "package.json"));
+                })
+                .forEach(i -> {
+                });
 
-        write(new RootPackageJson(), "package.json");
-        write(new LernaJson(), "lerna.json");
+        final TsExporterResource rootPackageJson = new RootPackageJson();
+        write(rootPackageJson, buildPath(rootPackageJson.getSimpleNpmPackageName(), "package.json"));
+
+        final TsExporterResource lernaJson = new LernaJson();
+        write(lernaJson, buildPath(lernaJson.getSimpleNpmPackageName(), "lerna.json"));
 
         if (bash("which verdaccio") != 0) {
             throw new RuntimeException("Verdaccio is not installed.");
         }
 
         bash("nohup verdaccio >/dev/null 2>&1 &");
-        bash(linesJoinedBy("&& \\", new String[]{
+        bash(linesJoinedBy(" && ", new String[]{
                 "cd /tmp/ts-exporter",
                 "npm i",
                 "git init",
@@ -111,8 +126,7 @@ public class TsCodegenExporter {
                 "npx lerna bootstrap",
                 "npx lerna run unpublish",
                 "npx lerna run build",
-                "npx lerna publish --skip-git --cd-version=1.0.0 || echo \"Yay!\"",
-                "",
+                "(npx lerna publish --skip-git --cd-version=1.0.0 || echo \"Yay!\")",
         }));
         bash("pgrep Verdaccio | xargs kill");
     }
@@ -130,12 +144,6 @@ public class TsCodegenExporter {
         }
     }
 
-    private void write(final TsExporterResource tsExporterResource,
-                       final String relativeFilePath) {
-
-        write(tsExporterResource, buildPath(tsExporterResource.getModuleName(), relativeFilePath));
-    }
-
     private void write(final TsExporterResource resource,
                        final Path path) {
 
@@ -151,7 +159,7 @@ public class TsCodegenExporter {
     private Path buildPath(final String moduleName,
                            final String relativeFilePath) {
 
-        return Paths.get(format("/tmp/ts-exporter/%s/%s", get(-1, moduleName.split("/")), relativeFilePath).replace("/", File.separator));
+        return Paths.get(format("/tmp/ts-exporter/%s/%s", moduleName, relativeFilePath).replace("/", File.separator));
     }
 
     private List<TypeElement> getClassesFromErraiAppPropertiesFiles() {

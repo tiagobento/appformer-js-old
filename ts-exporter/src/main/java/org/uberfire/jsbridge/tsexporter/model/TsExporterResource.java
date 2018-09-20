@@ -16,9 +16,15 @@
 
 package org.uberfire.jsbridge.tsexporter.model;
 
+import static org.uberfire.jsbridge.tsexporter.util.Utils.get;
+
 public interface TsExporterResource {
 
     String toSource();
 
-    String getModuleName();
+    String getScopedNpmPackageName();
+
+    default String getSimpleNpmPackageName() {
+        return get(-1, getScopedNpmPackageName().split("/"));
+    }
 }

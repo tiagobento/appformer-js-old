@@ -44,7 +44,7 @@ public interface TsClass extends TsExporterResource {
     }
 
     @Override
-    default String getModuleName() {
+    default String getScopedNpmPackageName() {
 
         if (getType().toString().matches("^javax?.*")) {
             return MODULE_SCOPE + "/" + "java";

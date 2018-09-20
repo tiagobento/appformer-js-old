@@ -65,7 +65,7 @@ public class ImportEntriesStore {
         final String uniqueName = dependency.uniqueName(tsClass.getType());
         final String simpleName = get(-1, uniqueName.split("_"));
 
-        if (!tsClass.getModuleName().equals(dependency.getModuleName())) {
+        if (!tsClass.getScopedNpmPackageName().equals(dependency.getModuleName())) {
             return format("import { %s as %s } from '%s';", simpleName, uniqueName, dependency.getModuleName());
         }
 

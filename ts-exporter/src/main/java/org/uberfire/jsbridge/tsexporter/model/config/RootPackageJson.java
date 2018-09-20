@@ -44,7 +44,7 @@ public class RootPackageJson implements TsExporterResource {
     }
 
     @Override
-    public String getModuleName() {
+    public String getScopedNpmPackageName() {
         return "";
     }
 }

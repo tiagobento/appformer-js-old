@@ -92,7 +92,7 @@ public class WebpackConfigJs implements TsExporterResource {
     }
 
     @Override
-    public String getModuleName() {
+    public String getScopedNpmPackageName() {
         return moduleName;
     }
 }

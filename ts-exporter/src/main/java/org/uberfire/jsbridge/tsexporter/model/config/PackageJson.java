@@ -17,13 +17,11 @@
 package org.uberfire.jsbridge.tsexporter.model.config;
 
 import java.util.List;
-import java.util.Set;
 
 import org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation;
 import org.uberfire.jsbridge.tsexporter.dependency.ImportEntry;
 import org.uberfire.jsbridge.tsexporter.model.TsClass;
 import org.uberfire.jsbridge.tsexporter.model.TsExporterResource;
-import org.uberfire.jsbridge.tsexporter.util.Lazy;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.groupingBy;
@@ -32,27 +30,25 @@ import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
 
 public class PackageJson implements TsExporterResource {
 
-    private final String moduleName;
+    private final String scopedModuleName;
     private final List<? extends TsClass> classes;
-    private final Lazy<Set<String>> dependencies;
 
-    public PackageJson(final String moduleName,
+    public PackageJson(final String scopedNpmModuleName,
                        final List<? extends TsClass> classes) {
 
-        this.moduleName = moduleName;
+        this.scopedModuleName = scopedNpmModuleName;
         this.classes = classes;
-        this.dependencies = new Lazy<>(() -> classes.stream()
-                .flatMap(c -> c.getDependencies().stream())
-                .map(DependencyRelation::getImportEntry)
-                .collect(groupingBy(ImportEntry::getModuleName))
-                .keySet());
     }
 
     @Override
     public String toSource() {
 
-        final String dependenciesPart = dependencies.get().stream()
-                .filter(s -> !s.equals(moduleName))
+        final String dependenciesPart = classes.stream()
+                .flatMap(c -> c.getDependencies().stream())
+                .map(DependencyRelation::getImportEntry)
+                .collect(groupingBy(ImportEntry::getModuleName))
+                .keySet().stream()
+                .filter(s -> !s.equals(scopedModuleName))
                 .sorted()
                 .map(moduleName -> format("\"%s\": \"1.0.0\"", moduleName))
                 .collect(joining(",\n"));
@@ -72,18 +68,14 @@ public class PackageJson implements TsExporterResource {
                             "  }",
                             "}"),
 
-                      moduleName,
+                      scopedModuleName,
                       "1.0.0",
                       dependenciesPart
         );
     }
 
     @Override
-    public String getModuleName() {
-        return moduleName;
-    }
-
-    public Lazy<Set<String>> getDependencies() {
-        return dependencies;
+    public String getScopedNpmPackageName() {
+        return scopedModuleName;
     }
 }

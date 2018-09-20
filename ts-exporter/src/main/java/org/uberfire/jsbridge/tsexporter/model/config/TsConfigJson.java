@@ -56,7 +56,7 @@ public class TsConfigJson implements TsExporterResource {
     }
 
     @Override
-    public String getModuleName() {
+    public String getScopedNpmPackageName() {
         return moduleName;
     }
 }

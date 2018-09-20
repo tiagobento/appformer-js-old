@@ -49,7 +49,7 @@ public class ImportEntryJava implements ImportEntry {
 
     @Override
     public String getModuleName() {
-        return new PojoTsClass(declaredType, decoratorStore).getModuleName();
+        return new PojoTsClass(declaredType, decoratorStore).getScopedNpmPackageName();
     }
 
     @Override

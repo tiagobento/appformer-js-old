@@ -36,7 +36,7 @@ public class LernaJson implements TsExporterResource {
     }
 
     @Override
-    public String getModuleName() {
+    public String getScopedNpmPackageName() {
         return "";
     }
 }
