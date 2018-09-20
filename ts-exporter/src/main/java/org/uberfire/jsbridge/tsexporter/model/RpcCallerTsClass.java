@@ -60,13 +60,13 @@ public class RpcCallerTsClass implements TsClass {
         this.typeElement = typeElement;
         this.dependencyGraph = dependencyGraph;
         this.decoratorStore = decoratorStore;
-        this.importEntriesStore = new ImportEntriesStore();
+        this.importEntriesStore = new ImportEntriesStore(this);
         this.source = new Lazy<>(() -> formatRightToLeft(
                 lines("",
-                      "import {rpc, marshall, unmarshall} from 'appformer-js';",
+                      "import { rpc, marshall, unmarshall } from 'appformer-js';",
                       "%s",
                       "",
-                      "export default class %s {",
+                      "export class %s {",
                       "%s",
                       "}"),
 
@@ -99,7 +99,7 @@ public class RpcCallerTsClass implements TsClass {
     }
 
     private String imports() {
-        return importEntriesStore.getImportStatements(this);
+        return importEntriesStore.getImportStatements();
     }
 
     private List<RpcCallerTsMethod> resolveOverloadsAndReservedWords(final String name,
@@ -118,7 +118,12 @@ public class RpcCallerTsClass implements TsClass {
     @Override
     public Set<DependencyRelation> getDependencies() {
         source.get();
-        return importEntriesStore.getImports(this);
+        return importEntriesStore.getImports();
+    }
+
+    @Override
+    public String getModuleName() {
+        return TsClass.super.getModuleName() + "-rpc";
     }
 
     @Override

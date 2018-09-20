@@ -29,13 +29,18 @@ import java.util.Set;
 
 import javax.lang.model.element.TypeElement;
 
-import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorImportEntry;
-import org.uberfire.jsbridge.tsexporter.model.PackageJson;
-import org.uberfire.jsbridge.tsexporter.model.TsExporterResource;
+import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
 import org.uberfire.jsbridge.tsexporter.dependency.DependencyGraph;
 import org.uberfire.jsbridge.tsexporter.model.RpcCallerTsClass;
 import org.uberfire.jsbridge.tsexporter.model.TsClass;
+import org.uberfire.jsbridge.tsexporter.model.TsExporterResource;
+import org.uberfire.jsbridge.tsexporter.model.config.IndexTs;
+import org.uberfire.jsbridge.tsexporter.model.config.LernaJson;
+import org.uberfire.jsbridge.tsexporter.model.config.PackageJson;
+import org.uberfire.jsbridge.tsexporter.model.config.RootPackageJson;
+import org.uberfire.jsbridge.tsexporter.model.config.TsConfigJson;
+import org.uberfire.jsbridge.tsexporter.model.config.WebpackConfigJs;
 import org.uberfire.jsbridge.tsexporter.util.Utils;
 
 import static java.lang.String.format;
@@ -45,10 +50,13 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.empty;
-import static org.uberfire.jsbridge.tsexporter.Main.*;
+import static org.uberfire.jsbridge.tsexporter.Main.TS_EXPORTER_PACKAGE;
+import static org.uberfire.jsbridge.tsexporter.Main.elements;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.createFileIfNotExists;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.distinctBy;
+import static org.uberfire.jsbridge.tsexporter.util.Utils.get;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.getResources;
+import static org.uberfire.jsbridge.tsexporter.util.Utils.linesJoinedBy;
 
 public class TsCodegenExporter {
 
@@ -62,7 +70,6 @@ public class TsCodegenExporter {
 
     public void run() {
 
-
         concat(getTsFilesFrom("portables.tsexporter").stream(),
                getClassesFromErraiAppPropertiesFiles().stream()
         ).forEach(dependencyGraph::add);
@@ -72,23 +79,84 @@ public class TsCodegenExporter {
                 .peek(TsClass::toSource)
                 .collect(toSet());
 
-        concat(rpcTsClasses.stream().parallel(), dependencyGraph.vertices().stream().parallel().map(DependencyGraph.Vertex::getPojoClass))
+        final Set<PackageJson> generatedPackages = concat(rpcTsClasses.stream().parallel(),
+                                                          dependencyGraph.vertices().stream().parallel().map(DependencyGraph.Vertex::getPojoClass))
                 .parallel()
                 .filter(distinctBy(tsClass -> tsClass.getType().toString()))
-                .peek(this::write)
+                .peek(tsClass -> write(tsClass, "src/" + tsClass.getRelativePath() + ".ts"))
                 .collect(groupingBy(TsClass::getModuleName))
                 .entrySet().stream()
                 .parallel()
+                .peek(e -> write(new IndexTs(e.getKey(), e.getValue()), "src/index.ts"))
+                .peek(e -> write(new WebpackConfigJs(e.getKey(), e.getValue()), "webpack.config.js"))
+                .peek(e -> write(new TsConfigJson(e.getKey(), e.getValue()), "tsconfig.json"))
                 .map(e -> new PackageJson(e.getKey(), e.getValue()))
-                .forEach(this::write);
+                .peek(packageJson -> write(packageJson, "package.json"))
+                .collect(toSet());
+
+        write(new RootPackageJson(), "package.json");
+        write(new LernaJson(), "lerna.json");
+
+        startLocalNpmRegistry();
+
+        //TODO: Discover order and remove this filter
+//        generatedPackages.stream()
+//                .filter(s -> s.getModuleName().equals("@kiegroup-ts-generated/uberfire-commons"))
+//                .forEach(this::buildAndPublish);
+
+        stopLocalNpmRegistry();
     }
 
-    private void write(final TsClass tsClass) {
-        write(tsClass, buildPath(tsClass.getModuleName(), tsClass.getRelativePath() + ".ts"));
+    private void startLocalNpmRegistry() {
+        if (bash("which verdaccio") != 0) {
+            throw new RuntimeException("Verdaccio is not installed.");
+        }
+        bash("nohup verdaccio >/dev/null 2>&1 &");
     }
 
-    private void write(final PackageJson packageJson) {
-        write(packageJson, buildPath(packageJson.getModuleName(), "package.json"));
+    private void stopLocalNpmRegistry() {
+        bash("pgrep Verdaccio | xargs kill");
+    }
+
+    private void buildAndPublish(final PackageJson packageJson) {
+
+        final String buildAndPublishModule = format(
+                linesJoinedBy(" && ", new String[]{
+                        "cd %s",
+                        "npm config set @kiegroup-ts-generated:registry http://localhost:4873",
+                        "npm i --registry http://localhost:4873",
+                        "(npm unpublish --force %s || echo \"Wasn't published.\")",
+                        "npx webpack",
+                        "npm publish",
+                }),
+
+                packageJson.getModuleName(),
+                packageJson.getModuleName());
+
+        //FIXME: Change location
+        if (bash("cd /tmp/ts-exporter && " + buildAndPublishModule) != 0) {
+            stopLocalNpmRegistry();
+            throw new RuntimeException(format("Something failed while building %s", packageJson.getModuleName()));
+        }
+    }
+
+    private int bash(final String command) {
+        try {
+            final ProcessBuilder processBuilder = new ProcessBuilder("bash", "-c", command);
+            processBuilder.inheritIO();
+            final Process process = processBuilder.start();
+            process.waitFor();
+            return process.exitValue();
+        } catch (final Exception e) {
+            stopLocalNpmRegistry();
+            throw new RuntimeException(format("Something failed while running command [ %s ]", command));
+        }
+    }
+
+    private void write(final TsExporterResource tsExporterResource,
+                       final String relativeFilePath) {
+
+        write(tsExporterResource, buildPath(tsExporterResource.getModuleName(), relativeFilePath));
     }
 
     private void write(final TsExporterResource resource,
@@ -106,7 +174,7 @@ public class TsCodegenExporter {
     private Path buildPath(final String moduleName,
                            final String relativeFilePath) {
 
-        return Paths.get(format("/tmp/ts-exporter/%s/%s", moduleName, relativeFilePath).replace("/", File.separator));
+        return Paths.get(format("/tmp/ts-exporter/%s/%s", get(-1, moduleName.split("/")), relativeFilePath).replace("/", File.separator));
     }
 
     private List<TypeElement> getClassesFromErraiAppPropertiesFiles() {

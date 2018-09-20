@@ -25,9 +25,9 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
-import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 import org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation;
 import org.uberfire.jsbridge.tsexporter.dependency.ImportEntriesStore;
+import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 import org.uberfire.jsbridge.tsexporter.meta.Translatable;
 import org.uberfire.jsbridge.tsexporter.util.Lazy;
 
@@ -40,11 +40,11 @@ import static javax.lang.model.element.ElementKind.INTERFACE;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.STATIC;
 import static org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore.NO_DECORATORS;
+import static org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation.Kind.FIELD;
+import static org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation.Kind.HIERARCHY;
 import static org.uberfire.jsbridge.tsexporter.meta.Translatable.SourceUsage.FIELD_DECLARATION;
 import static org.uberfire.jsbridge.tsexporter.meta.Translatable.SourceUsage.TYPE_ARGUMENT_DECLARATION;
 import static org.uberfire.jsbridge.tsexporter.meta.Translatable.SourceUsage.TYPE_ARGUMENT_USE;
-import static org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation.Kind.FIELD;
-import static org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation.Kind.HIERARCHY;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.formatRightToLeft;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
 
@@ -66,7 +66,7 @@ public class PojoTsClass implements TsClass {
 
         this.declaredType = declaredType;
         this.decoratorStore = decoratorStore;
-        this.importStore = new ImportEntriesStore();
+        this.importStore = new ImportEntriesStore(this);
         this.translatableSelf = new Lazy<>(() -> importStore.with(HIERARCHY, new JavaType(declaredType, declaredType).translate(NO_DECORATORS)));
         this.source = new Lazy<>(() -> {
             if (asElement().getKind().equals(INTERFACE)) {
@@ -83,13 +83,10 @@ public class PojoTsClass implements TsClass {
     private String toEnum() {
         return formatRightToLeft(
                 lines("",
-                      "enum %s { %s }",
-                      "",
-                      "export default %s;"),
+                      "export enum %s { %s }"),
 
                 () -> translatableSelf.get().toTypeScript(TYPE_ARGUMENT_DECLARATION),
-                this::enumFields,
-                () -> translatableSelf.get().toTypeScript(TYPE_ARGUMENT_DECLARATION));
+                this::enumFields);
     }
 
     private String toInterface() {
@@ -97,7 +94,7 @@ public class PojoTsClass implements TsClass {
                 lines("",
                       "%s",
                       "",
-                      "export default interface %s %s {",
+                      "export interface %s %s {",
                       "}"),
 
                 this::imports,
@@ -108,10 +105,10 @@ public class PojoTsClass implements TsClass {
     private String toClass() {
         return formatRightToLeft(
                 lines("",
-                      "import Portable from 'appformer-js';",
+                      "import { Portable } from 'appformer-js';",
                       "%s",
                       "",
-                      "export default %s class %s %s {",
+                      "export %s class %s %s {",
                       "",
                       "  protected readonly _fqcn: string = '%s';",
                       "",
@@ -135,7 +132,7 @@ public class PojoTsClass implements TsClass {
     }
 
     private String imports() {
-        return importStore.getImportStatements(this);
+        return importStore.getImportStatements();
     }
 
     private String fqcn() {
@@ -178,15 +175,16 @@ public class PojoTsClass implements TsClass {
                 ? "extends " + importStore.with(HIERARCHY, superclass()).toTypeScript(TYPE_ARGUMENT_USE)
                 : "";
 
+        final String portablePart = format("Portable<%s>", translatableSelf.get().toTypeScript(TYPE_ARGUMENT_USE));
         if (interfaces().isEmpty()) {
-            return _extends + " " + format("implements Portable<%s>", translatableSelf.get().toTypeScript(TYPE_ARGUMENT_USE));
-        } else {
-            return _extends + " " + format("implements %s, %s",
-                                           interfaces().stream()
-                                                   .map(javaType -> importStore.with(HIERARCHY, javaType.translate(NO_DECORATORS)).toTypeScript(TYPE_ARGUMENT_USE))
-                                                   .collect(joining(", ")),
-                                           format("Portable<%s>", translatableSelf.get().toTypeScript(TYPE_ARGUMENT_USE)));
+            return _extends + " implements " + portablePart;
         }
+
+        final String interfacesPart = interfaces().stream()
+                .map(javaType -> importStore.with(HIERARCHY, javaType.translate(NO_DECORATORS)).toTypeScript(TYPE_ARGUMENT_USE))
+                .collect(joining(", "));
+
+        return _extends + " " + format("implements %s, %s", interfacesPart, portablePart);
     }
 
     private String abstractOrNot() {
@@ -230,7 +228,7 @@ public class PojoTsClass implements TsClass {
     @Override
     public Set<DependencyRelation> getDependencies() {
         source.get();
-        return importStore.getImports(this);
+        return importStore.getImports();
     }
 
     @Override

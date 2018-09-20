@@ -1,11 +1,14 @@
 {
-  "name": "appformer-js",
+  "name": "appformer-js-decorators",
   "version": "1.0.0",
   "description": "",
   "license": "Apache-2.0",
-  "main": "./dist/appformer.js",
+  "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "dependencies": {},
+  "dependencies": {
+    "@kiegroup-ts-generated/uberfire-api": "^1.0.0",
+    "appformer-js": "^1.0.0"
+  },
   "devDependencies": {
     "@types/jest": "^23.3.1",
     "babel-core": "^6.26.3",

@@ -47,7 +47,11 @@ public class Utils {
     }
 
     public static String lines(final String... lines) {
-        return stream(lines).collect(joining("\n"));
+        return linesJoinedBy("\n", lines);
+    }
+
+    public static String linesJoinedBy(final String joiner, final String[] lines) {
+        return stream(lines).collect(joining(joiner));
     }
 
     @SafeVarargs

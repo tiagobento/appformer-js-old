@@ -28,7 +28,7 @@ public interface ImportEntry {
     String getModuleName();
 
     default String sourcePath() {
-        return (this instanceof ImportEntryJava ? "output/" : "") + getModuleName() + "/" + relativePath();
+        return getModuleName() + "/" + relativePath();
     }
 
     Element asElement();

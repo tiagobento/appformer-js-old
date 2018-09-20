@@ -8,8 +8,7 @@ import com.google.testing.compile.CompilationRule;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.uberfire.jsbridge.tsexporter.model.PackageJson;
-import org.uberfire.jsbridge.tsexporter.model.PojoTsClass;
+import org.uberfire.jsbridge.tsexporter.model.config.PackageJson;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;

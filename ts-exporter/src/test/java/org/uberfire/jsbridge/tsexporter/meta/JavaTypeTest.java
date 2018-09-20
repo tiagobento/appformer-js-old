@@ -36,7 +36,9 @@ public class JavaTypeTest {
 
     @Test
     public void testAggregated() {
-        final ImportEntriesStore store = new ImportEntriesStore();
+
+        final PojoTsClass tsClass = new PojoTsClass(type(JavaTypeTest.class), NO_DECORATORS);
+        final ImportEntriesStore store = new ImportEntriesStore(tsClass);
 
         final List<ImportEntry> aggregated0 = store.with(
                 FIELD, member("field2", type(TestingUtils.Sphere.class)).translate(NO_DECORATORS))
@@ -64,7 +66,7 @@ public class JavaTypeTest {
         assertEquals(3, aggregated3.size());
         assertTrue(aggregated3.get(0).toString().endsWith("Circle<T>"));
 
-        final List<ImportEntry> importEntries = store.getImports(new PojoTsClass(type(JavaTypeTest.class), NO_DECORATORS)).stream()
+        final List<ImportEntry> importEntries = store.getImports().stream()
                 .map(DependencyRelation::getImportEntry)
                 .sorted(comparing(ImportEntry::sourcePath))
                 .collect(Collectors.toList());

@@ -29,6 +29,8 @@ import static org.uberfire.jsbridge.tsexporter.util.Utils.get;
 
 public interface TsClass extends TsExporterResource {
 
+    public static final String MODULE_SCOPE = "@kiegroup-ts-generated";
+
     Set<DependencyRelation> getDependencies();
 
     DeclaredType getType();
@@ -45,17 +47,17 @@ public interface TsClass extends TsExporterResource {
     default String getModuleName() {
 
         if (getType().toString().matches("^javax?.*")) {
-            return "java";
+            return MODULE_SCOPE + "/" + "java";
         }
 
         try {
             final Class<?> clazz = Class.forName(((Symbol) asElement()).flatName().toString());
-            return getModuleNameFromSourceFilePath(clazz.getResource('/' + clazz.getName().replace('.', '/') + ".class").toString());
+            return MODULE_SCOPE + "/" + getModuleNameFromSourceFilePath(clazz.getResource('/' + clazz.getName().replace('.', '/') + ".class").toString());
         } catch (final ClassNotFoundException e) {
             try {
                 final Field sourceFileField = asElement().getClass().getField("sourcefile");
                 sourceFileField.setAccessible(true);
-                return getModuleNameFromSourceFilePath(sourceFileField.get(asElement()).toString());
+                return MODULE_SCOPE + "/" + getModuleNameFromSourceFilePath(sourceFileField.get(asElement()).toString());
             } catch (final Exception e1) {
                 throw new RuntimeException("Error while reading [sourcefile] field from @Remote interface element.", e1);
             }

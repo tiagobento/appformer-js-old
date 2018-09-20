@@ -17,8 +17,7 @@
 package org.uberfire.jsbridge.tsexporter.dependency;
 
 import java.util.Set;
-
-import javax.lang.model.type.DeclaredType;
+import java.util.stream.IntStream;
 
 import org.uberfire.jsbridge.tsexporter.meta.Translatable;
 import org.uberfire.jsbridge.tsexporter.model.TsClass;
@@ -29,12 +28,15 @@ import static java.lang.String.format;
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toSet;
+import static org.uberfire.jsbridge.tsexporter.util.Utils.get;
 
 public class ImportEntriesStore {
 
     private final IndirectHashMap<ImportEntry, Set<DependencyRelation.Kind>> dependencies;
+    private final TsClass tsClass;
 
-    public ImportEntriesStore() {
+    public ImportEntriesStore(final TsClass tsClass) {
+        this.tsClass = tsClass;
         this.dependencies = new IndirectHashMap<>(ImportEntry::relativePath);
     }
 
@@ -45,23 +47,33 @@ public class ImportEntriesStore {
         return type;
     }
 
-    public String getImportStatements(final TsClass tsClass) {
-        return getImports(tsClass).stream()
-                .map(relation -> toTypeScriptImportSource(relation.getImportEntry(), tsClass.getType()))
+    public String getImportStatements() {
+        return getImports().stream()
+                .map(relation -> toTypeScriptImportSource(relation.getImportEntry()))
                 .sorted()
                 .collect(joining("\n"));
     }
 
-    public Set<DependencyRelation> getImports(final TsClass tsClass) {
+    public Set<DependencyRelation> getImports() {
         return dependencies.entrySet().stream()
                 .filter(e -> !e.getKey().represents(tsClass.getType()))
                 .map(e -> new DependencyRelation(e.getKey(), e.getValue()))
                 .collect(toSet());
     }
 
-    private String toTypeScriptImportSource(final ImportEntry dependency,
-                                            final DeclaredType owner) {
+    private String toTypeScriptImportSource(final ImportEntry dependency) {
+        final String uniqueName = dependency.uniqueName(tsClass.getType());
+        final String simpleName = get(-1, uniqueName.split("_"));
 
-        return format("import %s from '%s';", dependency.uniqueName(owner), dependency.sourcePath());
+        if (!tsClass.getModuleName().equals(dependency.getModuleName())) {
+            return format("import { %s as %s } from '%s';", simpleName, uniqueName, dependency.getModuleName());
+        }
+
+        final int numberOfDirectoriesToGoBackUntilTheRootDir = tsClass.getRelativePath().split("/").length - 1;
+        final String dotDotSlashPart = IntStream.range(0, numberOfDirectoriesToGoBackUntilTheRootDir).boxed()
+                .map(i -> "../")
+                .collect(joining(""));
+
+        return format("import { %s as %s } from '%s';", simpleName, uniqueName, dotDotSlashPart + dependency.relativePath());
     }
 }

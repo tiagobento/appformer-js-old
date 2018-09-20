@@ -1,4 +1,4 @@
-import Path from "output/uberfire-api/org/uberfire/backend/vfs/Path";
+import { Path } from "@kiegroup-ts-generated/uberfire-api";
 
 export default interface PathDEC extends Path {
   blergs(): string;

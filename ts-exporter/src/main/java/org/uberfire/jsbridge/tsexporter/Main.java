@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
@@ -43,6 +44,7 @@ public class Main extends AbstractProcessor {
 
     public static Types types;
     public static Elements elements;
+    public static Messager messager;
 
     private static final List<Element> seenPortables = new ArrayList<>();
     private static final List<Element> seenRemotes = new ArrayList<>();
@@ -52,6 +54,7 @@ public class Main extends AbstractProcessor {
         super.init(processingEnv);
         Main.types = processingEnv.getTypeUtils();
         Main.elements = processingEnv.getElementUtils();
+        Main.messager = processingEnv.getMessager();
     }
 
     @Override
@@ -105,10 +108,10 @@ public class Main extends AbstractProcessor {
 
     private Set<DecoratorImportEntry> readDecoratorFiles() {
         return new HashSet<>(asList(
-                new DecoratorImportEntry("appformer", "decorators/PathDEC", "org.uberfire.backend.vfs.Path"),
-                new DecoratorImportEntry("appformer", "decorators/PathImplDEC", "org.uberfire.backend.vfs.PathFactory.PathImpl"),
-                new DecoratorImportEntry("appformer", "decorators/ObservablePathDEC", "org.uberfire.backend.vfs.ObservablePath"),
-                new DecoratorImportEntry("appformer", "decorators/ObservablePathImplDEC", "org.uberfire.backend.vfs.impl.ObservablePathImpl")
+//                new DecoratorImportEntry("appformer-js-decorators", "PathDEC", "org.uberfire.backend.vfs.Path"),
+//                new DecoratorImportEntry("appformer-js-decorators", "PathImplDEC", "org.uberfire.backend.vfs.PathFactory.PathImpl"),
+//                new DecoratorImportEntry("appformer-js-decorators", "ObservablePathDEC", "org.uberfire.backend.vfs.ObservablePath"),
+//                new DecoratorImportEntry("appformer-js-decorators", "ObservablePathImplDEC", "org.uberfire.backend.vfs.impl.ObservablePathImpl")
         ));
     }
 

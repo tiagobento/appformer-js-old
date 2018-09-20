@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-package org.uberfire.jsbridge.tsexporter.model;
+package org.uberfire.jsbridge.tsexporter.model.config;
 
 import java.util.List;
+import java.util.Set;
 
-import org.uberfire.jsbridge.tsexporter.dependency.ImportEntry;
 import org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation;
+import org.uberfire.jsbridge.tsexporter.dependency.ImportEntry;
 import org.uberfire.jsbridge.tsexporter.model.TsClass;
 import org.uberfire.jsbridge.tsexporter.model.TsExporterResource;
+import org.uberfire.jsbridge.tsexporter.util.Lazy;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.groupingBy;
@@ -32,43 +34,56 @@ public class PackageJson implements TsExporterResource {
 
     private final String moduleName;
     private final List<? extends TsClass> classes;
+    private final Lazy<Set<String>> dependencies;
 
     public PackageJson(final String moduleName,
                        final List<? extends TsClass> classes) {
 
         this.moduleName = moduleName;
         this.classes = classes;
+        this.dependencies = new Lazy<>(() -> classes.stream()
+                .flatMap(c -> c.getDependencies().stream())
+                .map(DependencyRelation::getImportEntry)
+                .collect(groupingBy(ImportEntry::getModuleName))
+                .keySet());
     }
 
     @Override
     public String toSource() {
 
-        final String dependencies = classes.stream()
-                .flatMap(c -> c.getDependencies().stream())
-                .map(DependencyRelation::getImportEntry)
-                .collect(groupingBy(ImportEntry::getModuleName))
-                .keySet().stream()
+        final String dependenciesPart = dependencies.get().stream()
                 .filter(s -> !s.equals(moduleName))
-                .map(moduleName -> format("\"%s\": \"file:../%s\"", moduleName, moduleName))
+                .sorted()
+                .map(moduleName -> format("\"%s\": \"1.0.0\"", moduleName))
                 .collect(joining(",\n"));
 
         return format(lines("{",
                             "  \"name\": \"%s\",",
                             "  \"version\": \"%s\",",
                             "  \"license\": \"Apache-2.0\",",
+                            "  \"main\": \"./dist/index.js\",",
+                            "  \"types\": \"./dist/index.d.ts\",",
                             "  \"dependencies\": {",
                             "%s",
+                            "  },",
+                            "  \"scripts\": {",
+                            "    \"build\": \"webpack\",",
+                            "    \"unpublish\": \"npm unpublish --force\"",
                             "  }",
                             "}"),
 
-                      "@kiegroup-ts-generated/" + moduleName,
+                      moduleName,
                       "1.0.0",
-                      dependencies
+                      dependenciesPart
         );
     }
 
     @Override
     public String getModuleName() {
         return moduleName;
+    }
+
+    public Lazy<Set<String>> getDependencies() {
+        return dependencies;
     }
 }
