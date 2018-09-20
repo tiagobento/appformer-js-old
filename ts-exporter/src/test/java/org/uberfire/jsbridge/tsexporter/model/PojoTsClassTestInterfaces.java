@@ -39,7 +39,7 @@ public class PojoTsClassTestInterfaces {
         assertEquals(lines("",
                            "",
                            "",
-                           "export default interface A  {",
+                           "export interface A  {",
                            "}"),
                      pojoTsClass.toSource());
     }
@@ -52,9 +52,9 @@ public class PojoTsClassTestInterfaces {
     public void testInterfaceB() {
         final PojoTsClass pojoTsClass = new PojoTsClass(type(B.class), NO_DECORATORS);
         assertEquals(lines("",
-                           "import A from 'output/ts-exporter-test/org/uberfire/jsbridge/tsexporter/model/PojoTsClassTestInterfaces/A';",
+                           "import { A as A } from '../../../../../../org/uberfire/jsbridge/tsexporter/model/PojoTsClassTestInterfaces/A';",
                            "",
-                           "export default interface B extends A {",
+                           "export interface B extends A {",
                            "}"),
                      pojoTsClass.toSource());
     }
@@ -69,7 +69,7 @@ public class PojoTsClassTestInterfaces {
         assertEquals(lines("",
                            "",
                            "",
-                           "export default interface C<T>  {",
+                           "export interface C<T>  {",
                            "}"),
                      pojoTsClass.toSource());
     }
@@ -82,9 +82,9 @@ public class PojoTsClassTestInterfaces {
     public void testInterfaceD() {
         final PojoTsClass pojoTsClass = new PojoTsClass(type(D.class), NO_DECORATORS);
         assertEquals(lines("",
-                           "import A from 'output/ts-exporter-test/org/uberfire/jsbridge/tsexporter/model/PojoTsClassTestInterfaces/A';",
+                           "import { A as A } from '../../../../../../org/uberfire/jsbridge/tsexporter/model/PojoTsClassTestInterfaces/A';",
                            "",
-                           "export default interface D<T extends A>  {",
+                           "export interface D<T extends A>  {",
                            "}"),
                      pojoTsClass.toSource());
     }
@@ -97,10 +97,10 @@ public class PojoTsClassTestInterfaces {
     public void testInterfaceE() {
         final PojoTsClass pojoTsClass = new PojoTsClass(type(E.class), NO_DECORATORS);
         assertEquals(lines("",
-                           "import A from 'output/ts-exporter-test/org/uberfire/jsbridge/tsexporter/model/PojoTsClassTestInterfaces/A';",
-                           "import D from 'output/ts-exporter-test/org/uberfire/jsbridge/tsexporter/model/PojoTsClassTestInterfaces/D';",
+                           "import { A as A } from '../../../../../../org/uberfire/jsbridge/tsexporter/model/PojoTsClassTestInterfaces/A';",
+                           "import { D as D } from '../../../../../../org/uberfire/jsbridge/tsexporter/model/PojoTsClassTestInterfaces/D';",
                            "",
-                           "export default interface E<J extends D<A>>  {",
+                           "export interface E<J extends D<A>>  {",
                            "}"),
                      pojoTsClass.toSource());
     }
@@ -115,7 +115,7 @@ public class PojoTsClassTestInterfaces {
         assertEquals(lines("",
                            "",
                            "",
-                           "export default interface F<B extends F<any /* wildcard */>>  {",
+                           "export interface F<B extends F<any /* wildcard */>>  {",
                            "}"),
                      pojoTsClass.toSource());
     }
@@ -128,9 +128,9 @@ public class PojoTsClassTestInterfaces {
     public void testInterfaceG() {
         final PojoTsClass pojoTsClass = new PojoTsClass(type(G.class), NO_DECORATORS);
         assertEquals(lines("",
-                           "import A from 'output/ts-exporter-test/org/uberfire/jsbridge/tsexporter/model/PojoTsClassTestInterfaces/A';",
+                           "import { A as A } from '../../../../../../org/uberfire/jsbridge/tsexporter/model/PojoTsClassTestInterfaces/A';",
                            "",
-                           "export default interface G<T> extends A {",
+                           "export interface G<T> extends A {",
                            "}"),
                      pojoTsClass.toSource());
     }
@@ -143,9 +143,9 @@ public class PojoTsClassTestInterfaces {
     public void testInterfaceH() {
         final PojoTsClass pojoTsClass = new PojoTsClass(type(H.class), NO_DECORATORS);
         assertEquals(lines("",
-                           "import C from 'output/ts-exporter-test/org/uberfire/jsbridge/tsexporter/model/PojoTsClassTestInterfaces/C';",
+                           "import { C as C } from '../../../../../../org/uberfire/jsbridge/tsexporter/model/PojoTsClassTestInterfaces/C';",
                            "",
-                           "export default interface H<T> extends C<T> {",
+                           "export interface H<T> extends C<T> {",
                            "}"),
                      pojoTsClass.toSource());
     }
@@ -158,10 +158,10 @@ public class PojoTsClassTestInterfaces {
     public void testInterfaceI() {
         final PojoTsClass pojoTsClass = new PojoTsClass(type(I.class), NO_DECORATORS);
         assertEquals(lines("",
-                           "import C from 'output/ts-exporter-test/org/uberfire/jsbridge/tsexporter/model/PojoTsClassTestInterfaces/C';",
-                           "import H from 'output/ts-exporter-test/org/uberfire/jsbridge/tsexporter/model/PojoTsClassTestInterfaces/H';",
+                           "import { C as C } from '../../../../../../org/uberfire/jsbridge/tsexporter/model/PojoTsClassTestInterfaces/C';",
+                           "import { H as H } from '../../../../../../org/uberfire/jsbridge/tsexporter/model/PojoTsClassTestInterfaces/H';",
                            "",
-                           "export default interface I<T extends C<I<any>>> extends H<T> {",
+                           "export interface I<T extends C<I<any>>> extends H<T> {",
                            "}"),
                      pojoTsClass.toSource());
     }

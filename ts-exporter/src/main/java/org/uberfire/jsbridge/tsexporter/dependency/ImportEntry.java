@@ -23,14 +23,14 @@ import static org.uberfire.jsbridge.tsexporter.util.Utils.get;
 
 public interface ImportEntry {
 
-    String uniqueName(final DeclaredType owner);
+    String getUniqueTsIdentifier(final DeclaredType owner);
 
-    String relativePath();
+    String getRelativePath();
 
-    String getModuleName();
+    String getNpmPackageName();
 
     default String sourcePath() {
-        return getModuleName() + "/" + relativePath();
+        return getNpmPackageName() + "/" + getRelativePath();
     }
 
     Element asElement();
@@ -38,6 +38,6 @@ public interface ImportEntry {
     boolean represents(final DeclaredType type);
 
     default String getSimpleName() {
-        return get(-1, this.relativePath().split("/"));
+        return get(-1, this.getRelativePath().split("/"));
     }
 }

@@ -30,13 +30,13 @@ import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
 
 public class PackageJson implements TsExporterResource {
 
-    private final String scopedModuleName;
+    private final String npmPackageName;
     private final List<? extends TsClass> classes;
 
-    public PackageJson(final String scopedNpmModuleName,
+    public PackageJson(final String npmPackageName,
                        final List<? extends TsClass> classes) {
 
-        this.scopedModuleName = scopedNpmModuleName;
+        this.npmPackageName = npmPackageName;
         this.classes = classes;
     }
 
@@ -44,13 +44,13 @@ public class PackageJson implements TsExporterResource {
     public String toSource() {
 
         final String dependenciesPart = classes.stream()
-                .flatMap(c -> c.getDependencies().stream())
+                .flatMap(clazz -> clazz.getDependencies().stream())
                 .map(DependencyRelation::getImportEntry)
-                .collect(groupingBy(ImportEntry::getModuleName))
+                .collect(groupingBy(ImportEntry::getNpmPackageName))
                 .keySet().stream()
-                .filter(s -> !s.equals(scopedModuleName))
+                .filter(name -> !name.equals(npmPackageName))
                 .sorted()
-                .map(moduleName -> format("\"%s\": \"1.0.0\"", moduleName))
+                .map(name -> format("\"%s\": \"1.0.0\"", name))
                 .collect(joining(",\n"));
 
         return format(lines("{",
@@ -65,18 +65,18 @@ public class PackageJson implements TsExporterResource {
                             "  \"scripts\": {",
                             "    \"build\": \"webpack\",",
                             "    \"unpublish\": \"npm unpublish --force --registry http://localhost:4873 || echo 'Was not published'\",",
-                            "    \"doPublish\": \"echo 'OY' && npm publish\"",
+                            "    \"doPublish\": \"npm publish\"",
                             "  }",
                             "}"),
 
-                      scopedModuleName,
+                      npmPackageName,
                       "1.0.0",
                       dependenciesPart
         );
     }
 
     @Override
-    public String getScopedNpmPackageName() {
-        return scopedModuleName;
+    public String getNpmPackageName() {
+        return npmPackageName;
     }
 }

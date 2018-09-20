@@ -25,31 +25,31 @@ import static org.uberfire.jsbridge.tsexporter.Main.elements;
 
 public class DecoratorImportEntry implements ImportEntry {
 
-    private final String moduleName;
+    private final String npmPackageName;
     private final String decoratorPath;
     private final String decoratedFqcn;
 
-    public DecoratorImportEntry(final String moduleName,
+    public DecoratorImportEntry(final String npmPackageName,
                                 final String decoratorPath,
                                 final String decoratedFqcn) {
 
-        this.moduleName = moduleName;
+        this.npmPackageName = npmPackageName;
         this.decoratorPath = decoratorPath;
         this.decoratedFqcn = decoratedFqcn;
     }
 
     @Override
-    public String uniqueName(final DeclaredType owner) {
+    public String getUniqueTsIdentifier(final DeclaredType owner) {
         return decoratorPath.replace("/", "_").replace("-", "");
     }
 
     @Override
-    public String relativePath() {
+    public String getRelativePath() {
         return decoratorPath;
     }
 
-    public String getModuleName() {
-        return moduleName;
+    public String getNpmPackageName() {
+        return npmPackageName;
     }
 
     @Override

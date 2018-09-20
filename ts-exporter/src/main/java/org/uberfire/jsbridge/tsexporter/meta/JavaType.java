@@ -108,7 +108,7 @@ public class JavaType {
             case SHORT:
                 return new TranslatableJavaNumberWithDefaultInstantiation(JAVA_SHORT);
             case LONG:
-                return new TranslatableDefault(JAVA_LONG.getUniqueName(), singleton(JAVA_LONG), emptyList());
+                return new TranslatableDefault(JAVA_LONG.getUniqueTsIdentifier(), singleton(JAVA_LONG), emptyList());
             case VOID:
                 return new TranslatableSimple("void");
             case NULL:
@@ -156,15 +156,15 @@ public class JavaType {
                     case "java.lang.Float":
                         return new TranslatableJavaNumberWithDefaultInstantiation(JAVA_FLOAT);
                     case "java.lang.Long":
-                        return new TranslatableDefault(JAVA_LONG.getUniqueName(), singleton(JAVA_LONG), emptyList());
+                        return new TranslatableDefault(JAVA_LONG.getUniqueTsIdentifier(), singleton(JAVA_LONG), emptyList());
                     case "java.lang.Number":
-                        return new TranslatableDefault(JAVA_NUMBER.getUniqueName(), singleton(JAVA_NUMBER), emptyList());
+                        return new TranslatableDefault(JAVA_NUMBER.getUniqueTsIdentifier(), singleton(JAVA_NUMBER), emptyList());
                     case "java.lang.Short":
                         return new TranslatableJavaNumberWithDefaultInstantiation(JAVA_SHORT);
                     case "java.math.BigInteger":
-                        return new TranslatableDefault(JAVA_BIG_INTEGER.getUniqueName(), singleton(JAVA_BIG_INTEGER), emptyList());
+                        return new TranslatableDefault(JAVA_BIG_INTEGER.getUniqueTsIdentifier(), singleton(JAVA_BIG_INTEGER), emptyList());
                     case "java.math.BigDecimal":
-                        return new TranslatableDefault(JAVA_BIG_DECIMAL.getUniqueName(), singleton(JAVA_BIG_DECIMAL), emptyList());
+                        return new TranslatableDefault(JAVA_BIG_DECIMAL.getUniqueTsIdentifier(), singleton(JAVA_BIG_DECIMAL), emptyList());
                     case "java.util.OptionalInt":
                         return new TranslatableSimple("number"); //FIXME: !
                     case "java.lang.Object":
@@ -211,7 +211,7 @@ public class JavaType {
                     default: {
                         if (decoratorStore.hasDecoratorFor(type)) {
                             final DecoratorImportEntry decorator = decoratorStore.getDecoratorFor(type);
-                            return new TranslatableDefault(decorator.uniqueName(declaredType), singleton(decorator), translatableTypeArguments);
+                            return new TranslatableDefault(decorator.getUniqueTsIdentifier(declaredType), singleton(decorator), translatableTypeArguments);
                         }
 
                         final String translated = (SIMPLE_NAMES.get() || types.asElement(declaredType).equals(types.asElement(owner)))

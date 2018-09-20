@@ -38,18 +38,18 @@ public class ImportEntryJava implements ImportEntry {
     }
 
     @Override
-    public String uniqueName(final DeclaredType owner) {
+    public String getUniqueTsIdentifier(final DeclaredType owner) {
         return new JavaType(declaredType, owner).translate(decoratorStore).toTypeScript(IMPORT_STATEMENT);
     }
 
     @Override
-    public String relativePath() {
+    public String getRelativePath() {
         return new PojoTsClass(declaredType, decoratorStore).getRelativePath();
     }
 
     @Override
-    public String getModuleName() {
-        return new PojoTsClass(declaredType, decoratorStore).getScopedNpmPackageName();
+    public String getNpmPackageName() {
+        return new PojoTsClass(declaredType, decoratorStore).getNpmPackageName();
     }
 
     @Override

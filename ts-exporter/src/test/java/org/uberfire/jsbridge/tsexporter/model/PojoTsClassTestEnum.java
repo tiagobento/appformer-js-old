@@ -31,9 +31,7 @@ public class PojoTsClassTestEnum {
     public void testEnum() {
         final PojoTsClass pojoTsClass = new PojoTsClass(type(E.class), NO_DECORATORS);
         assertEquals(lines("",
-                           "enum E { A, B, C }",
-                           "",
-                           "export default E;"),
+                           "export enum E { A, B, C }"),
                      pojoTsClass.toSource());
     }
 }

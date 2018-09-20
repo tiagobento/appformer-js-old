@@ -34,7 +34,7 @@ public class TranslatableJavaNumberWithDefaultInstantiation implements Translata
 
     @Override
     public String toTypeScript(final SourceUsage sourceUsage) {
-        final String translated = importEntry.getUniqueName();
+        final String translated = importEntry.getUniqueTsIdentifier();
         switch (sourceUsage) {
             case FIELD_DECLARATION:
                 return format("%s = new %s(\"0\")", translated, translated);

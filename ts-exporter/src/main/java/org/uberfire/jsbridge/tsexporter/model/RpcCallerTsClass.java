@@ -122,8 +122,8 @@ public class RpcCallerTsClass implements TsClass {
     }
 
     @Override
-    public String getScopedNpmPackageName() {
-        return TsClass.super.getScopedNpmPackageName() + "-rpc";
+    public String getNpmPackageName() {
+        return TsClass.super.getNpmPackageName() + "-rpc";
     }
 
     @Override

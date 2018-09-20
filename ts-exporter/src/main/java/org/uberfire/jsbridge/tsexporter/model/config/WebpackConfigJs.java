@@ -27,13 +27,13 @@ import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
 
 public class WebpackConfigJs implements TsExporterResource {
 
-    private final String moduleName;
+    private final String npmPackageName;
     private final List<? extends TsClass> classes;
 
-    public WebpackConfigJs(final String moduleName,
+    public WebpackConfigJs(final String npmPackageName,
                            final List<? extends TsClass> classes) {
 
-        this.moduleName = moduleName;
+        this.npmPackageName = npmPackageName;
         this.classes = classes;
     }
 
@@ -87,12 +87,12 @@ public class WebpackConfigJs implements TsExporterResource {
                 "};",
                 ""),
 
-                      get(-1, moduleName.split("/")),
-                      get(-1, moduleName.replace("-", "").split("/")));
+                      get(-1, npmPackageName.split("/")),
+                      get(-1, npmPackageName.replace("-", "").split("/")));
     }
 
     @Override
-    public String getScopedNpmPackageName() {
-        return moduleName;
+    public String getNpmPackageName() {
+        return npmPackageName;
     }
 }

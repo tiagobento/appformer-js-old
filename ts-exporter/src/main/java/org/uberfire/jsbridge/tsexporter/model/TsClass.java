@@ -29,7 +29,7 @@ import static org.uberfire.jsbridge.tsexporter.util.Utils.get;
 
 public interface TsClass extends TsExporterResource {
 
-    public static final String MODULE_SCOPE = "@kiegroup-ts-generated";
+    public static final String PACKAGES_SCOPE = "@kiegroup-ts-generated";
 
     Set<DependencyRelation> getDependencies();
 
@@ -44,27 +44,27 @@ public interface TsClass extends TsExporterResource {
     }
 
     @Override
-    default String getScopedNpmPackageName() {
+    default String getNpmPackageName() {
 
         if (getType().toString().matches("^javax?.*")) {
-            return MODULE_SCOPE + "/" + "java";
+            return PACKAGES_SCOPE + "/" + "java";
         }
 
         try {
             final Class<?> clazz = Class.forName(((Symbol) asElement()).flatName().toString());
-            return MODULE_SCOPE + "/" + getModuleNameFromSourceFilePath(clazz.getResource('/' + clazz.getName().replace('.', '/') + ".class").toString());
+            return PACKAGES_SCOPE + "/" + getMavenModuleNameFromSourceFilePath(clazz.getResource('/' + clazz.getName().replace('.', '/') + ".class").toString());
         } catch (final ClassNotFoundException e) {
             try {
                 final Field sourceFileField = asElement().getClass().getField("sourcefile");
                 sourceFileField.setAccessible(true);
-                return MODULE_SCOPE + "/" + getModuleNameFromSourceFilePath(sourceFileField.get(asElement()).toString());
+                return PACKAGES_SCOPE + "/" + getMavenModuleNameFromSourceFilePath(sourceFileField.get(asElement()).toString());
             } catch (final Exception e1) {
                 throw new RuntimeException("Error while reading [sourcefile] field from @Remote interface element.", e1);
             }
         }
     }
 
-    static String getModuleNameFromSourceFilePath(final String sourceFilePath) {
+    static String getMavenModuleNameFromSourceFilePath(final String sourceFilePath) {
 
         if (sourceFilePath.contains("jar!")) {
             return get(-2, sourceFilePath.split("(/)[\\w-]+(-)[\\d.]+(.*)\\.jar!")[0].split("/"));
@@ -94,6 +94,6 @@ public interface TsClass extends TsExporterResource {
             return get(-1, sourceFilePath.split("/target/test-classes")[0].split("/")) + "-test";
         }
 
-        throw new RuntimeException("Module name unretrievable from [" + sourceFilePath + "]");
+        throw new RuntimeException("Maven module name unretrievable from [" + sourceFilePath + "]");
     }
 }

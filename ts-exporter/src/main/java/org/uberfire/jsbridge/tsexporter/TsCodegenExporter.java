@@ -54,7 +54,6 @@ import static org.uberfire.jsbridge.tsexporter.Main.TS_EXPORTER_PACKAGE;
 import static org.uberfire.jsbridge.tsexporter.Main.elements;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.createFileIfNotExists;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.distinctBy;
-import static org.uberfire.jsbridge.tsexporter.util.Utils.get;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.getResources;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.linesJoinedBy;
 
@@ -83,34 +82,34 @@ public class TsCodegenExporter {
                dependencyGraph.vertices().stream().parallel().map(DependencyGraph.Vertex::getPojoClass))
                 .parallel()
                 .filter(distinctBy(tsClass -> tsClass.getType().toString()))
-                .peek(tsClass -> write(tsClass, buildPath("packages/" + tsClass.getSimpleNpmPackageName(), "src/" + tsClass.getRelativePath() + ".ts")))
-                .collect(groupingBy(TsClass::getScopedNpmPackageName))
+                .peek(tsClass -> write(tsClass, buildPath("packages/" + tsClass.getUnscopedNpmPackageName(), "src/" + tsClass.getRelativePath() + ".ts")))
+                .collect(groupingBy(TsClass::getNpmPackageName))
                 .entrySet().stream()
                 .parallel()
                 .peek(e -> {
                     final TsExporterResource tsExporterResource = new IndexTs(e.getKey(), e.getValue());
-                    write(tsExporterResource, buildPath("packages/" + tsExporterResource.getSimpleNpmPackageName(), "src/index.ts"));
+                    write(tsExporterResource, buildPath("packages/" + tsExporterResource.getUnscopedNpmPackageName(), "src/index.ts"));
                 })
                 .peek(e -> {
                     final TsExporterResource tsExporterResource = new WebpackConfigJs(e.getKey(), e.getValue());
-                    write(tsExporterResource, buildPath("packages/" + tsExporterResource.getSimpleNpmPackageName(), "webpack.config.js"));
+                    write(tsExporterResource, buildPath("packages/" + tsExporterResource.getUnscopedNpmPackageName(), "webpack.config.js"));
                 })
                 .peek(e -> {
                     final TsExporterResource tsExporterResource = new TsConfigJson(e.getKey(), e.getValue());
-                    write(tsExporterResource, buildPath("packages/" + tsExporterResource.getSimpleNpmPackageName(), "tsconfig.json"));
+                    write(tsExporterResource, buildPath("packages/" + tsExporterResource.getUnscopedNpmPackageName(), "tsconfig.json"));
                 })
                 .peek(e -> {
                     final PackageJson packageJson = new PackageJson(e.getKey(), e.getValue());
-                    write(packageJson, buildPath("packages/" + packageJson.getSimpleNpmPackageName(), "package.json"));
+                    write(packageJson, buildPath("packages/" + packageJson.getUnscopedNpmPackageName(), "package.json"));
                 })
                 .forEach(i -> {
                 });
 
         final TsExporterResource rootPackageJson = new RootPackageJson();
-        write(rootPackageJson, buildPath(rootPackageJson.getSimpleNpmPackageName(), "package.json"));
+        write(rootPackageJson, buildPath(rootPackageJson.getUnscopedNpmPackageName(), "package.json"));
 
         final TsExporterResource lernaJson = new LernaJson();
-        write(lernaJson, buildPath(lernaJson.getSimpleNpmPackageName(), "lerna.json"));
+        write(lernaJson, buildPath(lernaJson.getUnscopedNpmPackageName(), "lerna.json"));
 
         if (bash("which verdaccio") != 0) {
             throw new RuntimeException("Verdaccio is not installed.");
@@ -142,7 +141,6 @@ public class TsCodegenExporter {
             process.waitFor();
             return process.exitValue();
         } catch (final Exception e) {
-            bash("pgrep Verdaccio | xargs kill");
             throw new RuntimeException(format("Something failed while running command [ %s ]", command));
         }
     }
@@ -159,10 +157,10 @@ public class TsCodegenExporter {
         }
     }
 
-    private Path buildPath(final String moduleName,
+    private Path buildPath(final String unscopedNpmPackageName,
                            final String relativeFilePath) {
 
-        return Paths.get(format("/tmp/ts-exporter/%s/%s", moduleName, relativeFilePath).replace("/", File.separator));
+        return Paths.get(format("/tmp/ts-exporter/%s/%s", unscopedNpmPackageName, relativeFilePath).replace("/", File.separator));
     }
 
     private List<TypeElement> getClassesFromErraiAppPropertiesFiles() {

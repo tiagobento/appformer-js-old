@@ -35,36 +35,36 @@ public class ImportEntryBuiltIn implements ImportEntry {
     public static final ImportEntryBuiltIn JAVA_TREE_MAP = new ImportEntryBuiltIn("JavaTreeMap", "appformer-js","java-wrappers/JavaTreeMap");
     public static final ImportEntryBuiltIn JAVA_OPTIONAL = new ImportEntryBuiltIn("JavaOptional", "appformer-js","java-wrappers/JavaOptional");
 
-    private final String uniqueName;
+    private final String uniqueTsIdentifier;
     private final String relativePath;
-    private final String moduleName;
+    private final String npmPackageName;
 
-    private ImportEntryBuiltIn(final String uniqueName,
-                               final String moduleName,
+    private ImportEntryBuiltIn(final String uniqueTsIdentifier,
+                               final String npmPackageName,
                                final String relativePath) {
 
-        this.uniqueName = uniqueName;
-        this.moduleName = moduleName;
+        this.uniqueTsIdentifier = uniqueTsIdentifier;
+        this.npmPackageName = npmPackageName;
         this.relativePath = relativePath;
     }
 
     @Override
-    public String uniqueName(final DeclaredType owner) {
-        return getUniqueName();
+    public String getUniqueTsIdentifier(final DeclaredType owner) {
+        return getUniqueTsIdentifier();
     }
 
-    public String getUniqueName() {
-        return uniqueName;
+    public String getUniqueTsIdentifier() {
+        return uniqueTsIdentifier;
     }
 
     @Override
-    public String relativePath() {
+    public String getRelativePath() {
         return relativePath;
     }
 
     @Override
-    public String getModuleName() {
-        return moduleName;
+    public String getNpmPackageName() {
+        return npmPackageName;
     }
 
     @Override

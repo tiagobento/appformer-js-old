@@ -22,9 +22,9 @@ public interface TsExporterResource {
 
     String toSource();
 
-    String getScopedNpmPackageName();
+    String getNpmPackageName();
 
-    default String getSimpleNpmPackageName() {
-        return get(-1, getScopedNpmPackageName().split("/"));
+    default String getUnscopedNpmPackageName() {
+        return get(-1, getNpmPackageName().split("/"));
     }
 }

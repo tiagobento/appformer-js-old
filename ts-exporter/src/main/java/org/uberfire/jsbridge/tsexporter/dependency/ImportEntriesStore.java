@@ -28,7 +28,6 @@ import static java.lang.String.format;
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toSet;
-import static org.uberfire.jsbridge.tsexporter.util.Utils.get;
 
 public class ImportEntriesStore {
 
@@ -37,7 +36,7 @@ public class ImportEntriesStore {
 
     public ImportEntriesStore(final TsClass tsClass) {
         this.tsClass = tsClass;
-        this.dependencies = new IndirectHashMap<>(ImportEntry::relativePath);
+        this.dependencies = new IndirectHashMap<>(ImportEntry::getRelativePath);
     }
 
     public Translatable with(final DependencyRelation.Kind kind,
@@ -62,10 +61,10 @@ public class ImportEntriesStore {
     }
 
     private String toTypeScriptImportSource(final ImportEntry importEntry) {
-        final String uniqueName = importEntry.uniqueName(tsClass.getType());
+        final String uniqueName = importEntry.getUniqueTsIdentifier(tsClass.getType());
 
-        if (!tsClass.getScopedNpmPackageName().equals(importEntry.getModuleName())) {
-            return format("import { %s as %s } from '%s';", importEntry.getSimpleName(), uniqueName, importEntry.getModuleName());
+        if (!tsClass.getNpmPackageName().equals(importEntry.getNpmPackageName())) {
+            return format("import { %s as %s } from '%s';", importEntry.getSimpleName(), uniqueName, importEntry.getNpmPackageName());
         }
 
         final int numberOfDirectoriesToGoBackUntilTheRootDir = tsClass.getRelativePath().split("/").length - 1;
@@ -73,6 +72,6 @@ public class ImportEntriesStore {
                 .map(i -> "../")
                 .collect(joining(""));
 
-        return format("import { %s as %s } from '%s';", importEntry.getSimpleName(), uniqueName, dotDotSlashPart + importEntry.relativePath());
+        return format("import { %s as %s } from '%s';", importEntry.getSimpleName(), uniqueName, dotDotSlashPart + importEntry.getRelativePath());
     }
 }
