@@ -97,47 +97,24 @@ public class TsCodegenExporter {
         write(new RootPackageJson(), "package.json");
         write(new LernaJson(), "lerna.json");
 
-        startLocalNpmRegistry();
-
-        //TODO: Discover order and remove this filter
-//        generatedPackages.stream()
-//                .filter(s -> s.getModuleName().equals("@kiegroup-ts-generated/uberfire-commons"))
-//                .forEach(this::buildAndPublish);
-
-        stopLocalNpmRegistry();
-    }
-
-    private void startLocalNpmRegistry() {
         if (bash("which verdaccio") != 0) {
             throw new RuntimeException("Verdaccio is not installed.");
         }
+
         bash("nohup verdaccio >/dev/null 2>&1 &");
-    }
-
-    private void stopLocalNpmRegistry() {
+        bash(linesJoinedBy("&& \\", new String[]{
+                "cd /tmp/ts-exporter",
+                "npm i",
+                "git init",
+                "git add lerna.json",
+                "git commit -m \"First commit\"",
+                "npx lerna bootstrap",
+                "npx lerna run unpublish",
+                "npx lerna run build",
+                "npx lerna publish --skip-git --cd-version=1.0.0 || echo \"Yay!\"",
+                "",
+        }));
         bash("pgrep Verdaccio | xargs kill");
-    }
-
-    private void buildAndPublish(final PackageJson packageJson) {
-
-        final String buildAndPublishModule = format(
-                linesJoinedBy(" && ", new String[]{
-                        "cd %s",
-                        "npm config set @kiegroup-ts-generated:registry http://localhost:4873",
-                        "npm i --registry http://localhost:4873",
-                        "(npm unpublish --force %s || echo \"Wasn't published.\")",
-                        "npx webpack",
-                        "npm publish",
-                }),
-
-                packageJson.getModuleName(),
-                packageJson.getModuleName());
-
-        //FIXME: Change location
-        if (bash("cd /tmp/ts-exporter && " + buildAndPublishModule) != 0) {
-            stopLocalNpmRegistry();
-            throw new RuntimeException(format("Something failed while building %s", packageJson.getModuleName()));
-        }
     }
 
     private int bash(final String command) {
@@ -148,7 +125,7 @@ public class TsCodegenExporter {
             process.waitFor();
             return process.exitValue();
         } catch (final Exception e) {
-            stopLocalNpmRegistry();
+            bash("pgrep Verdaccio | xargs kill");
             throw new RuntimeException(format("Something failed while running command [ %s ]", command));
         }
     }
