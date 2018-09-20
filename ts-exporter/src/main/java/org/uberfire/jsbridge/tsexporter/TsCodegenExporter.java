@@ -126,7 +126,7 @@ public class TsCodegenExporter {
                 "npx lerna bootstrap",
                 "npx lerna run unpublish",
                 "npx lerna run build",
-                "(npx lerna publish --skip-git --cd-version=1.0.0 || echo \"Yay!\")",
+                "npx lerna run doPublish",
         }));
         bash("pgrep Verdaccio | xargs kill");
     }

@@ -19,6 +19,8 @@ package org.uberfire.jsbridge.tsexporter.dependency;
 import javax.lang.model.element.Element;
 import javax.lang.model.type.DeclaredType;
 
+import static org.uberfire.jsbridge.tsexporter.util.Utils.get;
+
 public interface ImportEntry {
 
     String uniqueName(final DeclaredType owner);
@@ -34,4 +36,8 @@ public interface ImportEntry {
     Element asElement();
 
     boolean represents(final DeclaredType type);
+
+    default String getSimpleName() {
+        return get(-1, this.relativePath().split("/"));
+    }
 }

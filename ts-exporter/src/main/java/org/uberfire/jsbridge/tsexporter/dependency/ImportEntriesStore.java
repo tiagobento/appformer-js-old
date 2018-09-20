@@ -61,12 +61,11 @@ public class ImportEntriesStore {
                 .collect(toSet());
     }
 
-    private String toTypeScriptImportSource(final ImportEntry dependency) {
-        final String uniqueName = dependency.uniqueName(tsClass.getType());
-        final String simpleName = get(-1, uniqueName.split("_"));
+    private String toTypeScriptImportSource(final ImportEntry importEntry) {
+        final String uniqueName = importEntry.uniqueName(tsClass.getType());
 
-        if (!tsClass.getScopedNpmPackageName().equals(dependency.getModuleName())) {
-            return format("import { %s as %s } from '%s';", simpleName, uniqueName, dependency.getModuleName());
+        if (!tsClass.getScopedNpmPackageName().equals(importEntry.getModuleName())) {
+            return format("import { %s as %s } from '%s';", importEntry.getSimpleName(), uniqueName, importEntry.getModuleName());
         }
 
         final int numberOfDirectoriesToGoBackUntilTheRootDir = tsClass.getRelativePath().split("/").length - 1;
@@ -74,6 +73,6 @@ public class ImportEntriesStore {
                 .map(i -> "../")
                 .collect(joining(""));
 
-        return format("import { %s as %s } from '%s';", simpleName, uniqueName, dotDotSlashPart + dependency.relativePath());
+        return format("import { %s as %s } from '%s';", importEntry.getSimpleName(), uniqueName, dotDotSlashPart + importEntry.relativePath());
     }
 }
