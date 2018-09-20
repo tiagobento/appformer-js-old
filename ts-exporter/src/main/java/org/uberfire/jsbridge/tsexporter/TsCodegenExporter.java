@@ -130,6 +130,7 @@ public class TsCodegenExporter {
                 "npx lerna run unpublish",
                 "npx lerna run build",
                 "npx lerna run doPublish",
+                "rm -rf .git",
         }));
     }
 
