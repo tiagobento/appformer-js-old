@@ -4,9 +4,7 @@
 Getting started
 --
 #### 1. Installing
-```
-npm install appformer-js
-```
+//TODO
 
 
 #### 2. Creating decorators
@@ -43,6 +41,8 @@ npm run build:prod --prefix showcase-components && \
 
 npm install --prefix showcase && \
 npm run build:prod --prefix showcase && \
+
+mvn clean install -f ts-exporter/pom.xml && \
 
 echo "Done."
 ```
