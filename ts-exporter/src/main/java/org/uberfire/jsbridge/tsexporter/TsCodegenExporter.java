@@ -116,7 +116,10 @@ public class TsCodegenExporter {
             throw new RuntimeException("Verdaccio is not installed.");
         }
 
-        bash("nohup verdaccio >/dev/null 2>&1 &");
+        if (bash("pgrep Verdaccio") != 0) {
+            throw new RuntimeException("Verdaccio is not running.");
+        }
+
         bash(linesJoinedBy(" && ", new String[]{
                 "cd /tmp/ts-exporter",
                 "npm i",
@@ -128,7 +131,6 @@ public class TsCodegenExporter {
                 "npx lerna run build",
                 "npx lerna run doPublish",
         }));
-        bash("pgrep Verdaccio | xargs kill");
     }
 
     private int bash(final String command) {
