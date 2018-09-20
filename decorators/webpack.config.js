@@ -6,11 +6,11 @@ const CircularDependencyPlugin = require("circular-dependency-plugin");
 
 module.exports = merge(common, {
   entry: {
-    "appformer-js": "./src/index.ts"
+    "decorators": "./src/index.ts"
   },
   output: {
     path: path.resolve(__dirname, "dist"),
-    filename: "appformer.js",
+    filename: "index.js",
     library: "AppFormer",
     libraryTarget: "umd",
     umdNamedDefine: true
