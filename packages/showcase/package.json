@@ -20,9 +20,10 @@
   "scripts": {
     "lint": "tslint -c ../../tslint.common.json 'src/**/*.{ts,tsx,js,jsx}'",
     "test": "",
-    "start": "webpack-dev-server --open",
-    "build:dev": "webpack",
-    "build:prod": "npm run lint && npm test && webpack --mode production"
+    "build:dev-fast": "webpack",
+    "build:dev": "npm test && webpack",
+    "build:prod": "npm run lint && npm test && webpack --mode production",
+    "start": "webpack-dev-server --open"
   },
   "babel": {
     "presets": [

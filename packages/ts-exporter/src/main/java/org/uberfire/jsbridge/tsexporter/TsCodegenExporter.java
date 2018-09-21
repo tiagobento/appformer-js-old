@@ -126,9 +126,9 @@ public class TsCodegenExporter {
                 "git add lerna.json",
                 "git commit -m \"First commit\"",
                 "npx lerna bootstrap",
-                "npx lerna run unpublish",
-                "npx lerna run build",
-                "npx lerna run doPublish",
+                "npx lerna exec --concurrency `sysctl -n hw.ncpu` -- npm run unpublish",
+                "npx lerna exec --concurrency `sysctl -n hw.ncpu` -- npm run build",
+                "npx lerna exec --concurrency `sysctl -n hw.ncpu` -- npm run doPublish",
                 "rm -rf .git",
         }));
     }

@@ -15,7 +15,8 @@
   "scripts": {
     "lint": "tslint -c ../../tslint.common.json 'src/**/*.{ts,tsx,js,jsx}'",
     "test": "jest",
-    "build:dev": "webpack",
+    "build:dev-fast": "webpack",
+    "build:dev": "npm test && webpack",
     "build:prod": "npm run lint && npm test && webpack --mode production"
   },
   "babel": {

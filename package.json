@@ -25,10 +25,9 @@
     "lerna": "^3.4.0"
   },
   "scripts": {
-    "lint": "tslint -c ../../tslint.common.json 'src/**/*.{ts,tsx,js,jsx}'",
-    "test": "jest",
-    "build:dev": "webpack",
-    "build:prod": "npm run lint && npm test && webpack --mode production && mvn clean install -f ./jar/pom.xml"
+    "build:all": "npm run build:ts && npm run build:mvn",
+    "build:ts": "npx lerna exec --concurrency `sysctl -n hw.ncpu` -- npm run build:prod",
+    "build:mvn": "npx lerna run build:mvn --stream --concurrency `sysctl -n hw.ncpu`"
   },
   "babel": {
     "presets": [
