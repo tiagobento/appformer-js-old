@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "license": "Apache-2.0",
-  "main": "./dist/showcase.js",
+  "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "dependencies": {
     "@types/react": "^16.4.6",
