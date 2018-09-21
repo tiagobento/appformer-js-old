@@ -5,7 +5,6 @@
     "target": "es5",
     "declaration": true,
     "sourceMap": true,
-    "outDir": "./dist",
     "noImplicitAny": true,
     "strictNullChecks": true,
     "experimentalDecorators": true,

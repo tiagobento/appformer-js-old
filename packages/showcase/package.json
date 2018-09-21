@@ -1,0 +1,33 @@
+{
+  "name": "appformer-js-showcase",
+  "version": "1.0.0",
+  "description": "",
+  "license": "Apache-2.0",
+  "main": "./dist/showcase.js",
+  "types": "./dist/index.d.ts",
+  "dependencies": {
+    "@types/react": "^16.4.6",
+    "@types/react-dom": "^16.0.6",
+    "appformer-js": "1.0.0",
+    "appformer-js-dev-console": "1.0.0",
+    "appformer-js-showcase-components": "1.0.0",
+    "react": "^16.4.1",
+    "react-dom": "^16.4.1"
+  },
+  "devDependencies": {
+    "html-webpack-plugin": "^3.2.0"
+  },
+  "scripts": {
+    "lint": "tslint -c ../../tslint.common.json 'src/**/*.{ts,tsx,js,jsx}'",
+    "test": "",
+    "start": "webpack-dev-server --open",
+    "build:dev": "webpack",
+    "build:prod": "npm run lint && npm test && webpack --mode production"
+  },
+  "babel": {
+    "presets": [
+      "env",
+      "react"
+    ]
+  }
+}

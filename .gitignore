@@ -1,6 +1,10 @@
-**/dist
-**/.idea
-**/node_modules
 **/.DS_Store
-**/target
+**/.idea
+
 **/*.iml
+**/*.log
+**/package-lock.json
+
+**/node_modules
+**/target
+**/dist
