@@ -167,7 +167,7 @@ public class PojoTsClass implements TsClass {
     }
 
     private String superConstructorCall() {
-        return superclass().canBeSubclassed() ? "super({...self.inherited});" : "";
+        return superclass().canBeSubclassed() ? "super({});" : ""; //FIXME: Actually call super constructor when necessary.
     }
 
     private String classHierarchy() {

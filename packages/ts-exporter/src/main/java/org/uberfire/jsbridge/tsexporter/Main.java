@@ -118,11 +118,12 @@ public class Main extends AbstractProcessor {
     private void writeExportFile(final List<Element> elements,
                                  final String fileName) {
 
-        try {
+        try (final Writer writer = processingEnv.getFiler().createResource(CLASS_OUTPUT, TS_EXPORTER_PACKAGE, fileName).openWriter()) {
             System.out.println("Saving export file: " + fileName + "... ");
-            try (final Writer writer = processingEnv.getFiler().createResource(CLASS_OUTPUT, TS_EXPORTER_PACKAGE, fileName).openWriter()) {
-                writer.write(elements.stream().map(element -> ((TypeElement) element).getQualifiedName().toString()).distinct().collect(joining("\n")));
-            }
+            writer.write(elements.stream()
+                                 .map(element -> ((TypeElement) element).getQualifiedName().toString())
+                                 .distinct()
+                                 .collect(joining("\n")));
         } catch (final IOException e) {
             throw new RuntimeException(e);
         }

@@ -82,7 +82,7 @@ public class RpcCallerTsClass implements TsClass {
     }
 
     private String simpleName() {
-        return importEntriesStore.with(HIERARCHY, new JavaType(typeElement.asType(), typeElement.asType())
+        return importEntriesStore.with(HIERARCHY, new JavaType(getType(), getType())
                 .translate(NO_DECORATORS))
                 .toTypeScript(TYPE_ARGUMENT_DECLARATION);
     }
