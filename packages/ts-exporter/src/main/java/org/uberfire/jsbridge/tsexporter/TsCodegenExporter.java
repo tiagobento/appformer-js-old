@@ -46,6 +46,7 @@ import org.uberfire.jsbridge.tsexporter.model.config.TsConfigJson;
 import org.uberfire.jsbridge.tsexporter.model.config.WebpackConfigJs;
 import org.uberfire.jsbridge.tsexporter.util.Utils;
 
+import static java.lang.Math.abs;
 import static java.lang.String.format;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.groupingBy;
@@ -69,8 +70,8 @@ public class TsCodegenExporter {
     public TsCodegenExporter(final Set<ImportEntryDecorator> decorators) {
         this.decoratorStore = new DecoratorStore(decorators);
         this.dependencyGraph = new DependencyGraph(decoratorStore);
-        this.outputDir = "/tmp/ts-exporter/" + Math.abs(new SecureRandom().nextLong());
-    }`
+        this.outputDir = "/tmp/ts-exporter/" + abs(new SecureRandom().nextLong());
+    }
 
     public void exportEverything() {
 
@@ -141,7 +142,7 @@ public class TsCodegenExporter {
         return Paths.get(format(outputDir + "/%s/%s", unscopedNpmPackageName, relativeFilePath).replace("/", File.separator));
     }
 
-    public List<? extends Element> getClassesFromErraiAppPropertiesFiles() {
+    private List<? extends Element> getClassesFromErraiAppPropertiesFiles() {
         return Collections.list(getResources("META-INF" + File.separator + "ErraiApp.properties")).stream()
                 .map(Utils::loadPropertiesFile)
                 .map(properties -> Optional.ofNullable(properties.getProperty("errai.marshalling.serializableTypes")))
