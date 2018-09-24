@@ -24,10 +24,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.uberfire.jsbridge.tsexporter.decorators.DecoratorImportEntry;
+import org.uberfire.jsbridge.tsexporter.decorators.ImportEntryDecorator;
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
-import org.uberfire.jsbridge.tsexporter.meta.JavaType;
-import org.uberfire.jsbridge.tsexporter.meta.Translatable;
 import org.uberfire.jsbridge.tsexporter.meta.Translatable.SourceUsage;
 
 import static java.util.Collections.singleton;
@@ -138,7 +136,7 @@ public class TranslatableTest {
 
     @Test
     public void testDecorated() {
-        final DecoratorImportEntry dependency = new DecoratorImportEntry(
+        final ImportEntryDecorator dependency = new ImportEntryDecorator(
                 "my-decorators",
                 "my-decorators/decorators/Bar",
                 Foo.class.getCanonicalName());

@@ -31,11 +31,11 @@ public class DecoratorStore {
 
     public static final DecoratorStore NO_DECORATORS = new DecoratorStore(emptySet());
 
-    private final Map<String, DecoratorImportEntry> decorators;
+    private final Map<String, ImportEntryDecorator> decorators;
 
-    public DecoratorStore(final Set<DecoratorImportEntry> decorators) {
+    public DecoratorStore(final Set<ImportEntryDecorator> decorators) {
         this.decorators = decorators.stream()
-                .collect(toMap(DecoratorImportEntry::getDecoratedFqcn, identity(), (kept, discarded) -> {
+                .collect(toMap(ImportEntryDecorator::getDecoratedFqcn, identity(), (kept, discarded) -> {
                     System.out.println(format("Found more than one decorator for %s. Keeping %s and discarding %s.", kept.getDecoratedFqcn(), kept.getDecoratorPath(), discarded.getDecoratorPath()));
                     return kept;
                 }));
@@ -45,7 +45,7 @@ public class DecoratorStore {
         return decorators.containsKey(types.erasure(type).toString());
     }
 
-    public DecoratorImportEntry getDecoratorFor(final TypeMirror type) {
+    public ImportEntryDecorator getDecoratorFor(final TypeMirror type) {
         return decorators.get(types.erasure(type).toString());
     }
 }

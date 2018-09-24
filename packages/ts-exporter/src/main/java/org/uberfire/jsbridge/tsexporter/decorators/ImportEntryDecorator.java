@@ -23,13 +23,13 @@ import org.uberfire.jsbridge.tsexporter.dependency.ImportEntry;
 
 import static org.uberfire.jsbridge.tsexporter.Main.elements;
 
-public class DecoratorImportEntry implements ImportEntry {
+public class ImportEntryDecorator implements ImportEntry {
 
     private final String npmPackageName;
     private final String decoratorPath;
     private final String decoratedFqcn;
 
-    public DecoratorImportEntry(final String npmPackageName,
+    public ImportEntryDecorator(final String npmPackageName,
                                 final String decoratorPath,
                                 final String decoratedFqcn) {
 

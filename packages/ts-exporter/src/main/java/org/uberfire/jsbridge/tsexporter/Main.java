@@ -20,9 +20,10 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
-import org.uberfire.jsbridge.tsexporter.decorators.DecoratorImportEntry;
+import org.uberfire.jsbridge.tsexporter.decorators.ImportEntryDecorator;
 
-import static java.lang.Boolean.getBoolean;
+import static java.lang.System.currentTimeMillis;
+import static java.lang.System.getProperty;
 import static java.util.Arrays.asList;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.joining;
@@ -46,8 +47,8 @@ public class Main extends AbstractProcessor {
     public static Elements elements;
     public static Messager messager;
 
-    private static final List<Element> seenPortables = new ArrayList<>();
-    private static final List<Element> seenRemotes = new ArrayList<>();
+    private static final List<Element> seenPortableTypes = new ArrayList<>();
+    private static final List<Element> seenRemoteInterfaces = new ArrayList<>();
 
     @Override
     public synchronized void init(final ProcessingEnvironment processingEnv) {
@@ -61,7 +62,8 @@ public class Main extends AbstractProcessor {
     public boolean process(final Set<? extends TypeElement> annotations,
                            final RoundEnvironment roundEnv) {
 
-        if (!getBoolean("ts-exporter")) {
+        if (!asList("none", "all", "single").contains(getProperty("ts-exporter"))) {
+            System.out.println("TypeScript exporter was not activated.");
             return false;
         }
 
@@ -81,9 +83,9 @@ public class Main extends AbstractProcessor {
         if (!roundEnv.processingOver() && !roundEnv.errorRaised()) {
             typesByAnnotations.forEach((annotation, classes) -> {
                 if (REMOTE.equals(annotation.getQualifiedName().toString())) {
-                    seenRemotes.addAll(classes);
+                    seenRemoteInterfaces.addAll(classes);
                 } else if (PORTABLE.equals(annotation.getQualifiedName().toString())) {
-                    seenPortables.addAll(classes);
+                    seenPortableTypes.addAll(classes);
                 } else if (ENTRY_POINT.equals(annotation.getQualifiedName().toString())) {
                     System.out.println("EntryPoint detected.");
                 } else {
@@ -91,22 +93,34 @@ public class Main extends AbstractProcessor {
                 }
             });
         } else {
-            writeExportFile(seenPortables, "portables.tsexporter");
-            writeExportFile(seenRemotes, "remotes.tsexporter");
 
-            if (!getBoolean("ts-exporter-generate")) {
-                System.out.println("TypeScript exporter will not run because ts-exporter-generate property is not set.");
-                return;
+            writeExportFile(seenPortableTypes, "portables.tsexporter");
+            writeExportFile(seenRemoteInterfaces, "remotes.tsexporter");
+            final TsCodegenExporter tsCodegenExporter = new TsCodegenExporter(readDecoratorFiles());
+
+            switch (getProperty("ts-exporter")) {
+                case "single": {
+                    throw new RuntimeException("Exporting single modules is not supported yet.");
+                }
+
+                case "all": {
+                    final long start = currentTimeMillis();
+                    System.out.println("Generating all TypeScript npm packages...");
+                    tsCodegenExporter.exportEverything();
+                    tsCodegenExporter.writeRootConfigFiles();
+                    tsCodegenExporter.buildAndPublishAllNpmPackages();
+                    System.out.println("TypeScript exporter has successfully run. (" + (currentTimeMillis() - start) + "ms)");
+                    break;
+                }
+
+                default:
+                    System.out.println("TypeScript exporter will not run because ts-exporter-generate property is not set.");
+                    break;
             }
-
-            System.out.println("Generating TypeScript modules...");
-            long start = System.currentTimeMillis();
-            new TsCodegenExporter(readDecoratorFiles()).run();
-            System.out.println("TypeScript exporter has successfully run. (" + (System.currentTimeMillis() - start) + "ms)");
         }
     }
 
-    private Set<DecoratorImportEntry> readDecoratorFiles() {
+    private Set<ImportEntryDecorator> readDecoratorFiles() {
         return new HashSet<>(asList(
 //                new DecoratorImportEntry("appformer-js-decorators", "PathDEC", "org.uberfire.backend.vfs.Path"),
 //                new DecoratorImportEntry("appformer-js-decorators", "PathImplDEC", "org.uberfire.backend.vfs.PathFactory.PathImpl"),

@@ -29,7 +29,7 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.WildcardType;
 
 import org.uberfire.jsbridge.tsexporter.Main;
-import org.uberfire.jsbridge.tsexporter.decorators.DecoratorImportEntry;
+import org.uberfire.jsbridge.tsexporter.decorators.ImportEntryDecorator;
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
 import org.uberfire.jsbridge.tsexporter.dependency.ImportEntryJava;
 
@@ -210,7 +210,7 @@ public class JavaType {
                         return new TranslatableDefault("Array", emptySet(), translatableTypeArguments);
                     default: {
                         if (decoratorStore.hasDecoratorFor(type)) {
-                            final DecoratorImportEntry decorator = decoratorStore.getDecoratorFor(type);
+                            final ImportEntryDecorator decorator = decoratorStore.getDecoratorFor(type);
                             return new TranslatableDefault(decorator.getUniqueTsIdentifier(declaredType), singleton(decorator), translatableTypeArguments);
                         }
 
