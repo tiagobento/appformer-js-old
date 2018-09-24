@@ -27,26 +27,7 @@ Development
 **NOTE:** Make sure that you have [npm]() installed.
 
 ```bash
-npm install --prefix core && \
-npm run build:prod --prefix core && \
-
-npm install --prefix decorators && \
-npm run build:prod --prefix decorators && \
-
-npm install --prefix dev-console && \
-npm run build:prod --prefix dev-console && \
-
-npm install --prefix showcase-components && \
-npm run build:prod --prefix showcase-components && \
-
-npm install --prefix showcase && \
-npm run build:prod --prefix showcase && \
-
-mvn clean install -f ts-exporter/pom.xml && \
-
-echo "Done."
+npm i && npm run build:all
 ```
 #### Other
-- Use `npm start --prefix showcase` to start the Showcase application
-- Use `npm test --prefix [module]` to run the unit tests
-- Use `npm run build:dev --prefix [module]` to build the module using the development configuration
+- Use `npm run showcase` to start the Showcase project.
