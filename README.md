@@ -27,7 +27,7 @@ Development
 **NOTE:** Make sure that you have [npm]() installed.
 
 ```bash
-npm i && npm run build:all
+npm i && npm run init && npm run build:all
 ```
 #### Other
 - Use `npm run showcase` to start the Showcase project.
