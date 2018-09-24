@@ -191,7 +191,7 @@ public class TsCodegenExporter {
 
         bash(linesJoinedBy(" && ", new String[]{
                 "cd " + outputDir,
-                "npm i",
+                "npm i --registry http://localhost:4873",
                 "npx lerna bootstrap --registry http://localhost:4873",
                 "npx lerna exec --concurrency `ls " + outputDir + "/packages | wc -l | awk '{$1=$1};1'` -- npm run unpublish",
                 "npx lerna exec --concurrency `nproc || sysctl -n hw.ncpu` -- npm run build",
