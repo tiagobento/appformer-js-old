@@ -65,7 +65,7 @@ public class PackageJson implements TsExporterResource {
                             "  \"scripts\": {",
                             "    \"build\": \"webpack\",",
                             "    \"unpublish\": \"npm unpublish --force --registry http://localhost:4873 || echo 'Was not published'\",",
-                            "    \"doPublish\": \"npm publish\"",
+                            "    \"doPublish\": \"npm publish --registry http://localhost:4873\"",
                             "  }",
                             "}"),
 

@@ -44,7 +44,7 @@ public class PackageJsonTest {
                            "  \"scripts\": {",
                            "    \"build\": \"webpack\",",
                            "    \"unpublish\": \"npm unpublish --force --registry http://localhost:4873 || echo 'Was not published'\",",
-                           "    \"doPublish\": \"npm publish\"",
+                           "    \"doPublish\": \"npm publish --registry http://localhost:4873\"",
                            "  }",
                            "}"),
                      packageJson.toSource());
@@ -78,7 +78,7 @@ public class PackageJsonTest {
                            "  \"scripts\": {",
                            "    \"build\": \"webpack\",",
                            "    \"unpublish\": \"npm unpublish --force --registry http://localhost:4873 || echo 'Was not published'\",",
-                           "    \"doPublish\": \"npm publish\"",
+                           "    \"doPublish\": \"npm publish --registry http://localhost:4873\"",
                            "  }",
                            "}"),
                      packageJsonA.toSource());
@@ -109,7 +109,7 @@ public class PackageJsonTest {
                            "  \"scripts\": {",
                            "    \"build\": \"webpack\",",
                            "    \"unpublish\": \"npm unpublish --force --registry http://localhost:4873 || echo 'Was not published'\",",
-                           "    \"doPublish\": \"npm publish\"",
+                           "    \"doPublish\": \"npm publish --registry http://localhost:4873\"",
                            "  }",
                            "}"),
                      packageJsonC.toSource());
