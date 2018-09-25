@@ -48,6 +48,7 @@ import org.uberfire.jsbridge.tsexporter.util.Utils;
 
 import static java.lang.Math.abs;
 import static java.lang.String.format;
+import static java.lang.System.getProperty;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
@@ -70,7 +71,7 @@ public class TsCodegenExporter {
     public TsCodegenExporter(final Set<ImportEntryDecorator> decorators) {
         this.decoratorStore = new DecoratorStore(decorators);
         this.dependencyGraph = new DependencyGraph(decoratorStore);
-        this.outputDir = "/tmp/ts-exporter/" + abs(new SecureRandom().nextLong());
+        this.outputDir = getProperty("ts-exporter-output-dir") + "/.tsexporter";
     }
 
     public void exportEverything() {
@@ -96,8 +97,12 @@ public class TsCodegenExporter {
                 .forEach(e -> writeNpmPackage(e.getKey(), e.getValue()));
     }
 
-    private void writeNpmPackage(final String npmPackageName, final List<? extends TsClass> classes) {
-        classes.forEach(tsClass -> write(tsClass, buildPath("packages/" + tsClass.getUnscopedNpmPackageName(), "src/" + tsClass.getRelativePath() + ".ts")));
+    private void writeNpmPackage(final String npmPackageName,
+                                 final List<? extends TsClass> classes) {
+
+        classes.forEach(tsClass -> write(tsClass,
+                                         buildPath("packages/" + tsClass.getUnscopedNpmPackageName(),
+                                                   "src/" + tsClass.getRelativePath() + ".ts")));
 
         final TsExporterResource tsExporterResource = new IndexTs(npmPackageName, classes);
         write(tsExporterResource, buildPath("packages/" + tsExporterResource.getUnscopedNpmPackageName(), "src/index.ts"));

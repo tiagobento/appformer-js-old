@@ -67,6 +67,7 @@ public class Main extends AbstractProcessor {
             return false;
         }
 
+
         try {
             process(roundEnv, annotations.stream().collect(toMap(identity(), roundEnv::getElementsAnnotatedWith)));
             return false;
@@ -93,7 +94,6 @@ public class Main extends AbstractProcessor {
                 }
             });
         } else {
-
             writeExportFile(seenPortableTypes, "portables.tsexporter");
             writeExportFile(seenRemoteInterfaces, "remotes.tsexporter");
             final TsCodegenExporter tsCodegenExporter = new TsCodegenExporter(readDecoratorFiles());
