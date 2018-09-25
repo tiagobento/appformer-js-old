@@ -3,7 +3,6 @@ package org.uberfire.jsbridge.tsexporter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -20,19 +19,23 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
+import com.google.gson.JsonParser;
 import org.uberfire.jsbridge.tsexporter.decorators.ImportEntryDecorator;
 
 import static java.lang.System.currentTimeMillis;
 import static java.lang.System.getProperty;
 import static java.util.Arrays.asList;
+import static java.util.Collections.list;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toSet;
 import static javax.tools.Diagnostic.Kind.ERROR;
 import static javax.tools.StandardLocation.CLASS_OUTPUT;
 import static org.uberfire.jsbridge.tsexporter.Main.ENTRY_POINT;
 import static org.uberfire.jsbridge.tsexporter.Main.PORTABLE;
 import static org.uberfire.jsbridge.tsexporter.Main.REMOTE;
+import static org.uberfire.jsbridge.tsexporter.util.Utils.getResources;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @SupportedAnnotationTypes({REMOTE, PORTABLE, ENTRY_POINT})
@@ -63,10 +66,9 @@ public class Main extends AbstractProcessor {
                            final RoundEnvironment roundEnv) {
 
         if (!asList("none", "all", "single").contains(getProperty("ts-exporter"))) {
-            System.out.println("TypeScript exporter was not activated.");
+            System.out.println("TypeScript exporter is not activated.");
             return false;
         }
-
 
         try {
             process(roundEnv, annotations.stream().collect(toMap(identity(), roundEnv::getElementsAnnotatedWith)));
@@ -121,12 +123,17 @@ public class Main extends AbstractProcessor {
     }
 
     private Set<ImportEntryDecorator> readDecoratorFiles() {
-        return new HashSet<>(asList(
-//                new DecoratorImportEntry("appformer-js-decorators", "PathDEC", "org.uberfire.backend.vfs.Path"),
-//                new DecoratorImportEntry("appformer-js-decorators", "PathImplDEC", "org.uberfire.backend.vfs.PathFactory.PathImpl"),
-//                new DecoratorImportEntry("appformer-js-decorators", "ObservablePathDEC", "org.uberfire.backend.vfs.ObservablePath"),
-//                new DecoratorImportEntry("appformer-js-decorators", "ObservablePathImplDEC", "org.uberfire.backend.vfs.impl.ObservablePathImpl")
-        ));
+        return list(getResources("META-INF/appformerjs.json")).stream().map(url -> {
+            try (java.util.Scanner s = new java.util.Scanner(url.openStream()).useDelimiter("\\A")) {
+                return new JsonParser().parse(s.hasNext() ? s.next() : "");
+            } catch (final Exception e) {
+                throw new RuntimeException(e);
+            }
+        }).flatMap(config -> {
+            return config.getAsJsonObject().get("decorators").getAsJsonObject().entrySet().stream().map(entry -> {
+                return new ImportEntryDecorator("uberfire-api-ts-decorators", entry.getKey(), entry.getValue().getAsString());
+            });
+        }).collect(toSet());
     }
 
     private void writeExportFile(final List<Element> elements,

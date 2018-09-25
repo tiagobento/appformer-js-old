@@ -192,8 +192,6 @@ public class TsCodegenExporter {
             throw new RuntimeException("Verdaccio is not running.");
         }
 
-        System.out.println("!!!: npx lerna exec --concurrency `ls " + outputDir + "/packages | wcl -l | awk '{$1=$1};1'` -- npm run unpublish");
-
         bash(linesJoinedBy(" && ", new String[]{
                 "cd " + outputDir,
                 "npm i --registry http://localhost:4873",
