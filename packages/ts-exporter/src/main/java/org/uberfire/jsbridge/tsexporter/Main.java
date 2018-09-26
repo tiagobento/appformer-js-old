@@ -104,9 +104,10 @@ public class Main extends AbstractProcessor {
 
                     final TsCodegenResult firstPass = new TsCodegen().generateNpmPackagesWhichWillBeDecorated();
                     final TsCodegenResultWriter firstPassWriter = new TsCodegenResultWriter(firstPass);
+                    final LernaBuilder firstPassBuilder = new LernaBuilder(firstPassWriter.getOutputDir());
+
                     final TsCodegenResult secondPass = new TsCodegen().generateWithDecorators();
                     final TsCodegenResultWriter secondPassWriter = new TsCodegenResultWriter(secondPass);
-                    final LernaBuilder firstPassBuilder = new LernaBuilder(firstPassWriter.getOutputDir());
                     final LernaBuilder secondPassBuilder = new LernaBuilder(secondPassWriter.getOutputDir());
 
                     firstPassWriter.write();
