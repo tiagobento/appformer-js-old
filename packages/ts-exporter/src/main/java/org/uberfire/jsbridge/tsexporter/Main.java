@@ -101,13 +101,12 @@ public class Main extends AbstractProcessor {
                 case "all": {
                     final long start = currentTimeMillis();
                     System.out.println("Generating all TypeScript npm packages...");
-                    final TsCodegen tsCodegen = new TsCodegen();
-                    final TsCodegenResult tsCodegenResult = tsCodegen.generate();
+                    final TsCodegenResult tsCodegenResult = new TsCodegen().generate();
 
-                    final TsCodegenResultWriter tsCodegenWriter = new TsCodegenResultWriter(tsCodegenResult);
-                    tsCodegenWriter.write();
+                    final TsCodegenResultWriter tsCodegenResultWriter = new TsCodegenResultWriter(tsCodegenResult);
+                    tsCodegenResultWriter.write();
 
-                    final LernaBuilder lernaBuilder = new LernaBuilder(tsCodegenWriter.getOutputDir(), tsCodegenResult);
+                    final LernaBuilder lernaBuilder = new LernaBuilder(tsCodegenResultWriter.getOutputDir(), tsCodegenResult);
                     lernaBuilder.build();
 
                     System.out.println("TypeScript exporter has successfully run. (" + (currentTimeMillis() - start) + "ms)");

@@ -41,7 +41,12 @@ public class TsCodegenResultWriter {
 
     public void write() {
         writeRootConfigFiles();
-        writeAllPackages();
+        writeGeneratedPackages();
+        writeDecoratorPackages();
+    }
+
+    private void writeDecoratorPackages() {
+        //TODO:
     }
 
     private void writeRootConfigFiles() {
@@ -52,7 +57,7 @@ public class TsCodegenResultWriter {
         write(lernaJson, buildPath(lernaJson.getUnscopedNpmPackageName(), "lerna.json"));
     }
 
-    private void writeAllPackages() {
+    private void writeGeneratedPackages() {
         tsCodegenResult.getTsNpmPackages().forEach(this::writeNpmPackage);
     }
 
