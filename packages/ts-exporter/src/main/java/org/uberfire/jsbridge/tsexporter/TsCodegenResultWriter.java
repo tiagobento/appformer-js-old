@@ -16,10 +16,12 @@
 
 package org.uberfire.jsbridge.tsexporter;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Comparator;
 
 import org.uberfire.jsbridge.tsexporter.model.TsExporterResource;
 import org.uberfire.jsbridge.tsexporter.model.TsNpmPackage;
@@ -27,6 +29,7 @@ import org.uberfire.jsbridge.tsexporter.model.TsNpmPackage;
 import static java.io.File.separator;
 import static java.lang.String.format;
 import static java.lang.System.getProperty;
+import static java.util.Comparator.reverseOrder;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.createFileIfNotExists;
 
 public class TsCodegenResultWriter {
@@ -42,10 +45,9 @@ public class TsCodegenResultWriter {
     public void write() {
         writeRootConfigFiles();
         writeGeneratedPackages();
-        writeDecoratorPackages();
     }
 
-    private void writeDecoratorPackages() {
+    public void writeDecoratorPackages() {
         //TODO:
     }
 
@@ -100,5 +102,20 @@ public class TsCodegenResultWriter {
 
     public String getOutputDir() {
         return outputDir;
+    }
+
+    public void removeOutput() {
+        try {
+            final boolean removed = Files.walk(Paths.get(outputDir))
+                    .sorted(reverseOrder())
+                    .map(Path::toFile)
+                    .allMatch(File::delete);
+
+            if (!removed) {
+                throw new RuntimeException("Could not remove outputDir " + outputDir);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

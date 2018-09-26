@@ -32,16 +32,16 @@ import static org.uberfire.jsbridge.tsexporter.model.TsClass.PACKAGES_SCOPE;
 public class TsNpmPackage {
 
     private final String npmPackageName;
-    private final List<TsClass> classes;
+    private final List<? extends TsClass> classes;
 
     public TsNpmPackage(final String npmPackageName,
-                        final List<TsClass> classes) {
+                        final List<? extends TsClass> classes) {
 
         this.npmPackageName = npmPackageName;
         this.classes = classes;
     }
 
-    public List<TsClass> getClasses() {
+    public List<? extends TsClass> getClasses() {
         return classes;
     }
 

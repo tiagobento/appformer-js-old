@@ -13,7 +13,7 @@ export function marshall<T>(obj: Portable<T>): string | null {
   return JSON.stringify(marshaller.marshall(obj, new MarshallingContext()));
 }
 
-export function unmarshall<T>(json: string, oracle: any): Portable<T> | null {
+export function unmarshall<T>(json: string, oracle: any): Portable<T> | null | void {
   if (json === null || json === undefined) {
     return null;
   }

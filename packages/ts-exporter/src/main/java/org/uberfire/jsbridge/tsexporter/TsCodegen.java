@@ -27,12 +27,14 @@ import java.util.stream.Stream;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
 import org.uberfire.jsbridge.tsexporter.decorators.ImportEntryDecorator;
 import org.uberfire.jsbridge.tsexporter.dependency.DependencyGraph;
+import org.uberfire.jsbridge.tsexporter.model.PojoTsClass;
 import org.uberfire.jsbridge.tsexporter.model.RpcCallerTsClass;
 import org.uberfire.jsbridge.tsexporter.model.TsClass;
 import org.uberfire.jsbridge.tsexporter.model.TsNpmPackage;
@@ -47,6 +49,7 @@ import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.empty;
 import static org.uberfire.jsbridge.tsexporter.Main.TS_EXPORTER_PACKAGE;
 import static org.uberfire.jsbridge.tsexporter.Main.elements;
+import static org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore.NO_DECORATORS;
 import static org.uberfire.jsbridge.tsexporter.model.TsClass.getMavenModuleNameFromSourceFilePath;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.distinctBy;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.getResources;
@@ -77,19 +80,36 @@ public class TsCodegen {
         }).collect(toSet());
     }
 
-    public TsCodegenResult generate() {
+    public TsCodegenResult generateWithDecorators() {
 
-        concat(getTsFilesFrom("portables.tsexporter").stream(),
-               getClassesFromErraiAppPropertiesFiles().stream()
-        ).forEach(dependencyGraph::add);
+        concat(getTsFilesFrom("portables.tsexporter").stream(), getClassesFromErraiAppPropertiesFiles().stream())
+                .collect(toSet())
+                .forEach(dependencyGraph::add);
 
         final Set<? extends TsClass> rpcTsClasses = getTsFilesFrom("remotes.tsexporter").stream()
                 .map(element -> new RpcCallerTsClass(element, dependencyGraph, decoratorStore))
                 .peek(TsClass::toSource)
                 .collect(toSet());
 
-        final Stream<TsClass> tsClasses = concat(dependencyGraph.vertices().parallelStream().map(DependencyGraph.Vertex::getPojoClass),
-                                                 rpcTsClasses.parallelStream());
+        final Stream<TsClass> tsClasses = concat(
+                dependencyGraph.vertices().parallelStream().map(DependencyGraph.Vertex::getPojoClass),
+                rpcTsClasses.parallelStream());
+
+        return generate(decoratorStore, tsClasses);
+    }
+
+    public TsCodegenResult generateNpmPackagesWhichWillBeDecorated() {
+
+        concat(getTsFilesFrom("portables.tsexporter").stream(), getClassesFromErraiAppPropertiesFiles().stream())
+                .map(t -> new PojoTsClass((DeclaredType) t.asType(), decoratorStore))
+                .filter(c -> decoratorStore.getNpmPackageNamesWhichHaveDecorators().contains(c.getUnscopedNpmPackageName()))
+                .forEach(c -> dependencyGraph.add(c.asElement()));
+
+        return generate(NO_DECORATORS, dependencyGraph.vertices().parallelStream().map(DependencyGraph.Vertex::getPojoClass));
+    }
+
+    private TsCodegenResult generate(final DecoratorStore decoratorStore,
+                                     final Stream<? extends TsClass> tsClasses) {
 
         final Set<TsNpmPackage> tsNpmPackages = tsClasses
                 .filter(distinctBy(tsClass -> tsClass.getType().toString()))

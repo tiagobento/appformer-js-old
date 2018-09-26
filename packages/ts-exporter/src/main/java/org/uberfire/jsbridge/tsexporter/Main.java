@@ -101,13 +101,21 @@ public class Main extends AbstractProcessor {
                 case "all": {
                     final long start = currentTimeMillis();
                     System.out.println("Generating all TypeScript npm packages...");
-                    final TsCodegenResult tsCodegenResult = new TsCodegen().generate();
 
-                    final TsCodegenResultWriter tsCodegenResultWriter = new TsCodegenResultWriter(tsCodegenResult);
-                    tsCodegenResultWriter.write();
+                    final TsCodegenResult firstPass = new TsCodegen().generateNpmPackagesWhichWillBeDecorated();
+                    final TsCodegenResultWriter firstPassWriter = new TsCodegenResultWriter(firstPass);
+                    final TsCodegenResult secondPass = new TsCodegen().generateWithDecorators();
+                    final TsCodegenResultWriter secondPassWriter = new TsCodegenResultWriter(secondPass);
+                    final LernaBuilder firstPassBuilder = new LernaBuilder(firstPassWriter.getOutputDir());
+                    final LernaBuilder secondPassBuilder = new LernaBuilder(secondPassWriter.getOutputDir());
 
-                    final LernaBuilder lernaBuilder = new LernaBuilder(tsCodegenResultWriter.getOutputDir(), tsCodegenResult);
-                    lernaBuilder.build();
+                    firstPassWriter.write();
+                    firstPassBuilder.build();
+                    firstPassWriter.writeDecoratorPackages();
+                    firstPassBuilder.buildDecoratorPackages();
+                    firstPassWriter.removeOutput();
+                    secondPassWriter.write();
+                    secondPassBuilder.build();
 
                     System.out.println("TypeScript exporter has successfully run. (" + (currentTimeMillis() - start) + "ms)");
                     break;

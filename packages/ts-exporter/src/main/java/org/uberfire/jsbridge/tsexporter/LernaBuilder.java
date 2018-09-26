@@ -17,19 +17,14 @@
 package org.uberfire.jsbridge.tsexporter;
 
 import static java.lang.String.format;
-import static java.util.stream.Collectors.joining;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.linesJoinedBy;
 
 public class LernaBuilder {
 
     private final String baseDir;
-    private final TsCodegenResult tsCodegenResult;
 
-    public LernaBuilder(final String baseDir,
-                        final TsCodegenResult tsCodegenResult) {
-
+    public LernaBuilder(final String baseDir) {
         this.baseDir = baseDir;
-        this.tsCodegenResult = tsCodegenResult;
     }
 
     void build() {
@@ -46,21 +41,16 @@ public class LernaBuilder {
         System.out.println("Initializing packages...");
         bash(linesJoinedBy(" && ", new String[]{
                 "cd " + baseDir,
-                "npm i --registry http://localhost:4873",
+                "npm i --registry http://localhost:4873 --no-lock-file --no-package-lock",
                 "npx lerna bootstrap --registry http://localhost:4873"
         }));
 
-        System.out.println("Building npm packages that will be decorated...");
-        buildPackages(tsCodegenResult.getTsNpmPackagesWhichHaveDecorators().stream()
-                                 .flatMap(tsNpmPackage -> tsNpmPackage.getGeneratedDependenciesNpmPackageNames().stream())
-                                 .map(n -> "--scope " + n)
-                                 .collect(joining(" ")));
-
-        System.out.println("Building Decorators...");
-        //TODO: Build decorators
-
-        System.out.println("Building all npm packages...");
+        System.out.println("Building npm packages...");
         buildPackages("");
+    }
+
+    public void buildDecoratorPackages() {
+        //TODO:
     }
 
     private void buildPackages(final String lernaArgs) {

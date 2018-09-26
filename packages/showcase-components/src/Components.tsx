@@ -35,7 +35,9 @@ export class ReactComponentScreen extends Screen {
 
     const preferenceStore = new WorkbenchServices();
     preferenceStore.loadPerspectives({}).then(s => {
-      console.log(s);
+        s.forEach(x => {
+            console.info(x.getName());
+        })
     });
 
     // vfsService.get({ arg0: "/pom.xml" }).then(s => {
