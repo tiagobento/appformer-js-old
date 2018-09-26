@@ -25,7 +25,8 @@ import static java.lang.String.format;
 import static java.util.Collections.emptySet;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
-import static org.uberfire.jsbridge.tsexporter.Main.*;
+import static java.util.stream.Collectors.toSet;
+import static org.uberfire.jsbridge.tsexporter.Main.types;
 
 public class DecoratorStore {
 
@@ -47,5 +48,17 @@ public class DecoratorStore {
 
     public ImportEntryDecorator getDecoratorFor(final TypeMirror type) {
         return decorators.get(types.erasure(type).toString());
+    }
+
+    public Set<String> getNpmPackageNamesWhichHaveDecorators() {
+        return decorators.values().stream()
+                .map(ImportEntryDecorator::getDecoratedMvnModule)
+                .collect(toSet());
+    }
+
+    public Set<String> getDecoratorsNpmPackages() {
+        return decorators.values().stream()
+                .map(ImportEntryDecorator::getNpmPackageName)
+                .collect(toSet());
     }
 }

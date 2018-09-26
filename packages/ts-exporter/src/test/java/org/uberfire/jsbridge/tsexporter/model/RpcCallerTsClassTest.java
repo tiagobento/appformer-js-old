@@ -65,9 +65,9 @@ public class RpcCallerTsClassTest {
                 element(SomeInterface.class),
                 dependencyGraph,
                 new DecoratorStore(new HashSet<>(asList(
-                        new ImportEntryDecorator("my-decorators", "decorators/pojo/FooDEC", Foo.class.getCanonicalName()),
-                        new ImportEntryDecorator("my-decorators", "decorators/pojo/impl/FooImpl1DEC", FooImpl1.class.getCanonicalName()),
-                        new ImportEntryDecorator("my-decorators", "decorators/pojo/impl/FooImpl2DEC", FooImpl2.class.getCanonicalName()))
+                        new ImportEntryDecorator("my-pojos", "my-decorators", "decorators/pojo/FooDEC", Foo.class.getCanonicalName()),
+                        new ImportEntryDecorator("my-pojos", "my-decorators", "decorators/pojo/impl/FooImpl1DEC", FooImpl1.class.getCanonicalName()),
+                        new ImportEntryDecorator("my-pojos", "my-decorators", "decorators/pojo/impl/FooImpl2DEC", FooImpl2.class.getCanonicalName()))
                 )));
 
         assertEquals(
@@ -114,9 +114,9 @@ public class RpcCallerTsClassTest {
                 element(SomeOtherInterface.class),
                 dependencyGraph,
                 new DecoratorStore(new HashSet<>(asList(
-                        new ImportEntryDecorator("my-decorators", "decorators/pojo/FooDEC", Foo.class.getCanonicalName()),
-                        new ImportEntryDecorator("my-decorators", "decorators/pojo/impl/FooImpl1DEC", FooImpl1.class.getCanonicalName()),
-                        new ImportEntryDecorator("my-decorators", "decorators/pojo/impl/FooImpl2DEC", FooImpl2.class.getCanonicalName())
+                        new ImportEntryDecorator("my-pojos", "my-decorators", "decorators/pojo/FooDEC", Foo.class.getCanonicalName()),
+                        new ImportEntryDecorator("my-pojos", "my-decorators", "decorators/pojo/impl/FooImpl1DEC", FooImpl1.class.getCanonicalName()),
+                        new ImportEntryDecorator("my-pojos", "my-decorators", "decorators/pojo/impl/FooImpl2DEC", FooImpl2.class.getCanonicalName())
                 ))));
 
         assertEquals(

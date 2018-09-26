@@ -88,8 +88,8 @@ public class PojoTsClassTestClasses {
     @Test
     public void testDecorators() {
         final PojoTsClass pojoTsClass = new PojoTsClass(type(C.class), new DecoratorStore(new HashSet<>(asList(
-                new ImportEntryDecorator("my-decorators", "decorators/simple/CDEC", C.class.getCanonicalName()),
-                new ImportEntryDecorator("my-decorators", "decorators/simple/ADEC", A.class.getCanonicalName())
+                new ImportEntryDecorator("my-pojos", "my-decorators", "decorators/simple/CDEC", C.class.getCanonicalName()),
+                new ImportEntryDecorator("my-pojos", "my-decorators", "decorators/simple/ADEC", A.class.getCanonicalName())
         ))));
 
         assertEquals(lines("",

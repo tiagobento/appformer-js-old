@@ -19,23 +19,17 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
-import com.google.gson.JsonParser;
-import org.uberfire.jsbridge.tsexporter.decorators.ImportEntryDecorator;
-
 import static java.lang.System.currentTimeMillis;
 import static java.lang.System.getProperty;
 import static java.util.Arrays.asList;
-import static java.util.Collections.list;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
-import static java.util.stream.Collectors.toSet;
 import static javax.tools.Diagnostic.Kind.ERROR;
 import static javax.tools.StandardLocation.CLASS_OUTPUT;
 import static org.uberfire.jsbridge.tsexporter.Main.ENTRY_POINT;
 import static org.uberfire.jsbridge.tsexporter.Main.PORTABLE;
 import static org.uberfire.jsbridge.tsexporter.Main.REMOTE;
-import static org.uberfire.jsbridge.tsexporter.util.Utils.getResources;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @SupportedAnnotationTypes({REMOTE, PORTABLE, ENTRY_POINT})
@@ -98,7 +92,6 @@ public class Main extends AbstractProcessor {
         } else {
             writeExportFile(seenPortableTypes, "portables.tsexporter");
             writeExportFile(seenRemoteInterfaces, "remotes.tsexporter");
-            final TsCodegenExporter tsCodegenExporter = new TsCodegenExporter(readDecoratorFiles());
 
             switch (getProperty("ts-exporter")) {
                 case "single": {
@@ -108,9 +101,15 @@ public class Main extends AbstractProcessor {
                 case "all": {
                     final long start = currentTimeMillis();
                     System.out.println("Generating all TypeScript npm packages...");
-                    tsCodegenExporter.exportEverything();
-                    tsCodegenExporter.writeRootConfigFiles();
-                    tsCodegenExporter.buildAndPublishAllNpmPackages();
+                    final TsCodegen tsCodegen = new TsCodegen();
+                    final TsCodegenResult tsCodegenResult = tsCodegen.generate();
+
+                    final TsCodegenResultWriter tsCodegenWriter = new TsCodegenResultWriter(tsCodegenResult);
+                    tsCodegenWriter.write();
+
+                    final LernaBuilder lernaBuilder = new LernaBuilder(tsCodegenWriter.getOutputDir(), tsCodegenResult);
+                    lernaBuilder.build();
+
                     System.out.println("TypeScript exporter has successfully run. (" + (currentTimeMillis() - start) + "ms)");
                     break;
                 }
@@ -120,20 +119,6 @@ public class Main extends AbstractProcessor {
                     break;
             }
         }
-    }
-
-    private Set<ImportEntryDecorator> readDecoratorFiles() {
-        return list(getResources("META-INF/appformerjs.json")).stream().map(url -> {
-            try (java.util.Scanner s = new java.util.Scanner(url.openStream()).useDelimiter("\\A")) {
-                return new JsonParser().parse(s.hasNext() ? s.next() : "");
-            } catch (final Exception e) {
-                throw new RuntimeException(e);
-            }
-        }).flatMap(config -> {
-            return config.getAsJsonObject().get("decorators").getAsJsonObject().entrySet().stream().map(entry -> {
-                return new ImportEntryDecorator("uberfire-api-ts-decorators", entry.getKey(), entry.getValue().getAsString());
-            });
-        }).collect(toSet());
     }
 
     private void writeExportFile(final List<Element> elements,

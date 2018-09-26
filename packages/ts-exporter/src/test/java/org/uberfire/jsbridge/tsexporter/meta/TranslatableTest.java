@@ -137,7 +137,7 @@ public class TranslatableTest {
     @Test
     public void testDecorated() {
         final ImportEntryDecorator dependency = new ImportEntryDecorator(
-                "my-decorators",
+                "my-pojos", "my-decorators",
                 "my-decorators/decorators/Bar",
                 Foo.class.getCanonicalName());
 

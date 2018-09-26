@@ -17,38 +17,42 @@
 package org.uberfire.jsbridge.tsexporter.model.config;
 
 import java.util.List;
+import java.util.Set;
 
 import org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation;
 import org.uberfire.jsbridge.tsexporter.dependency.ImportEntry;
 import org.uberfire.jsbridge.tsexporter.model.TsClass;
 import org.uberfire.jsbridge.tsexporter.model.TsExporterResource;
+import org.uberfire.jsbridge.tsexporter.util.Lazy;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toSet;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
 
 public class PackageJson implements TsExporterResource {
 
     private final String npmPackageName;
-    private final List<? extends TsClass> classes;
+    private final Lazy<Set<String>> dependenciesNpmPackageNames;
 
     public PackageJson(final String npmPackageName,
                        final List<? extends TsClass> classes) {
 
         this.npmPackageName = npmPackageName;
-        this.classes = classes;
-    }
-
-    @Override
-    public String toSource() {
-
-        final String dependenciesPart = classes.stream()
+        dependenciesNpmPackageNames = new Lazy<>(() -> classes.stream()
                 .flatMap(clazz -> clazz.getDependencies().stream())
                 .map(DependencyRelation::getImportEntry)
                 .collect(groupingBy(ImportEntry::getNpmPackageName))
                 .keySet().stream()
                 .filter(name -> !name.equals(npmPackageName))
+                .collect(toSet()));
+    }
+
+    @Override
+    public String toSource() {
+
+        final String dependenciesPart = dependenciesNpmPackageNames.get().stream()
                 .sorted()
                 .map(name -> format("\"%s\": \"1.0.0\"", name))
                 .collect(joining(",\n"));
@@ -78,5 +82,9 @@ public class PackageJson implements TsExporterResource {
     @Override
     public String getNpmPackageName() {
         return npmPackageName;
+    }
+
+    public Set<String> getDependenciesNpmPackageNames() {
+        return dependenciesNpmPackageNames.get();
     }
 }

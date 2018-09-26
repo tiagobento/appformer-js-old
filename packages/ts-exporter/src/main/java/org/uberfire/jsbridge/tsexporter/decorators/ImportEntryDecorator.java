@@ -25,14 +25,17 @@ import static org.uberfire.jsbridge.tsexporter.Main.elements;
 
 public class ImportEntryDecorator implements ImportEntry {
 
+    private final String decoratedMvnModule;
     private final String npmPackageName;
     private final String decoratorPath;
     private final String decoratedFqcn;
 
-    public ImportEntryDecorator(final String npmPackageName,
+    public ImportEntryDecorator(final String decoratedMvnModule,
+                                final String npmPackageName,
                                 final String decoratorPath,
                                 final String decoratedFqcn) {
 
+        this.decoratedMvnModule = decoratedMvnModule;
         this.npmPackageName = npmPackageName;
         this.decoratorPath = decoratorPath;
         this.decoratedFqcn = decoratedFqcn;
@@ -68,5 +71,9 @@ public class ImportEntryDecorator implements ImportEntry {
     @Override
     public boolean represents(final DeclaredType type) {
         return false;
+    }
+
+    public String getDecoratedMvnModule() {
+        return decoratedMvnModule;
     }
 }
