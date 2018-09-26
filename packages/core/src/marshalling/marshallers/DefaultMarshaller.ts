@@ -108,11 +108,13 @@ export class DefaultMarshaller<T extends Portable<T>> extends NullableMarshaller
 
     const targetData = {} as any;
     Object.keys(_this).forEach(k => {
-      const fqcn = _this[k][ErraiObjectConstants.ENCODED_TYPE];
       if (_this[k] === null || _this[k] === undefined) {
         targetData[k] = null;
-      } else if (fqcn) {
-        const unmarshalledValue = MarshallerProvider.getForFqcn(fqcn).unmarshall(_this[k], ctx);
+      } else if (_this[k][ErraiObjectConstants.ENCODED_TYPE]) {
+        const unmarshalledValue = MarshallerProvider.getForFqcn(_this[k][ErraiObjectConstants.ENCODED_TYPE]).unmarshall(
+          _this[k],
+          ctx
+        );
         targetData[k] = DefaultMarshaller.autoWrap(unmarshalledValue, k, emptyTargetObj);
       } else {
         // no fqcn, try to infer it asking the field's type to the target object

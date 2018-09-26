@@ -14,15 +14,15 @@ export function marshall<T>(obj: Portable<T>): string | null {
 }
 
 export function unmarshall<T>(json: string, oracle: any): Portable<T> | null {
-  // if (json === null || json === undefined) {
-  //   return null;
-  // }
-  //
-  // const jsonObj = JSON.parse(json);
-  // const fqcn = jsonObj[ErraiObjectConstants.ENCODED_TYPE];
-  //
-  // const marshaller = MarshallerProvider.getForFqcn(fqcn);
-  // return marshaller.unmarshall(jsonObj, new UnmarshallingContext(oracle));
+  if (json === null || json === undefined) {
+    return null;
+  }
 
-  return JSON.parse(json);
+  const jsonObj = JSON.parse(json);
+  const fqcn = jsonObj[ErraiObjectConstants.ENCODED_TYPE];
+
+  const marshaller = MarshallerProvider.getForFqcn(fqcn);
+  return marshaller.unmarshall(jsonObj, new UnmarshallingContext(oracle));
+
+  // return JSON.parse(json);
 }
