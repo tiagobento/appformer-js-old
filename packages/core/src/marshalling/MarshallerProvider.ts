@@ -16,12 +16,13 @@ import { JavaByteMarshaller } from "./marshallers/JavaByteMarshaller";
 import { JavaDateMarshaller } from "./marshallers/JavaDateMarshaller";
 import { JavaOptionalMarshaller } from "./marshallers/JavaOptionalMarshaller";
 import { JavaArrayListMarshaller, JavaHashSetMarshaller } from "./marshallers/JavaCollectionMarshaller";
+import { Portable } from "../internal";
 
 export class MarshallerProvider {
   private static initialized: boolean = false;
 
-  private static marshallersByJavaType: Map<string, Marshaller<any, any>>;
-  private static defaultMarshaller: Marshaller<any, any>;
+  private static marshallersByJavaType: Map<string, Marshaller<any, any, any, any>>;
+  private static defaultMarshaller: Marshaller<any, any, any, any>;
 
   public static initialize() {
     if (this.initialized) {
@@ -53,16 +54,24 @@ export class MarshallerProvider {
     this.initialized = true;
   }
 
-  public static getFor(obj: any): Marshaller<any, any> {
-    if (!this.initialized) {
-      throw new Error("MarshallerProvider should be initialized before using it.");
-    }
+  public static getForObject(obj: Portable<any>): Marshaller<any, any, any, any> {
+    this.assertInitialization();
 
-    if (obj === null || undefined) {
+    if (obj === null || obj === undefined) {
       return this.defaultMarshaller;
     }
 
-    const fqcn = obj._fqcn;
+    const fqcn = (obj as any)._fqcn;
+    if (!fqcn) {
+      return this.defaultMarshaller;
+    }
+
+    return this.getForFqcn(fqcn);
+  }
+
+  public static getForFqcn(fqcn: string): Marshaller<any, any, any, any> {
+    this.assertInitialization();
+
     if (!fqcn) {
       return this.defaultMarshaller;
     }
@@ -78,5 +87,11 @@ export class MarshallerProvider {
     }
 
     return marshaller;
+  }
+
+  private static assertInitialization() {
+    if (!this.initialized) {
+      throw new Error("MarshallerProvider should be initialized before using it.");
+    }
   }
 }

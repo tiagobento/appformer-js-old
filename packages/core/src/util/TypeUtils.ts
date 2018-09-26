@@ -45,3 +45,11 @@ export function isDate(obj: any): boolean {
 export function instanceOfDate(obj: any): obj is Date {
   return isDate(obj);
 }
+
+export function isNumber(obj: any): boolean {
+  return typeof obj === "number";
+}
+
+export function instanceOfNumber(obj: any): obj is number {
+  return isNumber(obj);
+}

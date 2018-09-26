@@ -6,9 +6,10 @@ import { ErraiObject } from "../../model/ErraiObject";
 import { MarshallingContext } from "../../MarshallingContext";
 import { MarshallerProvider } from "../../MarshallerProvider";
 import { JavaWrapperUtils } from "../../../java-wrappers/JavaWrapperUtils";
+import { UnmarshallingContext } from "../../UnmarshallingContext";
 
 export class GenericsTypeMarshallingUtils {
-  private static shouldWrapWhenUsedAsGenericsType(value: Portable<any>) {
+  private static shouldWrapWhenMarshallingAsGenericsType(value: Portable<any>) {
     return value instanceof NumberWrapper || value instanceof JavaBoolean;
   }
 
@@ -28,13 +29,18 @@ export class GenericsTypeMarshallingUtils {
     // apply automatic native types -> java types conversion
     const enhancedInput = JavaWrapperUtils.wrapIfNeeded(value);
 
-    const marshaller = MarshallerProvider.getFor(enhancedInput);
+    const marshaller = MarshallerProvider.getForObject(enhancedInput);
     const marshalledValue = marshaller.marshall(enhancedInput, ctx);
 
-    if (this.shouldWrapWhenUsedAsGenericsType(enhancedInput)) {
+    if (this.shouldWrapWhenMarshallingAsGenericsType(enhancedInput)) {
       return this.wrapGenericsTypeElement(enhancedInput, marshalledValue)!;
     }
 
     return marshalledValue;
+  }
+
+  public static unmarshallGenericsTypeElement<T>(value: any, ctx: UnmarshallingContext): T {
+    const marshaller = MarshallerProvider.getForObject(value);
+    return marshaller.unmarshall(value, ctx);
   }
 }

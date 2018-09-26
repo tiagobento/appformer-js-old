@@ -4,8 +4,14 @@ import { JavaOptional } from "../../java-wrappers/JavaOptional";
 import { ErraiObject } from "../model/ErraiObject";
 import { GenericsTypeMarshallingUtils } from "./util/GenericsTypeMarshallingUtils";
 import { ErraiObjectConstants } from "../model/ErraiObjectConstants";
+import { UnmarshallingContext } from "../UnmarshallingContext";
 
-export class JavaOptionalMarshaller<T> extends NullableMarshaller<JavaOptional<T>, ErraiObject> {
+export class JavaOptionalMarshaller<T> extends NullableMarshaller<
+  JavaOptional<T>,
+  ErraiObject,
+  ErraiObject,
+  JavaOptional<T>
+> {
   public notNullMarshall(input: JavaOptional<T>, ctx: MarshallingContext): ErraiObject {
     const innerValue = this.retrieveOptionalInnerValue(input, ctx);
 
@@ -22,5 +28,13 @@ export class JavaOptionalMarshaller<T> extends NullableMarshaller<JavaOptional<T
     }
 
     return GenericsTypeMarshallingUtils.marshallGenericsTypeElement(input.get(), ctx);
+  }
+
+  public notNullUnmarshall(input: ErraiObject, ctx: UnmarshallingContext): JavaOptional<T> {
+    const value = input[ErraiObjectConstants.VALUE];
+
+    const unmarshalledValue = GenericsTypeMarshallingUtils.unmarshallGenericsTypeElement<T>(value, ctx);
+
+    return new JavaOptional(unmarshalledValue);
   }
 }

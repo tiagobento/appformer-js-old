@@ -34,10 +34,10 @@ import * as JavaCollectionMarshaller from "../marshallers/JavaCollectionMarshall
 import { JavaDateMarshaller } from "../marshallers/JavaDateMarshaller";
 import { JavaOptionalMarshaller } from "../marshallers/JavaOptionalMarshaller";
 
-describe("getFor", () => {
+describe("getForObject", () => {
   test("without initialize, should return Error", () => {
     const input = new JavaString("foo");
-    expect(() => MarshallerProvider.getFor(input)).toThrowError();
+    expect(() => MarshallerProvider.getForObject(input)).toThrowError();
   });
 
   describe("properly initialized", () => {
@@ -48,77 +48,77 @@ describe("getFor", () => {
 
     test("with JavaByte instance, should return JavaByteMarshaller instance", () => {
       const input = new JavaByte("1");
-      expect(MarshallerProvider.getFor(input)).toEqual(new JavaByteMarshaller());
+      expect(MarshallerProvider.getForObject(input)).toEqual(new JavaByteMarshaller());
     });
 
     test("with JavaDouble instance, should return JavaDoubleMarshaller instance", () => {
       const input = new JavaDouble("1.1");
-      expect(MarshallerProvider.getFor(input)).toEqual(new JavaDoubleMarshaller());
+      expect(MarshallerProvider.getForObject(input)).toEqual(new JavaDoubleMarshaller());
     });
 
     test("with JavaFloat instance, should return JavaFloatMarshaller instance", () => {
       const input = new JavaFloat("1.1");
-      expect(MarshallerProvider.getFor(input)).toEqual(new JavaFloatMarshaller());
+      expect(MarshallerProvider.getForObject(input)).toEqual(new JavaFloatMarshaller());
     });
 
     test("with JavaInteger instance, should return JavaIntegerMarshaller instance", () => {
       const input = new JavaInteger("1");
-      expect(MarshallerProvider.getFor(input)).toEqual(new JavaIntegerMarshaller());
+      expect(MarshallerProvider.getForObject(input)).toEqual(new JavaIntegerMarshaller());
     });
 
     test("with JavaLong instance, should return JavaLongMarshaller instance", () => {
       const input = new JavaLong("1");
-      expect(MarshallerProvider.getFor(input)).toEqual(new JavaLongMarshaller());
+      expect(MarshallerProvider.getForObject(input)).toEqual(new JavaLongMarshaller());
     });
 
     test("with JavaShort instance, should return JavaShortMarshaller instance", () => {
       const input = new JavaShort("1");
-      expect(MarshallerProvider.getFor(input)).toEqual(new JavaShortMarshaller());
+      expect(MarshallerProvider.getForObject(input)).toEqual(new JavaShortMarshaller());
     });
 
     test("with JavaBoolean instance, should return JavaBooleanMarshaller instance", () => {
       const input = new JavaBoolean(false);
-      expect(MarshallerProvider.getFor(input)).toEqual(new JavaBooleanMarshaller());
+      expect(MarshallerProvider.getForObject(input)).toEqual(new JavaBooleanMarshaller());
     });
 
     test("with JavaString instance, should return JavaStringMarshaller instance", () => {
       const input = new JavaString("foo");
-      expect(MarshallerProvider.getFor(input)).toEqual(new JavaStringMarshaller());
+      expect(MarshallerProvider.getForObject(input)).toEqual(new JavaStringMarshaller());
     });
 
     test("with JavaDate instance, should return JavaDateMarshaller instance", () => {
       const input = new JavaDate(new Date());
-      expect(MarshallerProvider.getFor(input)).toEqual(new JavaDateMarshaller());
+      expect(MarshallerProvider.getForObject(input)).toEqual(new JavaDateMarshaller());
     });
 
     test("with JavaBigDecimal instance, should return JavaBigDecimalMarshaller instance", () => {
       const input = new JavaBigDecimal("1.1");
-      expect(MarshallerProvider.getFor(input)).toEqual(new JavaBigDecimalMarshaller());
+      expect(MarshallerProvider.getForObject(input)).toEqual(new JavaBigDecimalMarshaller());
     });
 
     test("with JavaBigInteger instance, should return JavaBigIntegerMarshaller instance", () => {
       const input = new JavaBigInteger("1");
-      expect(MarshallerProvider.getFor(input)).toEqual(new JavaBigIntegerMarshaller());
+      expect(MarshallerProvider.getForObject(input)).toEqual(new JavaBigIntegerMarshaller());
     });
 
     test("with JavaArrayList instance, should return JavaArrayListMarshaller instance", () => {
       const input = new JavaArrayList([1, 2, 3]);
-      expect(MarshallerProvider.getFor(input)).toEqual(new JavaCollectionMarshaller.JavaArrayListMarshaller());
+      expect(MarshallerProvider.getForObject(input)).toEqual(new JavaCollectionMarshaller.JavaArrayListMarshaller());
     });
 
     test("with JavaHashSet instance, should return JavaHashSetMarshaller instance", () => {
       const input = new JavaHashSet(new Set([1, 2, 3]));
-      expect(MarshallerProvider.getFor(input)).toEqual(new JavaCollectionMarshaller.JavaHashSetMarshaller());
+      expect(MarshallerProvider.getForObject(input)).toEqual(new JavaCollectionMarshaller.JavaHashSetMarshaller());
     });
 
     test("with JavaHashMap instance, should return JavaHashMapMarshaller instance", () => {
       const input = new JavaHashMap(new Map([["foo", "bar"]]));
-      expect(MarshallerProvider.getFor(input)).toEqual(new JavaHashMapMarshaller());
+      expect(MarshallerProvider.getForObject(input)).toEqual(new JavaHashMapMarshaller());
     });
 
     test("with JavaOptional instance, should return JavaOptionalMarshaller instance", () => {
       const input = new JavaOptional<string>("str");
-      expect(MarshallerProvider.getFor(input)).toEqual(new JavaOptionalMarshaller());
+      expect(MarshallerProvider.getForObject(input)).toEqual(new JavaOptionalMarshaller());
     });
 
     test("with input without fqcn, should return default marshaller", () => {
@@ -127,7 +127,7 @@ describe("getFor", () => {
         bar: "foo"
       };
 
-      expect(MarshallerProvider.getFor(input)).toEqual(new DefaultMarshaller());
+      expect(MarshallerProvider.getForObject(input)).toEqual(new DefaultMarshaller());
     });
 
     test("with input with a custom fqcn, should return default marshaller", () => {
@@ -141,7 +141,7 @@ describe("getFor", () => {
       // it is a custom pojo (i.e. no pre-defined marshaller)
       expect(JavaWrapperUtils.isJavaType(fqcn)).toBeFalsy();
 
-      expect(MarshallerProvider.getFor(input)).toEqual(new DefaultMarshaller());
+      expect(MarshallerProvider.getForObject(input)).toEqual(new DefaultMarshaller());
     });
 
     test("with a Java type without marshaller, should throw error", () => {
@@ -153,7 +153,7 @@ describe("getFor", () => {
 
       const input = new JavaString("foo");
 
-      expect(() => MarshallerProvider.getFor(input)).toThrowError();
+      expect(() => MarshallerProvider.getForObject(input)).toThrowError();
     });
 
     test("all Java types should have a marshaller associated", () => {

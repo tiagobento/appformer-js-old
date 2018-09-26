@@ -29,5 +29,6 @@ Development
 ```bash
 npm i && npm run init && npm run build:all
 ```
+
 #### Other
 - Use `npm run showcase` to start the Showcase project.
