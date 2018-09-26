@@ -1,9 +1,12 @@
 import * as React from "react";
 import { DemoReactComponent } from "./DemoReactComponent";
 import { JavaInteger, Screen } from "appformer-js";
-// import TestMessagesService from "output/uberfire-webapp/org/uberfire/shared/TestMessagesService";
-// import TestEvent from "output/uberfire-webapp/org/uberfire/shared/TestEvent";
-// import Foo from "output/uberfire-webapp/org/uberfire/shared/Foo";
+import { TestMessagesService } from "@kiegroup-ts-generated/uberfire-webapp-rpc";
+import { Foo, TestEvent } from "@kiegroup-ts-generated/uberfire-webapp";
+import { VFSService } from "@kiegroup-ts-generated/uberfire-backend-api-rpc";
+import { PreferenceStore } from "@kiegroup-ts-generated/uberfire-preferences-api-rpc";
+import { WorkbenchServices } from "@kiegroup-ts-generated/uberfire-backend-api-rpc";
+import { PerspectiveDefinition } from "@kiegroup-ts-generated/uberfire-api";
 
 // import homePerspectiveTemplate from "showcase-components/HomePerspective.html";
 // import otherPerspectiveTemplate from "showcase-components/other-perspective.html";
@@ -22,20 +25,30 @@ export class ReactComponentScreen extends Screen {
     const javaInteger = new JavaInteger("0");
 
     this.af_subscriptions = {
-      // "org.uberfire.shared.TestEvent": (testEvent: TestEvent) => {
-      //   return this.onFoo(`An event from server has arrived! "${testEvent.bar}"`);
-      // }
+      "org.uberfire.shared.TestEvent": (testEvent: TestEvent) => {
+        return this.onFoo(`An event from server has arrived! "${testEvent.bar}"`);
+      }
     };
 
-    // const service = new TestMessagesService();
+    const testMessagesService = new TestMessagesService();
+    const vfsService = new VFSService();
+
+    const preferenceStore = new WorkbenchServices();
+    preferenceStore.loadPerspectives({}).then(s => {
+      console.log(s);
+    });
+
+    // vfsService.get({ arg0: "/pom.xml" }).then(s => {
+    //   s.getFileName();
+    // });
     //
-    // this.af_componentService = {
-    //   sayHello: service.hello0,
-    //   sayHelloToSomething: service.hello1,
-    //   sayHelloOnServer: service.muteHello,
-    //   fireServerEvent: service.helloFromEvent,
-    //   sendTestPojo: service.postTestEvent
-    // };
+    this.af_componentService = {
+      sayHello: testMessagesService.hello0,
+      sayHelloToSomething: testMessagesService.hello1,
+      sayHelloOnServer: testMessagesService.muteHello,
+      fireServerEvent: testMessagesService.helloFromEvent,
+      sendTestPojo: testMessagesService.postTestEvent
+    };
   }
 
   public af_onStartup() {
@@ -43,14 +56,14 @@ export class ReactComponentScreen extends Screen {
   }
 
   public af_onOpen() {
-    // const testEventInstance = new TestEvent({
-    //   bar: "hello1",
-    //   foo: new Foo({ foo: "a" }),
-    //   child: new TestEvent({
-    //     bar: "hello2",
-    //     foo: new Foo({ foo: "b" })
-    //   })
-    // });
+    const testEventInstance = new TestEvent({
+      bar: "hello1",
+      foo: new Foo({ foo: "a" }),
+      child: new TestEvent({
+        bar: "hello2",
+        foo: new Foo({ foo: "b" })
+      })
+    });
 
     console.info(`[${this.af_componentId}] is open! :: (Starting to make requests..)`);
 
@@ -68,12 +81,12 @@ export class ReactComponentScreen extends Screen {
       })
       .then(msg => {
         console.info(`Third call returned (${msg})`);
-        return this.af_componentService.sendTestPojo({ testEvent: null });
+        return this.af_componentService.sendTestPojo({ testEvent: testEventInstance });
       })
       .then(msg => {
         console.info(`Fourth call returned:`);
         console.info(msg);
-        console.info(`All calls returned successfully!`);
+        console.info(`All calls returned successfully!!!`);
       })
       .catch(e => {
         console.error(e);
@@ -119,10 +132,10 @@ export class PureDomElementScreen extends Screen {
     this.af_componentId = "dom-elements-screen";
     this.af_componentTitle = "DOM Elements Component";
     this.span = document.createElement("span");
-    // const testMessagesService = new TestMessagesService();
-    // this.af_componentService = {
-    //   fireServerEvent: testMessagesService.helloFromEvent
-    // };
+    const testMessagesService = new TestMessagesService();
+    this.af_componentService = {
+      fireServerEvent: testMessagesService.helloFromEvent
+    };
   }
 
   public af_onMayClose() {
