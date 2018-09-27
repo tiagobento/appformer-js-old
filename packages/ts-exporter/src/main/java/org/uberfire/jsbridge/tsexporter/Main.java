@@ -19,6 +19,8 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
+import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
+
 import static java.lang.System.currentTimeMillis;
 import static java.lang.System.getProperty;
 import static java.util.Arrays.asList;
@@ -98,28 +100,22 @@ public class Main extends AbstractProcessor {
                     throw new RuntimeException("Exporting single modules is not supported yet.");
                 }
 
+                case "portables-only": {
+                    throw new RuntimeException("Exporting portables only is not supported yet.");
+                }
+
                 case "all": {
                     final long start = currentTimeMillis();
                     System.out.println("Generating all TypeScript npm packages...");
 
-                    final TsCodegenResult firstPass = new TsCodegen().generateNpmPackagesWhichWillBeDecorated();
-                    final TsCodegenResultWriter firstPassWriter = new TsCodegenResultWriter(firstPass);
-                    final LernaBuilder firstPassBuilder = new LernaBuilder(firstPassWriter.getOutputDir());
+                    final String version = "1.0.0";
+                    final DecoratorStore decoratorStore = new DecoratorStore();
+                    final TsCodegenResult result = new TsCodegen(version, decoratorStore).generate();
+                    final TsCodegenResultWriter writer = new TsCodegenResultWriter(result);
+                    final LernaBuilder builder = new LernaBuilder(writer.getOutputDir());
 
-                    final TsCodegenResult secondPass = new TsCodegen().generateAllWithDecorators();
-                    final TsCodegenResultWriter secondPassWriter = new TsCodegenResultWriter(secondPass);
-                    final LernaBuilder secondPassBuilder = new LernaBuilder(secondPassWriter.getOutputDir());
-
-                    firstPassWriter.write();
-                    firstPassBuilder.init();
-                    firstPassBuilder.buildPackages();
-                    firstPassWriter.writeDecoratorPackages();
-                    firstPassBuilder.buildDecoratorPackages();
-                    firstPassWriter.removeOutputDir();
-                    secondPassWriter.write();
-                    secondPassBuilder.init();
-                    secondPassBuilder.buildPackages();
-                    secondPassBuilder.publishPackages();
+                    writer.write();
+                    builder.build();
 
                     System.out.println("TypeScript exporter has successfully run. (" + (currentTimeMillis() - start) + "ms)");
                     break;

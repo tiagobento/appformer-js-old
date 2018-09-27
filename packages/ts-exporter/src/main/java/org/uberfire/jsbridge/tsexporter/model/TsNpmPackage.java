@@ -27,12 +27,24 @@ public class TsNpmPackage {
 
     private final String npmPackageName;
     private final List<? extends TsClass> classes;
+    private final String version;
+    private final Type type;
+
+    public enum Type {
+        RAW,
+        FINAL,
+        UNDECORATED;
+    }
 
     public TsNpmPackage(final String npmPackageName,
-                        final List<? extends TsClass> classes) {
+                        final List<? extends TsClass> classes,
+                        final String version,
+                        final Type type) {
 
         this.npmPackageName = npmPackageName;
         this.classes = classes;
+        this.version = version;
+        this.type = type;
     }
 
     public List<? extends TsClass> getClasses() {
@@ -56,10 +68,14 @@ public class TsNpmPackage {
     }
 
     public PackageJson getPackageJson() {
-        return new PackageJson(npmPackageName, classes);
+        return new PackageJson(npmPackageName, version, classes);
     }
 
     public String getUnscopedNpmPackageName() {
         return getPackageJson().getUnscopedNpmPackageName();
+    }
+
+    public Type getType() {
+        return type;
     }
 }

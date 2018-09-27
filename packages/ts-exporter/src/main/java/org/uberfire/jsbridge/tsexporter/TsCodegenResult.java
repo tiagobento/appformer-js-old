@@ -24,13 +24,15 @@ import org.uberfire.jsbridge.tsexporter.model.TsNpmPackage;
 import org.uberfire.jsbridge.tsexporter.model.config.LernaJson;
 import org.uberfire.jsbridge.tsexporter.model.config.RootPackageJson;
 
-import static java.util.stream.Collectors.toSet;
-
 public class TsCodegenResult {
 
+    private final DecoratorStore decoratorStore;
     private final Set<TsNpmPackage> npmPackages;
 
-    public TsCodegenResult(final Set<TsNpmPackage> npmPackages) {
+    public TsCodegenResult(final DecoratorStore decoratorStore,
+                           final Set<TsNpmPackage> npmPackages) {
+
+        this.decoratorStore = decoratorStore;
         this.npmPackages = npmPackages;
     }
 
@@ -44,5 +46,9 @@ public class TsCodegenResult {
 
     public TsExporterResource getLernaJson() {
         return new LernaJson();
+    }
+
+    public boolean willHaveDecorators(final TsNpmPackage tsNpmPackage) {
+        return decoratorStore.hasDecoratorFor(tsNpmPackage);
     }
 }

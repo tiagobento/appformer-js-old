@@ -27,7 +27,8 @@ public class LernaBuilder {
         this.baseDir = baseDir;
     }
 
-    public void init() {
+    public void build() {
+        System.out.println("Building npm packages...");
         System.out.println("Verdaccio installed at:");
         if (bash("which verdaccio") != 0) {
             throw new RuntimeException("Verdaccio is not installed.");
@@ -38,35 +39,12 @@ public class LernaBuilder {
             throw new RuntimeException("Verdaccio is not running.");
         }
 
-        System.out.println("Initializing packages...");
+        System.out.println("Building packages...");
         bash(linesJoinedBy(" && ", new String[]{
                 "cd " + baseDir,
                 "npm i --registry http://localhost:4873 --no-lock-file --no-package-lock",
-                "npx lerna bootstrap --registry http://localhost:4873"
-        }));
-    }
-
-    public void buildDecoratorPackages() {
-        //TODO:
-    }
-
-    public void buildPackages() {
-        System.out.println("Building npm packages...");
-        final String regularConcurrency = "--concurrency `nproc || sysctl -n hw.ncpu`";
-
-        bash(linesJoinedBy(" && ", new String[]{
-                "cd " + baseDir,
-                format("npx lerna exec %s %s -- npm run build", "", regularConcurrency),
-        }));
-    }
-
-    public void publishPackages() {
-        System.out.println("Publishing (locally) npm packages...");
-        final String extremeConcurrency = "--concurrency `ls " + baseDir + "/packages | wc -l | awk '{$1=$1};1'`";
-
-        bash(linesJoinedBy(" && ", new String[]{
-                "cd " + baseDir,
-                format("npx lerna exec %s %s -- \"npm run unpublish && npm run doPublish\"", "", extremeConcurrency),
+                "npx lerna bootstrap --registry http://localhost:4873",
+                "npx lerna exec --concurrency `nproc || sysctl -n hw.ncpu` -- npm run build"
         }));
     }
 

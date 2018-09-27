@@ -35,11 +35,14 @@ public class PackageJson implements TsExporterResource {
 
     private final String npmPackageName;
     private final Lazy<Set<String>> dependenciesNpmPackageNames;
+    private final String version;
 
     public PackageJson(final String npmPackageName,
+                       final String version,
                        final List<? extends TsClass> classes) {
 
         this.npmPackageName = npmPackageName;
+        this.version = version;
         dependenciesNpmPackageNames = new Lazy<>(() -> classes.stream()
                 .flatMap(clazz -> clazz.getDependencies().stream())
                 .map(DependencyRelation::getImportEntry)
@@ -54,7 +57,7 @@ public class PackageJson implements TsExporterResource {
 
         final String dependenciesPart = dependenciesNpmPackageNames.get().stream()
                 .sorted()
-                .map(name -> format("\"%s\": \"1.0.0\"", name))
+                .map(name -> format("\"%s\": \"%s\"", name, version))
                 .collect(joining(",\n"));
 
         return format(lines("{",
@@ -67,14 +70,14 @@ public class PackageJson implements TsExporterResource {
                             "%s",
                             "  },",
                             "  \"scripts\": {",
-                            "    \"build\": \"webpack\",",
-                            "    \"unpublish\": \"npm unpublish --force --registry http://localhost:4873 || echo 'Was not published'\",",
+                            "    \"build\": \"webpack && npm run doUnpublish && npm run doPublish\",",
+                            "    \"doUnpublish\": \"npm unpublish --force --registry http://localhost:4873 || echo 'Was not published'\",",
                             "    \"doPublish\": \"npm publish --registry http://localhost:4873\"",
                             "  }",
                             "}"),
 
                       npmPackageName,
-                      "1.0.0",
+                      version,
                       dependenciesPart
         );
     }

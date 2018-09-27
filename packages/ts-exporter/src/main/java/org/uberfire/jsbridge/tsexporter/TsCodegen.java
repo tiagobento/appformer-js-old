@@ -27,10 +27,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
-import org.uberfire.jsbridge.tsexporter.decorators.ImportEntryDecorator;
 import org.uberfire.jsbridge.tsexporter.dependency.DependencyGraph;
 import org.uberfire.jsbridge.tsexporter.model.PojoTsClass;
 import org.uberfire.jsbridge.tsexporter.model.RpcCallerTsClass;
@@ -47,36 +44,62 @@ import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.empty;
 import static org.uberfire.jsbridge.tsexporter.Main.TS_EXPORTER_PACKAGE;
 import static org.uberfire.jsbridge.tsexporter.Main.elements;
-import static org.uberfire.jsbridge.tsexporter.model.TsClass.getMavenModuleNameFromSourceFilePath;
+import static org.uberfire.jsbridge.tsexporter.model.TsNpmPackage.Type.FINAL;
+import static org.uberfire.jsbridge.tsexporter.model.TsNpmPackage.Type.RAW;
+import static org.uberfire.jsbridge.tsexporter.model.TsNpmPackage.Type.UNDECORATED;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.distinctBy;
+import static org.uberfire.jsbridge.tsexporter.util.Utils.get;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.getResources;
 
 public class TsCodegen {
 
     private final DecoratorStore decoratorStore;
+    private final String version;
 
-    public TsCodegen() {
-        this.decoratorStore = new DecoratorStore(readDecoratorFiles());
+    public TsCodegen(final String version,
+                     final DecoratorStore decoratorStore) {
+
+        this.decoratorStore = decoratorStore;
+        this.version = version;
     }
 
-    private Set<ImportEntryDecorator> readDecoratorFiles() {
-        return list(getResources("META-INF/appformerjs.json")).stream().flatMap(url -> {
-            try (final Scanner scanner = new Scanner(url.openStream()).useDelimiter("\\A")) {
-                JsonObject config = new JsonParser().parse(scanner.hasNext() ? scanner.next() : "").getAsJsonObject();
-                return config.get("decorators").getAsJsonObject()
-                        .entrySet().stream().map(entry -> new ImportEntryDecorator(
-                                getMavenModuleNameFromSourceFilePath(url.getFile()),
-                                config.get("name").getAsString(),
-                                entry.getKey(),
-                                entry.getValue().getAsString()));
-            } catch (final Exception e) {
-                throw new RuntimeException(e);
-            }
-        }).collect(toSet());
+    public TsCodegenResult generate() {
+        return new TsCodegenResult(decoratorStore,
+                                   concat(generateRaw().stream(),
+                                          generateFinals().stream()).collect(toSet()));
     }
 
-    public TsCodegenResult generateAllWithDecorators() {
 
+    private Set<TsNpmPackage> generateRaw() {
+        final DecoratorStore decoratorStore = this.decoratorStore.ignoringForCurrentNpmPackage();
+        final DependencyGraph dependencyGraph = new DependencyGraph(decoratorStore);
+
+        findAllPortableTypes()
+                .map(t -> new PojoTsClass((DeclaredType) t.asType(), decoratorStore))
+                .filter(decoratorStore::hasDecoratorFor)
+                .map(TsClass::asElement)
+                .forEach(dependencyGraph::add);
+
+        return dependencyGraph.vertices().parallelStream()
+                .map(DependencyGraph.Vertex::getPojoClass)
+                .filter(distinctBy(tsClass -> tsClass.getType().toString()))
+                .collect(groupingBy(TsClass::getNpmPackageName))
+                .entrySet()
+                .parallelStream()
+                .map(e -> {
+                    final boolean hasDecorators = decoratorStore.hasDecoratorFor(get(-1, e.getKey().split("/")));
+                    if (hasDecorators) {
+                        return new TsNpmPackage(e.getKey(), e.getValue(), version + "-raw", RAW);
+                    } else {
+                        return new TsNpmPackage(e.getKey(), e.getValue(), version, UNDECORATED);
+                    }
+                })
+                .collect(toSet());
+    }
+
+    private Set<TsNpmPackage> generateFinals() {
+
+        //FIXME: Duplicated generation of UNDECORATED modules
         final DependencyGraph dependencyGraph = new DependencyGraph(decoratorStore);
         findAllPortableTypes().forEach(dependencyGraph::add);
 
@@ -89,36 +112,25 @@ public class TsCodegen {
                 dependencyGraph.vertices().parallelStream().map(DependencyGraph.Vertex::getPojoClass),
                 rpcTsClasses.parallelStream());
 
-        return generate(tsClasses);
-    }
-
-    public TsCodegenResult generateNpmPackagesWhichWillBeDecorated() {
-
-        final DependencyGraph dependencyGraph = new DependencyGraph(decoratorStore);
-
-        findAllPortableTypes()
-                .map(t -> new PojoTsClass((DeclaredType) t.asType(), decoratorStore))
-                .filter(c -> decoratorStore.getNpmPackageNamesWhichHaveDecorators().contains(c.getUnscopedNpmPackageName()))
-                .map(TsClass::asElement)
-                .forEach(dependencyGraph::add);
-
-        return generate(dependencyGraph.vertices().parallelStream().map(DependencyGraph.Vertex::getPojoClass));
+        return tsClasses
+                .filter(distinctBy(tsClass -> tsClass.getType().toString()))
+                .collect(groupingBy(TsClass::getNpmPackageName))
+                .entrySet()
+                .parallelStream()
+                .map(e -> {
+                    final boolean hasDecorators = decoratorStore.hasDecoratorFor(get(-1, e.getKey().split("/")));
+                    if (hasDecorators) {
+                        return new TsNpmPackage(e.getKey(), e.getValue(), version, FINAL);
+                    } else {
+                        return new TsNpmPackage(e.getKey(), e.getValue(), version, UNDECORATED);
+                    }
+                })
+                .collect(toSet());
     }
 
     private Stream<Element> findAllPortableTypes() {
         return concat(getTsFilesFrom("portables.tsexporter").stream(),
                       getClassesFromErraiAppPropertiesFiles().stream());
-    }
-
-    private TsCodegenResult generate(final Stream<? extends TsClass> tsClasses) {
-
-        return new TsCodegenResult(tsClasses
-                .filter(distinctBy(tsClass -> tsClass.getType().toString()))
-                .collect(groupingBy(TsClass::getNpmPackageName))
-                .entrySet()
-                .parallelStream()
-                .map(e -> new TsNpmPackage(e.getKey(), e.getValue()))
-                .collect(toSet()));
     }
 
     private List<? extends Element> getClassesFromErraiAppPropertiesFiles() {

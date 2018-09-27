@@ -209,7 +209,7 @@ public class JavaType {
                     case "java.util.Collection":
                         return new TranslatableDefault("Array", emptySet(), translatableTypeArguments);
                     default: {
-                        if (decoratorStore.hasDecoratorFor(type)) {
+                        if (decoratorStore.shouldDecorate(type, owner)) {
                             final ImportEntryDecorator decorator = decoratorStore.getDecoratorFor(type);
                             return new TranslatableDefault(decorator.getUniqueTsIdentifier(declaredType), singleton(decorator), translatableTypeArguments);
                         }

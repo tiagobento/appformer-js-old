@@ -16,7 +16,6 @@
 
 package org.uberfire.jsbridge.tsexporter;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,7 +27,6 @@ import org.uberfire.jsbridge.tsexporter.model.TsNpmPackage;
 import static java.io.File.separator;
 import static java.lang.String.format;
 import static java.lang.System.getProperty;
-import static java.util.Comparator.reverseOrder;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.createFileIfNotExists;
 
 public class TsCodegenResultWriter {
@@ -42,35 +40,39 @@ public class TsCodegenResultWriter {
     }
 
     public void write() {
-        writeRootConfigFiles();
-        writeGeneratedPackages();
-    }
-
-    public void writeDecoratorPackages() {
-        //TODO:
-    }
-
-    private void writeRootConfigFiles() {
         write(tsCodegenResult.getRootPackageJson(), buildPath("", "package.json"));
         write(tsCodegenResult.getLernaJson(), buildPath("", "lerna.json"));
-    }
-
-    private void writeGeneratedPackages() {
         tsCodegenResult.getTsNpmPackages().forEach(this::writeNpmPackage);
+        //TODO: Write decorator packages
     }
 
     private void writeNpmPackage(final TsNpmPackage tsNpmPackage) {
 
-        final String npmPackageBaseDir = "packages/" + tsNpmPackage.getUnscopedNpmPackageName();
+        final String baseDir = getBaseDir(tsNpmPackage.getType(),
+                                          tsNpmPackage.getUnscopedNpmPackageName());
 
         tsNpmPackage.getClasses().forEach(
-                tsClass -> write(tsClass, buildPath(npmPackageBaseDir,
-                                                    "src/" + tsClass.getRelativePath() + ".ts")));
+                tsClass -> write(tsClass, buildPath(baseDir, "src/" + tsClass.getRelativePath() + ".ts")));
 
-        write(tsNpmPackage.getIndexTs(), buildPath(npmPackageBaseDir, "src/index.ts"));
-        write(tsNpmPackage.getWebpackConfigJs(), buildPath(npmPackageBaseDir, "webpack.config.js"));
-        write(tsNpmPackage.getTsConfigJson(), buildPath(npmPackageBaseDir, "tsconfig.json"));
-        write(tsNpmPackage.getPackageJson(), buildPath(npmPackageBaseDir, "package.json"));
+        write(tsNpmPackage.getIndexTs(), buildPath(baseDir, "src/index.ts"));
+        write(tsNpmPackage.getWebpackConfigJs(), buildPath(baseDir, "webpack.config.js"));
+        write(tsNpmPackage.getTsConfigJson(), buildPath(baseDir, "tsconfig.json"));
+        write(tsNpmPackage.getPackageJson(), buildPath(baseDir, "package.json"));
+    }
+
+    private String getBaseDir(final TsNpmPackage.Type type,
+                              final String unscopedNpmPackageName) {
+
+        switch (type) {
+            case RAW:
+                return format("packages/%s/packages/%s/", unscopedNpmPackageName, unscopedNpmPackageName + "-raw");
+            case FINAL:
+                return format("packages/%s/packages/%s/", unscopedNpmPackageName, unscopedNpmPackageName + "-final");
+            case UNDECORATED:
+                return format("packages/%s", unscopedNpmPackageName);
+            default:
+                throw new RuntimeException("Unknown type");
+        }
     }
 
     private void write(final TsExporterResource resource,
@@ -93,20 +95,5 @@ public class TsCodegenResultWriter {
 
     public String getOutputDir() {
         return outputDir;
-    }
-
-    public void removeOutputDir() {
-        try {
-            final boolean removed = Files.walk(Paths.get(outputDir))
-                    .sorted(reverseOrder())
-                    .map(Path::toFile)
-                    .allMatch(File::delete);
-
-            if (!removed) {
-                throw new RuntimeException("Could not remove outputDir " + outputDir);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 }
