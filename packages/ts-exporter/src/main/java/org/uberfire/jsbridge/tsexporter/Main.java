@@ -106,17 +106,20 @@ public class Main extends AbstractProcessor {
                     final TsCodegenResultWriter firstPassWriter = new TsCodegenResultWriter(firstPass);
                     final LernaBuilder firstPassBuilder = new LernaBuilder(firstPassWriter.getOutputDir());
 
-                    final TsCodegenResult secondPass = new TsCodegen().generateWithDecorators();
+                    final TsCodegenResult secondPass = new TsCodegen().generateAllWithDecorators();
                     final TsCodegenResultWriter secondPassWriter = new TsCodegenResultWriter(secondPass);
                     final LernaBuilder secondPassBuilder = new LernaBuilder(secondPassWriter.getOutputDir());
 
                     firstPassWriter.write();
-                    firstPassBuilder.build();
+                    firstPassBuilder.init();
+                    firstPassBuilder.buildPackages();
                     firstPassWriter.writeDecoratorPackages();
                     firstPassBuilder.buildDecoratorPackages();
-                    firstPassWriter.removeOutput();
+                    firstPassWriter.removeOutputDir();
                     secondPassWriter.write();
-                    secondPassBuilder.build();
+                    secondPassBuilder.init();
+                    secondPassBuilder.buildPackages();
+                    secondPassBuilder.publishPackages();
 
                     System.out.println("TypeScript exporter has successfully run. (" + (currentTimeMillis() - start) + "ms)");
                     break;

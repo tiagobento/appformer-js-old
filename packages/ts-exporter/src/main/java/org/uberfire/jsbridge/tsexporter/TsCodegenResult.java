@@ -17,7 +17,6 @@
 package org.uberfire.jsbridge.tsexporter;
 
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
 import org.uberfire.jsbridge.tsexporter.model.TsExporterResource;
@@ -30,12 +29,9 @@ import static java.util.stream.Collectors.toSet;
 public class TsCodegenResult {
 
     private final Set<TsNpmPackage> npmPackages;
-    private final DecoratorStore decoratorStore;
 
-    public TsCodegenResult(final DecoratorStore decoratorStore, final Set<TsNpmPackage> npmPackages) {
-
+    public TsCodegenResult(final Set<TsNpmPackage> npmPackages) {
         this.npmPackages = npmPackages;
-        this.decoratorStore = decoratorStore;
     }
 
     public Set<TsNpmPackage> getTsNpmPackages() {
@@ -48,11 +44,5 @@ public class TsCodegenResult {
 
     public TsExporterResource getLernaJson() {
         return new LernaJson();
-    }
-
-    public Set<TsNpmPackage> getTsNpmPackagesWhichHaveDecorators() {
-        return getTsNpmPackages().stream()
-                .filter(npmPackage -> decoratorStore.getNpmPackageNamesWhichHaveDecorators().contains(npmPackage.getUnscopedNpmPackageName()))
-                .collect(toSet());
     }
 }

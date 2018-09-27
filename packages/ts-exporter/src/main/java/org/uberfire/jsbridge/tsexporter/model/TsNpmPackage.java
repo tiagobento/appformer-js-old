@@ -17,17 +17,11 @@
 package org.uberfire.jsbridge.tsexporter.model;
 
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Stream;
 
 import org.uberfire.jsbridge.tsexporter.model.config.IndexTs;
 import org.uberfire.jsbridge.tsexporter.model.config.PackageJson;
 import org.uberfire.jsbridge.tsexporter.model.config.TsConfigJson;
 import org.uberfire.jsbridge.tsexporter.model.config.WebpackConfigJs;
-
-import static java.util.stream.Collectors.toSet;
-import static java.util.stream.Stream.concat;
-import static org.uberfire.jsbridge.tsexporter.model.TsClass.PACKAGES_SCOPE;
 
 public class TsNpmPackage {
 
@@ -63,13 +57,6 @@ public class TsNpmPackage {
 
     public PackageJson getPackageJson() {
         return new PackageJson(npmPackageName, classes);
-    }
-
-    public Set<String> getGeneratedDependenciesNpmPackageNames() {
-        return concat(Stream.of(npmPackageName),
-                      getPackageJson().getDependenciesNpmPackageNames().stream())
-                .filter(npmPackageName -> npmPackageName.startsWith(PACKAGES_SCOPE))
-                .collect(toSet());
     }
 
     public String getUnscopedNpmPackageName() {

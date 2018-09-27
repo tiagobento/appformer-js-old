@@ -27,14 +27,14 @@ public class LernaBuilder {
         this.baseDir = baseDir;
     }
 
-    void build() {
+    public void init() {
         System.out.println("Verdaccio installed at:");
         if (bash("which verdaccio") != 0) {
             throw new RuntimeException("Verdaccio is not installed.");
         }
 
         System.out.println("Verdaccio is running with PID:");
-        if (bash("pgrep Verdaccio") != 0) {
+        if (bash("ps -ef | awk '/[V]erdaccio/{print $2}'") != 0) {
             throw new RuntimeException("Verdaccio is not running.");
         }
 
@@ -44,30 +44,36 @@ public class LernaBuilder {
                 "npm i --registry http://localhost:4873 --no-lock-file --no-package-lock",
                 "npx lerna bootstrap --registry http://localhost:4873"
         }));
-
-        System.out.println("Building npm packages...");
-        buildPackages("");
     }
 
     public void buildDecoratorPackages() {
         //TODO:
     }
 
-    private void buildPackages(final String lernaArgs) {
+    public void buildPackages() {
+        System.out.println("Building npm packages...");
         final String regularConcurrency = "--concurrency `nproc || sysctl -n hw.ncpu`";
+
+        bash(linesJoinedBy(" && ", new String[]{
+                "cd " + baseDir,
+                format("npx lerna exec %s %s -- npm run build", "", regularConcurrency),
+        }));
+    }
+
+    public void publishPackages() {
+        System.out.println("Publishing (locally) npm packages...");
         final String extremeConcurrency = "--concurrency `ls " + baseDir + "/packages | wc -l | awk '{$1=$1};1'`";
 
         bash(linesJoinedBy(" && ", new String[]{
                 "cd " + baseDir,
-                format("npx lerna exec %s %s -- npm run unpublish", lernaArgs, extremeConcurrency),
-                format("npx lerna exec %s %s -- npm run build", lernaArgs, regularConcurrency),
-                format("npx lerna exec %s %s -- npm run doPublish", lernaArgs, extremeConcurrency),
+                format("npx lerna exec %s %s -- \"npm run unpublish && npm run doPublish\"", "", extremeConcurrency),
         }));
     }
 
     private int bash(final String command) {
 
         System.out.println("--> bash: " + command);
+
         try {
             final ProcessBuilder processBuilder = new ProcessBuilder("bash", "-c", command);
             processBuilder.inheritIO();
