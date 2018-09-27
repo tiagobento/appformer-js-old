@@ -57,7 +57,7 @@ public class PackageJson implements TsExporterResource {
 
         final String dependenciesPart = dependenciesNpmPackageNames.get().stream()
                 .sorted()
-                .map(name -> format("\"%s\": \"%s\"", name, version))
+                .map(name -> format("\"%s\": \"%s\"", name, version.replace("-raw", ""))) //FIXME: Bad
                 .collect(joining(",\n"));
 
         return format(lines("{",
