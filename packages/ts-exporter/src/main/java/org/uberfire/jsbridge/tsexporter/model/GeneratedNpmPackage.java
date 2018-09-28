@@ -23,29 +23,19 @@ import org.uberfire.jsbridge.tsexporter.model.config.PackageJson3rdLayer;
 import org.uberfire.jsbridge.tsexporter.model.config.TsConfigJson;
 import org.uberfire.jsbridge.tsexporter.model.config.WebpackConfigJs;
 
-import static org.uberfire.jsbridge.tsexporter.model.TsNpmPackage.Type.FINAL;
+import static org.uberfire.jsbridge.tsexporter.model.NpmPackage.Type.FINAL;
 
-public class TsNpmPackage {
+public class GeneratedNpmPackage implements NpmPackage {
 
     private final String npmPackageName;
     private final Set<? extends TsClass> classes;
     private final String version;
     private final Type type;
 
-    public String getVersion() {
-        return version;
-    }
-
-    public enum Type {
-        RAW,
-        FINAL,
-        UNDECORATED;
-    }
-
-    public TsNpmPackage(final String npmPackageName,
-                        final Set<? extends TsClass> classes,
-                        final String version,
-                        final Type type) {
+    public GeneratedNpmPackage(final String npmPackageName,
+                               final Set<? extends TsClass> classes,
+                               final String version,
+                               final Type type) {
 
         this.npmPackageName = npmPackageName;
         this.classes = classes;
@@ -55,10 +45,6 @@ public class TsNpmPackage {
 
     public Set<? extends TsClass> getClasses() {
         return classes;
-    }
-
-    public String getNpmPackageName() {
-        return npmPackageName;
     }
 
     public IndexTs getIndexTs() {
@@ -77,10 +63,22 @@ public class TsNpmPackage {
         return new PackageJson3rdLayer(version, npmPackageName + (type.equals(FINAL) ? "-final" : ""), classes); //FIXME: Bad
     }
 
+    @Override
+    public String getNpmPackageName() {
+        return npmPackageName;
+    }
+
+    @Override
+    public String getVersion() {
+        return version;
+    }
+
+    @Override
     public String getUnscopedNpmPackageName() {
         return getWebpackConfigJs().getUnscopedNpmPackageName();
     }
 
+    @Override
     public Type getType() {
         return type;
     }

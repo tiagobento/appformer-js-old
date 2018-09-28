@@ -29,10 +29,10 @@ import javax.lang.model.type.DeclaredType;
 
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
 import org.uberfire.jsbridge.tsexporter.dependency.DependencyGraph;
+import org.uberfire.jsbridge.tsexporter.model.GeneratedNpmPackage;
 import org.uberfire.jsbridge.tsexporter.model.PojoTsClass;
 import org.uberfire.jsbridge.tsexporter.model.RpcCallerTsClass;
 import org.uberfire.jsbridge.tsexporter.model.TsClass;
-import org.uberfire.jsbridge.tsexporter.model.TsNpmPackage;
 import org.uberfire.jsbridge.tsexporter.util.Utils;
 
 import static java.util.Arrays.stream;
@@ -44,9 +44,9 @@ import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.empty;
 import static org.uberfire.jsbridge.tsexporter.Main.TS_EXPORTER_PACKAGE;
 import static org.uberfire.jsbridge.tsexporter.Main.elements;
-import static org.uberfire.jsbridge.tsexporter.model.TsNpmPackage.Type.FINAL;
-import static org.uberfire.jsbridge.tsexporter.model.TsNpmPackage.Type.RAW;
-import static org.uberfire.jsbridge.tsexporter.model.TsNpmPackage.Type.UNDECORATED;
+import static org.uberfire.jsbridge.tsexporter.model.NpmPackage.Type.FINAL;
+import static org.uberfire.jsbridge.tsexporter.model.NpmPackage.Type.RAW;
+import static org.uberfire.jsbridge.tsexporter.model.NpmPackage.Type.UNDECORATED;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.distinctBy;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.get;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.getResources;
@@ -70,7 +70,7 @@ public class TsCodegen {
                                           generateNonRaw().stream()).collect(toSet()));
     }
 
-    private Set<TsNpmPackage> generateRaw() {
+    private Set<GeneratedNpmPackage> generateRaw() {
         final DecoratorStore decoratorStore = this.decoratorStore.ignoringForCurrentNpmPackage();
         final DependencyGraph dependencyGraph = new DependencyGraph(decoratorStore);
 
@@ -90,7 +90,7 @@ public class TsCodegen {
                     final String unscopedNpmPackageName = get(-1, e.getKey().split("/"));
                     final boolean hasDecorators = decoratorStore.hasDecoratorFor(unscopedNpmPackageName);
                     if (hasDecorators) {
-                        return Stream.of(new TsNpmPackage(e.getKey(), e.getValue(), version + "-raw", RAW));
+                        return Stream.of(new GeneratedNpmPackage(e.getKey(), e.getValue(), version + "-raw", RAW));
                     } else {
                         return Stream.empty();
                     }
@@ -98,7 +98,7 @@ public class TsCodegen {
                 .collect(toSet());
     }
 
-    private Set<TsNpmPackage> generateNonRaw() {
+    private Set<GeneratedNpmPackage> generateNonRaw() {
 
         final DependencyGraph dependencyGraph = new DependencyGraph(decoratorStore);
         findAllPortableTypes().forEach(dependencyGraph::add);
@@ -121,9 +121,9 @@ public class TsCodegen {
                     final String unscopedNpmPackageName = get(-1, e.getKey().split("/"));
                     final boolean hasDecorators = decoratorStore.hasDecoratorFor(unscopedNpmPackageName);
                     if (hasDecorators) {
-                        return new TsNpmPackage(e.getKey(), e.getValue(), version, FINAL);
+                        return new GeneratedNpmPackage(e.getKey(), e.getValue(), version, FINAL);
                     } else {
-                        return new TsNpmPackage(e.getKey(), e.getValue(), version, UNDECORATED);
+                        return new GeneratedNpmPackage(e.getKey(), e.getValue(), version, UNDECORATED);
                     }
                 })
                 .collect(toSet());

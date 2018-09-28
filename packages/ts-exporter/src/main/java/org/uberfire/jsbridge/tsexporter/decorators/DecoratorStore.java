@@ -17,7 +17,6 @@
 package org.uberfire.jsbridge.tsexporter.decorators;
 
 import java.util.Map;
-import java.util.Scanner;
 import java.util.Set;
 
 import javax.lang.model.type.DeclaredType;
@@ -25,9 +24,9 @@ import javax.lang.model.type.TypeMirror;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.uberfire.jsbridge.tsexporter.model.GeneratedNpmPackage;
 import org.uberfire.jsbridge.tsexporter.model.PojoTsClass;
 import org.uberfire.jsbridge.tsexporter.model.TsClass;
-import org.uberfire.jsbridge.tsexporter.model.TsNpmPackage;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptySet;
@@ -38,6 +37,7 @@ import static java.util.stream.Collectors.toSet;
 import static org.uberfire.jsbridge.tsexporter.Main.types;
 import static org.uberfire.jsbridge.tsexporter.model.TsClass.getMavenModuleNameFromSourceFilePath;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.getResources;
+import static org.uberfire.jsbridge.tsexporter.util.Utils.readClasspathResource;
 
 public class DecoratorStore {
 
@@ -67,17 +67,13 @@ public class DecoratorStore {
 
     private Set<ImportEntryDecorator> readDecoratorFiles() {
         return list(getResources("META-INF/appformerjs.json")).stream().flatMap(url -> {
-            try (final Scanner scanner = new Scanner(url.openStream()).useDelimiter("\\A")) {
-                JsonObject config = new JsonParser().parse(scanner.hasNext() ? scanner.next() : "").getAsJsonObject();
-                return config.get("decorators").getAsJsonObject()
-                        .entrySet().stream().map(entry -> new ImportEntryDecorator(
-                                getMavenModuleNameFromSourceFilePath(url.getFile()),
-                                config.get("name").getAsString(),
-                                entry.getKey(),
-                                entry.getValue().getAsString()));
-            } catch (final Exception e) {
-                throw new RuntimeException(e);
-            }
+            JsonObject config = new JsonParser().parse(readClasspathResource(url)).getAsJsonObject();
+            return config.get("decorators").getAsJsonObject()
+                    .entrySet().stream().map(entry -> new ImportEntryDecorator(
+                            getMavenModuleNameFromSourceFilePath(url.getFile()),
+                            config.get("name").getAsString(),
+                            entry.getKey(),
+                            entry.getValue().getAsString()));
         }).collect(toSet());
     }
 
@@ -118,9 +114,12 @@ public class DecoratorStore {
         };
     }
 
-    public String getDecoratorsNpmPackageNameFor(final TsNpmPackage tsNpmPackage) {
+    public String getDecoratorsNpmPackageNameFor(final GeneratedNpmPackage npmPackage) {
+        return getDecoratorNpmPackageNamesByDecoratedMvnModuleNames().get(npmPackage.getUnscopedNpmPackageName());
+    }
+
+    public Map<String, String> getDecoratorNpmPackageNamesByDecoratedMvnModuleNames() {
         return decorators.values().stream()
-                .collect(toMap(ImportEntryDecorator::getDecoratedMvnModule, ImportEntryDecorator::getNpmPackageName, (a, b) -> a))
-                .get(tsNpmPackage.getUnscopedNpmPackageName());
+                .collect(toMap(ImportEntryDecorator::getDecoratedMvnModule, ImportEntryDecorator::getNpmPackageName, (a, b) -> a));
     }
 }

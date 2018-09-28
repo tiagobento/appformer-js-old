@@ -17,16 +17,16 @@
 package org.uberfire.jsbridge.tsexporter.model.config;
 
 import org.uberfire.jsbridge.tsexporter.model.TsExporterResource;
-import org.uberfire.jsbridge.tsexporter.model.TsNpmPackage;
+import org.uberfire.jsbridge.tsexporter.model.GeneratedNpmPackage;
 
 import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
 
 public class NpmIgnore implements TsExporterResource {
 
-    private final TsNpmPackage tsNpmPackage;
+    private final GeneratedNpmPackage npmPackage;
 
-    public NpmIgnore(final TsNpmPackage tsNpmPackage) {
-        this.tsNpmPackage = tsNpmPackage;
+    public NpmIgnore(final GeneratedNpmPackage npmPackage) {
+        this.npmPackage = npmPackage;
     }
 
     @Override
@@ -39,6 +39,6 @@ public class NpmIgnore implements TsExporterResource {
 
     @Override
     public String getNpmPackageName() {
-        return tsNpmPackage.getNpmPackageName();
+        return npmPackage.getNpmPackageName();
     }
 }

@@ -17,8 +17,13 @@
 package org.uberfire.jsbridge.tsexporter.model.config;
 
 import java.util.Set;
+import java.util.stream.Stream;
 
-import org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation;
+import javax.lang.model.element.Element;
+import javax.lang.model.type.DeclaredType;
+
+import org.uberfire.jsbridge.tsexporter.decorators.ImportEntryDecorator;
+import org.uberfire.jsbridge.tsexporter.decorators.ImportEntryShadowedDecorator;
 import org.uberfire.jsbridge.tsexporter.dependency.ImportEntry;
 import org.uberfire.jsbridge.tsexporter.model.TsClass;
 import org.uberfire.jsbridge.tsexporter.model.TsExporterResource;
@@ -26,6 +31,7 @@ import org.uberfire.jsbridge.tsexporter.model.TsExporterResource;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.joining;
+import static org.uberfire.jsbridge.tsexporter.model.TsClass.PACKAGES_SCOPE;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
 
 public class PackageJson2ndLayer implements TsExporterResource {
@@ -50,7 +56,13 @@ public class PackageJson2ndLayer implements TsExporterResource {
     public String toSource() {
         final String dependenciesPart = dependencies.stream()
                 .flatMap(clazz -> clazz.getDependencies().stream())
-                .map(DependencyRelation::getImportEntry)
+                .flatMap(dependencyRelation -> {
+                    if (dependencyRelation.getImportEntry() instanceof ImportEntryDecorator) {
+                        return Stream.of(new ImportEntryShadowedDecorator((ImportEntryDecorator) dependencyRelation.getImportEntry()));
+                    } else {
+                        return Stream.of(dependencyRelation.getImportEntry());
+                    }
+                })
                 .collect(groupingBy(ImportEntry::getNpmPackageName))
                 .keySet().stream()
                 .filter(name -> !name.equals(npmPackageName))
@@ -69,7 +81,7 @@ public class PackageJson2ndLayer implements TsExporterResource {
                 "%s",
                 "  },",
                 "  \"scripts\": {",
-                "    \"build\": \"npm i --no-package-lock && npx lerna bootstrap && npx lerna run build && npm run doUnpublish && npm run doPublish\",",
+                "    \"build\": \"npm i --no-package-lock && npx lerna bootstrap && npx lerna run build && npm i " + decoratorsNpmPackageName + " --registry http://localhost:4873 && npm run doUnpublish && npm run doPublish\",",
                 "    \"doUnpublish\": \"npm unpublish --force --registry http://localhost:4873 || echo 'Was not published'\",",
                 "    \"doPublish\": \"mv dist dist.tmp && mv `readlink dist.tmp` . && rm dist.tmp && npm publish --registry http://localhost:4873\"",
                 "  },",

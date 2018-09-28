@@ -16,9 +16,12 @@
 
 package org.uberfire.jsbridge.tsexporter.model.config;
 
+import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Stream;
 
-import org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation;
+import org.uberfire.jsbridge.tsexporter.decorators.ImportEntryDecorator;
+import org.uberfire.jsbridge.tsexporter.decorators.ImportEntryShadowedDecorator;
 import org.uberfire.jsbridge.tsexporter.dependency.ImportEntry;
 import org.uberfire.jsbridge.tsexporter.model.TsClass;
 import org.uberfire.jsbridge.tsexporter.model.TsExporterResource;
@@ -35,6 +38,7 @@ public class PackageJson3rdLayer implements TsExporterResource {
     private final String version;
     private final String npmPackageName;
     private final Lazy<Set<String>> dependenciesNpmPackageNames;
+    private final Set<String> decoratorPackagesToInstallBeforeBuild = new HashSet<>();
 
     public PackageJson3rdLayer(final String version,
                                final String npmPackageName,
@@ -44,7 +48,14 @@ public class PackageJson3rdLayer implements TsExporterResource {
         this.npmPackageName = npmPackageName;
         dependenciesNpmPackageNames = new Lazy<>(() -> classes.stream()
                 .flatMap(clazz -> clazz.getDependencies().stream())
-                .map(DependencyRelation::getImportEntry)
+                .flatMap(dependencyRelation -> {
+                    if (!npmPackageName.endsWith("-final") && dependencyRelation.getImportEntry() instanceof ImportEntryDecorator) {
+                        decoratorPackagesToInstallBeforeBuild.add(dependencyRelation.getImportEntry().getNpmPackageName());
+                        return Stream.of(new ImportEntryShadowedDecorator((ImportEntryDecorator) dependencyRelation.getImportEntry()));
+                    } else {
+                        return Stream.of(dependencyRelation.getImportEntry());
+                    }
+                })
                 .collect(groupingBy(ImportEntry::getNpmPackageName))
                 .keySet().stream()
                 .filter(name -> !name.equals(npmPackageName))
@@ -60,6 +71,10 @@ public class PackageJson3rdLayer implements TsExporterResource {
                 .map(name -> format("\"%s\": \"%s\"", name, version.replace("-raw", ""))) //FIXME: Bad
                 .collect(joining(",\n"));
 
+        final String asd = decoratorPackagesToInstallBeforeBuild.isEmpty()
+                ? ""
+                : (" npm i " + decoratorPackagesToInstallBeforeBuild.stream().collect(joining(" ")) + " && ");
+
         return format(lines("{",
                             "  \"name\": \"%s\",",
                             "  \"version\": \"%s\",",
@@ -70,7 +85,7 @@ public class PackageJson3rdLayer implements TsExporterResource {
                             "%s",
                             "  },",
                             "  \"scripts\": {",
-                            "    \"build\": \"webpack && npm run doUnpublish && npm run doPublish\",",
+                            "    \"build\": \"" + asd + " webpack &&  npm run doUnpublish && npm run doPublish\",",
                             "    \"doUnpublish\": \"npm unpublish --force --registry http://localhost:4873 || echo 'Was not published'\",",
                             "    \"doPublish\": \"%s\"",
                             "  }",
