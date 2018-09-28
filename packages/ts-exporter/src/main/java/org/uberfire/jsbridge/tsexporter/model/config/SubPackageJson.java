@@ -69,7 +69,7 @@ public class SubPackageJson implements TsExporterResource {
                 "%s",
                 "  },",
                 "  \"scripts\": {",
-                "    \"build\": \"npm i --no-package-lock && npx lerna bootstrap && npx lerna run build && npm install packages/%s --save-optional && npm run doUnpublish && npm run doPublish\",",
+                "    \"build\": \"npm i --no-package-lock && npx lerna bootstrap && npx lerna run build && npm run doUnpublish && npm run doPublish\",",
                 "    \"doUnpublish\": \"npm unpublish --force --registry http://localhost:4873 || echo 'Was not published'\",",
                 "    \"doPublish\": \"npm publish --registry http://localhost:4873\"",
                 "  },",
@@ -87,8 +87,7 @@ public class SubPackageJson implements TsExporterResource {
 
                       npmPackageName,
                       version,
-                      dependenciesPart,
-                      decoratorsNpmPackageName
+                      dependenciesPart
 
         );
     }

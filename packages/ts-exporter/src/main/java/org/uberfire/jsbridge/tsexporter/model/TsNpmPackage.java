@@ -72,11 +72,11 @@ public class TsNpmPackage {
     }
 
     public PackageJson getPackageJson() {
-        return new PackageJson(npmPackageName, version, classes);
+        return new PackageJson(npmPackageName + (type.equals(Type.FINAL) ? "-final" : ""), version, classes);
     }
 
     public String getUnscopedNpmPackageName() {
-        return getPackageJson().getUnscopedNpmPackageName();
+        return getWebpackConfigJs().getUnscopedNpmPackageName();
     }
 
     public Type getType() {

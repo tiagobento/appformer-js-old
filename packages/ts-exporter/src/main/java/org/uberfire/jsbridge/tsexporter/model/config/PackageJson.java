@@ -48,6 +48,7 @@ public class PackageJson implements TsExporterResource {
                 .collect(groupingBy(ImportEntry::getNpmPackageName))
                 .keySet().stream()
                 .filter(name -> !name.equals(npmPackageName))
+                .filter(name -> !(name + "-final").equals(npmPackageName))
                 .collect(toSet()));
     }
 
@@ -71,13 +72,16 @@ public class PackageJson implements TsExporterResource {
                             "  \"scripts\": {",
                             "    \"build\": \"webpack && npm run doUnpublish && npm run doPublish\",",
                             "    \"doUnpublish\": \"npm unpublish --force --registry http://localhost:4873 || echo 'Was not published'\",",
-                            "    \"doPublish\": \"npm publish --registry http://localhost:4873\"",
+                            "    \"doPublish\": \"%s\"",
                             "  }",
                             "}"),
 
                       npmPackageName,
                       version,
-                      dependenciesPart
+                      dependenciesPart,
+                      npmPackageName.contains("-final")
+                              ? "echo 'Skipping publish'"
+                              : "npm publish --registry http://localhost:4873"
         );
     }
 
