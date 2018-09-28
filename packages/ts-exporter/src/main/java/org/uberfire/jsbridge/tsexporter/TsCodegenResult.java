@@ -28,12 +28,15 @@ public class TsCodegenResult {
 
     private final DecoratorStore decoratorStore;
     private final Set<TsNpmPackage> npmPackages;
+    private final String version;
 
-    public TsCodegenResult(final DecoratorStore decoratorStore,
+    public TsCodegenResult(final String version,
+                           final DecoratorStore decoratorStore,
                            final Set<TsNpmPackage> npmPackages) {
 
         this.decoratorStore = decoratorStore;
         this.npmPackages = npmPackages;
+        this.version = version;
     }
 
     public Set<TsNpmPackage> getTsNpmPackages() {
@@ -45,10 +48,10 @@ public class TsCodegenResult {
     }
 
     public TsExporterResource getLernaJson() {
-        return new LernaJson();
+        return new LernaJson(version);
     }
 
-    public boolean willHaveDecorators(final TsNpmPackage tsNpmPackage) {
-        return decoratorStore.hasDecoratorFor(tsNpmPackage);
+    public String getDecoratorsNpmPackageName(final TsNpmPackage tsNpmPackage) {
+        return decoratorStore.getDecoratorsNpmPackageNameFor(tsNpmPackage);
     }
 }

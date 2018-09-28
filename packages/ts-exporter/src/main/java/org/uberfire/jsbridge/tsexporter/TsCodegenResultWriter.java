@@ -20,13 +20,16 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 
 import org.uberfire.jsbridge.tsexporter.model.TsExporterResource;
 import org.uberfire.jsbridge.tsexporter.model.TsNpmPackage;
+import org.uberfire.jsbridge.tsexporter.model.config.SubPackageJson;
 
 import static java.io.File.separator;
 import static java.lang.String.format;
 import static java.lang.System.getProperty;
+import static org.uberfire.jsbridge.tsexporter.model.TsNpmPackage.Type.FINAL;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.createFileIfNotExists;
 
 public class TsCodegenResultWriter {
@@ -58,6 +61,20 @@ public class TsCodegenResultWriter {
         write(tsNpmPackage.getWebpackConfigJs(), buildPath(baseDir, "webpack.config.js"));
         write(tsNpmPackage.getTsConfigJson(), buildPath(baseDir, "tsconfig.json"));
         write(tsNpmPackage.getPackageJson(), buildPath(baseDir, "package.json"));
+
+        if (Arrays.asList(FINAL).contains(tsNpmPackage.getType())) {
+            try {
+                Files.createSymbolicLink(buildPath(baseDir + "../../", "dist"), buildPath(baseDir, "dist"));
+            } catch (final IOException e) {
+                throw new RuntimeException(e);
+            }
+            final SubPackageJson packageJson = new SubPackageJson(tsNpmPackage.getNpmPackageName(),
+                                                                  tsNpmPackage.getVersion(),
+                                                                  tsCodegenResult.getDecoratorsNpmPackageName(tsNpmPackage),
+                                                                  tsNpmPackage.getClasses());
+
+            write(packageJson, buildPath(baseDir + "../../", "package.json"));
+        }
     }
 
     private String getBaseDir(final TsNpmPackage.Type type,

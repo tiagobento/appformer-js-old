@@ -22,12 +22,18 @@ import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
 
 public class LernaJson implements TsExporterResource {
 
+    private final String version;
+
+    public LernaJson(final String version) {
+        this.version = version;
+    }
+
     @Override
     public String toSource() {
         return lines(
                 "{",
                 "  \"lerna\": \"3.4.0\",",
-                "  \"version\": \"1.0.0\",",
+                "  \"version\": \"" + version + "\",",
                 "  \"npmClientArgs\": [",
                 "    \"--no-package-lock\", \"--no-lock-file\"",
                 "  ]",

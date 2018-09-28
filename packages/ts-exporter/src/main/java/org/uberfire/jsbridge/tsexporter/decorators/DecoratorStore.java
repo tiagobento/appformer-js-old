@@ -95,16 +95,6 @@ public class DecoratorStore {
                 .collect(toSet());
     }
 
-    public Set<String> getDecoratorsNpmPackages() {
-        return decorators.values().stream()
-                .map(ImportEntryDecorator::getNpmPackageName)
-                .collect(toSet());
-    }
-
-    public boolean hasDecoratorFor(final TsNpmPackage tsNpmPackage) {
-        return hasDecoratorFor(tsNpmPackage.getUnscopedNpmPackageName());
-    }
-
     public boolean hasDecoratorFor(final TsClass tsClass) {
         return hasDecoratorFor(tsClass.getUnscopedNpmPackageName());
     }
@@ -126,5 +116,11 @@ public class DecoratorStore {
                 return super.shouldDecorate(type, owner) && !this.getDecoratorFor(type).getDecoratedMvnModule().equals(npmPackageName);
             }
         };
+    }
+
+    public String getDecoratorsNpmPackageNameFor(final TsNpmPackage tsNpmPackage) {
+        return decorators.values().stream()
+                .collect(toMap(ImportEntryDecorator::getDecoratedMvnModule, ImportEntryDecorator::getNpmPackageName, (a, b) -> a))
+                .get(tsNpmPackage.getUnscopedNpmPackageName());
     }
 }

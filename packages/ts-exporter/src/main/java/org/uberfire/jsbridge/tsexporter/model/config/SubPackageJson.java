@@ -22,62 +22,64 @@ import org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation;
 import org.uberfire.jsbridge.tsexporter.dependency.ImportEntry;
 import org.uberfire.jsbridge.tsexporter.model.TsClass;
 import org.uberfire.jsbridge.tsexporter.model.TsExporterResource;
-import org.uberfire.jsbridge.tsexporter.util.Lazy;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toSet;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
 
-public class PackageJson implements TsExporterResource {
+public class SubPackageJson implements TsExporterResource {
 
     private final String npmPackageName;
-    private final Lazy<Set<String>> dependenciesNpmPackageNames;
     private final String version;
+    private final String decoratorsNpmPackageName;
+    private final Set<? extends TsClass> dependencies;
 
-    public PackageJson(final String npmPackageName,
-                       final String version,
-                       final Set<? extends TsClass> classes) {
+    public SubPackageJson(final String npmPackageName,
+                          final String version,
+                          final String decoratorsNpmPackageName,
+                          final Set<? extends TsClass> dependencies) {
 
         this.npmPackageName = npmPackageName;
         this.version = version;
-        dependenciesNpmPackageNames = new Lazy<>(() -> classes.stream()
+        this.decoratorsNpmPackageName = decoratorsNpmPackageName;
+        this.dependencies = dependencies;
+    }
+
+    @Override
+    public String toSource() {
+        final String dependenciesPart = dependencies.stream()
                 .flatMap(clazz -> clazz.getDependencies().stream())
                 .map(DependencyRelation::getImportEntry)
                 .collect(groupingBy(ImportEntry::getNpmPackageName))
                 .keySet().stream()
                 .filter(name -> !name.equals(npmPackageName))
-                .collect(toSet()));
-    }
-
-    @Override
-    public String toSource() {
-
-        final String dependenciesPart = dependenciesNpmPackageNames.get().stream()
                 .sorted()
-                .map(name -> format("\"%s\": \"%s\"", name, version.replace("-raw", ""))) //FIXME: Bad
+                .map(name -> format("\"%s\": \"%s\"", name, version))
                 .collect(joining(",\n"));
 
-        return format(lines("{",
-                            "  \"name\": \"%s\",",
-                            "  \"version\": \"%s\",",
-                            "  \"license\": \"Apache-2.0\",",
-                            "  \"main\": \"./dist/index.js\",",
-                            "  \"types\": \"./dist/index.d.ts\",",
-                            "  \"dependencies\": {",
-                            "%s",
-                            "  },",
-                            "  \"scripts\": {",
-                            "    \"build\": \"webpack && npm run doUnpublish && npm run doPublish\",",
-                            "    \"doUnpublish\": \"npm unpublish --force --registry http://localhost:4873 || echo 'Was not published'\",",
-                            "    \"doPublish\": \"npm publish --registry http://localhost:4873\"",
-                            "  }",
-                            "}"),
+        return format(lines(
+                "{",
+                "  \"name\": \"%s\",",
+                "  \"version\": \"%s\",",
+                "  \"license\": \"Apache-2.0\",",
+                "  \"main\": \"./dist/index.js\",",
+                "  \"types\": \"./dist/index.d.ts\",",
+                "  \"dependencies\": {",
+                "%s",
+                "  },",
+                "  \"scripts\": {",
+                "    \"build\": \"echo 'HUEHUE'\",",
+                "    \"doUnpublish\": \"npm unpublish --force --registry http://localhost:4873 || echo 'Was not published'\",",
+                "    \"doPublish\": \"npm publish --registry http://localhost:4873\"",
+                "  }",
+                "}"),
 
                       npmPackageName,
                       version,
-                      dependenciesPart
+                      dependenciesPart,
+                      decoratorsNpmPackageName
+
         );
     }
 

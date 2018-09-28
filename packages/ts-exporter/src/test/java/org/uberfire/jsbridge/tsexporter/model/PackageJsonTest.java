@@ -12,6 +12,8 @@ import org.junit.Test;
 import org.uberfire.jsbridge.tsexporter.model.config.PackageJson;
 
 import static java.util.Collections.emptyList;
+import static java.util.Collections.emptySet;
+import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore.NO_DECORATORS;
@@ -32,7 +34,7 @@ public class PackageJsonTest {
     @Test
     @Ignore
     public void testNoDependencies() {
-        final PackageJson packageJson = new PackageJson("@kiegroup-ts-generated/test-module", "1.0.0", emptyList());
+        final PackageJson packageJson = new PackageJson("@kiegroup-ts-generated/test-module", "1.0.0", emptySet());
 
         assertEquals(lines("{",
                            "  \"name\": \"@kiegroup-ts-generated/test-module\",",
@@ -66,8 +68,8 @@ public class PackageJsonTest {
     @Test
     @Ignore
     public void testOneDependency() {
-        final PackageJson packageJsonA = new PackageJson("@kiegroup-ts-generated/test-module", "1.0.0", singletonList(new PojoTsClass(type(A.class), NO_DECORATORS)));
-        final PackageJson packageJsonB = new PackageJson("@kiegroup-ts-generated/test-module", "1.0.0", singletonList(new PojoTsClass(type(B.class), NO_DECORATORS)));
+        final PackageJson packageJsonA = new PackageJson("@kiegroup-ts-generated/test-module", "1.0.0", singleton(new PojoTsClass(type(A.class), NO_DECORATORS)));
+        final PackageJson packageJsonB = new PackageJson("@kiegroup-ts-generated/test-module", "1.0.0", singleton(new PojoTsClass(type(B.class), NO_DECORATORS)));
 
         assertEquals(lines("{",
                            "  \"name\": \"@kiegroup-ts-generated/test-module\",",
@@ -98,7 +100,7 @@ public class PackageJsonTest {
     @Test
     @Ignore
     public void testTwoDependencies() {
-        final PackageJson packageJsonC = new PackageJson("@kiegroup-ts-generated/test-module", "1.0.0", singletonList(new PojoTsClass(type(C.class), NO_DECORATORS)));
+        final PackageJson packageJsonC = new PackageJson("@kiegroup-ts-generated/test-module", "1.0.0", singleton(new PojoTsClass(type(C.class), NO_DECORATORS)));
 
         assertEquals(lines("{",
                            "  \"name\": \"@kiegroup-ts-generated/test-module\",",

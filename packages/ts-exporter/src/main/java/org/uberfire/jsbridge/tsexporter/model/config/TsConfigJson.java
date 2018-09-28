@@ -26,12 +26,9 @@ import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
 public class TsConfigJson implements TsExporterResource {
 
     private final String npmPackageName;
-    private final List<? extends TsClass> classes;
 
-    public TsConfigJson(final String npmPackageName,
-                        final List<? extends TsClass> classes) {
+    public TsConfigJson(final String npmPackageName) {
         this.npmPackageName = npmPackageName;
-        this.classes = classes;
     }
 
     @Override

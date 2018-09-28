@@ -16,7 +16,7 @@
 
 package org.uberfire.jsbridge.tsexporter.model;
 
-import java.util.List;
+import java.util.Set;
 
 import org.uberfire.jsbridge.tsexporter.model.config.IndexTs;
 import org.uberfire.jsbridge.tsexporter.model.config.PackageJson;
@@ -26,9 +26,13 @@ import org.uberfire.jsbridge.tsexporter.model.config.WebpackConfigJs;
 public class TsNpmPackage {
 
     private final String npmPackageName;
-    private final List<? extends TsClass> classes;
+    private final Set<? extends TsClass> classes;
     private final String version;
     private final Type type;
+
+    public String getVersion() {
+        return version;
+    }
 
     public enum Type {
         RAW,
@@ -37,7 +41,7 @@ public class TsNpmPackage {
     }
 
     public TsNpmPackage(final String npmPackageName,
-                        final List<? extends TsClass> classes,
+                        final Set<? extends TsClass> classes,
                         final String version,
                         final Type type) {
 
@@ -47,7 +51,7 @@ public class TsNpmPackage {
         this.type = type;
     }
 
-    public List<? extends TsClass> getClasses() {
+    public Set<? extends TsClass> getClasses() {
         return classes;
     }
 
@@ -60,11 +64,11 @@ public class TsNpmPackage {
     }
 
     public WebpackConfigJs getWebpackConfigJs() {
-        return new WebpackConfigJs(npmPackageName, classes);
+        return new WebpackConfigJs(npmPackageName);
     }
 
     public TsConfigJson getTsConfigJson() {
-        return new TsConfigJson(npmPackageName, classes);
+        return new TsConfigJson(npmPackageName);
     }
 
     public PackageJson getPackageJson() {

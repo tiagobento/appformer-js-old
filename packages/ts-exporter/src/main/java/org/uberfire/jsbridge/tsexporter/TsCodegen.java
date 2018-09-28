@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.lang.model.element.Element;
@@ -38,6 +39,7 @@ import org.uberfire.jsbridge.tsexporter.util.Utils;
 import static java.util.Arrays.stream;
 import static java.util.Collections.list;
 import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static java.util.stream.Stream.concat;
@@ -64,11 +66,11 @@ public class TsCodegen {
     }
 
     public TsCodegenResult generate() {
-        return new TsCodegenResult(decoratorStore,
+        return new TsCodegenResult(version,
+                                   decoratorStore,
                                    concat(generateRaw().stream(),
                                           generateFinals().stream()).collect(toSet()));
     }
-
 
     private Set<TsNpmPackage> generateRaw() {
         final DecoratorStore decoratorStore = this.decoratorStore.ignoringForCurrentNpmPackage();
@@ -83,15 +85,15 @@ public class TsCodegen {
         return dependencyGraph.vertices().parallelStream()
                 .map(DependencyGraph.Vertex::getPojoClass)
                 .filter(distinctBy(tsClass -> tsClass.getType().toString()))
-                .collect(groupingBy(TsClass::getNpmPackageName))
+                .collect(groupingBy(TsClass::getNpmPackageName, toSet()))
                 .entrySet()
                 .parallelStream()
-                .map(e -> {
+                .flatMap(e -> {
                     final boolean hasDecorators = decoratorStore.hasDecoratorFor(get(-1, e.getKey().split("/")));
                     if (hasDecorators) {
-                        return new TsNpmPackage(e.getKey(), e.getValue(), version + "-raw", RAW);
+                        return Stream.of(new TsNpmPackage(e.getKey(), e.getValue(), version + "-raw", RAW));
                     } else {
-                        return new TsNpmPackage(e.getKey(), e.getValue(), version, UNDECORATED);
+                        return Stream.empty();
                     }
                 })
                 .collect(toSet());
@@ -99,7 +101,6 @@ public class TsCodegen {
 
     private Set<TsNpmPackage> generateFinals() {
 
-        //FIXME: Duplicated generation of UNDECORATED modules
         final DependencyGraph dependencyGraph = new DependencyGraph(decoratorStore);
         findAllPortableTypes().forEach(dependencyGraph::add);
 
@@ -114,7 +115,7 @@ public class TsCodegen {
 
         return tsClasses
                 .filter(distinctBy(tsClass -> tsClass.getType().toString()))
-                .collect(groupingBy(TsClass::getNpmPackageName))
+                .collect(groupingBy(TsClass::getNpmPackageName, toSet()))
                 .entrySet()
                 .parallelStream()
                 .map(e -> {
