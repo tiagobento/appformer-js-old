@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.FileAttributeView;
 
 import org.uberfire.jsbridge.tsexporter.model.TsExporterResource;
 import org.uberfire.jsbridge.tsexporter.model.TsNpmPackage;
@@ -75,6 +77,17 @@ public class TsCodegenResultWriter {
 
             write(packageJson, buildPath(baseDir + "../../", "package.json"));
             write(new LernaJson(tsNpmPackage.getVersion()), buildPath(baseDir + "../../", "lerna.json"));
+            write(new TsExporterResource() {
+                @Override
+                public String toSource() {
+                    return "**/packages";
+                }
+
+                @Override
+                public String getNpmPackageName() {
+                    return tsNpmPackage.getNpmPackageName();
+                }
+            }, buildPath(baseDir + "../../", ".npmignore"));
         }
     }
 

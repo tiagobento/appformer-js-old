@@ -23,6 +23,8 @@ import org.uberfire.jsbridge.tsexporter.model.config.PackageJson;
 import org.uberfire.jsbridge.tsexporter.model.config.TsConfigJson;
 import org.uberfire.jsbridge.tsexporter.model.config.WebpackConfigJs;
 
+import static org.uberfire.jsbridge.tsexporter.model.TsNpmPackage.Type.FINAL;
+
 public class TsNpmPackage {
 
     private final String npmPackageName;
@@ -72,7 +74,7 @@ public class TsNpmPackage {
     }
 
     public PackageJson getPackageJson() {
-        return new PackageJson(npmPackageName + (type.equals(Type.FINAL) ? "-final" : ""), version, classes);
+        return new PackageJson(version, npmPackageName + (type.equals(FINAL) ? "-final" : ""), classes);
     }
 
     public String getUnscopedNpmPackageName() {

@@ -32,16 +32,16 @@ import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
 
 public class PackageJson implements TsExporterResource {
 
+    private final String version;
     private final String npmPackageName;
     private final Lazy<Set<String>> dependenciesNpmPackageNames;
-    private final String version;
 
-    public PackageJson(final String npmPackageName,
-                       final String version,
+    public PackageJson(final String version,
+                       final String npmPackageName,
                        final Set<? extends TsClass> classes) {
 
-        this.npmPackageName = npmPackageName;
         this.version = version;
+        this.npmPackageName = npmPackageName;
         dependenciesNpmPackageNames = new Lazy<>(() -> classes.stream()
                 .flatMap(clazz -> clazz.getDependencies().stream())
                 .map(DependencyRelation::getImportEntry)

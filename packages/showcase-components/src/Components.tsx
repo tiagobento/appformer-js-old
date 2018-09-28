@@ -7,6 +7,7 @@ import { VFSService } from "@kiegroup-ts-generated/uberfire-backend-api-rpc";
 import { PreferenceStore } from "@kiegroup-ts-generated/uberfire-preferences-api-rpc";
 import { WorkbenchServices } from "@kiegroup-ts-generated/uberfire-backend-api-rpc";
 import { PerspectiveDefinition } from "@kiegroup-ts-generated/uberfire-api";
+import { PathImpl, Path } from "uberfire-api-ts-decorators";
 
 // import homePerspectiveTemplate from "showcase-components/HomePerspective.html";
 // import otherPerspectiveTemplate from "showcase-components/other-perspective.html";
@@ -23,6 +24,11 @@ export class ReactComponentScreen extends Screen {
     this.af_componentTitle = "React Component";
 
     const javaInteger = new JavaInteger("0");
+    console.info("Testing builtin type:" + javaInteger.get());
+
+    const a: PathImpl = new PathImpl({ uri: "uri", fileName: "filename" });
+    const b: Path = a;
+    console.info("Testing decorators " + b.getFileName());
 
     this.af_subscriptions = {
       "org.uberfire.shared.TestEvent": (testEvent: TestEvent) => {
@@ -35,9 +41,9 @@ export class ReactComponentScreen extends Screen {
 
     const preferenceStore = new WorkbenchServices();
     preferenceStore.loadPerspectives({}).then(s => {
-        s.forEach(x => {
-            console.info(x.getName());
-        })
+      s.forEach(x => {
+        console.info(x.getName());
+      });
     });
 
     // vfsService.get({ arg0: "/pom.xml" }).then(s => {
