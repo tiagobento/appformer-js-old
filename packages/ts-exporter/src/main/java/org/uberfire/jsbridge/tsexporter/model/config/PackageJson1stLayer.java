@@ -20,7 +20,7 @@ import org.uberfire.jsbridge.tsexporter.model.TsExporterResource;
 
 import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
 
-public class RootPackageJson implements TsExporterResource {
+public class PackageJson1stLayer implements TsExporterResource {
 
     @Override
     public String toSource() {

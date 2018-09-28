@@ -9,7 +9,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
-import org.uberfire.jsbridge.tsexporter.model.config.PackageJson;
+import org.uberfire.jsbridge.tsexporter.model.config.PackageJson3rdLayer;
 
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
@@ -32,7 +32,7 @@ public class PackageJsonTest {
     @Test
     @Ignore
     public void testNoDependencies() {
-        final PackageJson packageJson = new PackageJson("1.0.0", "@kiegroup-ts-generated/test-module", emptySet());
+        final PackageJson3rdLayer packageJson = new PackageJson3rdLayer("1.0.0", "@kiegroup-ts-generated/test-module", emptySet());
 
         assertEquals(lines("{",
                            "  \"name\": \"@kiegroup-ts-generated/test-module\",",
@@ -66,8 +66,8 @@ public class PackageJsonTest {
     @Test
     @Ignore
     public void testOneDependency() {
-        final PackageJson packageJsonA = new PackageJson("1.0.0", "@kiegroup-ts-generated/test-module", singleton(new PojoTsClass(type(A.class), NO_DECORATORS)));
-        final PackageJson packageJsonB = new PackageJson("1.0.0", "@kiegroup-ts-generated/test-module", singleton(new PojoTsClass(type(B.class), NO_DECORATORS)));
+        final PackageJson3rdLayer packageJsonA = new PackageJson3rdLayer("1.0.0", "@kiegroup-ts-generated/test-module", singleton(new PojoTsClass(type(A.class), NO_DECORATORS)));
+        final PackageJson3rdLayer packageJsonB = new PackageJson3rdLayer("1.0.0", "@kiegroup-ts-generated/test-module", singleton(new PojoTsClass(type(B.class), NO_DECORATORS)));
 
         assertEquals(lines("{",
                            "  \"name\": \"@kiegroup-ts-generated/test-module\",",
@@ -98,7 +98,7 @@ public class PackageJsonTest {
     @Test
     @Ignore
     public void testTwoDependencies() {
-        final PackageJson packageJsonC = new PackageJson("1.0.0", "@kiegroup-ts-generated/test-module", singleton(new PojoTsClass(type(C.class), NO_DECORATORS)));
+        final PackageJson3rdLayer packageJsonC = new PackageJson3rdLayer("1.0.0", "@kiegroup-ts-generated/test-module", singleton(new PojoTsClass(type(C.class), NO_DECORATORS)));
 
         assertEquals(lines("{",
                            "  \"name\": \"@kiegroup-ts-generated/test-module\",",

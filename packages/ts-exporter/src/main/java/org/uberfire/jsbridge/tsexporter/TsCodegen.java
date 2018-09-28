@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.lang.model.element.Element;
@@ -39,7 +38,6 @@ import org.uberfire.jsbridge.tsexporter.util.Utils;
 import static java.util.Arrays.stream;
 import static java.util.Collections.list;
 import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static java.util.stream.Stream.concat;
@@ -69,7 +67,7 @@ public class TsCodegen {
         return new TsCodegenResult(version,
                                    decoratorStore,
                                    concat(generateRaw().stream(),
-                                          generateFinals().stream()).collect(toSet()));
+                                          generateNonRaw().stream()).collect(toSet()));
     }
 
     private Set<TsNpmPackage> generateRaw() {
@@ -89,7 +87,8 @@ public class TsCodegen {
                 .entrySet()
                 .parallelStream()
                 .flatMap(e -> {
-                    final boolean hasDecorators = decoratorStore.hasDecoratorFor(get(-1, e.getKey().split("/")));
+                    final String unscopedNpmPackageName = get(-1, e.getKey().split("/"));
+                    final boolean hasDecorators = decoratorStore.hasDecoratorFor(unscopedNpmPackageName);
                     if (hasDecorators) {
                         return Stream.of(new TsNpmPackage(e.getKey(), e.getValue(), version + "-raw", RAW));
                     } else {
@@ -99,7 +98,7 @@ public class TsCodegen {
                 .collect(toSet());
     }
 
-    private Set<TsNpmPackage> generateFinals() {
+    private Set<TsNpmPackage> generateNonRaw() {
 
         final DependencyGraph dependencyGraph = new DependencyGraph(decoratorStore);
         findAllPortableTypes().forEach(dependencyGraph::add);
@@ -119,7 +118,8 @@ public class TsCodegen {
                 .entrySet()
                 .parallelStream()
                 .map(e -> {
-                    final boolean hasDecorators = decoratorStore.hasDecoratorFor(get(-1, e.getKey().split("/")));
+                    final String unscopedNpmPackageName = get(-1, e.getKey().split("/"));
+                    final boolean hasDecorators = decoratorStore.hasDecoratorFor(unscopedNpmPackageName);
                     if (hasDecorators) {
                         return new TsNpmPackage(e.getKey(), e.getValue(), version, FINAL);
                     } else {

@@ -19,7 +19,7 @@ package org.uberfire.jsbridge.tsexporter.model;
 import java.util.Set;
 
 import org.uberfire.jsbridge.tsexporter.model.config.IndexTs;
-import org.uberfire.jsbridge.tsexporter.model.config.PackageJson;
+import org.uberfire.jsbridge.tsexporter.model.config.PackageJson3rdLayer;
 import org.uberfire.jsbridge.tsexporter.model.config.TsConfigJson;
 import org.uberfire.jsbridge.tsexporter.model.config.WebpackConfigJs;
 
@@ -73,8 +73,8 @@ public class TsNpmPackage {
         return new TsConfigJson(npmPackageName);
     }
 
-    public PackageJson getPackageJson() {
-        return new PackageJson(version, npmPackageName + (type.equals(FINAL) ? "-final" : ""), classes);
+    public PackageJson3rdLayer getPackageJson() {
+        return new PackageJson3rdLayer(version, npmPackageName + (type.equals(FINAL) ? "-final" : ""), classes); //FIXME: Bad
     }
 
     public String getUnscopedNpmPackageName() {

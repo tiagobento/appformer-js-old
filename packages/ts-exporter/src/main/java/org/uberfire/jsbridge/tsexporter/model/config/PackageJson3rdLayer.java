@@ -30,15 +30,15 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toSet;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
 
-public class PackageJson implements TsExporterResource {
+public class PackageJson3rdLayer implements TsExporterResource {
 
     private final String version;
     private final String npmPackageName;
     private final Lazy<Set<String>> dependenciesNpmPackageNames;
 
-    public PackageJson(final String version,
-                       final String npmPackageName,
-                       final Set<? extends TsClass> classes) {
+    public PackageJson3rdLayer(final String version,
+                               final String npmPackageName,
+                               final Set<? extends TsClass> classes) {
 
         this.version = version;
         this.npmPackageName = npmPackageName;
@@ -48,7 +48,7 @@ public class PackageJson implements TsExporterResource {
                 .collect(groupingBy(ImportEntry::getNpmPackageName))
                 .keySet().stream()
                 .filter(name -> !name.equals(npmPackageName))
-                .filter(name -> !(name + "-final").equals(npmPackageName))
+                .filter(name -> !(name + "-final").equals(npmPackageName)) //FIXME: Bad
                 .collect(toSet()));
     }
 
@@ -79,7 +79,7 @@ public class PackageJson implements TsExporterResource {
                       npmPackageName,
                       version,
                       dependenciesPart,
-                      npmPackageName.contains("-final")
+                      npmPackageName.contains("-final") //FIXME: Bad
                               ? "echo 'Skipping publish'"
                               : "npm publish --registry http://localhost:4873"
         );

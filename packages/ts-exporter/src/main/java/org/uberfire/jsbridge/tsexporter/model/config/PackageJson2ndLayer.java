@@ -28,17 +28,17 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.joining;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
 
-public class SubPackageJson implements TsExporterResource {
+public class PackageJson2ndLayer implements TsExporterResource {
 
     private final String npmPackageName;
     private final String version;
     private final String decoratorsNpmPackageName;
     private final Set<? extends TsClass> dependencies;
 
-    public SubPackageJson(final String npmPackageName,
-                          final String version,
-                          final String decoratorsNpmPackageName,
-                          final Set<? extends TsClass> dependencies) {
+    public PackageJson2ndLayer(final String npmPackageName,
+                               final String version,
+                               final String decoratorsNpmPackageName,
+                               final Set<? extends TsClass> dependencies) {
 
         this.npmPackageName = npmPackageName;
         this.version = version;

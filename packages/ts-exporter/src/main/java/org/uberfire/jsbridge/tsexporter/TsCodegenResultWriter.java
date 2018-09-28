@@ -20,13 +20,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.attribute.FileAttribute;
-import java.nio.file.attribute.FileAttributeView;
 
 import org.uberfire.jsbridge.tsexporter.model.TsExporterResource;
 import org.uberfire.jsbridge.tsexporter.model.TsNpmPackage;
 import org.uberfire.jsbridge.tsexporter.model.config.LernaJson;
-import org.uberfire.jsbridge.tsexporter.model.config.SubPackageJson;
+import org.uberfire.jsbridge.tsexporter.model.config.NpmIgnore;
+import org.uberfire.jsbridge.tsexporter.model.config.PackageJson2ndLayer;
 
 import static java.io.File.separator;
 import static java.lang.String.format;
@@ -53,8 +52,8 @@ public class TsCodegenResultWriter {
 
     private void writeNpmPackage(final TsNpmPackage tsNpmPackage) {
 
-        final String baseDir = getBaseDir(tsNpmPackage.getType(),
-                                          tsNpmPackage.getUnscopedNpmPackageName());
+        final String baseDir = getNpmPackageBaseDir(tsNpmPackage.getType(),
+                                                    tsNpmPackage.getUnscopedNpmPackageName());
 
         tsNpmPackage.getClasses().forEach(
                 tsClass -> write(tsClass, buildPath(baseDir, "src/" + tsClass.getRelativePath() + ".ts")));
@@ -65,34 +64,34 @@ public class TsCodegenResultWriter {
         write(tsNpmPackage.getPackageJson(), buildPath(baseDir, "package.json"));
 
         if (tsNpmPackage.getType().equals(FINAL)) {
-            try {
-                Files.createSymbolicLink(buildPath(baseDir + "../../", "dist"), buildPath(baseDir, "dist"));
-            } catch (final IOException e) {
-                throw new RuntimeException(e);
-            }
-            final SubPackageJson packageJson = new SubPackageJson(tsNpmPackage.getNpmPackageName(),
-                                                                  tsNpmPackage.getVersion(),
-                                                                  tsCodegenResult.getDecoratorsNpmPackageName(tsNpmPackage),
-                                                                  tsNpmPackage.getClasses());
-
-            write(packageJson, buildPath(baseDir + "../../", "package.json"));
-            write(new LernaJson(tsNpmPackage.getVersion()), buildPath(baseDir + "../../", "lerna.json"));
-            write(new TsExporterResource() {
-                @Override
-                public String toSource() {
-                    return "**/packages";
-                }
-
-                @Override
-                public String getNpmPackageName() {
-                    return tsNpmPackage.getNpmPackageName();
-                }
-            }, buildPath(baseDir + "../../", ".npmignore"));
+            write2ndLayerPackageJson(tsNpmPackage, baseDir);
         }
     }
 
-    private String getBaseDir(final TsNpmPackage.Type type,
-                              final String unscopedNpmPackageName) {
+    private void write2ndLayerPackageJson(final TsNpmPackage tsNpmPackage,
+                                          final String finalNpmPackageBaseDir) {
+
+        final String baseDir = finalNpmPackageBaseDir + "../../";
+
+        try {
+            Files.createSymbolicLink(buildPath(baseDir, "dist"), buildPath(finalNpmPackageBaseDir, "dist"));
+        } catch (final IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        final PackageJson2ndLayer packageJson = new PackageJson2ndLayer(
+                tsNpmPackage.getNpmPackageName(),
+                tsNpmPackage.getVersion(),
+                tsCodegenResult.getDecoratorsNpmPackageName(tsNpmPackage),
+                tsNpmPackage.getClasses());
+
+        write(packageJson, buildPath(baseDir, "package.json"));
+        write(new LernaJson(tsNpmPackage.getVersion()), buildPath(baseDir, "lerna.json"));
+        write(new NpmIgnore(tsNpmPackage), buildPath(baseDir, ".npmignore"));
+    }
+
+    private String getNpmPackageBaseDir(final TsNpmPackage.Type type,
+                                        final String unscopedNpmPackageName) {
 
         switch (type) {
             case RAW:

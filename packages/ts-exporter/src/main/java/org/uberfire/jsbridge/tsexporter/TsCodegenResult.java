@@ -22,7 +22,7 @@ import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
 import org.uberfire.jsbridge.tsexporter.model.TsExporterResource;
 import org.uberfire.jsbridge.tsexporter.model.TsNpmPackage;
 import org.uberfire.jsbridge.tsexporter.model.config.LernaJson;
-import org.uberfire.jsbridge.tsexporter.model.config.RootPackageJson;
+import org.uberfire.jsbridge.tsexporter.model.config.PackageJson1stLayer;
 
 public class TsCodegenResult {
 
@@ -44,7 +44,7 @@ public class TsCodegenResult {
     }
 
     public TsExporterResource getRootPackageJson() {
-        return new RootPackageJson();
+        return new PackageJson1stLayer();
     }
 
     public TsExporterResource getLernaJson() {
