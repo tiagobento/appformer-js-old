@@ -20,10 +20,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 
 import org.uberfire.jsbridge.tsexporter.model.TsExporterResource;
 import org.uberfire.jsbridge.tsexporter.model.TsNpmPackage;
+import org.uberfire.jsbridge.tsexporter.model.config.LernaJson;
 import org.uberfire.jsbridge.tsexporter.model.config.SubPackageJson;
 
 import static java.io.File.separator;
@@ -62,7 +62,7 @@ public class TsCodegenResultWriter {
         write(tsNpmPackage.getTsConfigJson(), buildPath(baseDir, "tsconfig.json"));
         write(tsNpmPackage.getPackageJson(), buildPath(baseDir, "package.json"));
 
-        if (Arrays.asList(FINAL).contains(tsNpmPackage.getType())) {
+        if (tsNpmPackage.getType().equals(FINAL)) {
             try {
                 Files.createSymbolicLink(buildPath(baseDir + "../../", "dist"), buildPath(baseDir, "dist"));
             } catch (final IOException e) {
@@ -74,6 +74,7 @@ public class TsCodegenResultWriter {
                                                                   tsNpmPackage.getClasses());
 
             write(packageJson, buildPath(baseDir + "../../", "package.json"));
+            write(new LernaJson(tsNpmPackage.getVersion()), buildPath(baseDir + "../../", "lerna.json"));
         }
     }
 
