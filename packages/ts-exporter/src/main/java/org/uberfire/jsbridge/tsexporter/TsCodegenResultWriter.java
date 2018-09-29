@@ -22,12 +22,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorsNpmPackage;
+import org.uberfire.jsbridge.tsexporter.model.GeneratedNpmPackage;
 import org.uberfire.jsbridge.tsexporter.model.NpmPackage;
 import org.uberfire.jsbridge.tsexporter.model.TsExporterResource;
-import org.uberfire.jsbridge.tsexporter.model.GeneratedNpmPackage;
 import org.uberfire.jsbridge.tsexporter.model.config.LernaJson;
 import org.uberfire.jsbridge.tsexporter.model.config.NpmIgnore;
-import org.uberfire.jsbridge.tsexporter.model.config.PackageJson2ndLayer;
+import org.uberfire.jsbridge.tsexporter.model.config.PackageJsonForAggregationNpmPackage;
 
 import static java.io.File.separator;
 import static java.lang.String.format;
@@ -87,11 +87,9 @@ public class TsCodegenResultWriter {
             throw new RuntimeException(e);
         }
 
-        final PackageJson2ndLayer packageJson = new PackageJson2ndLayer(
-                npmPackage.getNpmPackageName(),
-                npmPackage.getVersion(),
-                tsCodegenResult.getDecoratorsNpmPackageName(npmPackage),
-                npmPackage.getClasses());
+        final PackageJsonForAggregationNpmPackage packageJson = new PackageJsonForAggregationNpmPackage(
+                npmPackage,
+                tsCodegenResult.getDecoratorsNpmPackageName(npmPackage));
 
         write(packageJson, buildPath(baseDir, "package.json"));
         write(new LernaJson(npmPackage.getVersion()), buildPath(baseDir, "lerna.json"));

@@ -18,7 +18,7 @@ package org.uberfire.jsbridge.tsexporter.model;
 
 public interface NpmPackage {
 
-    String getNpmPackageName();
+    String getName();
 
     String getVersion();
 

@@ -8,10 +8,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.uberfire.jsbridge.tsexporter.decorators.ImportEntryDecorator;
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
-import org.uberfire.jsbridge.tsexporter.meta.JavaType;
+import org.uberfire.jsbridge.tsexporter.decorators.ImportEntryForDecorator;
 import org.uberfire.jsbridge.tsexporter.dependency.DependencyGraph;
+import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
@@ -65,9 +65,9 @@ public class RpcCallerTsClassTest {
                 element(SomeInterface.class),
                 dependencyGraph,
                 new DecoratorStore(new HashSet<>(asList(
-                        new ImportEntryDecorator("my-pojos", "my-decorators", "decorators/pojo/FooDEC", Foo.class.getCanonicalName()),
-                        new ImportEntryDecorator("my-pojos", "my-decorators", "decorators/pojo/impl/FooImpl1DEC", FooImpl1.class.getCanonicalName()),
-                        new ImportEntryDecorator("my-pojos", "my-decorators", "decorators/pojo/impl/FooImpl2DEC", FooImpl2.class.getCanonicalName()))
+                        new ImportEntryForDecorator("my-pojos", "my-decorators", "decorators/pojo/FooDEC", Foo.class.getCanonicalName()),
+                        new ImportEntryForDecorator("my-pojos", "my-decorators", "decorators/pojo/impl/FooImpl1DEC", FooImpl1.class.getCanonicalName()),
+                        new ImportEntryForDecorator("my-pojos", "my-decorators", "decorators/pojo/impl/FooImpl2DEC", FooImpl2.class.getCanonicalName()))
                 )));
 
         assertEquals(
@@ -114,9 +114,9 @@ public class RpcCallerTsClassTest {
                 element(SomeOtherInterface.class),
                 dependencyGraph,
                 new DecoratorStore(new HashSet<>(asList(
-                        new ImportEntryDecorator("my-pojos", "my-decorators", "decorators/pojo/FooDEC", Foo.class.getCanonicalName()),
-                        new ImportEntryDecorator("my-pojos", "my-decorators", "decorators/pojo/impl/FooImpl1DEC", FooImpl1.class.getCanonicalName()),
-                        new ImportEntryDecorator("my-pojos", "my-decorators", "decorators/pojo/impl/FooImpl2DEC", FooImpl2.class.getCanonicalName())
+                        new ImportEntryForDecorator("my-pojos", "my-decorators", "decorators/pojo/FooDEC", Foo.class.getCanonicalName()),
+                        new ImportEntryForDecorator("my-pojos", "my-decorators", "decorators/pojo/impl/FooImpl1DEC", FooImpl1.class.getCanonicalName()),
+                        new ImportEntryForDecorator("my-pojos", "my-decorators", "decorators/pojo/impl/FooImpl2DEC", FooImpl2.class.getCanonicalName())
                 ))));
 
         assertEquals(

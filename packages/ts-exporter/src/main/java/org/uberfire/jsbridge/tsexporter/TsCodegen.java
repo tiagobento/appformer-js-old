@@ -90,7 +90,7 @@ public class TsCodegen {
                     final String unscopedNpmPackageName = get(-1, e.getKey().split("/"));
                     final boolean hasDecorators = decoratorStore.hasDecoratorFor(unscopedNpmPackageName);
                     if (hasDecorators) {
-                        return Stream.of(new GeneratedNpmPackage(e.getKey(), e.getValue(), version + "-raw", RAW));
+                        return Stream.of(new GeneratedNpmPackage(e.getKey(), e.getValue(), version, RAW));
                     } else {
                         return Stream.empty();
                     }

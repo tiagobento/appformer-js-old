@@ -19,25 +19,23 @@ package org.uberfire.jsbridge.tsexporter.model;
 import java.util.Set;
 
 import org.uberfire.jsbridge.tsexporter.model.config.IndexTs;
-import org.uberfire.jsbridge.tsexporter.model.config.PackageJson3rdLayer;
+import org.uberfire.jsbridge.tsexporter.model.config.PackageJsonForGeneratedNpmPackages;
 import org.uberfire.jsbridge.tsexporter.model.config.TsConfigJson;
 import org.uberfire.jsbridge.tsexporter.model.config.WebpackConfigJs;
 
-import static org.uberfire.jsbridge.tsexporter.model.NpmPackage.Type.FINAL;
-
 public class GeneratedNpmPackage implements NpmPackage {
 
-    private final String npmPackageName;
+    private final String name;
     private final Set<? extends TsClass> classes;
     private final String version;
     private final Type type;
 
-    public GeneratedNpmPackage(final String npmPackageName,
+    public GeneratedNpmPackage(final String name,
                                final Set<? extends TsClass> classes,
                                final String version,
                                final Type type) {
 
-        this.npmPackageName = npmPackageName;
+        this.name = name;
         this.classes = classes;
         this.version = version;
         this.type = type;
@@ -48,24 +46,24 @@ public class GeneratedNpmPackage implements NpmPackage {
     }
 
     public IndexTs getIndexTs() {
-        return new IndexTs(npmPackageName, classes);
+        return new IndexTs(name, classes);
     }
 
     public WebpackConfigJs getWebpackConfigJs() {
-        return new WebpackConfigJs(npmPackageName);
+        return new WebpackConfigJs(name);
     }
 
     public TsConfigJson getTsConfigJson() {
-        return new TsConfigJson(npmPackageName);
+        return new TsConfigJson(name);
     }
 
-    public PackageJson3rdLayer getPackageJson() {
-        return new PackageJson3rdLayer(version, npmPackageName + (type.equals(FINAL) ? "-final" : ""), classes); //FIXME: Bad
+    public PackageJsonForGeneratedNpmPackages getPackageJson() {
+        return new PackageJsonForGeneratedNpmPackages(this);
     }
 
     @Override
-    public String getNpmPackageName() {
-        return npmPackageName;
+    public String getName() {
+        return name;
     }
 
     @Override

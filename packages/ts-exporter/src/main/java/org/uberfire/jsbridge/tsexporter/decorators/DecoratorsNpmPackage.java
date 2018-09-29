@@ -17,10 +17,14 @@
 package org.uberfire.jsbridge.tsexporter.decorators;
 
 import java.util.Set;
+import java.util.regex.Pattern;
 
+import org.reflections.Reflections;
+import org.reflections.scanners.ResourcesScanner;
 import org.uberfire.jsbridge.tsexporter.model.GeneratedNpmPackage;
 import org.uberfire.jsbridge.tsexporter.model.NpmPackage;
 
+import static java.util.stream.Collectors.toSet;
 import static org.uberfire.jsbridge.tsexporter.model.NpmPackage.Type.DECORATORS;
 
 public class DecoratorsNpmPackage implements NpmPackage {
@@ -30,11 +34,15 @@ public class DecoratorsNpmPackage implements NpmPackage {
     private final Set<DecoratorPackageResource> resources;
 
     public DecoratorsNpmPackage(final String name,
-                                final String version,
-                                final Set<DecoratorPackageResource> resources) {
+                                final String version) {
+
         this.name = name;
         this.version = version;
-        this.resources = resources;
+        this.resources = new Reflections(name, new ResourcesScanner()).getResources(Pattern.compile(".*")).stream()
+                .filter(resourceName -> !resourceName.contains("/node_modules/"))
+                .filter(resourceName -> !resourceName.contains("/dist/"))
+                .map(resourceName -> new DecoratorPackageResource(name, resourceName))
+                .collect(toSet());
     }
 
     @Override
@@ -43,7 +51,7 @@ public class DecoratorsNpmPackage implements NpmPackage {
     }
 
     @Override
-    public String getNpmPackageName() {
+    public String getName() {
         return name;
     }
 

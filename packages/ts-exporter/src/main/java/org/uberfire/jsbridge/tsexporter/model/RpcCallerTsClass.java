@@ -26,10 +26,10 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
-import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 import org.uberfire.jsbridge.tsexporter.dependency.DependencyGraph;
 import org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation;
 import org.uberfire.jsbridge.tsexporter.dependency.ImportEntriesStore;
+import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 import org.uberfire.jsbridge.tsexporter.util.Lazy;
 
 import static java.util.stream.Collectors.groupingBy;
@@ -38,8 +38,8 @@ import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.ElementKind.METHOD;
 import static org.uberfire.jsbridge.tsexporter.Main.elements;
 import static org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore.NO_DECORATORS;
-import static org.uberfire.jsbridge.tsexporter.meta.Translatable.SourceUsage.TYPE_ARGUMENT_DECLARATION;
 import static org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation.Kind.HIERARCHY;
+import static org.uberfire.jsbridge.tsexporter.meta.Translatable.SourceUsage.TYPE_ARGUMENT_DECLARATION;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.formatRightToLeft;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
 
@@ -51,7 +51,7 @@ public class RpcCallerTsClass implements TsClass {
     private final ImportEntriesStore importEntriesStore;
     private final Lazy<String> source;
 
-    private static final List<String> RESERVED_WORDS = Arrays.asList("delete", "copy");
+    private static final List<String> RESERVED_WORDS = Arrays.asList("delete", "copy"); //TODO: Add all
 
     public RpcCallerTsClass(final TypeElement typeElement,
                             final DependencyGraph dependencyGraph,

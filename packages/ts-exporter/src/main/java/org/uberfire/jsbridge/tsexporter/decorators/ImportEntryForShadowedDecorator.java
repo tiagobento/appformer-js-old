@@ -23,11 +23,11 @@ import org.uberfire.jsbridge.tsexporter.dependency.ImportEntry;
 
 import static org.uberfire.jsbridge.tsexporter.model.TsClass.PACKAGES_SCOPE;
 
-public class ImportEntryShadowedDecorator implements ImportEntry {
+public class ImportEntryForShadowedDecorator implements ImportEntry {
 
-    private final ImportEntryDecorator importEntry;
+    private final ImportEntryForDecorator importEntry;
 
-    public ImportEntryShadowedDecorator(final ImportEntryDecorator importEntry) {
+    public ImportEntryForShadowedDecorator(final ImportEntryForDecorator importEntry) {
         this.importEntry = importEntry;
     }
 
@@ -52,7 +52,7 @@ public class ImportEntryShadowedDecorator implements ImportEntry {
     }
 
     @Override
-    public boolean represents(DeclaredType type) {
+    public boolean represents(final DeclaredType type) {
         return importEntry.represents(type);
     }
 }

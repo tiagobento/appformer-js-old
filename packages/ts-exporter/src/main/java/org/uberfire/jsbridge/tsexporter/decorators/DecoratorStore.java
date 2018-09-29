@@ -43,37 +43,38 @@ public class DecoratorStore {
 
     public static final DecoratorStore NO_DECORATORS = new DecoratorStore(emptySet());
 
-    private final Map<String, ImportEntryDecorator> decorators;
+    private final Map<String, ImportEntryForDecorator> decorators;
 
     public DecoratorStore() {
         this.decorators = asMap(readDecoratorFiles());
     }
 
-    public DecoratorStore(final Set<ImportEntryDecorator> decorators) {
+    public DecoratorStore(final Set<ImportEntryForDecorator> decorators) {
         this.decorators = asMap(decorators);
     }
 
-    private DecoratorStore(final Map<String, ImportEntryDecorator> decorators) {
+    private DecoratorStore(final Map<String, ImportEntryForDecorator> decorators) {
         this.decorators = decorators;
     }
 
-    private Map<String, ImportEntryDecorator> asMap(final Set<ImportEntryDecorator> decorators) {
+    private Map<String, ImportEntryForDecorator> asMap(final Set<ImportEntryForDecorator> decorators) {
         return decorators.stream()
-                .collect(toMap(ImportEntryDecorator::getDecoratedFqcn, identity(), (kept, discarded) -> {
+                .collect(toMap(ImportEntryForDecorator::getDecoratedFqcn, identity(), (kept, discarded) -> {
                     System.out.println(format("Found more than one decorator for %s. Keeping %s and discarding %s.", kept.getDecoratedFqcn(), kept.getDecoratorPath(), discarded.getDecoratorPath()));
                     return kept;
                 }));
     }
 
-    private Set<ImportEntryDecorator> readDecoratorFiles() {
+    private Set<ImportEntryForDecorator> readDecoratorFiles() {
         return list(getResources("META-INF/appformerjs.json")).stream().flatMap(url -> {
-            JsonObject config = new JsonParser().parse(readClasspathResource(url)).getAsJsonObject();
-            return config.get("decorators").getAsJsonObject()
-                    .entrySet().stream().map(entry -> new ImportEntryDecorator(
-                            getMavenModuleNameFromSourceFilePath(url.getFile()),
-                            config.get("name").getAsString(),
-                            entry.getKey(),
-                            entry.getValue().getAsString()));
+            final JsonObject config = new JsonParser().parse(readClasspathResource(url)).getAsJsonObject();
+            final String mvnModuleName = getMavenModuleNameFromSourceFilePath(url.getFile());
+            final String decoratorsNpmPackageName = config.get("name").getAsString();
+            return config.get("decorators").getAsJsonObject().entrySet().stream()
+                    .map(e -> new ImportEntryForDecorator(mvnModuleName,
+                                                          decoratorsNpmPackageName,
+                                                          e.getKey(),
+                                                          e.getValue().getAsString()));
         }).collect(toSet());
     }
 
@@ -81,14 +82,8 @@ public class DecoratorStore {
         return decorators.containsKey(types.erasure(type).toString());
     }
 
-    public ImportEntryDecorator getDecoratorFor(final TypeMirror type) {
+    public ImportEntryForDecorator getDecoratorFor(final TypeMirror type) {
         return decorators.get(types.erasure(type).toString());
-    }
-
-    private Set<String> getUnscopedNpmPackageNamesWhichHaveDecorators() {
-        return decorators.values().stream()
-                .map(ImportEntryDecorator::getDecoratedMvnModule)
-                .collect(toSet());
     }
 
     public boolean hasDecoratorFor(final TsClass tsClass) {
@@ -96,7 +91,10 @@ public class DecoratorStore {
     }
 
     public boolean hasDecoratorFor(final String unscopedNpmPackageName) {
-        return getUnscopedNpmPackageNamesWhichHaveDecorators().contains(unscopedNpmPackageName);
+        return decorators.values().stream()
+                .map(ImportEntryForDecorator::getDecoratedMvnModule)
+                .collect(toSet())
+                .contains(unscopedNpmPackageName);
     }
 
     public DecoratorStore ignoringForCurrentNpmPackage() {
@@ -108,8 +106,8 @@ public class DecoratorStore {
 
             @Override
             public boolean shouldDecorate(final TypeMirror type, final TypeMirror owner) {
-                final String npmPackageName = new PojoTsClass((DeclaredType) owner, this).getUnscopedNpmPackageName();
-                return super.shouldDecorate(type, owner) && !this.getDecoratorFor(type).getDecoratedMvnModule().equals(npmPackageName);
+                final String unscopedNpmPackageName = new PojoTsClass((DeclaredType) owner, this).getUnscopedNpmPackageName();
+                return super.shouldDecorate(type, owner) && !this.getDecoratorFor(type).getDecoratedMvnModule().equals(unscopedNpmPackageName);
             }
         };
     }
@@ -120,6 +118,6 @@ public class DecoratorStore {
 
     public Map<String, String> getDecoratorNpmPackageNamesByDecoratedMvnModuleNames() {
         return decorators.values().stream()
-                .collect(toMap(ImportEntryDecorator::getDecoratedMvnModule, ImportEntryDecorator::getNpmPackageName, (a, b) -> a));
+                .collect(toMap(ImportEntryForDecorator::getDecoratedMvnModule, ImportEntryForDecorator::getNpmPackageName, (a, b) -> a));
     }
 }

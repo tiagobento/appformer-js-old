@@ -24,8 +24,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.uberfire.jsbridge.tsexporter.decorators.ImportEntryDecorator;
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
+import org.uberfire.jsbridge.tsexporter.decorators.ImportEntryForDecorator;
 import org.uberfire.jsbridge.tsexporter.meta.Translatable.SourceUsage;
 
 import static java.util.Collections.singleton;
@@ -39,9 +39,9 @@ import static javax.lang.model.type.TypeKind.LONG;
 import static javax.lang.model.type.TypeKind.SHORT;
 import static javax.lang.model.type.TypeKind.VOID;
 import static org.junit.Assert.assertEquals;
-import static org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore.*;
-import static org.uberfire.jsbridge.tsexporter.meta.Translatable.SourceUsage.TYPE_ARGUMENT_DECLARATION;
+import static org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore.NO_DECORATORS;
 import static org.uberfire.jsbridge.tsexporter.meta.Translatable.SourceUsage.IMPORT_STATEMENT;
+import static org.uberfire.jsbridge.tsexporter.meta.Translatable.SourceUsage.TYPE_ARGUMENT_DECLARATION;
 import static org.uberfire.jsbridge.tsexporter.meta.Translatable.SourceUsage.TYPE_ARGUMENT_USE;
 import static org.uberfire.jsbridge.tsexporter.util.TestingUtils.Circle;
 import static org.uberfire.jsbridge.tsexporter.util.TestingUtils.Cylinder;
@@ -136,7 +136,7 @@ public class TranslatableTest {
 
     @Test
     public void testDecorated() {
-        final ImportEntryDecorator dependency = new ImportEntryDecorator(
+        final ImportEntryForDecorator dependency = new ImportEntryForDecorator(
                 "my-pojos", "my-decorators",
                 "my-decorators/decorators/Bar",
                 Foo.class.getCanonicalName());

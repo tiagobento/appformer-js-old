@@ -18,60 +18,52 @@ package org.uberfire.jsbridge.tsexporter.model.config;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Stream;
 
-import org.uberfire.jsbridge.tsexporter.decorators.ImportEntryDecorator;
-import org.uberfire.jsbridge.tsexporter.decorators.ImportEntryShadowedDecorator;
+import org.uberfire.jsbridge.tsexporter.decorators.ImportEntryForDecorator;
+import org.uberfire.jsbridge.tsexporter.decorators.ImportEntryForShadowedDecorator;
+import org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation;
 import org.uberfire.jsbridge.tsexporter.dependency.ImportEntry;
-import org.uberfire.jsbridge.tsexporter.model.TsClass;
+import org.uberfire.jsbridge.tsexporter.model.GeneratedNpmPackage;
 import org.uberfire.jsbridge.tsexporter.model.TsExporterResource;
-import org.uberfire.jsbridge.tsexporter.util.Lazy;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toSet;
+import static org.uberfire.jsbridge.tsexporter.model.NpmPackage.Type.FINAL;
+import static org.uberfire.jsbridge.tsexporter.model.NpmPackage.Type.RAW;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
 
-public class PackageJson3rdLayer implements TsExporterResource {
+public class PackageJsonForGeneratedNpmPackages implements TsExporterResource {
 
-    private final String version;
-    private final String npmPackageName;
-    private final Lazy<Set<String>> dependenciesNpmPackageNames;
-    private final Set<String> decoratorPackagesToInstallBeforeBuild = new HashSet<>();
+    private final GeneratedNpmPackage npmPackage;
 
-    public PackageJson3rdLayer(final String version,
-                               final String npmPackageName,
-                               final Set<? extends TsClass> classes) {
-
-        this.version = version;
-        this.npmPackageName = npmPackageName;
-        dependenciesNpmPackageNames = new Lazy<>(() -> classes.stream()
-                .flatMap(clazz -> clazz.getDependencies().stream())
-                .flatMap(dependencyRelation -> {
-                    if (!npmPackageName.endsWith("-final") && dependencyRelation.getImportEntry() instanceof ImportEntryDecorator) {
-                        decoratorPackagesToInstallBeforeBuild.add(dependencyRelation.getImportEntry().getNpmPackageName());
-                        return Stream.of(new ImportEntryShadowedDecorator((ImportEntryDecorator) dependencyRelation.getImportEntry()));
-                    } else {
-                        return Stream.of(dependencyRelation.getImportEntry());
-                    }
-                })
-                .collect(groupingBy(ImportEntry::getNpmPackageName))
-                .keySet().stream()
-                .filter(name -> !name.equals(npmPackageName))
-                .filter(name -> !(name + "-final").equals(npmPackageName)) //FIXME: Bad
-                .collect(toSet()));
+    public PackageJsonForGeneratedNpmPackages(final GeneratedNpmPackage npmPackage) {
+        this.npmPackage = npmPackage;
     }
 
     @Override
     public String toSource() {
+        final Set<String> decoratorPackagesToInstallBeforeBuild = new HashSet<>();
 
-        final String dependenciesPart = dependenciesNpmPackageNames.get().stream()
+        final String dependenciesPart = npmPackage.getClasses().stream()
+                .flatMap(clazz -> clazz.getDependencies().stream())
+                .map(DependencyRelation::getImportEntry)
+                .map(importEntry -> {
+                    if (npmPackage.getType().equals(FINAL) || !(importEntry instanceof ImportEntryForDecorator)) {
+                        return importEntry;
+                    }
+
+                    decoratorPackagesToInstallBeforeBuild.add(importEntry.getNpmPackageName());
+                    return new ImportEntryForShadowedDecorator((ImportEntryForDecorator) importEntry);
+                })
+                .collect(groupingBy(ImportEntry::getNpmPackageName))
+                .keySet().stream()
+                .filter(name -> !name.equals(npmPackage.getName()))
                 .sorted()
-                .map(name -> format("\"%s\": \"%s\"", name, version.replace("-raw", ""))) //FIXME: Bad
+                .map(name -> format("\"%s\": \"%s\"", name, npmPackage.getVersion()))
                 .collect(joining(",\n"));
 
-        final String asd = decoratorPackagesToInstallBeforeBuild.isEmpty()
+        final String installDecoratorsPart = decoratorPackagesToInstallBeforeBuild.isEmpty()
                 ? ""
                 : (" npm i " + decoratorPackagesToInstallBeforeBuild.stream().collect(joining(" ")) + " && ");
 
@@ -85,16 +77,16 @@ public class PackageJson3rdLayer implements TsExporterResource {
                             "%s",
                             "  },",
                             "  \"scripts\": {",
-                            "    \"build\": \"" + asd + " webpack &&  npm run doUnpublish && npm run doPublish\",",
+                            "    \"build\": \"" + installDecoratorsPart + " webpack && npm run doUnpublish && npm run doPublish\",",
                             "    \"doUnpublish\": \"npm unpublish --force --registry http://localhost:4873 || echo 'Was not published'\",",
                             "    \"doPublish\": \"%s\"",
                             "  }",
                             "}"),
 
-                      npmPackageName,
-                      version,
+                      getNpmPackageName(),
+                      npmPackage.getVersion() + (npmPackage.getType().equals(RAW) ? "-raw" : ""),
                       dependenciesPart,
-                      npmPackageName.contains("-final") //FIXME: Bad
+                      npmPackage.getType().equals(FINAL)
                               ? "echo 'Skipping publish'"
                               : "npm publish --registry http://localhost:4873"
         );
@@ -102,6 +94,6 @@ public class PackageJson3rdLayer implements TsExporterResource {
 
     @Override
     public String getNpmPackageName() {
-        return npmPackageName;
+        return npmPackage.getName() + (npmPackage.getType().equals(FINAL) ? "-final" : "");
     }
 }

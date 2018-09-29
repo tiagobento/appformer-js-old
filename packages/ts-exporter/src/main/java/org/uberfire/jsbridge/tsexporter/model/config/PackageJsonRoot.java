@@ -18,15 +18,16 @@ package org.uberfire.jsbridge.tsexporter.model.config;
 
 import org.uberfire.jsbridge.tsexporter.model.TsExporterResource;
 
+import static java.lang.String.format;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
 
-public class PackageJson1stLayer implements TsExporterResource {
+public class PackageJsonRoot implements TsExporterResource {
 
     @Override
     public String toSource() {
-        return lines(
+        return format(lines(
                 "{",
-                "  \"name\": \"babel\",",
+                "  \"name\": \"%s\",",
                 "  \"private\": true,",
                 "  \"license\": \"Apache-2.0\",",
                 "  \"devDependencies\": {",
@@ -39,12 +40,13 @@ public class PackageJson1stLayer implements TsExporterResource {
                 "    \"webpack-cli\": \"^3.0.8\",",
                 "    \"lerna\": \"^3.4.0\"",
                 "  }",
-                "}"
-        );
+                "}"),
+
+                      getNpmPackageName());
     }
 
     @Override
     public String getNpmPackageName() {
-        return "";
+        return "ts-exporter-build-root";
     }
 }

@@ -18,21 +18,16 @@ package org.uberfire.jsbridge.tsexporter;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
 
-import org.reflections.Reflections;
-import org.reflections.scanners.ResourcesScanner;
-import org.uberfire.jsbridge.tsexporter.decorators.DecoratorPackageResource;
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorsNpmPackage;
 import org.uberfire.jsbridge.tsexporter.model.GeneratedNpmPackage;
 import org.uberfire.jsbridge.tsexporter.model.TsExporterResource;
 import org.uberfire.jsbridge.tsexporter.model.config.LernaJson;
-import org.uberfire.jsbridge.tsexporter.model.config.PackageJson1stLayer;
+import org.uberfire.jsbridge.tsexporter.model.config.PackageJsonRoot;
 
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
-import static java.util.stream.Collectors.toSet;
 import static org.uberfire.jsbridge.tsexporter.model.NpmPackage.Type.RAW;
 import static org.uberfire.jsbridge.tsexporter.model.TsClass.PACKAGES_SCOPE;
 
@@ -53,7 +48,7 @@ public class TsCodegenResult {
 
     private Map<String, GeneratedNpmPackage> generatedNpmPackagesByName() {
         return npmPackages.stream()
-                .collect(toMap(GeneratedNpmPackage::getNpmPackageName,
+                .collect(toMap(GeneratedNpmPackage::getName,
                                identity(),
                                (a, b) -> a.getType().equals(RAW) ? b : a));
     }
@@ -63,7 +58,7 @@ public class TsCodegenResult {
     }
 
     public TsExporterResource getRootPackageJson() {
-        return new PackageJson1stLayer();
+        return new PackageJsonRoot();
     }
 
     public TsExporterResource getLernaJson() {
@@ -76,15 +71,7 @@ public class TsCodegenResult {
 
     public Map<GeneratedNpmPackage, DecoratorsNpmPackage> getDecoratorsNpmPackagesByDecoratedNpmPackages() {
         return decoratorStore.getDecoratorNpmPackageNamesByDecoratedMvnModuleNames().entrySet().stream()
-                .collect(toMap(e -> generatedNpmPackagesByName().get(PACKAGES_SCOPE + "/" + e.getKey()), e -> {
-                    final Set<DecoratorPackageResource> resources = new Reflections(e.getValue(), new ResourcesScanner())
-                            .getResources(Pattern.compile(".*")).stream()
-                            .filter(resourceName -> !resourceName.contains("/node_modules/"))
-                            .filter(resourceName -> !resourceName.contains("/dist/"))
-                            .map(resourceName -> new DecoratorPackageResource(e.getValue(), resourceName))
-                            .collect(toSet());
-
-                    return new DecoratorsNpmPackage(e.getValue(), version, resources);
-                }));
+                .collect(toMap(e -> generatedNpmPackagesByName().get(PACKAGES_SCOPE + "/" + e.getKey()),
+                               e -> new DecoratorsNpmPackage(e.getValue(), version)));
     }
 }

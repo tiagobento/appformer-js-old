@@ -16,8 +16,8 @@
 
 package org.uberfire.jsbridge.tsexporter.model.config;
 
-import org.uberfire.jsbridge.tsexporter.model.TsExporterResource;
 import org.uberfire.jsbridge.tsexporter.model.GeneratedNpmPackage;
+import org.uberfire.jsbridge.tsexporter.model.TsExporterResource;
 
 import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
 
@@ -39,6 +39,6 @@ public class NpmIgnore implements TsExporterResource {
 
     @Override
     public String getNpmPackageName() {
-        return npmPackage.getNpmPackageName();
+        return npmPackage.getName();
     }
 }

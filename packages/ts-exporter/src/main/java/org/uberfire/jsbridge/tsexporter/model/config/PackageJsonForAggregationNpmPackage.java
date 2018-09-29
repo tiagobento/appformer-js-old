@@ -16,58 +16,43 @@
 
 package org.uberfire.jsbridge.tsexporter.model.config;
 
-import java.util.Set;
-import java.util.stream.Stream;
-
-import javax.lang.model.element.Element;
-import javax.lang.model.type.DeclaredType;
-
-import org.uberfire.jsbridge.tsexporter.decorators.ImportEntryDecorator;
-import org.uberfire.jsbridge.tsexporter.decorators.ImportEntryShadowedDecorator;
+import org.uberfire.jsbridge.tsexporter.decorators.ImportEntryForDecorator;
+import org.uberfire.jsbridge.tsexporter.decorators.ImportEntryForShadowedDecorator;
+import org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation;
 import org.uberfire.jsbridge.tsexporter.dependency.ImportEntry;
-import org.uberfire.jsbridge.tsexporter.model.TsClass;
+import org.uberfire.jsbridge.tsexporter.model.GeneratedNpmPackage;
 import org.uberfire.jsbridge.tsexporter.model.TsExporterResource;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.joining;
-import static org.uberfire.jsbridge.tsexporter.model.TsClass.PACKAGES_SCOPE;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
 
-public class PackageJson2ndLayer implements TsExporterResource {
+public class PackageJsonForAggregationNpmPackage implements TsExporterResource {
 
-    private final String npmPackageName;
-    private final String version;
+    private final GeneratedNpmPackage npmPackage;
     private final String decoratorsNpmPackageName;
-    private final Set<? extends TsClass> dependencies;
 
-    public PackageJson2ndLayer(final String npmPackageName,
-                               final String version,
-                               final String decoratorsNpmPackageName,
-                               final Set<? extends TsClass> dependencies) {
+    public PackageJsonForAggregationNpmPackage(final GeneratedNpmPackage npmPackage,
+                                               final String decoratorsNpmPackageName) {
 
-        this.npmPackageName = npmPackageName;
-        this.version = version;
+        this.npmPackage = npmPackage;
         this.decoratorsNpmPackageName = decoratorsNpmPackageName;
-        this.dependencies = dependencies;
     }
 
     @Override
     public String toSource() {
-        final String dependenciesPart = dependencies.stream()
+        final String dependenciesPart = npmPackage.getClasses().stream()
                 .flatMap(clazz -> clazz.getDependencies().stream())
-                .flatMap(dependencyRelation -> {
-                    if (dependencyRelation.getImportEntry() instanceof ImportEntryDecorator) {
-                        return Stream.of(new ImportEntryShadowedDecorator((ImportEntryDecorator) dependencyRelation.getImportEntry()));
-                    } else {
-                        return Stream.of(dependencyRelation.getImportEntry());
-                    }
-                })
+                .map(DependencyRelation::getImportEntry)
+                .map(importEntry -> importEntry instanceof ImportEntryForDecorator
+                        ? new ImportEntryForShadowedDecorator((ImportEntryForDecorator) importEntry)
+                        : importEntry)
                 .collect(groupingBy(ImportEntry::getNpmPackageName))
                 .keySet().stream()
-                .filter(name -> !name.equals(npmPackageName))
+                .filter(name -> !name.equals(npmPackage.getName()))
                 .sorted()
-                .map(name -> format("\"%s\": \"%s\"", name, version))
+                .map(name -> format("\"%s\": \"%s\"", name, npmPackage.getVersion()))
                 .collect(joining(",\n"));
 
         return format(lines(
@@ -81,7 +66,7 @@ public class PackageJson2ndLayer implements TsExporterResource {
                 "%s",
                 "  },",
                 "  \"scripts\": {",
-                "    \"build\": \"npm i --no-package-lock && npx lerna bootstrap && npx lerna run build && npm i " + decoratorsNpmPackageName + " --registry http://localhost:4873 && npm run doUnpublish && npm run doPublish\",",
+                "    \"build\": \"npm i --no-package-lock && npx lerna bootstrap && npx lerna exec -- npm run build && npm i " + decoratorsNpmPackageName + " --registry http://localhost:4873 && npm run doUnpublish && npm run doPublish\",",
                 "    \"doUnpublish\": \"npm unpublish --force --registry http://localhost:4873 || echo 'Was not published'\",",
                 "    \"doPublish\": \"mv dist dist.tmp && mv `readlink dist.tmp` . && rm dist.tmp && npm publish --registry http://localhost:4873\"",
                 "  },",
@@ -97,8 +82,8 @@ public class PackageJson2ndLayer implements TsExporterResource {
                 "  }",
                 "}"),
 
-                      npmPackageName,
-                      version,
+                      npmPackage.getName(),
+                      npmPackage.getVersion(),
                       dependenciesPart
 
         );
@@ -106,6 +91,6 @@ public class PackageJson2ndLayer implements TsExporterResource {
 
     @Override
     public String getNpmPackageName() {
-        return npmPackageName;
+        return npmPackage.getName();
     }
 }
