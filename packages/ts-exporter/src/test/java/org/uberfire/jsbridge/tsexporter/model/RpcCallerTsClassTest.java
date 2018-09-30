@@ -2,6 +2,7 @@ package org.uberfire.jsbridge.tsexporter.model;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Stream;
 
 import com.google.testing.compile.CompilationRule;
 import org.junit.After;
@@ -58,8 +59,8 @@ public class RpcCallerTsClassTest {
     @Test
     public void testDecorators() {
 
-        final DependencyGraph dependencyGraph = new DependencyGraph(NO_DECORATORS);
-        dependencyGraph.add(element(FooImpl2.class));
+        final DependencyGraph dependencyGraph = new DependencyGraph(Stream.of(element(FooImpl2.class)),
+                                                                    NO_DECORATORS);
 
         final RpcCallerTsClass tsClass = new RpcCallerTsClass(
                 element(SomeInterface.class),
@@ -107,8 +108,8 @@ public class RpcCallerTsClassTest {
     @Test
     public void testDecoratorsIndirectly() {
 
-        final DependencyGraph dependencyGraph = new DependencyGraph(NO_DECORATORS);
-        dependencyGraph.add(element(FooImpl3.class));
+        final DependencyGraph dependencyGraph = new DependencyGraph(Stream.of(element(FooImpl3.class)),
+                                                                    NO_DECORATORS);
 
         final RpcCallerTsClass tsClass = new RpcCallerTsClass(
                 element(SomeOtherInterface.class),

@@ -21,8 +21,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.uberfire.jsbridge.tsexporter.decorators.DecoratorsNpmPackage;
-import org.uberfire.jsbridge.tsexporter.model.GeneratedNpmPackage;
+import org.uberfire.jsbridge.tsexporter.decorators.NpmPackageForDecorators;
+import org.uberfire.jsbridge.tsexporter.model.NpmPackageGenerated;
 import org.uberfire.jsbridge.tsexporter.model.NpmPackage;
 import org.uberfire.jsbridge.tsexporter.model.TsExporterResource;
 import org.uberfire.jsbridge.tsexporter.model.config.LernaJson;
@@ -52,14 +52,14 @@ public class TsCodegenResultWriter {
         tsCodegenResult.getDecoratorsNpmPackagesByDecoratedNpmPackages().forEach(this::writeDecoratorNpmPackage);
     }
 
-    private void writeDecoratorNpmPackage(final GeneratedNpmPackage decoratedNpmPackage,
-                                          final DecoratorsNpmPackage decoratorsNpmPackage) {
+    private void writeDecoratorNpmPackage(final NpmPackageGenerated decoratedNpmPackage,
+                                          final NpmPackageForDecorators decoratorsNpmPackage) {
 
         final String baseDir = getNpmPackageBaseDir(decoratorsNpmPackage, decoratedNpmPackage);
         decoratorsNpmPackage.getResources().forEach(r -> this.write(r, buildPath(baseDir, r.getResourcePath())));
     }
 
-    private void writeNpmPackage(final GeneratedNpmPackage npmPackage) {
+    private void writeNpmPackage(final NpmPackageGenerated npmPackage) {
 
         final String baseDir = getNpmPackageBaseDir(npmPackage, npmPackage);
 
@@ -76,7 +76,7 @@ public class TsCodegenResultWriter {
         }
     }
 
-    private void write2ndLayerPackageJson(final GeneratedNpmPackage npmPackage,
+    private void write2ndLayerPackageJson(final NpmPackageGenerated npmPackage,
                                           final String finalNpmPackageBaseDir) {
 
         final String baseDir = finalNpmPackageBaseDir + "../../";
@@ -97,7 +97,7 @@ public class TsCodegenResultWriter {
     }
 
     private String getNpmPackageBaseDir(final NpmPackage npmPackage,
-                                        final GeneratedNpmPackage decoratedNpmPackage) {
+                                        final NpmPackageGenerated decoratedNpmPackage) {
 
         final String unscopedNpmPackageName = npmPackage.getUnscopedNpmPackageName();
 

@@ -108,9 +108,8 @@ public class Main extends AbstractProcessor {
                     final long start = currentTimeMillis();
                     System.out.println("Generating all TypeScript npm packages...");
 
-                    final String version = "1.0.0";
-                    final DecoratorStore decoratorStore = new DecoratorStore();
-                    final TsCodegenResult result = new TsCodegen(version, decoratorStore).generate();
+                    final String version = "1.0.0"; //TODO: Read from System property or something
+                    final TsCodegenResult result = new TsCodegen(version, new DecoratorStore()).generate();
                     final TsCodegenResultWriter writer = new TsCodegenResultWriter(result);
                     final LernaBuilder builder = new LernaBuilder(writer.getOutputDir());
 
@@ -131,12 +130,14 @@ public class Main extends AbstractProcessor {
     private void writeExportFile(final List<Element> elements,
                                  final String fileName) {
 
+        final String contents = elements.stream()
+                .map(element -> ((TypeElement) element).getQualifiedName().toString())
+                .distinct()
+                .collect(joining("\n"));
+
         try (final Writer writer = processingEnv.getFiler().createResource(CLASS_OUTPUT, TS_EXPORTER_PACKAGE, fileName).openWriter()) {
             System.out.println("Saving export file: " + fileName + "... ");
-            writer.write(elements.stream()
-                                 .map(element -> ((TypeElement) element).getQualifiedName().toString())
-                                 .distinct()
-                                 .collect(joining("\n")));
+            writer.write(contents);
         } catch (final IOException e) {
             throw new RuntimeException(e);
         }

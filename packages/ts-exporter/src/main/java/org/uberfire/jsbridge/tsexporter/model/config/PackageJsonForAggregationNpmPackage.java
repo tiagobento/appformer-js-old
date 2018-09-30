@@ -20,7 +20,7 @@ import org.uberfire.jsbridge.tsexporter.decorators.ImportEntryForDecorator;
 import org.uberfire.jsbridge.tsexporter.decorators.ImportEntryForShadowedDecorator;
 import org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation;
 import org.uberfire.jsbridge.tsexporter.dependency.ImportEntry;
-import org.uberfire.jsbridge.tsexporter.model.GeneratedNpmPackage;
+import org.uberfire.jsbridge.tsexporter.model.NpmPackageGenerated;
 import org.uberfire.jsbridge.tsexporter.model.TsExporterResource;
 
 import static java.lang.String.format;
@@ -30,10 +30,10 @@ import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
 
 public class PackageJsonForAggregationNpmPackage implements TsExporterResource {
 
-    private final GeneratedNpmPackage npmPackage;
+    private final NpmPackageGenerated npmPackage;
     private final String decoratorsNpmPackageName;
 
-    public PackageJsonForAggregationNpmPackage(final GeneratedNpmPackage npmPackage,
+    public PackageJsonForAggregationNpmPackage(final NpmPackageGenerated npmPackage,
                                                final String decoratorsNpmPackageName) {
 
         this.npmPackage = npmPackage;

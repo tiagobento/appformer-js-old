@@ -23,14 +23,14 @@ import org.uberfire.jsbridge.tsexporter.model.config.PackageJsonForGeneratedNpmP
 import org.uberfire.jsbridge.tsexporter.model.config.TsConfigJson;
 import org.uberfire.jsbridge.tsexporter.model.config.WebpackConfigJs;
 
-public class GeneratedNpmPackage implements NpmPackage {
+public class NpmPackageGenerated implements NpmPackage {
 
     private final String name;
     private final Set<? extends TsClass> classes;
     private final String version;
     private final Type type;
 
-    public GeneratedNpmPackage(final String name,
+    public NpmPackageGenerated(final String name,
                                final Set<? extends TsClass> classes,
                                final String version,
                                final Type type) {

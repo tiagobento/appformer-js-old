@@ -20,8 +20,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
-import org.uberfire.jsbridge.tsexporter.decorators.DecoratorsNpmPackage;
-import org.uberfire.jsbridge.tsexporter.model.GeneratedNpmPackage;
+import org.uberfire.jsbridge.tsexporter.decorators.NpmPackageForDecorators;
+import org.uberfire.jsbridge.tsexporter.model.NpmPackageGenerated;
 import org.uberfire.jsbridge.tsexporter.model.TsExporterResource;
 import org.uberfire.jsbridge.tsexporter.model.config.LernaJson;
 import org.uberfire.jsbridge.tsexporter.model.config.PackageJsonRoot;
@@ -33,27 +33,27 @@ import static org.uberfire.jsbridge.tsexporter.model.TsClass.PACKAGES_SCOPE;
 
 public class TsCodegenResult {
 
-    private final DecoratorStore decoratorStore;
-    private final Set<GeneratedNpmPackage> npmPackages;
     private final String version;
+    private final DecoratorStore decoratorStore;
+    private final Set<NpmPackageGenerated> npmPackages;
 
     public TsCodegenResult(final String version,
                            final DecoratorStore decoratorStore,
-                           final Set<GeneratedNpmPackage> npmPackages) {
+                           final Set<NpmPackageGenerated> npmPackages) {
 
         this.version = version;
         this.decoratorStore = decoratorStore;
         this.npmPackages = npmPackages;
     }
 
-    private Map<String, GeneratedNpmPackage> generatedNpmPackagesByName() {
+    private Map<String, NpmPackageGenerated> generatedNpmPackagesByName() {
         return npmPackages.stream()
-                .collect(toMap(GeneratedNpmPackage::getName,
+                .collect(toMap(NpmPackageGenerated::getName,
                                identity(),
                                (a, b) -> a.getType().equals(RAW) ? b : a));
     }
 
-    public Set<GeneratedNpmPackage> getNpmPackages() {
+    public Set<NpmPackageGenerated> getNpmPackages() {
         return npmPackages;
     }
 
@@ -65,13 +65,13 @@ public class TsCodegenResult {
         return new LernaJson(version);
     }
 
-    public String getDecoratorsNpmPackageName(final GeneratedNpmPackage npmPackage) {
+    public String getDecoratorsNpmPackageName(final NpmPackageGenerated npmPackage) {
         return decoratorStore.getDecoratorsNpmPackageNameFor(npmPackage);
     }
 
-    public Map<GeneratedNpmPackage, DecoratorsNpmPackage> getDecoratorsNpmPackagesByDecoratedNpmPackages() {
+    public Map<NpmPackageGenerated, NpmPackageForDecorators> getDecoratorsNpmPackagesByDecoratedNpmPackages() {
         return decoratorStore.getDecoratorNpmPackageNamesByDecoratedMvnModuleNames().entrySet().stream()
                 .collect(toMap(e -> generatedNpmPackagesByName().get(PACKAGES_SCOPE + "/" + e.getKey()),
-                               e -> new DecoratorsNpmPackage(e.getValue(), version)));
+                               e -> new NpmPackageForDecorators(e.getValue(), version)));
     }
 }

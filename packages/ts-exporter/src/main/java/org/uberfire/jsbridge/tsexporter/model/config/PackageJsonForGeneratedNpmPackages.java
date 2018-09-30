@@ -23,7 +23,7 @@ import org.uberfire.jsbridge.tsexporter.decorators.ImportEntryForDecorator;
 import org.uberfire.jsbridge.tsexporter.decorators.ImportEntryForShadowedDecorator;
 import org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation;
 import org.uberfire.jsbridge.tsexporter.dependency.ImportEntry;
-import org.uberfire.jsbridge.tsexporter.model.GeneratedNpmPackage;
+import org.uberfire.jsbridge.tsexporter.model.NpmPackageGenerated;
 import org.uberfire.jsbridge.tsexporter.model.TsExporterResource;
 
 import static java.lang.String.format;
@@ -35,9 +35,9 @@ import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
 
 public class PackageJsonForGeneratedNpmPackages implements TsExporterResource {
 
-    private final GeneratedNpmPackage npmPackage;
+    private final NpmPackageGenerated npmPackage;
 
-    public PackageJsonForGeneratedNpmPackages(final GeneratedNpmPackage npmPackage) {
+    public PackageJsonForGeneratedNpmPackages(final NpmPackageGenerated npmPackage) {
         this.npmPackage = npmPackage;
     }
 

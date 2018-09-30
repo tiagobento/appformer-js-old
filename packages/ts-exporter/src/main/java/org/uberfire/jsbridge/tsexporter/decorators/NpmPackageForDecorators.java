@@ -21,20 +21,20 @@ import java.util.regex.Pattern;
 
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
-import org.uberfire.jsbridge.tsexporter.model.GeneratedNpmPackage;
+import org.uberfire.jsbridge.tsexporter.model.NpmPackageGenerated;
 import org.uberfire.jsbridge.tsexporter.model.NpmPackage;
 
 import static java.util.stream.Collectors.toSet;
 import static org.uberfire.jsbridge.tsexporter.model.NpmPackage.Type.DECORATORS;
 
-public class DecoratorsNpmPackage implements NpmPackage {
+public class NpmPackageForDecorators implements NpmPackage {
 
     private final String name;
     private final String version;
     private final Set<DecoratorPackageResource> resources;
 
-    public DecoratorsNpmPackage(final String name,
-                                final String version) {
+    public NpmPackageForDecorators(final String name,
+                                   final String version) {
 
         this.name = name;
         this.version = version;
@@ -61,7 +61,7 @@ public class DecoratorsNpmPackage implements NpmPackage {
     }
 
     @Override
-    public GeneratedNpmPackage.Type getType() {
+    public NpmPackageGenerated.Type getType() {
         return DECORATORS;
     }
 

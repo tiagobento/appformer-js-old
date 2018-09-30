@@ -24,9 +24,8 @@ import javax.lang.model.type.TypeMirror;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import org.uberfire.jsbridge.tsexporter.model.GeneratedNpmPackage;
+import org.uberfire.jsbridge.tsexporter.model.NpmPackageGenerated;
 import org.uberfire.jsbridge.tsexporter.model.PojoTsClass;
-import org.uberfire.jsbridge.tsexporter.model.TsClass;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptySet;
@@ -79,18 +78,18 @@ public class DecoratorStore {
     }
 
     public boolean shouldDecorate(final TypeMirror type, TypeMirror owner) {
-        return decorators.containsKey(types.erasure(type).toString());
+        return hasDecoratorFor(type);
     }
 
     public ImportEntryForDecorator getDecoratorFor(final TypeMirror type) {
         return decorators.get(types.erasure(type).toString());
     }
 
-    public boolean hasDecoratorFor(final TsClass tsClass) {
-        return hasDecoratorFor(tsClass.getUnscopedNpmPackageName());
+    public boolean hasDecoratorFor(final TypeMirror type) {
+        return decorators.containsKey(types.erasure(type).toString());
     }
 
-    public boolean hasDecoratorFor(final String unscopedNpmPackageName) {
+    public boolean hasDecoratorsFor(final String unscopedNpmPackageName) {
         return decorators.values().stream()
                 .map(ImportEntryForDecorator::getDecoratedMvnModule)
                 .collect(toSet())
@@ -112,7 +111,7 @@ public class DecoratorStore {
         };
     }
 
-    public String getDecoratorsNpmPackageNameFor(final GeneratedNpmPackage npmPackage) {
+    public String getDecoratorsNpmPackageNameFor(final NpmPackageGenerated npmPackage) {
         return getDecoratorNpmPackageNamesByDecoratedMvnModuleNames().get(npmPackage.getUnscopedNpmPackageName());
     }
 

@@ -44,9 +44,12 @@ public class DependencyGraph {
     private final Map<TypeElement, Vertex> graph;
     private final DecoratorStore decoratorStore;
 
-    public DependencyGraph(final DecoratorStore decoratorStore) {
+    public DependencyGraph(final Stream<? extends Element> elements,
+                           final DecoratorStore decoratorStore) {
+
         this.decoratorStore = decoratorStore;
         this.graph = new HashMap<>();
+        elements.forEach(this::add);
     }
 
     public Vertex add(final Element element) {

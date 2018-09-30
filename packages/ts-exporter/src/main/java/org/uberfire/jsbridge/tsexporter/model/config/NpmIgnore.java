@@ -16,16 +16,16 @@
 
 package org.uberfire.jsbridge.tsexporter.model.config;
 
-import org.uberfire.jsbridge.tsexporter.model.GeneratedNpmPackage;
+import org.uberfire.jsbridge.tsexporter.model.NpmPackageGenerated;
 import org.uberfire.jsbridge.tsexporter.model.TsExporterResource;
 
 import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
 
 public class NpmIgnore implements TsExporterResource {
 
-    private final GeneratedNpmPackage npmPackage;
+    private final NpmPackageGenerated npmPackage;
 
-    public NpmIgnore(final GeneratedNpmPackage npmPackage) {
+    public NpmIgnore(final NpmPackageGenerated npmPackage) {
         this.npmPackage = npmPackage;
     }
 
