@@ -16,6 +16,7 @@
 
 package org.uberfire.jsbridge.tsexporter.model;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -85,7 +86,7 @@ public class PojoTsClass implements TsClass {
                 lines("",
                       "export enum %s { %s }"),
 
-                () -> translatableSelf.get().toTypeScript(TYPE_ARGUMENT_DECLARATION),
+                this::getSimpleName,
                 this::enumFields);
     }
 
@@ -98,7 +99,7 @@ public class PojoTsClass implements TsClass {
                       "}"),
 
                 this::imports,
-                () -> translatableSelf.get().toTypeScript(TYPE_ARGUMENT_DECLARATION),
+                this::getSimpleName,
                 this::interfaceHierarchy);
     }
 
@@ -122,13 +123,17 @@ public class PojoTsClass implements TsClass {
 
                 this::imports,
                 this::abstractOrNot,
-                () -> translatableSelf.get().toTypeScript(TYPE_ARGUMENT_DECLARATION),
+                this::getSimpleName,
                 this::classHierarchy,
                 this::fqcn,
                 this::fields,
                 this::extractConstructorArgs,
                 this::superConstructorCall
         );
+    }
+
+    private String getSimpleName() {
+        return translatableSelf.get().toTypeScript(TYPE_ARGUMENT_DECLARATION);
     }
 
     private String imports() {
@@ -147,12 +152,17 @@ public class PojoTsClass implements TsClass {
     }
 
     private String fields() {
-        return asElement().getEnclosedElements().stream()
-                .filter(s -> s.getKind().isField())
-                .filter(s -> !s.getModifiers().contains(STATIC))
-                .filter(s -> !s.asType().toString().contains("java.util.function"))
+        return fieldsIn(asElement().getEnclosedElements()).stream()
                 .map(this::toFieldSource)
                 .collect(joining("\n"));
+    }
+
+    private List<Element> fieldsIn(final List<? extends Element> elements) {
+        return elements.stream()
+                .filter(e -> e.getKind().isField())
+                .filter(e -> !e.getModifiers().contains(STATIC))
+                .filter(e -> !e.asType().toString().contains("java.util.function"))
+                .collect(toList());
     }
 
     private String toFieldSource(final Element fieldElement) {
@@ -167,7 +177,7 @@ public class PojoTsClass implements TsClass {
     }
 
     private String superConstructorCall() {
-        final String superConstructorArgs = findAllFields().stream()
+        final String superConstructorArgs = fieldsIn(Main.elements.getAllMembers(asElement())).stream()
                 .filter(field -> !field.getEnclosingElement().equals(asElement()))
                 .map(field -> format("%s: self.%s", field.getSimpleName(), field.getSimpleName()))
                 .collect(joining(", "));
@@ -216,22 +226,20 @@ public class PojoTsClass implements TsClass {
     }
 
     private String extractConstructorArgs() {
-        return findAllFields().stream()
-                .map(fieldElement -> {
-                    final JavaType fieldType = new JavaType(fieldElement.asType(), declaredType);
+        final Set<String> fieldNames = new HashSet<>();
+        return fieldsIn(Main.elements.getAllMembers(asElement())).stream()
+                .peek(field -> {
+                    if (!fieldNames.add(field.getSimpleName().toString())) {
+                        throw new RuntimeException(format("Class %s has a field with the same name as one of its parent classes", getSimpleName()));
+                    }
+                })
+                .map(field -> {
+                    final JavaType fieldType = new JavaType(field.asType(), declaredType);
                     return format("%s?: %s",
-                                  fieldElement.getSimpleName(),
+                                  field.getSimpleName(),
                                   importStore.with(FIELD, fieldType.translate(decoratorStore)).toTypeScript(TYPE_ARGUMENT_USE));
                 })
                 .collect(joining(", "));
-    }
-
-    private List<Element> findAllFields() {
-        return Main.elements.getAllMembers(asElement()).stream()
-                .filter(f -> f.getKind().isField())
-                .filter(f -> !f.getModifiers().contains(STATIC))
-                .filter(s -> !s.asType().toString().contains("java.util.function"))
-                .collect(toList());
     }
 
     @Override
