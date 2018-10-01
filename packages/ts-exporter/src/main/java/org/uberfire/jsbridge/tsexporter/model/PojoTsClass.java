@@ -18,12 +18,12 @@ package org.uberfire.jsbridge.tsexporter.model;
 
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 
+import org.uberfire.jsbridge.tsexporter.Main;
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
 import org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation;
 import org.uberfire.jsbridge.tsexporter.dependency.ImportEntriesStore;
@@ -126,7 +126,7 @@ public class PojoTsClass implements TsClass {
                 this::classHierarchy,
                 this::fqcn,
                 this::fields,
-                () -> extractConstructorArgs(asElement()),
+                this::extractConstructorArgs,
                 this::superConstructorCall
         );
     }
@@ -167,7 +167,14 @@ public class PojoTsClass implements TsClass {
     }
 
     private String superConstructorCall() {
-        return superclass().canBeSubclassed() ? "super({});" : ""; //FIXME: Actually call super constructor when necessary.
+        final String superConstructorArgs = findAllFields().stream()
+                .filter(field -> !field.getEnclosingElement().equals(asElement()))
+                .map(field -> format("%s: self.%s", field.getSimpleName(), field.getSimpleName()))
+                .collect(joining(", "));
+
+        return superclass().canBeSubclassed()
+                ? format("super({ %s });", superConstructorArgs)
+                : "";
     }
 
     private String classHierarchy() {
@@ -208,21 +215,23 @@ public class PojoTsClass implements TsClass {
                 .collect(toList());
     }
 
-    private String extractConstructorArgs(final TypeElement typeElement) {
+    private String extractConstructorArgs() {
+        return findAllFields().stream()
+                .map(fieldElement -> {
+                    final JavaType fieldType = new JavaType(fieldElement.asType(), declaredType);
+                    return format("%s?: %s",
+                                  fieldElement.getSimpleName(),
+                                  importStore.with(FIELD, fieldType.translate(decoratorStore)).toTypeScript(TYPE_ARGUMENT_USE));
+                })
+                .collect(joining(", "));
+    }
 
-        final List<String> fields = typeElement.getEnclosedElements().stream()
+    private List<Element> findAllFields() {
+        return Main.elements.getAllMembers(asElement()).stream()
                 .filter(f -> f.getKind().isField())
                 .filter(f -> !f.getModifiers().contains(STATIC))
                 .filter(s -> !s.asType().toString().contains("java.util.function"))
-                .map(f -> format("%s?: %s", f.getSimpleName(), importStore.with(FIELD, new JavaType(f.asType(), declaredType).translate(decoratorStore)).toTypeScript(TYPE_ARGUMENT_USE)))
                 .collect(toList());
-
-        if (typeElement.getSuperclass().toString().equals("java.lang.Object")) {
-            return fields.stream().collect(joining(", "));
-        }
-
-        final String inheritedFields = extractConstructorArgs((TypeElement) ((DeclaredType) typeElement.getSuperclass()).asElement());
-        return Stream.concat(fields.stream(), Stream.of("inherited?: {" + inheritedFields + "}")).collect(joining(", "));
     }
 
     @Override

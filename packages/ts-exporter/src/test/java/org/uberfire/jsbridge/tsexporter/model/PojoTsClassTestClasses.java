@@ -32,7 +32,7 @@ public class PojoTsClassTestClasses {
     }
 
     static class A {
-
+        String test;
     }
 
     public class B extends A {
@@ -70,8 +70,8 @@ public class PojoTsClassTestClasses {
                            "public readonly f?: JavaTreeMap<string, string>;",
                            "public readonly g?: JavaOptional<JavaTreeSet<string>>;",
                            "",
-                           "  constructor(self: { a?: org_uberfire_jsbridge_tsexporter_model_PojoTsClassTestClasses_A, b?: B, c?: JavaInteger, d?: JavaTreeSet<string>, e?: JavaLinkedList<string>, f?: JavaTreeMap<string, string>, g?: JavaOptional<JavaTreeSet<string>>, inherited?: {} }) {",
-                           "    super({});",
+                           "  constructor(self: { test?: string, a?: org_uberfire_jsbridge_tsexporter_model_PojoTsClassTestClasses_A, b?: B, c?: JavaInteger, d?: JavaTreeSet<string>, e?: JavaLinkedList<string>, f?: JavaTreeMap<string, string>, g?: JavaOptional<JavaTreeSet<string>> }) {",
+                           "    super({ test: self.test });",
                            "    Object.assign(this, self);",
                            "  }",
                            "}"),
@@ -106,8 +106,8 @@ public class PojoTsClassTestClasses {
                            "public readonly c?: decorators_simple_CDEC;",
                            "public readonly setA?: Set<decorators_simple_ADEC>;",
                            "",
-                           "  constructor(self: { a?: decorators_simple_ADEC, c?: decorators_simple_CDEC, setA?: Set<decorators_simple_ADEC>, inherited?: {} }) {",
-                           "    super({});",
+                           "  constructor(self: { test?: string, a?: decorators_simple_ADEC, c?: decorators_simple_CDEC, setA?: Set<decorators_simple_ADEC> }) {",
+                           "    super({ test: self.test });",
                            "    Object.assign(this, self);",
                            "  }",
                            "}"),

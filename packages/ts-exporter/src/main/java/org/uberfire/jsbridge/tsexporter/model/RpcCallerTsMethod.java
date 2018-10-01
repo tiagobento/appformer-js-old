@@ -91,13 +91,17 @@ public class RpcCallerTsMethod {
         final String params = params();
         final String erraiBusString = erraiBusString();
         final String rpcCallParams = rpcCallParams();
-        final String returnStatement = returnStatement();
+        final String returnType = returnType();
+
+        final String factoriesOracle = factoriesOracle(); //Has to be the last
 
         return format(lines("",
                             "public %s(args: { %s }) {",
                             "  return rpc(%s, [%s])",
                             "         .then((json: string) => {",
-                            "           %s",
+                            "           return unmarshall(json, {",
+                            "%s",
+                            "           }) as %s;",
                             "         });",
                             "}",
                             ""),
@@ -106,24 +110,12 @@ public class RpcCallerTsMethod {
                       params,
                       erraiBusString,
                       rpcCallParams,
-                      returnStatement);
+                      factoriesOracle,
+                      returnType);
     }
 
-    private String returnStatement() {
-        final Translatable translatedReturnType = translatedReturnType();
-        final String returnType = importing(translatedReturnType).toTypeScript(TYPE_ARGUMENT_USE);
-
-        if (shouldSkipUnmarshalling(translatedReturnType)) {
-            return format("return new %s(json) as %s",
-                          returnType, returnType);
-        } else {
-            return format(lines("return unmarshall(json, {", "%s", "}) as %s;"),
-                          factoriesOracle(), returnType);
-        }
-    }
-
-    private boolean shouldSkipUnmarshalling(final Translatable translatable) {
-        return translatable instanceof TranslatableJavaNumberWithDefaultInstantiation;
+    private String returnType() {
+        return importing(translatedReturnType()).toTypeScript(TYPE_ARGUMENT_USE);
     }
 
     private String methodDeclaration() {
