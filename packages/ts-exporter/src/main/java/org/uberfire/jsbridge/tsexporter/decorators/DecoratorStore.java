@@ -26,7 +26,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.uberfire.jsbridge.tsexporter.model.NpmPackageGenerated;
 import org.uberfire.jsbridge.tsexporter.model.PojoTsClass;
-import org.uberfire.jsbridge.tsexporter.model.TsClass;
+import org.uberfire.jsbridge.tsexporter.util.Lazy;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptySet;
@@ -43,18 +43,18 @@ public class DecoratorStore {
 
     public static final DecoratorStore NO_DECORATORS = new DecoratorStore(emptySet());
 
-    private final Map<String, ImportEntryForDecorator> decorators;
+    private final Lazy<Map<String, ImportEntryForDecorator>> decorators;
 
     public DecoratorStore() {
-        this.decorators = asMap(readDecoratorFiles());
+        this.decorators = new Lazy<>(() -> asMap(readDecoratorFiles()));
     }
 
     public DecoratorStore(final Set<ImportEntryForDecorator> decorators) {
-        this.decorators = asMap(decorators);
+        this.decorators = new Lazy<>(() -> asMap(decorators));
     }
 
     private DecoratorStore(final Map<String, ImportEntryForDecorator> decorators) {
-        this.decorators = decorators;
+        this.decorators = new Lazy<>(() -> decorators);
     }
 
     private Map<String, ImportEntryForDecorator> asMap(final Set<ImportEntryForDecorator> decorators) {
@@ -79,22 +79,22 @@ public class DecoratorStore {
     }
 
     public boolean shouldDecorate(final TypeMirror type, TypeMirror owner) {
-        return decorators.containsKey(types.erasure(type).toString());
+        return decorators.get().containsKey(types.erasure(type).toString());
     }
 
     public ImportEntryForDecorator getDecoratorFor(final TypeMirror type) {
-        return decorators.get(types.erasure(type).toString());
+        return decorators.get().get(types.erasure(type).toString());
     }
 
     public boolean hasDecoratorsFor(final String unscopedNpmPackageName) {
-        return decorators.values().stream()
+        return decorators.get().values().stream()
                 .map(ImportEntryForDecorator::getDecoratedMvnModule)
                 .collect(toSet())
                 .contains(unscopedNpmPackageName);
     }
 
     public DecoratorStore ignoringForCurrentNpmPackage() {
-        return new DecoratorStore(decorators) {
+        return new DecoratorStore(decorators.get()) {
             @Override
             public DecoratorStore ignoringForCurrentNpmPackage() {
                 return this;
@@ -113,7 +113,7 @@ public class DecoratorStore {
     }
 
     public Map<String, String> getDecoratorNpmPackageNamesByDecoratedMvnModuleNames() {
-        return decorators.values().stream()
+        return decorators.get().values().stream()
                 .collect(toMap(ImportEntryForDecorator::getDecoratedMvnModule, ImportEntryForDecorator::getNpmPackageName, (a, b) -> a));
     }
 }

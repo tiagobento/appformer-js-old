@@ -85,9 +85,9 @@ public class TsCodegen {
                 .collect(groupingBy(TsClass::getNpmPackageName, toSet()))
                 .entrySet()
                 .parallelStream()
-                .flatMap(e -> !decoratorStore.hasDecoratorsFor(get(-1, e.getKey().split("/")))
-                        ? Stream.empty()
-                        : Stream.of(new NpmPackageGenerated(e.getKey(), e.getValue(), version, RAW)))
+                .flatMap(e -> decoratorStore.hasDecoratorsFor(get(-1, e.getKey().split("/")))
+                        ? Stream.of(new NpmPackageGenerated(e.getKey(), e.getValue(), version, RAW))
+                        : Stream.empty())
                 .collect(toSet());
     }
 

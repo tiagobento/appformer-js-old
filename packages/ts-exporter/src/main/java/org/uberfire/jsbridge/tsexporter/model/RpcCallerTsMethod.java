@@ -123,7 +123,6 @@ public class RpcCallerTsMethod {
     }
 
     private boolean shouldSkipUnmarshalling(final Translatable translatable) {
-        //TODO: Is this rule correct?
         return translatable instanceof TranslatableJavaNumberWithDefaultInstantiation;
     }
 
