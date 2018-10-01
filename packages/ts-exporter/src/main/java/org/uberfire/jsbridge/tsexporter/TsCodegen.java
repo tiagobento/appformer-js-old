@@ -25,10 +25,12 @@ import java.util.stream.Stream;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
 
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
 import org.uberfire.jsbridge.tsexporter.dependency.DependencyGraph;
 import org.uberfire.jsbridge.tsexporter.model.NpmPackageGenerated;
+import org.uberfire.jsbridge.tsexporter.model.PojoTsClass;
 import org.uberfire.jsbridge.tsexporter.model.RpcCallerTsClass;
 import org.uberfire.jsbridge.tsexporter.model.TsClass;
 import org.uberfire.jsbridge.tsexporter.util.Utils;
@@ -71,7 +73,10 @@ public class TsCodegen {
     private Set<NpmPackageGenerated> generateRaw() {
         final DecoratorStore decoratorStore = this.decoratorStore.ignoringForCurrentNpmPackage();
         final Stream<Element> allDecoratedPortableTypes = findAllPortableTypes()
-                .filter(e -> decoratorStore.hasDecoratorFor(e.asType()));
+                .filter(e -> {
+                    final PojoTsClass pojoTsClass = new PojoTsClass((DeclaredType) e.asType(), decoratorStore);
+                    return decoratorStore.hasDecoratorsFor(pojoTsClass.getUnscopedNpmPackageName());
+                });
 
         return new DependencyGraph(allDecoratedPortableTypes, decoratorStore)
                 .vertices().parallelStream()

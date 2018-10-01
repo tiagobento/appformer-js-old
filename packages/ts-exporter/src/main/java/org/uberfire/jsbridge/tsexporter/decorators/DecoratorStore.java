@@ -26,6 +26,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.uberfire.jsbridge.tsexporter.model.NpmPackageGenerated;
 import org.uberfire.jsbridge.tsexporter.model.PojoTsClass;
+import org.uberfire.jsbridge.tsexporter.model.TsClass;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptySet;
@@ -78,15 +79,11 @@ public class DecoratorStore {
     }
 
     public boolean shouldDecorate(final TypeMirror type, TypeMirror owner) {
-        return hasDecoratorFor(type);
+        return decorators.containsKey(types.erasure(type).toString());
     }
 
     public ImportEntryForDecorator getDecoratorFor(final TypeMirror type) {
         return decorators.get(types.erasure(type).toString());
-    }
-
-    public boolean hasDecoratorFor(final TypeMirror type) {
-        return decorators.containsKey(types.erasure(type).toString());
     }
 
     public boolean hasDecoratorsFor(final String unscopedNpmPackageName) {

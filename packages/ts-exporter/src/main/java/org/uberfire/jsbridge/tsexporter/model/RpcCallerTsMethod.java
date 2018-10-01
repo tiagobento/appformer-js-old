@@ -30,6 +30,7 @@ import org.uberfire.jsbridge.tsexporter.dependency.ImportEntriesStore;
 import org.uberfire.jsbridge.tsexporter.dependency.ImportEntry;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 import org.uberfire.jsbridge.tsexporter.meta.Translatable;
+import org.uberfire.jsbridge.tsexporter.meta.TranslatableJavaNumberWithDefaultInstantiation;
 
 import static java.lang.String.format;
 import static java.util.Comparator.comparing;
@@ -90,16 +91,13 @@ public class RpcCallerTsMethod {
         final String params = params();
         final String erraiBusString = erraiBusString();
         final String rpcCallParams = rpcCallParams();
-        final String returnType = returnType();
-        final String factoriesOracle = factoriesOracle(); //Has to be the last
+        final String returnStatement = returnStatement();
 
         return format(lines("",
                             "public %s(args: { %s }) {",
                             "  return rpc(%s, [%s])",
                             "         .then((json: string) => {",
-                            "           return unmarshall(json, {",
-                            "%s",
-                            "           }) as %s;",
+                            "           %s",
                             "         });",
                             "}",
                             ""),
@@ -108,8 +106,25 @@ public class RpcCallerTsMethod {
                       params,
                       erraiBusString,
                       rpcCallParams,
-                      factoriesOracle,
-                      returnType);
+                      returnStatement);
+    }
+
+    private String returnStatement() {
+        final Translatable translatedReturnType = translatedReturnType();
+        final String returnType = importing(translatedReturnType).toTypeScript(TYPE_ARGUMENT_USE);
+
+        if (shouldSkipUnmarshalling(translatedReturnType)) {
+            return format("return new %s(json) as %s",
+                          returnType, returnType);
+        } else {
+            return format(lines("return unmarshall(json, {", "%s", "}) as %s;"),
+                          factoriesOracle(), returnType);
+        }
+    }
+
+    private boolean shouldSkipUnmarshalling(final Translatable translatable) {
+        //TODO: Is this rule correct?
+        return translatable instanceof TranslatableJavaNumberWithDefaultInstantiation;
     }
 
     private String methodDeclaration() {
@@ -178,10 +193,6 @@ public class RpcCallerTsMethod {
 
     private boolean isSubtype(final PojoTsClass tsClass, final Element element) {
         return types.isSubtype(types.erasure(tsClass.getType()), types.erasure(element.asType()));
-    }
-
-    private String returnType() {
-        return importing(translatedReturnType()).toTypeScript(TYPE_ARGUMENT_USE);
     }
 
     private Translatable translatedReturnType() {

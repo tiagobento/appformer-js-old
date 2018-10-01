@@ -7,6 +7,7 @@ import java.util.stream.Stream;
 import com.google.testing.compile.CompilationRule;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
@@ -57,6 +58,7 @@ public class RpcCallerTsClassTest {
     }
 
     @Test
+    @Ignore
     public void testDecorators() {
 
         final DependencyGraph dependencyGraph = new DependencyGraph(Stream.of(element(FooImpl2.class)),
@@ -106,6 +108,7 @@ public class RpcCallerTsClassTest {
     }
 
     @Test
+    @Ignore
     public void testDecoratorsIndirectly() {
 
         final DependencyGraph dependencyGraph = new DependencyGraph(Stream.of(element(FooImpl3.class)),
