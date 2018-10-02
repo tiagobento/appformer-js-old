@@ -35,7 +35,7 @@ public class TsCodegenBuilder {
         }
 
         System.out.println("Verdaccio is running with PID:");
-        if (bash("ps -ef | awk '/[V]erdaccio/{print $2}'") != 0) {
+        if (bash("test -n `ps -ef | awk '/[V]erdaccio/{print $2}'`") != 0) {
             throw new RuntimeException("Verdaccio is not running.");
         }
 
