@@ -21,10 +21,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.uberfire.jsbridge.tsexporter.config.Config;
+import org.uberfire.jsbridge.tsexporter.config.Configuration;
 import org.uberfire.jsbridge.tsexporter.config.Project;
 import org.uberfire.jsbridge.tsexporter.model.NpmPackage;
-import org.uberfire.jsbridge.tsexporter.model.NpmPackageForProjects;
+import org.uberfire.jsbridge.tsexporter.model.NpmPackageFor3rdPartyProjects;
 import org.uberfire.jsbridge.tsexporter.model.NpmPackageGenerated;
 import org.uberfire.jsbridge.tsexporter.model.TsExporterResource;
 import org.uberfire.jsbridge.tsexporter.model.config.LernaJson;
@@ -39,14 +39,14 @@ import static org.uberfire.jsbridge.tsexporter.config.Project.Type.LIB;
 import static org.uberfire.jsbridge.tsexporter.model.NpmPackage.Type.FINAL;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.createFileIfNotExists;
 
-public class TsCodegenResultWriter {
+public class TsCodegenWriter {
 
-    private final Config config;
+    private final Configuration config;
     private final TsCodegenResult tsCodegenResult;
     private final String outputDir;
 
-    public TsCodegenResultWriter(final Config config,
-                                 final TsCodegenResult tsCodegenResult) {
+    public TsCodegenWriter(final Configuration config,
+                           final TsCodegenResult tsCodegenResult) {
         this.config = config;
         this.tsCodegenResult = tsCodegenResult;
         this.outputDir = getProperty("ts-exporter-output-dir") + "/.tsexporter";
@@ -66,7 +66,7 @@ public class TsCodegenResultWriter {
     }
 
     private void writeNpmPackageForLib(final Project project) {
-        final NpmPackageForProjects npmPackage = new NpmPackageForProjects(
+        final NpmPackageFor3rdPartyProjects npmPackage = new NpmPackageFor3rdPartyProjects(
                 project.getName(),
                 tsCodegenResult.getVersion(),
                 NpmPackage.Type.LIB);
@@ -78,7 +78,7 @@ public class TsCodegenResultWriter {
     private void writeNpmPackageForDecorator(final Project project) {
         final NpmPackageGenerated decoratedNpmPackage = tsCodegenResult.getNpmPackageGeneratedByMvnModuleName(project.getMvnModuleName());
 
-        final NpmPackageForProjects decoratorsNpmPackage = new NpmPackageForProjects(
+        final NpmPackageFor3rdPartyProjects decoratorsNpmPackage = new NpmPackageFor3rdPartyProjects(
                 project.getName(),
                 tsCodegenResult.getVersion(),
                 NpmPackage.Type.DECORATORS);
@@ -124,8 +124,8 @@ public class TsCodegenResultWriter {
         write(new NpmIgnore(npmPackageFinal), buildPath(baseDir, ".npmignore"));
     }
 
-    private String getNpmPackageBaseDir(final NpmPackage npmPackage,
-                                        final NpmPackageGenerated decoratedNpmPackage) {
+    public String getNpmPackageBaseDir(final NpmPackage npmPackage,
+                                       final NpmPackageGenerated decoratedNpmPackage) {
 
         final String unscopedNpmPackageName = npmPackage.getUnscopedNpmPackageName();
 
@@ -157,13 +157,17 @@ public class TsCodegenResultWriter {
         }
     }
 
-    private Path buildPath(final String unscopedNpmPackageName,
-                           final String relativeFilePath) {
+    public Path buildPath(final String unscopedNpmPackageName,
+                          final String relativeFilePath) {
 
         return Paths.get(format(outputDir + "/%s/%s", unscopedNpmPackageName, relativeFilePath).replace("/", separator));
     }
 
     public String getOutputDir() {
         return outputDir;
+    }
+
+    public String getVersion() {
+        return tsCodegenResult.getVersion();
     }
 }

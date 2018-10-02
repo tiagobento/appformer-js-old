@@ -22,7 +22,7 @@ import java.util.Set;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
-import org.uberfire.jsbridge.tsexporter.config.Config;
+import org.uberfire.jsbridge.tsexporter.config.Configuration;
 import org.uberfire.jsbridge.tsexporter.model.NpmPackageGenerated;
 import org.uberfire.jsbridge.tsexporter.model.PojoTsClass;
 import org.uberfire.jsbridge.tsexporter.util.Lazy;
@@ -41,7 +41,7 @@ public class DecoratorStore {
 
     private final Lazy<Map<String, ImportEntryForDecorator>> decorators;
 
-    public DecoratorStore(final Config config) {
+    public DecoratorStore(final Configuration config) {
         this.decorators = new Lazy<>(() -> asMap(readDecoratorFiles(config)));
     }
 
@@ -61,7 +61,7 @@ public class DecoratorStore {
                 }));
     }
 
-    private Set<ImportEntryForDecorator> readDecoratorFiles(final Config config) {
+    private Set<ImportEntryForDecorator> readDecoratorFiles(final Configuration config) {
         return config.getProjects().stream()
                 .filter(project -> project.getType().equals(DECORATORS))
                 .flatMap(project -> project.getDecorators().entrySet().stream().map(e -> {

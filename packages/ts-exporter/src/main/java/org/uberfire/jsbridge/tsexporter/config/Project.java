@@ -18,11 +18,15 @@ package org.uberfire.jsbridge.tsexporter.config;
 
 import java.net.URL;
 import java.util.Map;
+import java.util.Set;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toSet;
+import static java.util.stream.StreamSupport.stream;
 import static org.uberfire.jsbridge.tsexporter.model.TsClass.getMavenModuleNameFromSourceFilePath;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.readClasspathResource;
 
@@ -32,20 +36,29 @@ public class Project {
     private final Type type;
     private final String mvnModuleName;
     private final Map<String, String> decorators;
+    private final String main;
+    private final Set<String> components;
 
     public Project(final URL url) {
         final String jsonString = readClasspathResource(url);
         final JsonObject json = new JsonParser().parse(jsonString).getAsJsonObject();
 
         name = json.get("name").getAsString();
+        main = json.get("main").getAsString();
 
         type = Type.valueOf(json.get("type").getAsString().trim().toUpperCase());
 
         mvnModuleName = getMavenModuleNameFromSourceFilePath(url.getFile());
 
-        decorators = json.get("decorators").getAsJsonObject().entrySet()
-                .stream().collect(toMap(Map.Entry::getKey,
-                                        e -> e.getValue().getAsString()));
+        components = stream(json.get("components").getAsJsonArray().spliterator(), false)
+                .map(JsonElement::getAsString)
+                .collect(toSet());
+
+        decorators = json.get("decorators").getAsJsonObject()
+                .entrySet()
+                .stream()
+                .collect(toMap(Map.Entry::getKey,
+                               e -> e.getValue().getAsString()));
     }
 
     public String getMvnModuleName() {
@@ -62,6 +75,14 @@ public class Project {
 
     public Type getType() {
         return type;
+    }
+
+    public String getMain() {
+        return main;
+    }
+
+    public Set<String> getComponents() {
+        return components;
     }
 
     public enum Type {

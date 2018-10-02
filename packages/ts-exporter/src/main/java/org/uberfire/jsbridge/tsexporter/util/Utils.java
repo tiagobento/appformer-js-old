@@ -104,12 +104,12 @@ public class Utils {
     }
 
     public static String readClasspathResource(final URL url) {
-        String json;
+        String contents;
         try (final Scanner scanner = new Scanner(url.openStream()).useDelimiter("\\A")) {
-            json = scanner.hasNext() ? scanner.next() : "";
+            contents = scanner.hasNext() ? scanner.next() : "";
         } catch (final Exception e) {
             throw new RuntimeException(e);
         }
-        return json;
+        return contents;
     }
 }

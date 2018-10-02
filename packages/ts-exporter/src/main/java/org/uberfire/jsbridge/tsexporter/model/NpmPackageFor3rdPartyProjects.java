@@ -25,26 +25,25 @@ import org.uberfire.jsbridge.tsexporter.decorators.CopiedResource;
 
 import static java.util.stream.Collectors.toSet;
 
-public class NpmPackageForProjects implements NpmPackage {
+public class NpmPackageFor3rdPartyProjects implements NpmPackage {
 
     private final String name;
     private final String version;
     private final Type type;
     private final Set<CopiedResource> resources;
 
-    public NpmPackageForProjects(final String name,
-                                 final String version,
-                                 final Type type) {
+    public NpmPackageFor3rdPartyProjects(final String name,
+                                         final String version,
+                                         final Type type) {
 
         this.name = name;
         this.version = version;
         this.type = type;
         this.resources = new Reflections(name, new ResourcesScanner()).getResources(Pattern.compile(".*")).stream()
-                .filter(resourceName -> !resourceName.contains("/node_modules/"))
-                .filter(resourceName -> !resourceName.contains("/dist/"))
-                .map(resourceName -> new CopiedResource(name, resourceName))
+                .filter(resourcePath -> !resourcePath.contains("/node_modules/"))
+                .filter(resourcePath -> !resourcePath.contains("/dist/"))
+                .map(resourcePath -> new CopiedResource(name, resourcePath))
                 .collect(toSet());
-
     }
 
     @Override

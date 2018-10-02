@@ -23,15 +23,14 @@ import java.util.Set;
 import static java.util.Collections.list;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
-import static java.util.stream.Collectors.toSet;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.getResources;
 
-public class Config {
+public class Configuration {
 
     private final Map<String, Project> projectsByName;
 
-    public Config() {
-        projectsByName = list(getResources("META-INF/appformerjs.json")).stream()
+    public Configuration() {
+        projectsByName = list(getResources("META-INF/appformer-js.json")).stream()
                 .map(Project::new)
                 .collect(toMap(Project::getName, identity()));
     }

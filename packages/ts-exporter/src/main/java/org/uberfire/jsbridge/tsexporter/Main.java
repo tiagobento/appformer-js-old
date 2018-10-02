@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
@@ -19,7 +20,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
-import org.uberfire.jsbridge.tsexporter.config.Config;
+import org.uberfire.jsbridge.tsexporter.config.Configuration;
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
 
 import static java.lang.System.currentTimeMillis;
@@ -46,6 +47,7 @@ public class Main extends AbstractProcessor {
     public static Types types;
     public static Elements elements;
     public static Messager messager;
+    public static Filer filer;
 
     private static final List<Element> seenPortableTypes = new ArrayList<>();
     private static final List<Element> seenRemoteInterfaces = new ArrayList<>();
@@ -56,6 +58,7 @@ public class Main extends AbstractProcessor {
         Main.types = processingEnv.getTypeUtils();
         Main.elements = processingEnv.getElementUtils();
         Main.messager = processingEnv.getMessager();
+        Main.filer = processingEnv.getFiler();
     }
 
     @Override
@@ -110,13 +113,17 @@ public class Main extends AbstractProcessor {
                     System.out.println("Generating all TypeScript npm packages...");
 
                     final String version = "1.0.0"; //TODO: Read from System property or something
-                    final Config config = new Config();
+                    final Configuration config = new Configuration();
                     final TsCodegenResult result = new TsCodegen(version, new DecoratorStore(config)).generate();
-                    final TsCodegenResultWriter writer = new TsCodegenResultWriter(config, result);
-                    final TsCodegenBuilder builder = new TsCodegenBuilder(writer.getOutputDir());
 
+                    final TsCodegenWriter writer = new TsCodegenWriter(config, result);
                     writer.write();
+
+                    final TsCodegenBuilder builder = new TsCodegenBuilder(writer.getOutputDir());
                     builder.build();
+
+                    final TsCodegenLibBundler bundler = new TsCodegenLibBundler(config, writer);
+                    bundler.bundle();
 
                     System.out.println("TypeScript exporter has successfully run. (" + (currentTimeMillis() - start) + "ms)");
                     break;
@@ -137,7 +144,7 @@ public class Main extends AbstractProcessor {
                 .distinct()
                 .collect(joining("\n"));
 
-        try (final Writer writer = processingEnv.getFiler().createResource(CLASS_OUTPUT, TS_EXPORTER_PACKAGE, fileName).openWriter()) {
+        try (final Writer writer = filer.createResource(CLASS_OUTPUT, TS_EXPORTER_PACKAGE, fileName).openWriter()) {
             System.out.println("Saving export file: " + fileName + "... ");
             writer.write(contents);
         } catch (final IOException e) {

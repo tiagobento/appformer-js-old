@@ -28,18 +28,18 @@ public class TsCodegenBuilder {
     }
 
     public void build() {
-        System.out.println("Building npm packages...");
+        System.out.println("Building npm packages..");
         System.out.println("Verdaccio installed at:");
         if (bash("which verdaccio") != 0) {
             throw new RuntimeException("Verdaccio is not installed.");
         }
 
-        System.out.println("Verdaccio is running with PID:");
+        System.out.println("Checking if Verdaccio is up..");
         if (bash("test -n `ps -ef | awk '/[V]erdaccio/{print $2}'`") != 0) {
             throw new RuntimeException("Verdaccio is not running.");
         }
 
-        System.out.println("Building packages...");
+        System.out.println("Building packages..");
         bash(linesJoinedBy(" && ", new String[]{
                 "cd " + baseDir,
                 "npm i --registry http://localhost:4873 --no-lock-file --no-package-lock",
