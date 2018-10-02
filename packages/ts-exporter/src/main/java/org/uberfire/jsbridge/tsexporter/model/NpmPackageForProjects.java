@@ -14,40 +14,37 @@
  * limitations under the License.
  */
 
-package org.uberfire.jsbridge.tsexporter.decorators;
+package org.uberfire.jsbridge.tsexporter.model;
 
 import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
-import org.uberfire.jsbridge.tsexporter.model.NpmPackageGenerated;
-import org.uberfire.jsbridge.tsexporter.model.NpmPackage;
+import org.uberfire.jsbridge.tsexporter.decorators.CopiedResource;
 
 import static java.util.stream.Collectors.toSet;
-import static org.uberfire.jsbridge.tsexporter.model.NpmPackage.Type.DECORATORS;
 
-public class NpmPackageForDecorators implements NpmPackage {
+public class NpmPackageForProjects implements NpmPackage {
 
     private final String name;
     private final String version;
-    private final Set<DecoratorPackageResource> resources;
+    private final Type type;
+    private final Set<CopiedResource> resources;
 
-    public NpmPackageForDecorators(final String name,
-                                   final String version) {
+    public NpmPackageForProjects(final String name,
+                                 final String version,
+                                 final Type type) {
 
         this.name = name;
         this.version = version;
+        this.type = type;
         this.resources = new Reflections(name, new ResourcesScanner()).getResources(Pattern.compile(".*")).stream()
                 .filter(resourceName -> !resourceName.contains("/node_modules/"))
                 .filter(resourceName -> !resourceName.contains("/dist/"))
-                .map(resourceName -> new DecoratorPackageResource(name, resourceName))
+                .map(resourceName -> new CopiedResource(name, resourceName))
                 .collect(toSet());
-    }
 
-    @Override
-    public String getVersion() {
-        return version;
     }
 
     @Override
@@ -56,16 +53,21 @@ public class NpmPackageForDecorators implements NpmPackage {
     }
 
     @Override
+    public String getVersion() {
+        return version;
+    }
+
+    @Override
     public String getUnscopedNpmPackageName() {
         return name;
     }
 
     @Override
-    public NpmPackageGenerated.Type getType() {
-        return DECORATORS;
+    public Type getType() {
+        return type;
     }
 
-    public Set<DecoratorPackageResource> getResources() {
+    public Set<CopiedResource> getResources() {
         return resources;
     }
 }

@@ -19,6 +19,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
+import org.uberfire.jsbridge.tsexporter.config.Config;
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
 
 import static java.lang.System.currentTimeMillis;
@@ -109,9 +110,10 @@ public class Main extends AbstractProcessor {
                     System.out.println("Generating all TypeScript npm packages...");
 
                     final String version = "1.0.0"; //TODO: Read from System property or something
-                    final TsCodegenResult result = new TsCodegen(version, new DecoratorStore()).generate();
-                    final TsCodegenResultWriter writer = new TsCodegenResultWriter(result);
-                    final LernaBuilder builder = new LernaBuilder(writer.getOutputDir());
+                    final Config config = new Config();
+                    final TsCodegenResult result = new TsCodegen(version, new DecoratorStore(config)).generate();
+                    final TsCodegenResultWriter writer = new TsCodegenResultWriter(config, result);
+                    final TsCodegenBuilder builder = new TsCodegenBuilder(writer.getOutputDir());
 
                     writer.write();
                     builder.build();

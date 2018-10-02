@@ -21,9 +21,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.uberfire.jsbridge.tsexporter.decorators.NpmPackageForDecorators;
-import org.uberfire.jsbridge.tsexporter.model.NpmPackageGenerated;
+import org.uberfire.jsbridge.tsexporter.config.Config;
+import org.uberfire.jsbridge.tsexporter.config.Project;
 import org.uberfire.jsbridge.tsexporter.model.NpmPackage;
+import org.uberfire.jsbridge.tsexporter.model.NpmPackageForProjects;
+import org.uberfire.jsbridge.tsexporter.model.NpmPackageGenerated;
 import org.uberfire.jsbridge.tsexporter.model.TsExporterResource;
 import org.uberfire.jsbridge.tsexporter.model.config.LernaJson;
 import org.uberfire.jsbridge.tsexporter.model.config.NpmIgnore;
@@ -32,15 +34,20 @@ import org.uberfire.jsbridge.tsexporter.model.config.PackageJsonForAggregationNp
 import static java.io.File.separator;
 import static java.lang.String.format;
 import static java.lang.System.getProperty;
+import static org.uberfire.jsbridge.tsexporter.config.Project.Type.DECORATORS;
+import static org.uberfire.jsbridge.tsexporter.config.Project.Type.LIB;
 import static org.uberfire.jsbridge.tsexporter.model.NpmPackage.Type.FINAL;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.createFileIfNotExists;
 
 public class TsCodegenResultWriter {
 
+    private final Config config;
     private final TsCodegenResult tsCodegenResult;
     private final String outputDir;
 
-    public TsCodegenResultWriter(final TsCodegenResult tsCodegenResult) {
+    public TsCodegenResultWriter(final Config config,
+                                 final TsCodegenResult tsCodegenResult) {
+        this.config = config;
         this.tsCodegenResult = tsCodegenResult;
         this.outputDir = getProperty("ts-exporter-output-dir") + "/.tsexporter";
     }
@@ -48,18 +55,39 @@ public class TsCodegenResultWriter {
     public void write() {
         write(tsCodegenResult.getRootPackageJson(), buildPath("", "package.json"));
         write(tsCodegenResult.getLernaJson(), buildPath("", "lerna.json"));
-        tsCodegenResult.getNpmPackages().forEach(this::writeNpmPackage);
-        tsCodegenResult.getDecoratorsNpmPackagesByDecoratedNpmPackages().forEach(this::writeDecoratorNpmPackage);
+
+        tsCodegenResult.getNpmPackages().forEach(this::writeNpmPackageGenerated);
+
+        config.getProjects().stream().filter(s -> s.getType().equals(DECORATORS))
+                .forEach(this::writeNpmPackageForDecorator);
+
+        config.getProjects().stream().filter(s -> s.getType().equals(LIB))
+                .forEach(this::writeNpmPackageForLib);
     }
 
-    private void writeDecoratorNpmPackage(final NpmPackageGenerated decoratedNpmPackage,
-                                          final NpmPackageForDecorators decoratorsNpmPackage) {
+    private void writeNpmPackageForLib(final Project project) {
+        final NpmPackageForProjects npmPackage = new NpmPackageForProjects(
+                project.getName(),
+                tsCodegenResult.getVersion(),
+                NpmPackage.Type.LIB);
+
+        final String baseDir = getNpmPackageBaseDir(npmPackage, null);
+        npmPackage.getResources().forEach(r -> this.write(r, buildPath(baseDir, r.getResourcePath())));
+    }
+
+    private void writeNpmPackageForDecorator(final Project project) {
+        final NpmPackageGenerated decoratedNpmPackage = tsCodegenResult.getNpmPackageGeneratedByMvnModuleName(project.getMvnModuleName());
+
+        final NpmPackageForProjects decoratorsNpmPackage = new NpmPackageForProjects(
+                project.getName(),
+                tsCodegenResult.getVersion(),
+                NpmPackage.Type.DECORATORS);
 
         final String baseDir = getNpmPackageBaseDir(decoratorsNpmPackage, decoratedNpmPackage);
         decoratorsNpmPackage.getResources().forEach(r -> this.write(r, buildPath(baseDir, r.getResourcePath())));
     }
 
-    private void writeNpmPackage(final NpmPackageGenerated npmPackage) {
+    private void writeNpmPackageGenerated(final NpmPackageGenerated npmPackage) {
 
         final String baseDir = getNpmPackageBaseDir(npmPackage, npmPackage);
 
@@ -72,12 +100,12 @@ public class TsCodegenResultWriter {
         write(npmPackage.getPackageJson(), buildPath(baseDir, "package.json"));
 
         if (npmPackage.getType().equals(FINAL)) {
-            write2ndLayerPackageJson(npmPackage, baseDir);
+            writeAggregationNpmPackage(npmPackage, baseDir);
         }
     }
 
-    private void write2ndLayerPackageJson(final NpmPackageGenerated npmPackage,
-                                          final String finalNpmPackageBaseDir) {
+    private void writeAggregationNpmPackage(final NpmPackageGenerated npmPackageFinal,
+                                            final String finalNpmPackageBaseDir) {
 
         final String baseDir = finalNpmPackageBaseDir + "../../";
 
@@ -88,12 +116,12 @@ public class TsCodegenResultWriter {
         }
 
         final PackageJsonForAggregationNpmPackage packageJson = new PackageJsonForAggregationNpmPackage(
-                npmPackage,
-                tsCodegenResult.getDecoratorsNpmPackageName(npmPackage));
+                npmPackageFinal,
+                tsCodegenResult.getDecoratorsNpmPackageName(npmPackageFinal));
 
         write(packageJson, buildPath(baseDir, "package.json"));
-        write(new LernaJson(npmPackage.getVersion()), buildPath(baseDir, "lerna.json"));
-        write(new NpmIgnore(npmPackage), buildPath(baseDir, ".npmignore"));
+        write(new LernaJson(npmPackageFinal.getVersion()), buildPath(baseDir, "lerna.json"));
+        write(new NpmIgnore(npmPackageFinal), buildPath(baseDir, ".npmignore"));
     }
 
     private String getNpmPackageBaseDir(final NpmPackage npmPackage,
@@ -109,6 +137,8 @@ public class TsCodegenResultWriter {
             case DECORATORS:
                 return format("packages/%s/packages/%s/", decoratedNpmPackage.getUnscopedNpmPackageName(), unscopedNpmPackageName);
             case UNDECORATED:
+                return format("packages/%s", unscopedNpmPackageName);
+            case LIB:
                 return format("packages/%s", unscopedNpmPackageName);
             default:
                 throw new RuntimeException("Unknown type");

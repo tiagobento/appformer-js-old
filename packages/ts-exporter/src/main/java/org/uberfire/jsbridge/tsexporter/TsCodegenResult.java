@@ -16,20 +16,15 @@
 
 package org.uberfire.jsbridge.tsexporter;
 
-import java.util.Map;
 import java.util.Set;
 
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
-import org.uberfire.jsbridge.tsexporter.decorators.NpmPackageForDecorators;
 import org.uberfire.jsbridge.tsexporter.model.NpmPackageGenerated;
 import org.uberfire.jsbridge.tsexporter.model.TsExporterResource;
 import org.uberfire.jsbridge.tsexporter.model.config.LernaJson;
 import org.uberfire.jsbridge.tsexporter.model.config.PackageJsonRoot;
 
-import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toMap;
-import static org.uberfire.jsbridge.tsexporter.model.NpmPackage.Type.RAW;
-import static org.uberfire.jsbridge.tsexporter.model.TsClass.PACKAGES_SCOPE;
+import static org.uberfire.jsbridge.tsexporter.model.NpmPackage.Type.FINAL;
 
 public class TsCodegenResult {
 
@@ -46,17 +41,6 @@ public class TsCodegenResult {
         this.npmPackages = npmPackages;
     }
 
-    private Map<String, NpmPackageGenerated> generatedNpmPackagesByName() {
-        return npmPackages.stream()
-                .collect(toMap(NpmPackageGenerated::getName,
-                               identity(),
-                               (a, b) -> a.getType().equals(RAW) ? b : a));
-    }
-
-    public Set<NpmPackageGenerated> getNpmPackages() {
-        return npmPackages;
-    }
-
     public TsExporterResource getRootPackageJson() {
         return new PackageJsonRoot();
     }
@@ -69,9 +53,19 @@ public class TsCodegenResult {
         return decoratorStore.getDecoratorsNpmPackageNameFor(npmPackage);
     }
 
-    public Map<NpmPackageGenerated, NpmPackageForDecorators> getDecoratorsNpmPackagesByDecoratedNpmPackages() {
-        return decoratorStore.getDecoratorNpmPackageNamesByDecoratedMvnModuleNames().entrySet().stream()
-                .collect(toMap(e -> generatedNpmPackagesByName().get(PACKAGES_SCOPE + "/" + e.getKey()),
-                               e -> new NpmPackageForDecorators(e.getValue(), version)));
+    public NpmPackageGenerated getNpmPackageGeneratedByMvnModuleName(final String mvnModuleName) {
+        return npmPackages.stream()
+                .filter(s -> s.getUnscopedNpmPackageName().endsWith(mvnModuleName))
+                .filter(s -> s.getType().equals(FINAL))
+                .findFirst()
+                .get();
+    }
+
+    public Set<NpmPackageGenerated> getNpmPackages() {
+        return npmPackages;
+    }
+
+    public String getVersion() {
+        return version;
     }
 }

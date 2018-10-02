@@ -19,11 +19,11 @@ package org.uberfire.jsbridge.tsexporter;
 import static java.lang.String.format;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.linesJoinedBy;
 
-public class LernaBuilder {
+public class TsCodegenBuilder {
 
     private final String baseDir;
 
-    public LernaBuilder(final String baseDir) {
+    public TsCodegenBuilder(final String baseDir) {
         this.baseDir = baseDir;
     }
 

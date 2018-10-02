@@ -31,5 +31,6 @@ public interface NpmPackage {
         FINAL,
         DECORATORS,
         UNDECORATED,
+        LIB,
     }
 }

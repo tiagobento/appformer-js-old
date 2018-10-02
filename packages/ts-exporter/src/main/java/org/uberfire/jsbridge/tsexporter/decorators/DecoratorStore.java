@@ -22,22 +22,18 @@ import java.util.Set;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import org.uberfire.jsbridge.tsexporter.config.Config;
 import org.uberfire.jsbridge.tsexporter.model.NpmPackageGenerated;
 import org.uberfire.jsbridge.tsexporter.model.PojoTsClass;
 import org.uberfire.jsbridge.tsexporter.util.Lazy;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptySet;
-import static java.util.Collections.list;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 import static org.uberfire.jsbridge.tsexporter.Main.types;
-import static org.uberfire.jsbridge.tsexporter.model.TsClass.getMavenModuleNameFromSourceFilePath;
-import static org.uberfire.jsbridge.tsexporter.util.Utils.getResources;
-import static org.uberfire.jsbridge.tsexporter.util.Utils.readClasspathResource;
+import static org.uberfire.jsbridge.tsexporter.config.Project.Type.DECORATORS;
 
 public class DecoratorStore {
 
@@ -45,8 +41,8 @@ public class DecoratorStore {
 
     private final Lazy<Map<String, ImportEntryForDecorator>> decorators;
 
-    public DecoratorStore() {
-        this.decorators = new Lazy<>(() -> asMap(readDecoratorFiles()));
+    public DecoratorStore(final Config config) {
+        this.decorators = new Lazy<>(() -> asMap(readDecoratorFiles(config)));
     }
 
     public DecoratorStore(final Set<ImportEntryForDecorator> decorators) {
@@ -65,17 +61,17 @@ public class DecoratorStore {
                 }));
     }
 
-    private Set<ImportEntryForDecorator> readDecoratorFiles() {
-        return list(getResources("META-INF/appformerjs.json")).stream().flatMap(url -> {
-            final JsonObject config = new JsonParser().parse(readClasspathResource(url)).getAsJsonObject();
-            final String mvnModuleName = getMavenModuleNameFromSourceFilePath(url.getFile());
-            final String decoratorsNpmPackageName = config.get("name").getAsString();
-            return config.get("decorators").getAsJsonObject().entrySet().stream()
-                    .map(e -> new ImportEntryForDecorator(mvnModuleName,
-                                                          decoratorsNpmPackageName,
-                                                          e.getKey(),
-                                                          e.getValue().getAsString()));
-        }).collect(toSet());
+    private Set<ImportEntryForDecorator> readDecoratorFiles(final Config config) {
+        return config.getProjects().stream()
+                .filter(project -> project.getType().equals(DECORATORS))
+                .flatMap(project -> project.getDecorators().entrySet().stream().map(e -> {
+                    return new ImportEntryForDecorator(
+                            project.getMvnModuleName(),
+                            project.getName(),
+                            e.getKey(),
+                            e.getValue());
+                }))
+                .collect(toSet());
     }
 
     public boolean shouldDecorate(final TypeMirror type, TypeMirror owner) {
@@ -109,11 +105,10 @@ public class DecoratorStore {
     }
 
     public String getDecoratorsNpmPackageNameFor(final NpmPackageGenerated npmPackage) {
-        return getDecoratorNpmPackageNamesByDecoratedMvnModuleNames().get(npmPackage.getUnscopedNpmPackageName());
-    }
-
-    public Map<String, String> getDecoratorNpmPackageNamesByDecoratedMvnModuleNames() {
         return decorators.get().values().stream()
-                .collect(toMap(ImportEntryForDecorator::getDecoratedMvnModule, ImportEntryForDecorator::getNpmPackageName, (a, b) -> a));
+                .collect(toMap(ImportEntryForDecorator::getDecoratedMvnModule,
+                               ImportEntryForDecorator::getNpmPackageName,
+                               (a, b) -> a))
+                .get(npmPackage.getUnscopedNpmPackageName());
     }
 }

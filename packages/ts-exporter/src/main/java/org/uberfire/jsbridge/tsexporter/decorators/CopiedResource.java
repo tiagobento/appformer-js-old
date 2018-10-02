@@ -28,14 +28,14 @@ import org.uberfire.jsbridge.tsexporter.model.TsExporterResource;
 import static java.util.Collections.emptySet;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.readClasspathResource;
 
-public class DecoratorPackageResource implements TsExporterResource {
+public class CopiedResource implements TsExporterResource {
 
     private final String source;
     private final String npmPackageName;
     private final String resourcePath;
 
-    public DecoratorPackageResource(final String npmPackageName,
-                                    final String resourcePath) {
+    public CopiedResource(final String npmPackageName,
+                          final String resourcePath) {
 
         this.npmPackageName = npmPackageName;
         this.resourcePath = resourcePath;
