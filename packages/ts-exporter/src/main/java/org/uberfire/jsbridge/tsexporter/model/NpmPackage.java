@@ -14,25 +14,23 @@
  * limitations under the License.
  */
 
-package org.uberfire.jsbridge.tsexporter.meta;
+package org.uberfire.jsbridge.tsexporter.model;
 
-import java.util.List;
+public interface NpmPackage {
 
-import org.uberfire.jsbridge.tsexporter.dependency.ImportEntry;
+    String getName();
 
-public interface Translatable {
+    String getVersion();
 
-    String toTypeScript(final SourceUsage sourceUsage);
+    String getUnscopedNpmPackageName();
 
-    List<ImportEntry> getAggregatedImportEntries();
+    Type getType();
 
-    default boolean canBeSubclassed() {
-        return false;
-    }
-
-    enum SourceUsage {
-        TYPE_ARGUMENT_USE,
-        TYPE_ARGUMENT_DECLARATION,
-        IMPORT_STATEMENT,
+    enum Type {
+        RAW,
+        FINAL,
+        DECORATORS,
+        UNDECORATED,
+        LIB,
     }
 }

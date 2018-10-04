@@ -17,6 +17,7 @@
 package org.uberfire.jsbridge.tsexporter.model.config;
 
 import java.util.List;
+import java.util.Set;
 
 import org.uberfire.jsbridge.tsexporter.model.TsClass;
 import org.uberfire.jsbridge.tsexporter.model.TsExporterResource;
@@ -27,10 +28,10 @@ import static java.util.stream.Collectors.joining;
 public class IndexTs implements TsExporterResource {
 
     private final String npmPackageName;
-    private final List<? extends TsClass> classes;
+    private final Set<? extends TsClass> classes;
 
     public IndexTs(final String npmPackageName,
-                   final List<? extends TsClass> classes) {
+                   final Set<? extends TsClass> classes) {
 
         this.npmPackageName = npmPackageName;
         this.classes = classes;

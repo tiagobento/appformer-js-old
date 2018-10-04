@@ -19,17 +19,20 @@ package org.uberfire.jsbridge.tsexporter.model;
 import java.util.LinkedHashMap;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 
+import org.uberfire.jsbridge.tsexporter.Main;
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
 import org.uberfire.jsbridge.tsexporter.dependency.DependencyGraph;
 import org.uberfire.jsbridge.tsexporter.dependency.ImportEntriesStore;
 import org.uberfire.jsbridge.tsexporter.dependency.ImportEntry;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 import org.uberfire.jsbridge.tsexporter.meta.Translatable;
+import org.uberfire.jsbridge.tsexporter.meta.TranslatableJavaNumberWithDefaultInstantiation;
 
 import static java.lang.String.format;
 import static java.util.Comparator.comparing;
@@ -68,17 +71,14 @@ public class RpcCallerTsMethod {
     }
 
     RpcCallerTsMethod(final ExecutableElement executableElement,
-                      final TypeElement owner,
-                      final ImportEntriesStore importStore,
-                      final DependencyGraph dependencyGraph,
-                      final DecoratorStore decoratorStore) {
+                      final RpcCallerTsClass rpcCallerTsClass) {
 
         this.executableElement = executableElement;
-        this.owner = owner;
-        this.importStore = importStore;
         this.name = executableElement.getSimpleName().toString();
-        this.dependencyGraph = dependencyGraph;
-        this.decoratorStore = decoratorStore;
+        this.owner = rpcCallerTsClass.asElement();
+        this.importStore = rpcCallerTsClass.importEntriesStore;
+        this.dependencyGraph = rpcCallerTsClass.dependencyGraph;
+        this.decoratorStore = rpcCallerTsClass.decoratorStore;
     }
 
     public String getName() {
@@ -91,15 +91,16 @@ public class RpcCallerTsMethod {
         final String erraiBusString = erraiBusString();
         final String rpcCallParams = rpcCallParams();
         final String returnType = returnType();
+
         final String factoriesOracle = factoriesOracle(); //Has to be the last
 
         return format(lines("",
                             "public %s(args: { %s }) {",
                             "  return rpc(%s, [%s])",
                             "         .then((json: string) => {",
-                            "           return unmarshall(json, {",
+                            "           return unmarshall(json, new Map([",
                             "%s",
-                            "           }) as %s;",
+                            "           ])) as %s;",
                             "         });",
                             "}",
                             ""),
@@ -110,6 +111,10 @@ public class RpcCallerTsMethod {
                       rpcCallParams,
                       factoriesOracle,
                       returnType);
+    }
+
+    private String returnType() {
+        return importing(translatedReturnType()).toTypeScript(TYPE_ARGUMENT_USE);
     }
 
     private String methodDeclaration() {
@@ -166,9 +171,26 @@ public class RpcCallerTsMethod {
 
     private String toFactoriesOracleEntry(final PojoTsClass tsClass) {
         final JavaType javaType = new JavaType(types.erasure(tsClass.getType()), owner.asType());
-        return format("\"%s\": (x: any) => new %s(x)",
+        final String defaultNumbersInitialization = Main.elements.getAllMembers((TypeElement) javaType.asElement()).stream()
+                .flatMap(field -> toOracleFactoryMethodConstructorEntry(field, new JavaType(field.asType(), javaType.getType())))
+                .collect(joining(", "));
+
+        return format("[\"%s\", () => new %s({ %s }) as any]",
                       tsClass.asElement().getQualifiedName().toString(),
-                      importing(javaType.translate(decoratorStore)).toTypeScript(TYPE_ARGUMENT_USE));
+                      importing(javaType.translate(decoratorStore)).toTypeScript(TYPE_ARGUMENT_USE),
+                      defaultNumbersInitialization);
+    }
+
+    private Stream<String> toOracleFactoryMethodConstructorEntry(final Element fieldElement,
+                                                                 final JavaType fieldJavaType) {
+
+        final Translatable translatedFieldType = fieldJavaType.translate(decoratorStore);
+        if (!(translatedFieldType instanceof TranslatableJavaNumberWithDefaultInstantiation)) {
+            return Stream.empty();
+        }
+
+        final String fieldType = importStore.with(CODE, translatedFieldType).toTypeScript(TYPE_ARGUMENT_USE);
+        return Stream.of(format("%s: new %s(\"0\")", fieldElement.getSimpleName(), fieldType));
     }
 
     private boolean isConcreteClass(final PojoTsClass tsClass) {
@@ -178,10 +200,6 @@ public class RpcCallerTsMethod {
 
     private boolean isSubtype(final PojoTsClass tsClass, final Element element) {
         return types.isSubtype(types.erasure(tsClass.getType()), types.erasure(element.asType()));
-    }
-
-    private String returnType() {
-        return importing(translatedReturnType()).toTypeScript(TYPE_ARGUMENT_USE);
     }
 
     private Translatable translatedReturnType() {

@@ -28,13 +28,9 @@ import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
 public class WebpackConfigJs implements TsExporterResource {
 
     private final String npmPackageName;
-    private final List<? extends TsClass> classes;
 
-    public WebpackConfigJs(final String npmPackageName,
-                           final List<? extends TsClass> classes) {
-
+    public WebpackConfigJs(final String npmPackageName) {
         this.npmPackageName = npmPackageName;
-        this.classes = classes;
     }
 
     @Override
@@ -45,7 +41,7 @@ public class WebpackConfigJs implements TsExporterResource {
                 "const CircularDependencyPlugin = require('circular-dependency-plugin');",
                 "",
                 "module.exports = {",
-                "  mode: 'development',",
+                "  mode: 'production',",
                 "  externals: {",
                 "    'appformer-js': {",
                 "      root: 'AppFormer', //indicates global variable",

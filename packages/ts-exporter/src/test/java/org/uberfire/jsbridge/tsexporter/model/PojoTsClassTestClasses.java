@@ -11,8 +11,8 @@ import com.google.testing.compile.CompilationRule;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.uberfire.jsbridge.tsexporter.decorators.ImportEntryDecorator;
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
+import org.uberfire.jsbridge.tsexporter.decorators.ImportEntryForDecorator;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;
@@ -32,7 +32,7 @@ public class PojoTsClassTestClasses {
     }
 
     static class A {
-
+        String test;
     }
 
     public class B extends A {
@@ -62,16 +62,16 @@ public class PojoTsClassTestClasses {
                            "",
                            "  protected readonly _fqcn: string = 'org.uberfire.jsbridge.tsexporter.model.PojoTsClassTestClasses.B';",
                            "",
-                           "public readonly a?: org_uberfire_jsbridge_tsexporter_model_PojoTsClassTestClasses_A;",
-                           "public readonly b?: B;",
-                           "public readonly c?: JavaInteger = new JavaInteger(\"0\");",
-                           "public readonly d?: JavaTreeSet<string>;",
-                           "public readonly e?: JavaLinkedList<string>;",
-                           "public readonly f?: JavaTreeMap<string, string>;",
-                           "public readonly g?: JavaOptional<JavaTreeSet<string>>;",
+                           "public readonly a?: org_uberfire_jsbridge_tsexporter_model_PojoTsClassTestClasses_A = undefined;",
+                           "public readonly b?: B = undefined;",
+                           "public readonly c?: JavaInteger = undefined;",
+                           "public readonly d?: JavaTreeSet<string> = undefined;",
+                           "public readonly e?: JavaLinkedList<string> = undefined;",
+                           "public readonly f?: JavaTreeMap<string, string> = undefined;",
+                           "public readonly g?: JavaOptional<JavaTreeSet<string>> = undefined;",
                            "",
-                           "  constructor(self: { a?: org_uberfire_jsbridge_tsexporter_model_PojoTsClassTestClasses_A, b?: B, c?: JavaInteger, d?: JavaTreeSet<string>, e?: JavaLinkedList<string>, f?: JavaTreeMap<string, string>, g?: JavaOptional<JavaTreeSet<string>>, inherited?: {} }) {",
-                           "    super({});",
+                           "  constructor(self: { test?: string, a?: org_uberfire_jsbridge_tsexporter_model_PojoTsClassTestClasses_A, b?: B, c?: JavaInteger, d?: JavaTreeSet<string>, e?: JavaLinkedList<string>, f?: JavaTreeMap<string, string>, g?: JavaOptional<JavaTreeSet<string>> }) {",
+                           "    super({ test: self.test });",
                            "    Object.assign(this, self);",
                            "  }",
                            "}"),
@@ -88,8 +88,8 @@ public class PojoTsClassTestClasses {
     @Test
     public void testDecorators() {
         final PojoTsClass pojoTsClass = new PojoTsClass(type(C.class), new DecoratorStore(new HashSet<>(asList(
-                new ImportEntryDecorator("my-decorators", "decorators/simple/CDEC", C.class.getCanonicalName()),
-                new ImportEntryDecorator("my-decorators", "decorators/simple/ADEC", A.class.getCanonicalName())
+                new ImportEntryForDecorator("my-pojos", "my-decorators", "decorators/simple/CDEC", C.class.getCanonicalName()),
+                new ImportEntryForDecorator("my-pojos", "my-decorators", "decorators/simple/ADEC", A.class.getCanonicalName())
         ))));
 
         assertEquals(lines("",
@@ -102,12 +102,12 @@ public class PojoTsClassTestClasses {
                            "",
                            "  protected readonly _fqcn: string = 'org.uberfire.jsbridge.tsexporter.model.PojoTsClassTestClasses.C';",
                            "",
-                           "public readonly a?: decorators_simple_ADEC;",
-                           "public readonly c?: decorators_simple_CDEC;",
-                           "public readonly setA?: Set<decorators_simple_ADEC>;",
+                           "public readonly a?: decorators_simple_ADEC = undefined;",
+                           "public readonly c?: decorators_simple_CDEC = undefined;",
+                           "public readonly setA?: Set<decorators_simple_ADEC> = undefined;",
                            "",
-                           "  constructor(self: { a?: decorators_simple_ADEC, c?: decorators_simple_CDEC, setA?: Set<decorators_simple_ADEC>, inherited?: {} }) {",
-                           "    super({});",
+                           "  constructor(self: { test?: string, a?: decorators_simple_ADEC, c?: decorators_simple_CDEC, setA?: Set<decorators_simple_ADEC> }) {",
+                           "    super({ test: self.test });",
                            "    Object.assign(this, self);",
                            "  }",
                            "}"),

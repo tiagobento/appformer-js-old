@@ -16,8 +16,10 @@
 
 package org.uberfire.jsbridge.tsexporter.dependency;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import javax.lang.model.element.Element;
 
@@ -54,8 +56,8 @@ public class DependencyGraphTest {
 
     @Test
     public void testInvalidElements() {
-        final DependencyGraph graph = new DependencyGraph(NO_DECORATORS);
-        assertEquals(null, graph.add((Element) null));
+        final DependencyGraph graph = new DependencyGraph(Stream.empty(), NO_DECORATORS);
+        assertEquals(null, graph.add(null));
         assertEquals(0, graph.vertices().size());
         assertEquals(null, graph.add(memberElement("field", type(X.class))));
         assertEquals(0, graph.vertices().size());
@@ -94,7 +96,7 @@ public class DependencyGraphTest {
 
     @Test
     public void testSimpleGraphVertices() {
-        final DependencyGraph graph = new DependencyGraph(NO_DECORATORS);
+        final DependencyGraph graph = new DependencyGraph(Stream.empty(), NO_DECORATORS);
         graph.add(element(A0.class));
         assertEquals(1, graph.vertices().size());
         graph.add(element(A1.class));
@@ -113,7 +115,7 @@ public class DependencyGraphTest {
 
     @Test
     public void testGraphVerticesComplex() {
-        final DependencyGraph graph = new DependencyGraph(NO_DECORATORS);
+        final DependencyGraph graph = new DependencyGraph(Stream.empty(), NO_DECORATORS);
         graph.add(element(A2B1.class));
         assertEquals(4, graph.vertices().size());
         graph.add(element(A1.class));
@@ -154,7 +156,7 @@ public class DependencyGraphTest {
 
     @Test
     public void testCycle() {
-        final DependencyGraph graph = new DependencyGraph(NO_DECORATORS);
+        final DependencyGraph graph = new DependencyGraph(Stream.empty(), NO_DECORATORS);
         graph.add(element(c0.class));
         assertEquals(2, graph.vertices().size());
         graph.add(element(c1.class));
@@ -179,7 +181,7 @@ public class DependencyGraphTest {
 
     @Test
     public void testCycleComplex() {
-        final DependencyGraph graph = new DependencyGraph(NO_DECORATORS);
+        final DependencyGraph graph = new DependencyGraph(Stream.empty(), NO_DECORATORS);
         graph.add(element(a2b2.class));
         assertEquals(7, graph.vertices().size());
         graph.add(element(a3b2.class));

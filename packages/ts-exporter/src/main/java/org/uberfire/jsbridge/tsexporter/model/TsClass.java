@@ -64,7 +64,7 @@ public interface TsClass extends TsExporterResource {
         }
     }
 
-    static String getMavenModuleNameFromSourceFilePath(final String sourceFilePath) {
+    public static String getMavenModuleNameFromSourceFilePath(final String sourceFilePath) {
 
         if (sourceFilePath.contains("jar!")) {
             return get(-2, sourceFilePath.split("(/)[\\w-]+(-)[\\d.]+(.*)\\.jar!")[0].split("/"));

@@ -3,12 +3,12 @@ package org.uberfire.jsbridge.tsexporter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
@@ -20,7 +20,8 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
-import org.uberfire.jsbridge.tsexporter.decorators.ImportEntryDecorator;
+import org.uberfire.jsbridge.tsexporter.config.Configuration;
+import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
 
 import static java.lang.System.currentTimeMillis;
 import static java.lang.System.getProperty;
@@ -46,6 +47,7 @@ public class Main extends AbstractProcessor {
     public static Types types;
     public static Elements elements;
     public static Messager messager;
+    public static Filer filer;
 
     private static final List<Element> seenPortableTypes = new ArrayList<>();
     private static final List<Element> seenRemoteInterfaces = new ArrayList<>();
@@ -56,6 +58,7 @@ public class Main extends AbstractProcessor {
         Main.types = processingEnv.getTypeUtils();
         Main.elements = processingEnv.getElementUtils();
         Main.messager = processingEnv.getMessager();
+        Main.filer = processingEnv.getFiler();
     }
 
     @Override
@@ -63,10 +66,9 @@ public class Main extends AbstractProcessor {
                            final RoundEnvironment roundEnv) {
 
         if (!asList("none", "all", "single").contains(getProperty("ts-exporter"))) {
-            System.out.println("TypeScript exporter was not activated.");
+            System.out.println("TypeScript exporter is not activated.");
             return false;
         }
-
 
         try {
             process(roundEnv, annotations.stream().collect(toMap(identity(), roundEnv::getElementsAnnotatedWith)));
@@ -96,19 +98,33 @@ public class Main extends AbstractProcessor {
         } else {
             writeExportFile(seenPortableTypes, "portables.tsexporter");
             writeExportFile(seenRemoteInterfaces, "remotes.tsexporter");
-            final TsCodegenExporter tsCodegenExporter = new TsCodegenExporter(readDecoratorFiles());
 
             switch (getProperty("ts-exporter")) {
                 case "single": {
                     throw new RuntimeException("Exporting single modules is not supported yet.");
                 }
 
+                case "portables-only": {
+                    throw new RuntimeException("Exporting portables only is not supported yet.");
+                }
+
                 case "all": {
                     final long start = currentTimeMillis();
                     System.out.println("Generating all TypeScript npm packages...");
-                    tsCodegenExporter.exportEverything();
-                    tsCodegenExporter.writeRootConfigFiles();
-                    tsCodegenExporter.buildAndPublishAllNpmPackages();
+
+                    final String version = "1.0.0"; //TODO: Read from System property or something
+                    final Configuration config = new Configuration();
+                    final TsCodegenResult result = new TsCodegen(version, new DecoratorStore(config)).generate();
+
+                    final TsCodegenWriter writer = new TsCodegenWriter(config, result);
+                    writer.write();
+
+                    final TsCodegenBuilder builder = new TsCodegenBuilder(writer.getOutputDir());
+                    builder.build();
+
+                    final TsCodegenLibBundler bundler = new TsCodegenLibBundler(config, writer);
+                    bundler.bundle();
+
                     System.out.println("TypeScript exporter has successfully run. (" + (currentTimeMillis() - start) + "ms)");
                     break;
                 }
@@ -120,24 +136,17 @@ public class Main extends AbstractProcessor {
         }
     }
 
-    private Set<ImportEntryDecorator> readDecoratorFiles() {
-        return new HashSet<>(asList(
-//                new DecoratorImportEntry("appformer-js-decorators", "PathDEC", "org.uberfire.backend.vfs.Path"),
-//                new DecoratorImportEntry("appformer-js-decorators", "PathImplDEC", "org.uberfire.backend.vfs.PathFactory.PathImpl"),
-//                new DecoratorImportEntry("appformer-js-decorators", "ObservablePathDEC", "org.uberfire.backend.vfs.ObservablePath"),
-//                new DecoratorImportEntry("appformer-js-decorators", "ObservablePathImplDEC", "org.uberfire.backend.vfs.impl.ObservablePathImpl")
-        ));
-    }
-
     private void writeExportFile(final List<Element> elements,
                                  final String fileName) {
 
-        try (final Writer writer = processingEnv.getFiler().createResource(CLASS_OUTPUT, TS_EXPORTER_PACKAGE, fileName).openWriter()) {
+        final String contents = elements.stream()
+                .map(element -> ((TypeElement) element).getQualifiedName().toString())
+                .distinct()
+                .collect(joining("\n"));
+
+        try (final Writer writer = filer.createResource(CLASS_OUTPUT, TS_EXPORTER_PACKAGE, fileName).openWriter()) {
             System.out.println("Saving export file: " + fileName + "... ");
-            writer.write(elements.stream()
-                                 .map(element -> ((TypeElement) element).getQualifiedName().toString())
-                                 .distinct()
-                                 .collect(joining("\n")));
+            writer.write(contents);
         } catch (final IOException e) {
             throw new RuntimeException(e);
         }

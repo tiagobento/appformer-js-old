@@ -23,6 +23,7 @@ import java.nio.file.Path;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Properties;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -100,5 +101,15 @@ public class Utils {
 
     public static <T> Set<T> mergeSets(final Set<T> a, final Set<T> b) {
         return concat(a.stream(), b.stream()).collect(toSet());
+    }
+
+    public static String readClasspathResource(final URL url) {
+        String contents;
+        try (final Scanner scanner = new Scanner(url.openStream()).useDelimiter("\\A")) {
+            contents = scanner.hasNext() ? scanner.next() : "";
+        } catch (final Exception e) {
+            throw new RuntimeException(e);
+        }
+        return contents;
     }
 }

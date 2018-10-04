@@ -1,12 +1,6 @@
 import * as React from "react";
 import { DemoReactComponent } from "./DemoReactComponent";
 import { JavaInteger, Screen } from "appformer-js";
-// import TestMessagesService from "output/uberfire-webapp/org/uberfire/shared/TestMessagesService";
-// import TestEvent from "output/uberfire-webapp/org/uberfire/shared/TestEvent";
-// import Foo from "output/uberfire-webapp/org/uberfire/shared/Foo";
-
-// import homePerspectiveTemplate from "showcase-components/HomePerspective.html";
-// import otherPerspectiveTemplate from "showcase-components/other-perspective.html";
 
 export class InoffensiveNonScreenClass {}
 
@@ -18,24 +12,10 @@ export class ReactComponentScreen extends Screen {
     this.isReact = true;
     this.af_componentId = "A-react-screen";
     this.af_componentTitle = "React Component";
+    this.af_subscriptions = {};
+    this.af_componentService = {};
 
-    const javaInteger = new JavaInteger("0");
-
-    this.af_subscriptions = {
-      // "org.uberfire.shared.TestEvent": (testEvent: TestEvent) => {
-      //   return this.onFoo(`An event from server has arrived! "${testEvent.bar}"`);
-      // }
-    };
-
-    // const service = new TestMessagesService();
-    //
-    // this.af_componentService = {
-    //   sayHello: service.hello0,
-    //   sayHelloToSomething: service.hello1,
-    //   sayHelloOnServer: service.muteHello,
-    //   fireServerEvent: service.helloFromEvent,
-    //   sendTestPojo: service.postTestEvent
-    // };
+    console.info("Testing builtin type: " + new JavaInteger("42").get());
   }
 
   public af_onStartup() {
@@ -43,41 +23,7 @@ export class ReactComponentScreen extends Screen {
   }
 
   public af_onOpen() {
-    // const testEventInstance = new TestEvent({
-    //   bar: "hello1",
-    //   foo: new Foo({ foo: "a" }),
-    //   child: new TestEvent({
-    //     bar: "hello2",
-    //     foo: new Foo({ foo: "b" })
-    //   })
-    // });
-
-    console.info(`[${this.af_componentId}] is open! :: (Starting to make requests..)`);
-
-    Promise.resolve()
-      .then(() => {
-        return this.af_componentService.sayHello();
-      })
-      .then(msg => {
-        console.info(`First call returned (${msg})`);
-        return this.af_componentService.sayHelloToSomething({ who: "foo" });
-      })
-      .then(msg => {
-        console.info(`Second call returned (${msg})`);
-        return this.af_componentService.sayHelloOnServer();
-      })
-      .then(msg => {
-        console.info(`Third call returned (${msg})`);
-        return this.af_componentService.sendTestPojo({ testEvent: null });
-      })
-      .then(msg => {
-        console.info(`Fourth call returned:`);
-        console.info(msg);
-        console.info(`All calls returned successfully!`);
-      })
-      .catch(e => {
-        console.error(e);
-      });
+    console.info(`[${this.af_componentId}] is open! :: It's a pure React component`);
   }
 
   public af_onFocus() {
@@ -100,7 +46,7 @@ export class ReactComponentScreen extends Screen {
     return (
       <div>
         <br />
-        <button className={"btn btn-primary btn-sm"} onClick={() => this.af_componentService.fireServerEvent()}>
+        <button className={"btn btn-primary btn-sm"} onClick={() => console.info("Button was clicked.")}>
           Click me to make server send an event...
         </button>
         <br />
@@ -119,10 +65,7 @@ export class PureDomElementScreen extends Screen {
     this.af_componentId = "dom-elements-screen";
     this.af_componentTitle = "DOM Elements Component";
     this.span = document.createElement("span");
-    // const testMessagesService = new TestMessagesService();
-    // this.af_componentService = {
-    //   fireServerEvent: testMessagesService.helloFromEvent
-    // };
+    this.af_componentService = {};
   }
 
   public af_onMayClose() {
@@ -131,8 +74,8 @@ export class PureDomElementScreen extends Screen {
 
   public af_componentRoot() {
     const button = document.createElement("button");
-    button.textContent = "This is a HTMLButton element";
-    button.onclick = e => this.af_componentService.fireServerEvent();
+    button.textContent = "This is a HTMLButtonElement";
+    button.onclick = e => console.info("HTMLButtonElement was clicked");
 
     const label = document.createElement("label");
     label.textContent = "This is also a Foo Message: ";
@@ -174,35 +117,3 @@ export class SillyReactScreen extends Screen {
     return <h1>{`This is just an <h1>`}</h1>;
   }
 }
-
-// export class HomePerspective extends AppFormer.Perspective {
-//
-//     constructor() {
-//         super();
-//         this.af_componentId = "home-perspective";
-//         this.af_perspectiveScreens = ["string-template-screen", "A-react-screen"];
-//         this.af_isDefaultPerspective = false;
-//     }
-//
-//
-//     af_perspectiveRoot() {
-//         return homePerspectiveTemplate;
-//     }
-// }
-//
-//
-//
-// export class OtherPerspective extends AppFormer.Perspective {
-//
-//     constructor() {
-//         super();
-//         this.af_componentId = "other-perspective";
-//         this.af_perspectiveScreens = ["string-template-screen", "dom-elements-screen"];
-//         this.af_isDefaultPerspective = false;
-//     }
-//
-//
-//     af_perspectiveRoot() {
-//         return otherPerspectiveTemplate;
-//     }
-// }

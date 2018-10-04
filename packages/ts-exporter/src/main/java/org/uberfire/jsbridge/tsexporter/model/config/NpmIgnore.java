@@ -16,33 +16,29 @@
 
 package org.uberfire.jsbridge.tsexporter.model.config;
 
+import org.uberfire.jsbridge.tsexporter.model.NpmPackageGenerated;
 import org.uberfire.jsbridge.tsexporter.model.TsExporterResource;
 
 import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
 
-public class LernaJson implements TsExporterResource {
+public class NpmIgnore implements TsExporterResource {
 
-    private final String version;
+    private final NpmPackageGenerated npmPackage;
 
-    public LernaJson(final String version) {
-        this.version = version;
+    public NpmIgnore(final NpmPackageGenerated npmPackage) {
+        this.npmPackage = npmPackage;
     }
 
     @Override
     public String toSource() {
         return lines(
-                "{",
-                "  \"lerna\": \"3.4.0\",",
-                "  \"version\": \"" + version + "\",",
-                "  \"npmClientArgs\": [",
-                "    \"--no-package-lock\", \"--no-lock-file\"",
-                "  ]",
-                "}"
+                "**/packages",
+                "**/lerna.json"
         );
     }
 
     @Override
     public String getNpmPackageName() {
-        return "";
+        return npmPackage.getName();
     }
 }

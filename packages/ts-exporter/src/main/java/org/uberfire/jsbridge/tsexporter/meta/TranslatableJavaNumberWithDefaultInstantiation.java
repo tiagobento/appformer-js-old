@@ -36,8 +36,6 @@ public class TranslatableJavaNumberWithDefaultInstantiation implements Translata
     public String toTypeScript(final SourceUsage sourceUsage) {
         final String translated = importEntry.getUniqueTsIdentifier();
         switch (sourceUsage) {
-            case FIELD_DECLARATION:
-                return format("%s = new %s(\"0\")", translated, translated);
             case IMPORT_STATEMENT:
             case TYPE_ARGUMENT_USE:
             case TYPE_ARGUMENT_DECLARATION:

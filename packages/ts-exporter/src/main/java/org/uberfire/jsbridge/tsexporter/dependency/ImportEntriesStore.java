@@ -48,7 +48,8 @@ public class ImportEntriesStore {
 
     public String getImportStatements() {
         return getImports().stream()
-                .map(relation -> toTypeScriptImportSource(relation.getImportEntry()))
+                .map(DependencyRelation::getImportEntry)
+                .map(this::toTypeScriptImportSource)
                 .sorted()
                 .collect(joining("\n"));
     }

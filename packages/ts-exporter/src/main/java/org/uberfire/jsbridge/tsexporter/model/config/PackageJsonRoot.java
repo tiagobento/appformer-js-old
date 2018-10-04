@@ -18,19 +18,28 @@ package org.uberfire.jsbridge.tsexporter.model.config;
 
 import org.uberfire.jsbridge.tsexporter.model.TsExporterResource;
 
+import static java.lang.String.format;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
 
-public class RootPackageJson implements TsExporterResource {
+public class PackageJsonRoot implements TsExporterResource {
+
+    private final String appformerJsVersion;
+
+    public PackageJsonRoot(final String appformerJsVersion) {
+        this.appformerJsVersion = appformerJsVersion;
+    }
 
     @Override
     public String toSource() {
-        return lines(
+        return format(lines(
                 "{",
-                "  \"name\": \"babel\",",
+                "  \"name\": \"%s\",",
                 "  \"private\": true,",
                 "  \"license\": \"Apache-2.0\",",
+                "  \"dependencies\": {",
+                "    \"appformer-js\": \"^" + appformerJsVersion + "\"",
+                "  },",
                 "  \"devDependencies\": {",
-                "    \"appformer-js\": \"^1.0.0\",",
                 "    \"circular-dependency-plugin\": \"^5.0.2\",",
                 "    \"clean-webpack-plugin\": \"^0.1.19\",",
                 "    \"ts-loader\": \"^4.4.2\",",
@@ -39,12 +48,13 @@ public class RootPackageJson implements TsExporterResource {
                 "    \"webpack-cli\": \"^3.0.8\",",
                 "    \"lerna\": \"^3.4.0\"",
                 "  }",
-                "}"
-        );
+                "}"),
+
+                      getNpmPackageName());
     }
 
     @Override
     public String getNpmPackageName() {
-        return "";
+        return "ts-exporter-build-root";
     }
 }

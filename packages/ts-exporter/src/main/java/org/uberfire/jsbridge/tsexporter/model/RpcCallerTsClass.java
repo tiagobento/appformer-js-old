@@ -26,10 +26,10 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
-import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 import org.uberfire.jsbridge.tsexporter.dependency.DependencyGraph;
 import org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation;
 import org.uberfire.jsbridge.tsexporter.dependency.ImportEntriesStore;
+import org.uberfire.jsbridge.tsexporter.meta.JavaType;
 import org.uberfire.jsbridge.tsexporter.util.Lazy;
 
 import static java.util.stream.Collectors.groupingBy;
@@ -38,20 +38,20 @@ import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.ElementKind.METHOD;
 import static org.uberfire.jsbridge.tsexporter.Main.elements;
 import static org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore.NO_DECORATORS;
-import static org.uberfire.jsbridge.tsexporter.meta.Translatable.SourceUsage.TYPE_ARGUMENT_DECLARATION;
 import static org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation.Kind.HIERARCHY;
+import static org.uberfire.jsbridge.tsexporter.meta.Translatable.SourceUsage.TYPE_ARGUMENT_DECLARATION;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.formatRightToLeft;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
 
 public class RpcCallerTsClass implements TsClass {
 
     private final TypeElement typeElement;
-    private final DependencyGraph dependencyGraph;
-    private final DecoratorStore decoratorStore;
-    private final ImportEntriesStore importEntriesStore;
     private final Lazy<String> source;
+    final DependencyGraph dependencyGraph;
+    final DecoratorStore decoratorStore;
+    final ImportEntriesStore importEntriesStore;
 
-    private static final List<String> RESERVED_WORDS = Arrays.asList("delete", "copy");
+    private static final List<String> RESERVED_WORDS = Arrays.asList("delete", "copy"); //TODO: Add all
 
     public RpcCallerTsClass(final TypeElement typeElement,
                             final DependencyGraph dependencyGraph,
@@ -82,16 +82,14 @@ public class RpcCallerTsClass implements TsClass {
     }
 
     private String simpleName() {
-        return importEntriesStore.with(HIERARCHY, new JavaType(getType(), getType())
-                .translate(NO_DECORATORS))
-                .toTypeScript(TYPE_ARGUMENT_DECLARATION);
+        return importEntriesStore.with(HIERARCHY, new JavaType(getType(), getType()).translate(NO_DECORATORS)).toTypeScript(TYPE_ARGUMENT_DECLARATION);
     }
 
     private String methods() {
         return elements.getAllMembers(typeElement).stream()
                 .filter(member -> member.getKind().equals(METHOD))
                 .filter(member -> !member.getEnclosingElement().toString().equals("java.lang.Object"))
-                .map(member -> new RpcCallerTsMethod((ExecutableElement) member, typeElement, importEntriesStore, dependencyGraph, decoratorStore))
+                .map(member -> new RpcCallerTsMethod((ExecutableElement) member, this))
                 .collect(groupingBy(RpcCallerTsMethod::getName)).entrySet().stream()
                 .flatMap(e -> resolveOverloadsAndReservedWords(e.getKey(), e.getValue()).stream())
                 .map(RpcCallerTsMethod::toSource)

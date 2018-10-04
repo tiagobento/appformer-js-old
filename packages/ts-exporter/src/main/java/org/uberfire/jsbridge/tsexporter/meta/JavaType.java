@@ -29,8 +29,8 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.WildcardType;
 
 import org.uberfire.jsbridge.tsexporter.Main;
-import org.uberfire.jsbridge.tsexporter.decorators.ImportEntryDecorator;
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
+import org.uberfire.jsbridge.tsexporter.decorators.ImportEntryForDecorator;
 import org.uberfire.jsbridge.tsexporter.dependency.ImportEntryJava;
 
 import static java.util.Collections.emptyList;
@@ -209,8 +209,8 @@ public class JavaType {
                     case "java.util.Collection":
                         return new TranslatableDefault("Array", emptySet(), translatableTypeArguments);
                     default: {
-                        if (decoratorStore.hasDecoratorFor(type)) {
-                            final ImportEntryDecorator decorator = decoratorStore.getDecoratorFor(type);
+                        if (decoratorStore.shouldDecorate(type, owner)) {
+                            final ImportEntryForDecorator decorator = decoratorStore.getDecoratorFor(type);
                             return new TranslatableDefault(decorator.getUniqueTsIdentifier(declaredType), singleton(decorator), translatableTypeArguments);
                         }
 

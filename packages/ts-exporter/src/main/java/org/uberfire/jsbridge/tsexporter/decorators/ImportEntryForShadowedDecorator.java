@@ -21,52 +21,38 @@ import javax.lang.model.type.DeclaredType;
 
 import org.uberfire.jsbridge.tsexporter.dependency.ImportEntry;
 
-import static org.uberfire.jsbridge.tsexporter.Main.elements;
+import static org.uberfire.jsbridge.tsexporter.model.TsClass.PACKAGES_SCOPE;
 
-public class ImportEntryDecorator implements ImportEntry {
+public class ImportEntryForShadowedDecorator implements ImportEntry {
 
-    private final String npmPackageName;
-    private final String decoratorPath;
-    private final String decoratedFqcn;
+    private final ImportEntryForDecorator importEntry;
 
-    public ImportEntryDecorator(final String npmPackageName,
-                                final String decoratorPath,
-                                final String decoratedFqcn) {
-
-        this.npmPackageName = npmPackageName;
-        this.decoratorPath = decoratorPath;
-        this.decoratedFqcn = decoratedFqcn;
+    public ImportEntryForShadowedDecorator(final ImportEntryForDecorator importEntry) {
+        this.importEntry = importEntry;
     }
 
     @Override
     public String getUniqueTsIdentifier(final DeclaredType owner) {
-        return decoratorPath.replace("/", "_").replace("-", "");
+        return importEntry.getUniqueTsIdentifier(owner);
     }
 
     @Override
     public String getRelativePath() {
-        return decoratorPath;
+        return importEntry.getRelativePath();
     }
 
+    @Override
     public String getNpmPackageName() {
-        return npmPackageName;
+        return PACKAGES_SCOPE + "/" + importEntry.getDecoratedMvnModule();
     }
 
     @Override
     public Element asElement() {
-        return elements.getTypeElement(decoratedFqcn);
-    }
-
-    public String getDecoratedFqcn() {
-        return decoratedFqcn;
-    }
-
-    public String getDecoratorPath() {
-        return decoratorPath;
+        return importEntry.asElement();
     }
 
     @Override
     public boolean represents(final DeclaredType type) {
-        return false;
+        return importEntry.represents(type);
     }
 }

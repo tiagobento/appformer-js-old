@@ -14,47 +14,50 @@
  * limitations under the License.
  */
 
-package org.uberfire.jsbridge.tsexporter.model.config;
+package org.uberfire.jsbridge.tsexporter.model;
 
-import java.util.List;
+import java.util.Set;
 
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
+
+import org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation;
 import org.uberfire.jsbridge.tsexporter.model.TsClass;
 import org.uberfire.jsbridge.tsexporter.model.TsExporterResource;
 
-import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
+import static java.util.Collections.emptySet;
+import static org.uberfire.jsbridge.tsexporter.util.Utils.readClasspathResource;
 
-public class TsConfigJson implements TsExporterResource {
+public class ClassPathResource implements TsExporterResource {
 
+    private final String source;
     private final String npmPackageName;
+    private final String resourcePath;
 
-    public TsConfigJson(final String npmPackageName) {
+    public ClassPathResource(final String npmPackageName,
+                             final String resourcePath) {
+
         this.npmPackageName = npmPackageName;
+        this.resourcePath = resourcePath;
+        this.source = readClasspathResource(getClass().getClassLoader().getResource(resourcePath));
     }
 
     @Override
     public String toSource() {
-        return lines(
-                "{",
-                "  \"exclude\": [\"./node_modules\"],",
-                "  \"include\": [\"./src\"],",
-                "  \"compilerOptions\": {",
-                "    \"lib\": [\"es6\", \"dom\"],",
-                "    \"module\": \"commonjs\",",
-                "    \"target\": \"es5\",",
-                "    \"declaration\": true,",
-                "    \"sourceMap\": true,",
-                "    \"outDir\": \"./\",",
-                "    \"noImplicitAny\": true,",
-                "    \"strictNullChecks\": true,",
-                "    \"experimentalDecorators\": true,",
-                "    \"noErrorTruncation\": true",
-                "  }",
-                "}"
-        );
+        return source;
     }
 
     @Override
     public String getNpmPackageName() {
         return npmPackageName;
+    }
+
+    @Override
+    public String getUnscopedNpmPackageName() {
+        return npmPackageName;
+    }
+
+    public String getResourcePath() {
+        return resourcePath.replace(npmPackageName + "/", "");
     }
 }
