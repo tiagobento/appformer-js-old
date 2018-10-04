@@ -22,9 +22,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.uberfire.jsbridge.tsexporter.config.Configuration;
-import org.uberfire.jsbridge.tsexporter.config.Project;
+import org.uberfire.jsbridge.tsexporter.config.AppFormerLib;
 import org.uberfire.jsbridge.tsexporter.model.NpmPackage;
-import org.uberfire.jsbridge.tsexporter.model.NpmPackageFor3rdPartyProjects;
+import org.uberfire.jsbridge.tsexporter.model.NpmPackageForAppFormerLibs;
 import org.uberfire.jsbridge.tsexporter.model.NpmPackageGenerated;
 import org.uberfire.jsbridge.tsexporter.model.TsExporterResource;
 import org.uberfire.jsbridge.tsexporter.model.config.LernaJson;
@@ -34,8 +34,8 @@ import org.uberfire.jsbridge.tsexporter.model.config.PackageJsonForAggregationNp
 import static java.io.File.separator;
 import static java.lang.String.format;
 import static java.lang.System.getProperty;
-import static org.uberfire.jsbridge.tsexporter.config.Project.Type.DECORATORS;
-import static org.uberfire.jsbridge.tsexporter.config.Project.Type.LIB;
+import static org.uberfire.jsbridge.tsexporter.config.AppFormerLib.Type.DECORATORS;
+import static org.uberfire.jsbridge.tsexporter.config.AppFormerLib.Type.LIB;
 import static org.uberfire.jsbridge.tsexporter.model.NpmPackage.Type.FINAL;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.createFileIfNotExists;
 
@@ -58,16 +58,16 @@ public class TsCodegenWriter {
 
         tsCodegenResult.getNpmPackages().forEach(this::writeNpmPackageGenerated);
 
-        config.getProjects().stream().filter(s -> s.getType().equals(DECORATORS))
+        config.getLibraries().stream().filter(s -> s.getType().equals(DECORATORS))
                 .forEach(this::writeNpmPackageForDecorator);
 
-        config.getProjects().stream().filter(s -> s.getType().equals(LIB))
+        config.getLibraries().stream().filter(s -> s.getType().equals(LIB))
                 .forEach(this::writeNpmPackageForLib);
     }
 
-    private void writeNpmPackageForLib(final Project project) {
-        final NpmPackageFor3rdPartyProjects npmPackage = new NpmPackageFor3rdPartyProjects(
-                project.getName(),
+    private void writeNpmPackageForLib(final AppFormerLib lib) {
+        final NpmPackageForAppFormerLibs npmPackage = new NpmPackageForAppFormerLibs(
+                lib.getName(),
                 tsCodegenResult.getVersion(),
                 NpmPackage.Type.LIB);
 
@@ -75,11 +75,11 @@ public class TsCodegenWriter {
         npmPackage.getResources().forEach(r -> this.write(r, buildPath(baseDir, r.getResourcePath())));
     }
 
-    private void writeNpmPackageForDecorator(final Project project) {
-        final NpmPackageGenerated decoratedNpmPackage = tsCodegenResult.getNpmPackageGeneratedByMvnModuleName(project.getMvnModuleName());
+    private void writeNpmPackageForDecorator(final AppFormerLib lib) {
+        final NpmPackageGenerated decoratedNpmPackage = tsCodegenResult.getNpmPackageGeneratedByMvnModuleName(lib.getAssociatedMvnModuleName());
 
-        final NpmPackageFor3rdPartyProjects decoratorsNpmPackage = new NpmPackageFor3rdPartyProjects(
-                project.getName(),
+        final NpmPackageForAppFormerLibs decoratorsNpmPackage = new NpmPackageForAppFormerLibs(
+                lib.getName(),
                 tsCodegenResult.getVersion(),
                 NpmPackage.Type.DECORATORS);
 

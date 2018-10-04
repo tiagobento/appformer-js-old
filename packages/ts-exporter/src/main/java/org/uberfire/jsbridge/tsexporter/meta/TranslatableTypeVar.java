@@ -70,7 +70,6 @@ public class TranslatableTypeVar implements Translatable {
     public String toTypeScript(final SourceUsage sourceUsage) {
         switch (sourceUsage) {
             case TYPE_ARGUMENT_USE:
-            case FIELD_DECLARATION:
                 return translatedUse;
             case TYPE_ARGUMENT_DECLARATION:
                 return translatedDeclaration;

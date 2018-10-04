@@ -27,15 +27,15 @@ import static org.uberfire.jsbridge.tsexporter.util.Utils.getResources;
 
 public class Configuration {
 
-    private final Map<String, Project> projectsByName;
+    private final Map<String, AppFormerLib> libsByName;
 
     public Configuration() {
-        projectsByName = list(getResources("META-INF/appformer-js.json")).stream()
-                .map(Project::new)
-                .collect(toMap(Project::getName, identity()));
+        libsByName = list(getResources("META-INF/appformer-js.json")).stream()
+                .map(AppFormerLib::new)
+                .collect(toMap(AppFormerLib::getName, identity()));
     }
 
-    public Set<Project> getProjects() {
-        return new HashSet<>(projectsByName.values());
+    public Set<AppFormerLib> getLibraries() {
+        return new HashSet<>(libsByName.values());
     }
 }

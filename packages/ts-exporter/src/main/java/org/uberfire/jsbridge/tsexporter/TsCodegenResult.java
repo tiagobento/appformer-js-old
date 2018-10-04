@@ -29,20 +29,23 @@ import static org.uberfire.jsbridge.tsexporter.model.NpmPackage.Type.FINAL;
 public class TsCodegenResult {
 
     private final String version;
+    private final String appformerJsVersion;
     private final DecoratorStore decoratorStore;
     private final Set<NpmPackageGenerated> npmPackages;
 
     public TsCodegenResult(final String version,
+                           final String appformerJsVersion,
                            final DecoratorStore decoratorStore,
                            final Set<NpmPackageGenerated> npmPackages) {
 
         this.version = version;
         this.decoratorStore = decoratorStore;
         this.npmPackages = npmPackages;
+        this.appformerJsVersion = appformerJsVersion;
     }
 
     public TsExporterResource getRootPackageJson() {
-        return new PackageJsonRoot();
+        return new PackageJsonRoot(appformerJsVersion);
     }
 
     public TsExporterResource getLernaJson() {

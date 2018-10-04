@@ -49,8 +49,6 @@ public class TranslatableDefault implements Translatable {
             case TYPE_ARGUMENT_USE:
             case TYPE_ARGUMENT_DECLARATION:
                 return translate(sourceUsage);
-            case FIELD_DECLARATION:
-                return translate(TYPE_ARGUMENT_USE);
             default:
                 throw new RuntimeException();
         }

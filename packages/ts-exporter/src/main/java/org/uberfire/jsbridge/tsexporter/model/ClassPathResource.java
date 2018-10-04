@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.uberfire.jsbridge.tsexporter.decorators;
+package org.uberfire.jsbridge.tsexporter.model;
 
 import java.util.Set;
 
@@ -28,14 +28,14 @@ import org.uberfire.jsbridge.tsexporter.model.TsExporterResource;
 import static java.util.Collections.emptySet;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.readClasspathResource;
 
-public class CopiedResource implements TsExporterResource {
+public class ClassPathResource implements TsExporterResource {
 
     private final String source;
     private final String npmPackageName;
     private final String resourcePath;
 
-    public CopiedResource(final String npmPackageName,
-                          final String resourcePath) {
+    public ClassPathResource(final String npmPackageName,
+                             final String resourcePath) {
 
         this.npmPackageName = npmPackageName;
         this.resourcePath = resourcePath;

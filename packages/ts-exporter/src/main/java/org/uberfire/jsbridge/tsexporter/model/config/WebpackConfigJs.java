@@ -41,7 +41,7 @@ public class WebpackConfigJs implements TsExporterResource {
                 "const CircularDependencyPlugin = require('circular-dependency-plugin');",
                 "",
                 "module.exports = {",
-                "  mode: 'development',",
+                "  mode: 'production',",
                 "  externals: {",
                 "    'appformer-js': {",
                 "      root: 'AppFormer', //indicates global variable",

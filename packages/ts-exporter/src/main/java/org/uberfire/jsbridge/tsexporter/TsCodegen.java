@@ -53,18 +53,21 @@ import static org.uberfire.jsbridge.tsexporter.util.Utils.getResources;
 
 public class TsCodegen {
 
-    private final DecoratorStore decoratorStore;
     private final String version;
+    private final String appformerJsVersion;
+    private final DecoratorStore decoratorStore;
 
     public TsCodegen(final String version,
                      final DecoratorStore decoratorStore) {
 
-        this.decoratorStore = decoratorStore;
         this.version = version;
+        this.appformerJsVersion = "1.0.0"; //FIXME: Change that
+        this.decoratorStore = decoratorStore;
     }
 
     public TsCodegenResult generate() {
         return new TsCodegenResult(version,
+                                   appformerJsVersion,
                                    decoratorStore,
                                    concat(generateRaw().stream(),
                                           generateNonRaw().stream()).collect(toSet()));

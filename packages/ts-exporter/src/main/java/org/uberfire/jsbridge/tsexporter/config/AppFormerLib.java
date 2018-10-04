@@ -30,16 +30,16 @@ import static java.util.stream.StreamSupport.stream;
 import static org.uberfire.jsbridge.tsexporter.model.TsClass.getMavenModuleNameFromSourceFilePath;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.readClasspathResource;
 
-public class Project {
+public class AppFormerLib {
 
     private final String name;
     private final Type type;
-    private final String mvnModuleName;
+    private final String associatedMvnModuleName;
     private final Map<String, String> decorators;
     private final String main;
     private final Set<String> components;
 
-    public Project(final URL url) {
+    public AppFormerLib(final URL url) {
         final String jsonString = readClasspathResource(url);
         final JsonObject json = new JsonParser().parse(jsonString).getAsJsonObject();
 
@@ -48,7 +48,7 @@ public class Project {
 
         type = Type.valueOf(json.get("type").getAsString().trim().toUpperCase());
 
-        mvnModuleName = getMavenModuleNameFromSourceFilePath(url.getFile());
+        associatedMvnModuleName = getMavenModuleNameFromSourceFilePath(url.getFile());
 
         components = stream(json.get("components").getAsJsonArray().spliterator(), false)
                 .map(JsonElement::getAsString)
@@ -61,8 +61,8 @@ public class Project {
                                e -> e.getValue().getAsString()));
     }
 
-    public String getMvnModuleName() {
-        return mvnModuleName;
+    public String getAssociatedMvnModuleName() {
+        return associatedMvnModuleName;
     }
 
     public String getName() {

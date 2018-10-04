@@ -33,7 +33,7 @@ import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 import static org.uberfire.jsbridge.tsexporter.Main.types;
-import static org.uberfire.jsbridge.tsexporter.config.Project.Type.DECORATORS;
+import static org.uberfire.jsbridge.tsexporter.config.AppFormerLib.Type.DECORATORS;
 
 public class DecoratorStore {
 
@@ -62,19 +62,17 @@ public class DecoratorStore {
     }
 
     private Set<ImportEntryForDecorator> readDecoratorFiles(final Configuration config) {
-        return config.getProjects().stream()
-                .filter(project -> project.getType().equals(DECORATORS))
-                .flatMap(project -> project.getDecorators().entrySet().stream().map(e -> {
-                    return new ImportEntryForDecorator(
-                            project.getMvnModuleName(),
-                            project.getName(),
-                            e.getKey(),
-                            e.getValue());
-                }))
+        return config.getLibraries().stream()
+                .filter(lib -> lib.getType().equals(DECORATORS))
+                .flatMap(lib -> lib.getDecorators().entrySet().stream().map(e -> new ImportEntryForDecorator(
+                        lib.getAssociatedMvnModuleName(),
+                        lib.getName(),
+                        e.getKey(),
+                        e.getValue())))
                 .collect(toSet());
     }
 
-    public boolean shouldDecorate(final TypeMirror type, TypeMirror owner) {
+    public boolean shouldDecorate(final TypeMirror type, final TypeMirror owner) {
         return decorators.get().containsKey(types.erasure(type).toString());
     }
 

@@ -21,20 +21,19 @@ import java.util.regex.Pattern;
 
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
-import org.uberfire.jsbridge.tsexporter.decorators.CopiedResource;
 
 import static java.util.stream.Collectors.toSet;
 
-public class NpmPackageFor3rdPartyProjects implements NpmPackage {
+public class NpmPackageForAppFormerLibs implements NpmPackage {
 
     private final String name;
     private final String version;
     private final Type type;
-    private final Set<CopiedResource> resources;
+    private final Set<ClassPathResource> resources;
 
-    public NpmPackageFor3rdPartyProjects(final String name,
-                                         final String version,
-                                         final Type type) {
+    public NpmPackageForAppFormerLibs(final String name,
+                                      final String version,
+                                      final Type type) {
 
         this.name = name;
         this.version = version;
@@ -42,7 +41,7 @@ public class NpmPackageFor3rdPartyProjects implements NpmPackage {
         this.resources = new Reflections(name, new ResourcesScanner()).getResources(Pattern.compile(".*")).stream()
                 .filter(resourcePath -> !resourcePath.contains("/node_modules/"))
                 .filter(resourcePath -> !resourcePath.contains("/dist/"))
-                .map(resourcePath -> new CopiedResource(name, resourcePath))
+                .map(resourcePath -> new ClassPathResource(name, resourcePath))
                 .collect(toSet());
     }
 
@@ -66,7 +65,7 @@ public class NpmPackageFor3rdPartyProjects implements NpmPackage {
         return type;
     }
 
-    public Set<CopiedResource> getResources() {
+    public Set<ClassPathResource> getResources() {
         return resources;
     }
 }

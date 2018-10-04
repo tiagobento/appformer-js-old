@@ -23,6 +23,12 @@ import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
 
 public class PackageJsonRoot implements TsExporterResource {
 
+    private final String appformerJsVersion;
+
+    public PackageJsonRoot(final String appformerJsVersion) {
+        this.appformerJsVersion = appformerJsVersion;
+    }
+
     @Override
     public String toSource() {
         return format(lines(
@@ -31,10 +37,9 @@ public class PackageJsonRoot implements TsExporterResource {
                 "  \"private\": true,",
                 "  \"license\": \"Apache-2.0\",",
                 "  \"dependencies\": {",
-                "    \"appformer-js\": \"^1.0.0\"",
+                "    \"appformer-js\": \"^" + appformerJsVersion + "\"",
                 "  },",
                 "  \"devDependencies\": {",
-                "    \"appformer-js\": \"^1.0.0\",",
                 "    \"circular-dependency-plugin\": \"^5.0.2\",",
                 "    \"clean-webpack-plugin\": \"^0.1.19\",",
                 "    \"ts-loader\": \"^4.4.2\",",

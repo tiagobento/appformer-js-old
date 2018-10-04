@@ -37,8 +37,6 @@ public class TranslatableArray implements Translatable {
             case TYPE_ARGUMENT_USE:
             case TYPE_ARGUMENT_DECLARATION:
                 return format("%s[]", componentTranslatable.toTypeScript(sourceUsage));
-            case FIELD_DECLARATION:
-                return format("%s[]", componentTranslatable.toTypeScript(TYPE_ARGUMENT_USE));
             case IMPORT_STATEMENT:
                 return componentTranslatable.toTypeScript(sourceUsage);
             default:

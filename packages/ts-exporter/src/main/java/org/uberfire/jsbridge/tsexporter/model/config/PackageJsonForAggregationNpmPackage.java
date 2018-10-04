@@ -51,6 +51,7 @@ public class PackageJsonForAggregationNpmPackage implements TsExporterResource {
                 .collect(groupingBy(ImportEntry::getNpmPackageName))
                 .keySet().stream()
                 .filter(name -> !name.equals(npmPackage.getName()))
+                .filter(name -> !name.contains("appformer-js"))
                 .sorted()
                 .map(name -> format("\"%s\": \"%s\"", name, npmPackage.getVersion()))
                 .collect(joining(",\n"));
@@ -71,7 +72,6 @@ public class PackageJsonForAggregationNpmPackage implements TsExporterResource {
                 "    \"doPublish\": \"mv dist dist.tmp && mv `readlink dist.tmp` . && rm dist.tmp && npm publish --registry http://localhost:4873\"",
                 "  },",
                 "  \"devDependencies\": {",
-                "    \"appformer-js\": \"^1.0.0\",",
                 "    \"circular-dependency-plugin\": \"^5.0.2\",",
                 "    \"clean-webpack-plugin\": \"^0.1.19\",",
                 "    \"ts-loader\": \"^4.4.2\",",

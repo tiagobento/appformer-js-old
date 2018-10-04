@@ -19,6 +19,7 @@ package org.uberfire.jsbridge.tsexporter.model;
 import java.util.LinkedHashMap;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
@@ -174,22 +175,20 @@ public class RpcCallerTsMethod {
     private String toFactoriesOracleEntry(final PojoTsClass tsClass) {
         final JavaType javaType = new JavaType(types.erasure(tsClass.getType()), owner.asType());
         final String defaultNumbersInitialization = Main.elements.getAllMembers((TypeElement) javaType.asElement()).stream()
-                .filter(field -> requiresDefaultOracleInstantiation(field, javaType))
-                .map(field -> {
-                    final String fieldType = importStore.with(CODE, new JavaType(field.asType(), javaType.getType()).translate(decoratorStore)).toTypeScript(TYPE_ARGUMENT_USE);
-                    return format("%s: new %s(\"0\")", field.getSimpleName(), fieldType);
+                .flatMap(field -> {
+                    final Translatable translatedFieldType = new JavaType(field.asType(), javaType.getType()).translate(decoratorStore);
+                    if (translatedFieldType instanceof TranslatableJavaNumberWithDefaultInstantiation) {
+                        return Stream.empty();
+                    } else {
+                        final String fieldType = importStore.with(CODE, translatedFieldType).toTypeScript(TYPE_ARGUMENT_USE);
+                        return Stream.of(format("%s: new %s(\"0\")", field.getSimpleName(), fieldType));
+                    }
                 }).collect(joining(", "));
 
         return format("[\"%s\", () => new %s({ %s }) as any]",
                       tsClass.asElement().getQualifiedName().toString(),
                       importing(javaType.translate(decoratorStore)).toTypeScript(TYPE_ARGUMENT_USE),
                       defaultNumbersInitialization);
-    }
-
-    private boolean requiresDefaultOracleInstantiation(final Element fieldElement,
-                                                       final JavaType javaType) {
-
-        return new JavaType(fieldElement.asType(), javaType.getType()).translate(decoratorStore) instanceof TranslatableJavaNumberWithDefaultInstantiation;
     }
 
     private boolean isConcreteClass(final PojoTsClass tsClass) {
