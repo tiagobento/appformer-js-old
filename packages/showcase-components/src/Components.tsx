@@ -74,8 +74,8 @@ export class PureDomElementScreen extends Screen {
 
   public af_componentRoot() {
     const button = document.createElement("button");
-    button.textContent = "This is a HTMLButton element";
-    button.onclick = e => this.af_componentService.fireServerEvent();
+    button.textContent = "This is a HTMLButtonElement";
+    button.onclick = e => console.info("HTMLButtonElement was clicked");
 
     const label = document.createElement("label");
     label.textContent = "This is also a Foo Message: ";

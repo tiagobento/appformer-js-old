@@ -22,6 +22,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.AbstractMap.SimpleImmutableEntry;
 
+import javax.tools.StandardLocation;
+
 import org.uberfire.jsbridge.tsexporter.config.Configuration;
 import org.uberfire.jsbridge.tsexporter.config.Project;
 import org.uberfire.jsbridge.tsexporter.model.NpmPackage;
@@ -29,13 +31,11 @@ import org.uberfire.jsbridge.tsexporter.model.NpmPackageFor3rdPartyProjects;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
-import static javax.tools.StandardLocation.CLASS_OUTPUT;
-import static org.uberfire.jsbridge.tsexporter.Main.TS_EXPORTER_PACKAGE;
 import static org.uberfire.jsbridge.tsexporter.config.Project.Type.LIB;
 
 public class TsCodegenLibBundler {
 
-    private static final String BUNDLER_DESTINATION_PACKAGE = TS_EXPORTER_PACKAGE;
+    private static final String BUNDLER_DESTINATION_DIR = "org/uberfire/jsbridge/public/";
 
     private final Configuration config;
     private final TsCodegenWriter writer;
@@ -53,13 +53,12 @@ public class TsCodegenLibBundler {
                 .filter(project -> project.getType().equals(LIB))
                 .peek(this::writeEntryPoint)
                 .flatMap(project -> project.getComponents().stream()
-                        .map(componentId -> new SimpleImmutableEntry<>(componentId, "test/" + getEntryPointFileName(project))))
+                        .map(componentId -> new SimpleImmutableEntry<>(componentId, getEntryPointFileName(project))))
                 .map(e -> format("\"%s\": \"%s\"", e.getKey(), e.getValue()))
                 .collect(joining(",\n"));
 
-        writeResource(BUNDLER_DESTINATION_PACKAGE,
-                      "AppFormerComponentsRegistry.js",
-                      format("window.AppFormerComponentsRegistry = { %s }", registryEntries));
+        writePublicResource("AppFormerComponentsRegistry.js",
+                            format("window.AppFormerComponentsRegistry = { %s }", registryEntries));
     }
 
     private void writeEntryPoint(final Project project) {
@@ -75,17 +74,16 @@ public class TsCodegenLibBundler {
 
         try {
             final String contents = Files.lines(srcFilePath).collect(joining("\n"));
-            writeResource(BUNDLER_DESTINATION_PACKAGE, fileName, contents);
+            writePublicResource(fileName, contents);
         } catch (final Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    private void writeResource(final String packageName,
-                               final String fileName,
-                               final String contents) {
+    private void writePublicResource(final String fileName,
+                                     final String contents) {
 
-        try (final Writer filerWriter = Main.filer.createResource(CLASS_OUTPUT, packageName, fileName).openWriter()) {
+        try (final Writer filerWriter = Main.filer.createResource(StandardLocation.CLASS_OUTPUT, "", BUNDLER_DESTINATION_DIR + fileName).openWriter()) {
             filerWriter.write(contents);
         } catch (final IOException e) {
             throw new RuntimeException(e);
@@ -93,6 +91,6 @@ public class TsCodegenLibBundler {
     }
 
     private String getEntryPointFileName(final Project project) {
-        return project.getName().replace("-", "") + ".js";
+        return project.getName() + ".js";
     }
 }
