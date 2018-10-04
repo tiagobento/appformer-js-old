@@ -66,7 +66,7 @@ public class PackageJsonForGeneratedNpmPackages implements TsExporterResource {
 
         final String installDecoratorsPart = decoratorPackagesToInstallBeforeBuild.isEmpty()
                 ? ""
-                : (" npm i " + decoratorPackagesToInstallBeforeBuild.stream().collect(joining(" ")) + " && ");
+                : (" npm i " + decoratorPackagesToInstallBeforeBuild.stream().collect(joining(" ")) + " --registry http://localhost:4873 && ");
 
         return format(lines("{",
                             "  \"name\": \"%s\",",
