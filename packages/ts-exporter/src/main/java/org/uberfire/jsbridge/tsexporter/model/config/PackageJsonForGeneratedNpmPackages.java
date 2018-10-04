@@ -59,6 +59,7 @@ public class PackageJsonForGeneratedNpmPackages implements TsExporterResource {
                 .collect(groupingBy(ImportEntry::getNpmPackageName))
                 .keySet().stream()
                 .filter(name -> !name.equals(npmPackage.getName()))
+                .filter(name -> !name.contains("appformer-js"))
                 .sorted()
                 .map(name -> format("\"%s\": \"%s\"", name, npmPackage.getVersion()))
                 .collect(joining(",\n"));

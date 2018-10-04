@@ -46,7 +46,8 @@ public class TsConfigJson implements TsExporterResource {
                 "    \"outDir\": \"./\",",
                 "    \"noImplicitAny\": true,",
                 "    \"strictNullChecks\": true,",
-                "    \"experimentalDecorators\": true",
+                "    \"experimentalDecorators\": true,",
+                "    \"noErrorTruncation\": true",
                 "  }",
                 "}"
         );

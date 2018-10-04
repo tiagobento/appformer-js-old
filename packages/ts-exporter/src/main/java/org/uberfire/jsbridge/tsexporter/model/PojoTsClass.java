@@ -166,10 +166,10 @@ public class PojoTsClass implements TsClass {
     }
 
     private String toFieldSource(final Element fieldElement) {
-        return format("public readonly %s?: %s;",
+        return format("public readonly %s?: %s = undefined;",
                       fieldElement.getSimpleName(),
                       importStore.with(FIELD, new JavaType(fieldElement.asType(), declaredType)
-                              .translate(decoratorStore)).toTypeScript(FIELD_DECLARATION));
+                              .translate(decoratorStore)).toTypeScript(TYPE_ARGUMENT_USE));
     }
 
     private Translatable superclass() {

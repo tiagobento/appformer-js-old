@@ -24,6 +24,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 
+import org.uberfire.jsbridge.tsexporter.Main;
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
 import org.uberfire.jsbridge.tsexporter.dependency.DependencyGraph;
 import org.uberfire.jsbridge.tsexporter.dependency.ImportEntriesStore;
@@ -99,9 +100,9 @@ public class RpcCallerTsMethod {
                             "public %s(args: { %s }) {",
                             "  return rpc(%s, [%s])",
                             "         .then((json: string) => {",
-                            "           return unmarshall(json, {",
+                            "           return unmarshall(json, new Map([",
                             "%s",
-                            "           }) as %s;",
+                            "           ])) as %s;",
                             "         });",
                             "}",
                             ""),
@@ -172,9 +173,23 @@ public class RpcCallerTsMethod {
 
     private String toFactoriesOracleEntry(final PojoTsClass tsClass) {
         final JavaType javaType = new JavaType(types.erasure(tsClass.getType()), owner.asType());
-        return format("\"%s\": (x: any) => new %s(x)",
+        final String defaultNumbersInitialization = Main.elements.getAllMembers((TypeElement) javaType.asElement()).stream()
+                .filter(field -> requiresDefaultOracleInstantiation(field, javaType))
+                .map(field -> {
+                    final String fieldType = importStore.with(CODE, new JavaType(field.asType(), javaType.getType()).translate(decoratorStore)).toTypeScript(TYPE_ARGUMENT_USE);
+                    return format("%s: new %s(\"0\")", field.getSimpleName(), fieldType);
+                }).collect(joining(", "));
+
+        return format("[\"%s\", () => new %s({ %s }) as any]",
                       tsClass.asElement().getQualifiedName().toString(),
-                      importing(javaType.translate(decoratorStore)).toTypeScript(TYPE_ARGUMENT_USE));
+                      importing(javaType.translate(decoratorStore)).toTypeScript(TYPE_ARGUMENT_USE),
+                      defaultNumbersInitialization);
+    }
+
+    private boolean requiresDefaultOracleInstantiation(final Element fieldElement,
+                                                       final JavaType javaType) {
+
+        return new JavaType(fieldElement.asType(), javaType.getType()).translate(decoratorStore) instanceof TranslatableJavaNumberWithDefaultInstantiation;
     }
 
     private boolean isConcreteClass(final PojoTsClass tsClass) {
