@@ -34,6 +34,5 @@ public interface Translatable {
         TYPE_ARGUMENT_USE,
         TYPE_ARGUMENT_DECLARATION,
         IMPORT_STATEMENT,
-        FIELD_DECLARATION,
     }
 }

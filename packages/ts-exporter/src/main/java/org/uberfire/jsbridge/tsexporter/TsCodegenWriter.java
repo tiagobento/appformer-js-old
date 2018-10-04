@@ -149,7 +149,7 @@ public class TsCodegenWriter {
                        final Path path) {
 
         try {
-            System.out.println("Saving file: " + path + "...");
+            System.out.println("Writing file: " + path + "...");
             Files.createDirectories(path.getParent());
             Files.write(createFileIfNotExists(path), resource.toSource().getBytes());
         } catch (final IOException e) {

@@ -71,17 +71,14 @@ public class RpcCallerTsMethod {
     }
 
     RpcCallerTsMethod(final ExecutableElement executableElement,
-                      final TypeElement owner,
-                      final ImportEntriesStore importStore,
-                      final DependencyGraph dependencyGraph,
-                      final DecoratorStore decoratorStore) {
+                      final RpcCallerTsClass rpcCallerTsClass) {
 
         this.executableElement = executableElement;
-        this.owner = owner;
-        this.importStore = importStore;
         this.name = executableElement.getSimpleName().toString();
-        this.dependencyGraph = dependencyGraph;
-        this.decoratorStore = decoratorStore;
+        this.owner = rpcCallerTsClass.asElement();
+        this.importStore = rpcCallerTsClass.importEntriesStore;
+        this.dependencyGraph = rpcCallerTsClass.dependencyGraph;
+        this.decoratorStore = rpcCallerTsClass.decoratorStore;
     }
 
     public String getName() {
@@ -175,20 +172,25 @@ public class RpcCallerTsMethod {
     private String toFactoriesOracleEntry(final PojoTsClass tsClass) {
         final JavaType javaType = new JavaType(types.erasure(tsClass.getType()), owner.asType());
         final String defaultNumbersInitialization = Main.elements.getAllMembers((TypeElement) javaType.asElement()).stream()
-                .flatMap(field -> {
-                    final Translatable translatedFieldType = new JavaType(field.asType(), javaType.getType()).translate(decoratorStore);
-                    if (translatedFieldType instanceof TranslatableJavaNumberWithDefaultInstantiation) {
-                        return Stream.empty();
-                    } else {
-                        final String fieldType = importStore.with(CODE, translatedFieldType).toTypeScript(TYPE_ARGUMENT_USE);
-                        return Stream.of(format("%s: new %s(\"0\")", field.getSimpleName(), fieldType));
-                    }
-                }).collect(joining(", "));
+                .flatMap(field -> toOracleFactoryMethodConstructorEntry(field, new JavaType(field.asType(), javaType.getType())))
+                .collect(joining(", "));
 
         return format("[\"%s\", () => new %s({ %s }) as any]",
                       tsClass.asElement().getQualifiedName().toString(),
                       importing(javaType.translate(decoratorStore)).toTypeScript(TYPE_ARGUMENT_USE),
                       defaultNumbersInitialization);
+    }
+
+    private Stream<String> toOracleFactoryMethodConstructorEntry(final Element fieldElement,
+                                                                 final JavaType fieldJavaType) {
+
+        final Translatable translatedFieldType = fieldJavaType.translate(decoratorStore);
+        if (!(translatedFieldType instanceof TranslatableJavaNumberWithDefaultInstantiation)) {
+            return Stream.empty();
+        }
+
+        final String fieldType = importStore.with(CODE, translatedFieldType).toTypeScript(TYPE_ARGUMENT_USE);
+        return Stream.of(format("%s: new %s(\"0\")", fieldElement.getSimpleName(), fieldType));
     }
 
     private boolean isConcreteClass(final PojoTsClass tsClass) {

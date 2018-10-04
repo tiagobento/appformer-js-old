@@ -48,9 +48,8 @@ public class TsCodegenLibBundler {
 
         final String registryEntries = config.getLibraries().stream()
                 .filter(lib -> lib.getType().equals(LIB))
-                .peek(this::writeEntryPoint)
-                .flatMap(lib -> lib.getComponents().stream()
-                        .map(componentId -> new SimpleImmutableEntry<>(componentId, getLibMainFileName(lib))))
+                .peek(this::writeLibMainFile)
+                .flatMap(lib -> lib.getComponents().stream().map(componentId -> new SimpleImmutableEntry<>(componentId, getLibMainFileName(lib))))
                 .map(e -> format("\"%s\": \"%s\"", e.getKey(), e.getValue()))
                 .collect(joining(",\n"));
 
@@ -58,7 +57,7 @@ public class TsCodegenLibBundler {
                             format("window.AppFormerComponentsRegistry = { %s }", registryEntries));
     }
 
-    private void writeEntryPoint(final AppFormerLib lib) {
+    private void writeLibMainFile(final AppFormerLib lib) {
         final String fileName = getLibMainFileName(lib);
 
         final NpmPackage npmPackage = new NpmPackageForAppFormerLibs(

@@ -40,12 +40,16 @@ public class TsCodegenBuilder {
         }
 
         System.out.println("Building packages..");
-        bash(linesJoinedBy(" && ", new String[]{
+        final int buildSuccess = bash(linesJoinedBy(" && ", new String[]{
                 "cd " + baseDir,
                 "npm i --registry http://localhost:4873 --no-lock-file --no-package-lock",
                 "npx lerna bootstrap --registry http://localhost:4873",
                 "npx lerna exec --concurrency `nproc || sysctl -n hw.ncpu` -- npm run build"
         }));
+
+        if (buildSuccess != 0) {
+            throw new RuntimeException("Build failed. Scroll up to see the logs.");
+        }
     }
 
     private int bash(final String command) {
