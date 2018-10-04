@@ -1,6 +1,9 @@
 import { MarshallingContext } from "../../MarshallingContext";
 import { JavaDouble } from "../../../java-wrappers";
 import { JavaDoubleMarshaller } from "../JavaDoubleMarshaller";
+import { UnmarshallingContext } from "../../UnmarshallingContext";
+import { NumValBasedErraiObject } from "../../model/NumValBasedErraiObject";
+import { JavaType } from "../../../java-wrappers/JavaType";
 
 describe("marshall", () => {
   test("with regular double, should return the same value", () => {
@@ -25,5 +28,59 @@ describe("marshall", () => {
     const output = new JavaDoubleMarshaller().marshall(input, new MarshallingContext());
 
     expect(output).toBeNull();
+  });
+});
+
+describe("unmarshall", () => {
+  test("with number input, should return a JavaDouble instance", () => {
+    const marshaller = new JavaDoubleMarshaller();
+    const context = new UnmarshallingContext(new Map());
+
+    const input = 1.1;
+    const output = marshaller.notNullUnmarshall(input, context);
+
+    expect(output).toEqual(new JavaDouble("1.1"));
+  });
+
+  test("with ErraiObject regular input, should return a JavaDouble instance", () => {
+    const marshaller = new JavaDoubleMarshaller();
+    const context = new UnmarshallingContext(new Map());
+
+    const input = 1.1;
+    const marshalledInput = new NumValBasedErraiObject(JavaType.DOUBLE, input).asErraiObject();
+
+    const output = marshaller.notNullUnmarshall(marshalledInput, context);
+
+    expect(output).toEqual(new JavaDouble("1.1"));
+  });
+
+  test("with non double value, should throw error", () => {
+    const marshaller = new JavaDoubleMarshaller();
+    const context = new UnmarshallingContext(new Map());
+
+    const input = "abc" as any;
+    const marshalledInput = new NumValBasedErraiObject(JavaType.DOUBLE, input).asErraiObject();
+
+    expect(() => marshaller.notNullUnmarshall(marshalledInput, context)).toThrowError();
+  });
+
+  test("with null value, should throw error", () => {
+    const marshaller = new JavaDoubleMarshaller();
+    const context = new UnmarshallingContext(new Map());
+
+    const input = null as any;
+    const marshalledInput = new NumValBasedErraiObject(JavaType.DOUBLE, input).asErraiObject();
+
+    expect(() => marshaller.notNullUnmarshall(marshalledInput, context)).toThrowError();
+  });
+
+  test("with undefined value, should throw error", () => {
+    const marshaller = new JavaDoubleMarshaller();
+    const context = new UnmarshallingContext(new Map());
+
+    const input = undefined as any;
+    const marshalledInput = new NumValBasedErraiObject(JavaType.DOUBLE, input).asErraiObject();
+
+    expect(() => marshaller.notNullUnmarshall(marshalledInput, context)).toThrowError();
   });
 });

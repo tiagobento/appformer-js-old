@@ -1,4 +1,5 @@
 import { JavaDouble } from "../JavaDouble";
+import { JavaType } from "../JavaType";
 
 describe("get", () => {
   describe("with valid input", () => {
@@ -184,6 +185,6 @@ describe("_fqcn", () => {
   test("must be the same than in Java", () => {
     const fqcn = (new JavaDouble("1") as any)._fqcn;
 
-    expect(fqcn).toBe("java.lang.Double");
+    expect(fqcn).toBe(JavaType.DOUBLE);
   });
 });

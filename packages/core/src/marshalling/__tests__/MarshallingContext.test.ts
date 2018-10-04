@@ -2,6 +2,7 @@ import { MarshallingContext } from "../MarshallingContext";
 import { ErraiObject } from "../model/ErraiObject";
 import { ErraiObjectConstants } from "../model/ErraiObjectConstants";
 import { JavaWrapper } from "../../java-wrappers/JavaWrapper";
+import { NumValBasedErraiObject } from "../model/NumValBasedErraiObject";
 
 describe("incrementAndGetObjectId", () => {
   test("with sequential calls, should return different ids", () => {
@@ -24,11 +25,7 @@ describe("cacheObject", () => {
   test("with regular object, should record the correct ErraiObject instance", () => {
     const inputPortable = { _fqcn: "com.myapp.my.portable", foo: "bar", bar: "foo" };
 
-    const inputErraiObject = {
-      [ErraiObjectConstants.ENCODED_TYPE]: "com.foo.bar",
-      [ErraiObjectConstants.OBJECT_ID]: "1",
-      [ErraiObjectConstants.NUM_VAL]: "123"
-    } as ErraiObject;
+    const inputErraiObject = new NumValBasedErraiObject("com.foo.bar", "123", "1").asErraiObject();
 
     context.cacheObject(inputPortable, inputErraiObject);
 
@@ -42,11 +39,7 @@ describe("cacheObject", () => {
   test("with object overwritten, should return the last version", () => {
     const inputPortable = { _fqcn: "com.myapp.my.portable", foo: "bar", bar: "foo" };
 
-    const inputErraiObject = {
-      [ErraiObjectConstants.ENCODED_TYPE]: "com.foo.bar",
-      [ErraiObjectConstants.OBJECT_ID]: "1",
-      [ErraiObjectConstants.NUM_VAL]: "123"
-    } as ErraiObject;
+    const inputErraiObject = new NumValBasedErraiObject("com.foo.bar", "123", "1").asErraiObject();
 
     context.cacheObject(inputPortable, inputErraiObject);
 
@@ -66,11 +59,7 @@ describe("cacheObject", () => {
     const innerValue = 1;
     const wrappedValue = new MyNumberWrappedType(innerValue);
 
-    const inputErraiObject = {
-      [ErraiObjectConstants.ENCODED_TYPE]: "com.foo.bar",
-      [ErraiObjectConstants.OBJECT_ID]: "1",
-      [ErraiObjectConstants.NUM_VAL]: "123"
-    } as ErraiObject;
+    const inputErraiObject = new NumValBasedErraiObject("com.foo.bar", "123", "1").asErraiObject();
 
     context.cacheObject(wrappedValue, inputErraiObject);
 

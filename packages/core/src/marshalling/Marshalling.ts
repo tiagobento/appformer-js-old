@@ -13,16 +13,17 @@ export function marshall<T>(obj: Portable<T>): string | null {
   return JSON.stringify(marshaller.marshall(obj, new MarshallingContext()));
 }
 
-export function unmarshall<T>(json: string, oracle: any): Portable<T> | null {
-  // if (json === null || json === undefined) {
-  //   return null;
-  // }
-  //
-  // const jsonObj = JSON.parse(json);
-  // const fqcn = jsonObj[ErraiObjectConstants.ENCODED_TYPE];
-  //
-  // const marshaller = MarshallerProvider.getForFqcn(fqcn);
-  // return marshaller.unmarshall(jsonObj, new UnmarshallingContext(oracle));
+export function unmarshall<T>(
+  json: string,
+  oracle: Map<string, () => Portable<any>>
+): Portable<T> | null | void {
+  if (json === null || json === undefined) {
+    return undefined;
+  }
 
-  return JSON.parse(json);
+  const jsonObj = JSON.parse(json);
+  const fqcn = jsonObj[ErraiObjectConstants.ENCODED_TYPE];
+
+  const marshaller = MarshallerProvider.getForFqcn(fqcn);
+  return marshaller.unmarshall(jsonObj, new UnmarshallingContext(oracle));
 }

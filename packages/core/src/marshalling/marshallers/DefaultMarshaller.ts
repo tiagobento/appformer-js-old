@@ -6,6 +6,7 @@ import { ErraiObjectConstants } from "../model/ErraiObjectConstants";
 import { Portable } from "../../internal/model/Portable";
 import { NullableMarshaller } from "./NullableMarshaller";
 import { UnmarshallingContext } from "../UnmarshallingContext";
+import { JavaWrapper } from "../../java-wrappers/JavaWrapper";
 
 export class DefaultMarshaller<T extends Portable<T>> extends NullableMarshaller<
   T,
@@ -96,36 +97,33 @@ export class DefaultMarshaller<T extends Portable<T>> extends NullableMarshaller
     return _this;
   }
 
-  private unmarshallCustomObject(targetFactory: (data: any) => any, input: ErraiObject, ctx: UnmarshallingContext) {
+  private unmarshallCustomObject(targetFactory: () => any, input: ErraiObject, ctx: UnmarshallingContext) {
     // instantiate an empty target object in order to be able to discover the
     // types of unqualified values present in the JSON
-    const emptyTargetObj = targetFactory({});
+    const targetObj = targetFactory();
 
     // clone the input, removing non useful fields
     const _this = { ...(input as any) };
     delete _this[ErraiObjectConstants.ENCODED_TYPE];
     delete _this[ErraiObjectConstants.OBJECT_ID];
 
-    const targetData = {} as any;
     Object.keys(_this).forEach(k => {
-      const fqcn = _this[k][ErraiObjectConstants.ENCODED_TYPE];
       if (_this[k] === null || _this[k] === undefined) {
-        targetData[k] = null;
-      } else if (fqcn) {
-        const unmarshalledValue = MarshallerProvider.getForFqcn(fqcn).unmarshall(_this[k], ctx);
-        targetData[k] = DefaultMarshaller.autoWrap(unmarshalledValue, k, emptyTargetObj);
+        targetObj[k] = undefined;
+      } else if (_this[k][ErraiObjectConstants.ENCODED_TYPE]) {
+        const fqcn = _this[k][ErraiObjectConstants.ENCODED_TYPE];
+        targetObj[k] = MarshallerProvider.getForFqcn(fqcn).unmarshall(_this[k], ctx);
       } else {
         // no fqcn, try to infer it asking the field's type to the target object
-        const inferredFqcn = DefaultMarshaller.qualifyValue(k, _this[k], emptyTargetObj);
+        const inferredFqcn = DefaultMarshaller.qualifyValue(k, _this[k], targetObj);
         if (!inferredFqcn) {
           throw new Error(`Don't know how to unmarshall field ${k} of ${input}`);
         }
-        const unmarshalledValue = MarshallerProvider.getForFqcn(inferredFqcn).unmarshall(_this[k], ctx);
-        targetData[k] = DefaultMarshaller.autoWrap(unmarshalledValue, k, emptyTargetObj);
+        targetObj[k] = MarshallerProvider.getForFqcn(inferredFqcn).unmarshall(_this[k], ctx);
       }
     });
 
-    return targetFactory(targetData);
+    return targetObj;
   }
 
   private static marshallWrappableType(input: any, ctx: MarshallingContext): any {
@@ -152,7 +150,7 @@ export class DefaultMarshaller<T extends Portable<T>> extends NullableMarshaller
     // qualify the input (i.e. discover its fqcn)
     const wrappedType = JavaWrapperUtils.wrapIfNeeded(input);
 
-    return MarshallerProvider.getForObject(wrappedType).unmarshall(wrappedType, ctx);
+    return MarshallerProvider.getForObject(wrappedType).unmarshall((wrappedType as JavaWrapper<any>).get(), ctx);
   }
 
   private static qualifyValue(fieldName: string, fieldValue: any, targetObj: any): string | undefined {
@@ -160,24 +158,10 @@ export class DefaultMarshaller<T extends Portable<T>> extends NullableMarshaller
       return (JavaWrapperUtils.wrapIfNeeded(fieldValue) as any)._fqcn;
     }
 
+    if (targetObj[fieldName] === null || targetObj[fieldName] === undefined) {
+      return undefined;
+    }
+
     return (targetObj[fieldName] as any)._fqcn;
-  }
-
-  private static autoWrap(unmarshalledValue: any, fieldName: string, targetObj: any): any {
-    // wrap native types if the target object wants its java-wrapped version
-
-    if (!targetObj[fieldName] || !targetObj[fieldName]._fqcn) {
-      // target obj is not defined or doesn't have a fqcn, therefore, the field
-      // is not java-wrapped (otherwise, it would have a _fqcn defined)
-      return unmarshalledValue;
-    }
-
-    if (unmarshalledValue._fqcn) {
-      // the just unmarshalled value has a fqcn, then, it's not a native type
-      return unmarshalledValue;
-    }
-
-    // the field in the target obj has a fqcn and our unmarshalled value hasn't, we need to wrap it.
-    return JavaWrapperUtils.wrapIfNeeded(unmarshalledValue);
   }
 }

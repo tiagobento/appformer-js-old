@@ -6,12 +6,14 @@ import { MarshallingContext } from "../MarshallingContext";
 import { ErraiObject } from "../model/ErraiObject";
 import { isString } from "../../util/TypeUtils";
 import { UnmarshallingContext } from "../UnmarshallingContext";
+import { ValueBasedErraiObject } from "../model/ValueBasedErraiObject";
+import { MarshallerProvider } from "../MarshallerProvider";
 
 export class JavaHashMapMarshaller<T, U> extends NullableMarshaller<
-  JavaHashMap<T | null, U | null>,
+  JavaHashMap<T | undefined, U | undefined>,
   ErraiObject,
   ErraiObject,
-  Map<T | null, U | null>
+  Map<T | undefined, U | undefined>
 > {
   public notNullMarshall(input: JavaHashMap<T, U>, ctx: MarshallingContext): ErraiObject {
     const cachedObject = ctx.getCached(input);
@@ -21,24 +23,26 @@ export class JavaHashMapMarshaller<T, U> extends NullableMarshaller<
 
     const marshalledEntriesMap = this.marshallEntries(input.get().entries(), ctx);
 
-    const result = {
-      [ErraiObjectConstants.ENCODED_TYPE]: (input as any)._fqcn,
-      [ErraiObjectConstants.OBJECT_ID]: `${ctx.incrementAndGetObjectId()}`,
-      [ErraiObjectConstants.VALUE]: marshalledEntriesMap
-    };
+    const fqcn = (input as any)._fqcn;
+    const value = marshalledEntriesMap;
+    const objectId = ctx.incrementAndGetObjectId().toString(10);
+    const result = new ValueBasedErraiObject(fqcn, value, objectId).asErraiObject();
 
     ctx.cacheObject(input, result);
 
     return result;
   }
 
-  public notNullUnmarshall(input: ErraiObject, ctx: UnmarshallingContext): Map<T | null, U | null> {
+  public notNullUnmarshall(input: ErraiObject, ctx: UnmarshallingContext): Map<T | undefined, U | undefined> {
     const cachedObject = ctx.getCached(input);
     if (cachedObject) {
-      return (cachedObject as JavaHashMap<T | null, U | null>).get();
+      return (cachedObject as JavaHashMap<T | undefined, U | undefined>).get();
     }
 
-    const mapObj = input[ErraiObjectConstants.VALUE];
+    const mapObj = ValueBasedErraiObject.from(input).value;
+    if (!mapObj) {
+      throw new Error(`Invalid Map value ${mapObj}. Can't unmarshall json ${input}`);
+    }
 
     const map = this.unmarshallEntries(mapObj, ctx);
 
@@ -69,12 +73,13 @@ export class JavaHashMapMarshaller<T, U> extends NullableMarshaller<
     return { [`${marshalledKey}`]: marshalledValue };
   }
 
-  private unmarshallEntries(map: any, ctx: UnmarshallingContext): JavaHashMap<T | null, U | null> {
-    const unmarshalledMap = new Map<T | null, U | null>();
+  private unmarshallEntries(map: any, ctx: UnmarshallingContext): JavaHashMap<T | undefined, U | undefined> {
+    const unmarshalledMap = new Map<T | undefined, U | undefined>();
 
     Object.keys(map).forEach(key => {
       const unmarshalledKey = this.unmarshallKey(key, ctx);
-      const unmarshalledValue = GenericsTypeMarshallingUtils.unmarshallGenericsTypeElement<U>(map[key], ctx);
+
+      const unmarshalledValue = MarshallerProvider.getForObject(map[key]).unmarshall(map[key], ctx);
 
       unmarshalledMap.set(unmarshalledKey, unmarshalledValue);
     });
@@ -82,15 +87,19 @@ export class JavaHashMapMarshaller<T, U> extends NullableMarshaller<
     return new JavaHashMap(unmarshalledMap);
   }
 
-  private unmarshallKey(key: string, ctx: UnmarshallingContext): T | null {
+  private unmarshallKey(key: string, ctx: UnmarshallingContext): T | undefined {
+    if (!key) {
+      throw new Error(`Invalid Map's key ${key}. Can't unmarshall json!`);
+    }
+
     if (key === ErraiObjectConstants.NULL) {
-      return null;
+      return undefined;
     }
 
     if (key.startsWith(ErraiObjectConstants.JSON)) {
-      // this prefix indicates that the key is not a native string
-      const keyJson = key.replace(ErraiObjectConstants.JSON, "");
-      return GenericsTypeMarshallingUtils.unmarshallGenericsTypeElement(keyJson, ctx);
+      // this prefix indicates that the key is not a native string, it is a json object serialized to string
+      const keyJson = JSON.parse(key.replace(ErraiObjectConstants.JSON, ""));
+      return MarshallerProvider.getForObject(keyJson).unmarshall(keyJson, ctx);
     }
 
     // the map key has type string

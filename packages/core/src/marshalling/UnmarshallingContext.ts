@@ -3,10 +3,10 @@ import { ErraiObject } from "./model/ErraiObject";
 import { ErraiObjectConstants } from "./model/ErraiObjectConstants";
 
 export class UnmarshallingContext {
-  private readonly _oracle: any;
+  private readonly _oracle: Map<string, () => Portable<any>>;
   private readonly _objectsCache: Map<string, Portable<any>>;
 
-  constructor(oracle: any) {
+  constructor(oracle: Map<string, () => Portable<any>>) {
     this._oracle = oracle;
     this._objectsCache = new Map();
   }
@@ -27,7 +27,7 @@ export class UnmarshallingContext {
     return this._objectsCache.get(objectId);
   }
 
-  public getFactory(fqcn: string): ((data: any) => Portable<any>) | undefined {
-    return this._oracle[fqcn];
+  public getFactory(fqcn: string): (() => Portable<any>) | undefined {
+    return this._oracle.get(fqcn);
   }
 }

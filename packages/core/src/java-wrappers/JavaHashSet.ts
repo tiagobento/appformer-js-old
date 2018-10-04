@@ -1,8 +1,9 @@
 import { JavaCollection } from "./JavaCollection";
 import { instanceOfSet } from "../util/TypeUtils";
+import { JavaType } from "./JavaType";
 
 export class JavaHashSet<T> extends JavaCollection<Set<T>> {
-  private readonly _fqcn = "java.util.HashSet";
+  private readonly _fqcn = JavaType.HASH_SET;
 
   private _value: Set<T>;
 

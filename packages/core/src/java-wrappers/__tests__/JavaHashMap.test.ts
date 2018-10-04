@@ -1,4 +1,5 @@
 import { JavaHashMap } from "../JavaHashMap";
+import { JavaType } from "../JavaType";
 
 describe("get", () => {
   test("with populated map, returns the same map", () => {
@@ -46,6 +47,6 @@ describe("_fqcn", () => {
   test("must be the same than in Java", () => {
     const fqcn = (new JavaHashMap(new Map([["foo1", "bar1"]])) as any)._fqcn;
 
-    expect(fqcn).toBe("java.util.HashMap");
+    expect(fqcn).toBe(JavaType.HASH_MAP);
   });
 });

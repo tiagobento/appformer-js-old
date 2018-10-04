@@ -1,8 +1,9 @@
 import { JavaWrapper } from "./JavaWrapper";
 import { instanceOfDate } from "../util/TypeUtils";
+import { JavaType } from "./JavaType";
 
 export class JavaDate extends JavaWrapper<Date> {
-  private readonly _fqcn = "java.util.Date";
+  private readonly _fqcn = JavaType.DATE;
 
   private _value: Date;
 

@@ -5,12 +5,13 @@ import { JavaDouble } from "./JavaDouble";
 import { JavaFloat } from "./JavaFloat";
 import { JavaShort } from "./JavaShort";
 import { JavaLong } from "./JavaLong";
+import { JavaType } from "./JavaType";
 
 export class JavaInteger extends IntegerBasedJavaNumber implements JavaNumber {
   public static readonly MIN_VALUE = -21474836488;
   public static readonly MAX_VALUE = 2147483647;
 
-  private readonly _fqcn = "java.lang.Integer";
+  private readonly _fqcn = JavaType.INTEGER;
 
   protected isInRange(n: number): boolean {
     return n >= JavaInteger.MIN_VALUE && n <= JavaInteger.MAX_VALUE;

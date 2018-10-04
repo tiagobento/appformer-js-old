@@ -1,4 +1,5 @@
 import { JavaBoolean } from "../JavaBoolean";
+import { JavaType } from "../JavaType";
 
 describe("get", () => {
   describe("with valid input", () => {
@@ -44,6 +45,6 @@ describe("_fqcn", () => {
   test("must be the same than in Java", () => {
     const fqcn = (new JavaBoolean(true) as any)._fqcn;
 
-    expect(fqcn).toBe("java.lang.Boolean");
+    expect(fqcn).toBe(JavaType.BOOLEAN);
   });
 });

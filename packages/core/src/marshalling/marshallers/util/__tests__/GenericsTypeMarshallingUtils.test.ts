@@ -29,11 +29,11 @@ import { JavaDateMarshaller } from "../../JavaDateMarshaller";
 import { DefaultMarshaller } from "../../DefaultMarshaller";
 import { Portable } from "../../../../internal";
 import { JavaOptionalMarshaller } from "../../JavaOptionalMarshaller";
+import { NumValBasedErraiObject } from "../../../model/NumValBasedErraiObject";
+import { JavaType } from "../../../../java-wrappers/JavaType";
 
 describe("marshallGenericsTypeElement", () => {
-  const encodedType = ErraiObjectConstants.ENCODED_TYPE;
   const objectId = ErraiObjectConstants.OBJECT_ID;
-  const numVal = ErraiObjectConstants.NUM_VAL;
 
   beforeEach(() => {
     MarshallerProvider.initialize();
@@ -227,11 +227,7 @@ describe("marshallGenericsTypeElement", () => {
     [booleanInput, javaBooleanInput].forEach(input => {
       const output = GenericsTypeMarshallingUtils.marshallGenericsTypeElement(input, new MarshallingContext());
 
-      expect(output).toStrictEqual({
-        [encodedType]: "java.lang.Boolean",
-        [objectId]: "-1",
-        [numVal]: false
-      });
+      expect(output).toStrictEqual(new NumValBasedErraiObject(JavaType.BOOLEAN, false).asErraiObject());
     });
   });
 
@@ -239,12 +235,7 @@ describe("marshallGenericsTypeElement", () => {
     const input = new JavaByte("1");
 
     const output = GenericsTypeMarshallingUtils.marshallGenericsTypeElement(input, new MarshallingContext());
-
-    expect(output).toStrictEqual({
-      [encodedType]: "java.lang.Byte",
-      [objectId]: "-1",
-      [numVal]: 1
-    });
+    expect(output).toStrictEqual(new NumValBasedErraiObject(JavaType.BYTE, 1).asErraiObject());
   });
 
   test("with JavaDouble input, should return input wrapped as an ErraiObject", () => {
@@ -252,11 +243,7 @@ describe("marshallGenericsTypeElement", () => {
 
     const output = GenericsTypeMarshallingUtils.marshallGenericsTypeElement(input, new MarshallingContext());
 
-    expect(output).toStrictEqual({
-      [encodedType]: "java.lang.Double",
-      [objectId]: "-1",
-      [numVal]: 1.1
-    });
+    expect(output).toStrictEqual(new NumValBasedErraiObject(JavaType.DOUBLE, 1.1).asErraiObject());
   });
 
   test("with JavaFloat input, should return input wrapped as an ErraiObject", () => {
@@ -264,11 +251,7 @@ describe("marshallGenericsTypeElement", () => {
 
     const output = GenericsTypeMarshallingUtils.marshallGenericsTypeElement(input, new MarshallingContext());
 
-    expect(output).toStrictEqual({
-      [encodedType]: "java.lang.Float",
-      [objectId]: "-1",
-      [numVal]: 1.1
-    });
+    expect(output).toStrictEqual(new NumValBasedErraiObject(JavaType.FLOAT, 1.1).asErraiObject());
   });
 
   test("with JavaInteger input, should return input wrapped as an ErraiObject", () => {
@@ -276,11 +259,7 @@ describe("marshallGenericsTypeElement", () => {
 
     const output = GenericsTypeMarshallingUtils.marshallGenericsTypeElement(input, new MarshallingContext());
 
-    expect(output).toStrictEqual({
-      [encodedType]: "java.lang.Integer",
-      [objectId]: "-1",
-      [numVal]: 1
-    });
+    expect(output).toStrictEqual(new NumValBasedErraiObject(JavaType.INTEGER, 1).asErraiObject());
   });
 
   test("with JavaShort input, should return input wrapped as an ErraiObject", () => {
@@ -288,11 +267,7 @@ describe("marshallGenericsTypeElement", () => {
 
     const output = GenericsTypeMarshallingUtils.marshallGenericsTypeElement(input, new MarshallingContext());
 
-    expect(output).toStrictEqual({
-      [encodedType]: "java.lang.Short",
-      [objectId]: "-1",
-      [numVal]: 1
-    });
+    expect(output).toStrictEqual(new NumValBasedErraiObject(JavaType.SHORT, 1).asErraiObject());
   });
 
   class Pojo implements Portable<Pojo> {

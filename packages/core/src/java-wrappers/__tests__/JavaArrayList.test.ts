@@ -1,4 +1,5 @@
 import { JavaArrayList } from "../JavaArrayList";
+import { JavaType } from "../JavaType";
 
 describe("get", () => {
   test("with populated array, returns the same array", () => {
@@ -45,6 +46,6 @@ describe("_fqcn", () => {
   test("must be the same than in Java", () => {
     const fqcn = (new JavaArrayList(["1", "2"]) as any)._fqcn;
 
-    expect(fqcn).toBe("java.util.ArrayList");
+    expect(fqcn).toBe(JavaType.ARRAY_LIST);
   });
 });

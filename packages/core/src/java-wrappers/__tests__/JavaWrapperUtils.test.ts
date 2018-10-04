@@ -5,6 +5,7 @@ import { JavaHashMap } from "../JavaHashMap";
 import { JavaBoolean } from "../JavaBoolean";
 import { JavaString } from "../JavaString";
 import { JavaDate } from "../JavaDate";
+import { JavaType } from "../JavaType";
 
 describe("needsWrapping", () => {
   test("with array object, should return true", () => {
@@ -93,59 +94,59 @@ describe("wrapIfNeeded", () => {
 
 describe("isJavaType", () => {
   test("with Java Byte's fqcn, should return true", () => {
-    expect(JavaWrapperUtils.isJavaType("java.lang.Byte")).toBeTruthy();
+    expect(JavaWrapperUtils.isJavaType(JavaType.BYTE)).toBeTruthy();
   });
 
   test("with Java Double's fqcn, should return true", () => {
-    expect(JavaWrapperUtils.isJavaType("java.lang.Double")).toBeTruthy();
+    expect(JavaWrapperUtils.isJavaType(JavaType.DOUBLE)).toBeTruthy();
   });
 
   test("with Java Float's fqcn, should return true", () => {
-    expect(JavaWrapperUtils.isJavaType("java.lang.Float")).toBeTruthy();
+    expect(JavaWrapperUtils.isJavaType(JavaType.FLOAT)).toBeTruthy();
   });
 
   test("with Java Integer's fqcn, should return true", () => {
-    expect(JavaWrapperUtils.isJavaType("java.lang.Integer")).toBeTruthy();
+    expect(JavaWrapperUtils.isJavaType(JavaType.INTEGER)).toBeTruthy();
   });
 
   test("with Java Long's fqcn, should return true", () => {
-    expect(JavaWrapperUtils.isJavaType("java.lang.Long")).toBeTruthy();
+    expect(JavaWrapperUtils.isJavaType(JavaType.LONG)).toBeTruthy();
   });
 
   test("with Java Short's fqcn, should return true", () => {
-    expect(JavaWrapperUtils.isJavaType("java.lang.Short")).toBeTruthy();
+    expect(JavaWrapperUtils.isJavaType(JavaType.SHORT)).toBeTruthy();
   });
 
   test("with Java Boolean's fqcn, should return true", () => {
-    expect(JavaWrapperUtils.isJavaType("java.lang.Boolean")).toBeTruthy();
+    expect(JavaWrapperUtils.isJavaType(JavaType.BOOLEAN)).toBeTruthy();
   });
 
   test("with Java String's fqcn, should return true", () => {
-    expect(JavaWrapperUtils.isJavaType("java.lang.String")).toBeTruthy();
+    expect(JavaWrapperUtils.isJavaType(JavaType.STRING)).toBeTruthy();
   });
 
   test("with Java BigDecimal's fqcn, should return true", () => {
-    expect(JavaWrapperUtils.isJavaType("java.math.BigDecimal")).toBeTruthy();
+    expect(JavaWrapperUtils.isJavaType(JavaType.BIG_DECIMAL)).toBeTruthy();
   });
 
   test("with Java BigInteger's fqcn, should return true", () => {
-    expect(JavaWrapperUtils.isJavaType("java.math.BigInteger")).toBeTruthy();
+    expect(JavaWrapperUtils.isJavaType(JavaType.BIG_INTEGER)).toBeTruthy();
   });
 
   test("with Java ArrayList's fqcn, should return true", () => {
-    expect(JavaWrapperUtils.isJavaType("java.util.ArrayList")).toBeTruthy();
+    expect(JavaWrapperUtils.isJavaType(JavaType.ARRAY_LIST)).toBeTruthy();
   });
 
   test("with Java HashSet's fqcn, should return true", () => {
-    expect(JavaWrapperUtils.isJavaType("java.util.HashSet")).toBeTruthy();
+    expect(JavaWrapperUtils.isJavaType(JavaType.HASH_SET)).toBeTruthy();
   });
 
   test("with Java HashMap's fqcn, should return true", () => {
-    expect(JavaWrapperUtils.isJavaType("java.util.HashMap")).toBeTruthy();
+    expect(JavaWrapperUtils.isJavaType(JavaType.HASH_MAP)).toBeTruthy();
   });
 
   test("with Java Date's fqcn, should return true", () => {
-    expect(JavaWrapperUtils.isJavaType("java.util.Date")).toBeTruthy();
+    expect(JavaWrapperUtils.isJavaType(JavaType.DATE)).toBeTruthy();
   });
 
   test("with non Java type fqcn, should return false", () => {
@@ -153,6 +154,6 @@ describe("isJavaType", () => {
   });
 
   test("with Java Optional's fqcn, should return true", () => {
-    expect(JavaWrapperUtils.isJavaType("java.util.Optional")).toBeTruthy();
+    expect(JavaWrapperUtils.isJavaType(JavaType.OPTIONAL)).toBeTruthy();
   });
 });

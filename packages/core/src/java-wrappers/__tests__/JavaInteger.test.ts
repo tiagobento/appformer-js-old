@@ -1,4 +1,5 @@
 import { JavaInteger } from "../JavaInteger";
+import { JavaType } from "../JavaType";
 
 describe("get", () => {
   describe("with valid input", () => {
@@ -218,6 +219,6 @@ describe("_fqcn", () => {
   test("must be the same than in Java", () => {
     const fqcn = (new JavaInteger("1") as any)._fqcn;
 
-    expect(fqcn).toBe("java.lang.Integer");
+    expect(fqcn).toBe(JavaType.INTEGER);
   });
 });

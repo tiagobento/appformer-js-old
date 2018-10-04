@@ -1,8 +1,9 @@
 import { JavaCollection } from "./JavaCollection";
 import { instanceOfArray } from "../util/TypeUtils";
+import { JavaType } from "./JavaType";
 
 export class JavaArrayList<T> extends JavaCollection<T[]> {
-  private readonly _fqcn = "java.util.ArrayList";
+  private readonly _fqcn = JavaType.ARRAY_LIST;
 
   private _value: T[];
 

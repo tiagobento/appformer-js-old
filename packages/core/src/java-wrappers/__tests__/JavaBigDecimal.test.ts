@@ -1,5 +1,6 @@
 import { JavaBigDecimal } from "../JavaBigDecimal";
 import { BigNumber } from "bignumber.js";
+import { JavaType } from "../JavaType";
 
 describe("get", () => {
   describe("with valid input", () => {
@@ -185,6 +186,6 @@ describe("_fqcn", () => {
   test("must be the same than in Java", () => {
     const fqcn = (new JavaBigDecimal("1") as any)._fqcn;
 
-    expect(fqcn).toBe("java.math.BigDecimal");
+    expect(fqcn).toBe(JavaType.BIG_DECIMAL);
   });
 });

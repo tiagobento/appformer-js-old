@@ -1,8 +1,9 @@
 import { JavaWrapper } from "./JavaWrapper";
 import { instanceOfString } from "../util/TypeUtils";
+import { JavaType } from "./JavaType";
 
 export class JavaString extends JavaWrapper<string> {
-  private readonly _fqcn = "java.lang.String";
+  private readonly _fqcn = JavaType.STRING;
 
   private _value: string;
 

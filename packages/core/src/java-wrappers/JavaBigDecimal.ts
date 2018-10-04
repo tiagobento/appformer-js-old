@@ -7,9 +7,10 @@ import { JavaFloat } from "./JavaFloat";
 import { JavaInteger } from "./JavaInteger";
 import { JavaShort } from "./JavaShort";
 import { JavaLong } from "./JavaLong";
+import { JavaType } from "./JavaType";
 
 export class JavaBigDecimal extends BigNumberWrapper implements JavaNumber {
-  private readonly _fqcn = "java.math.BigDecimal";
+  private readonly _fqcn = JavaType.BIG_DECIMAL;
 
   public from(asString: string): BigNumber {
     return new BigNumber(asString, 10);

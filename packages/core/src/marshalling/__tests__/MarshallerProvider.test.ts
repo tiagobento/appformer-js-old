@@ -42,8 +42,12 @@ describe("getForObject", () => {
 
   describe("properly initialized", () => {
     beforeEach(() => {
-      (MarshallerProvider as any).initialized = false; // force reinitialization
       MarshallerProvider.initialize();
+    });
+
+    afterEach(() => {
+      // force reinitialization
+      (MarshallerProvider as any).initialized = false;
     });
 
     test("with JavaByte instance, should return JavaByteMarshaller instance", () => {
@@ -155,14 +159,129 @@ describe("getForObject", () => {
 
       expect(() => MarshallerProvider.getForObject(input)).toThrowError();
     });
+  });
+});
 
-    test("all Java types should have a marshaller associated", () => {
-      // this test is important to avoid developers to forget to add marshallers to new JavaTypes
+describe("getForFqcn", () => {
+  test("without initialize, should return Error", () => {
+    expect(() => MarshallerProvider.getForFqcn("anything")).toThrowError();
+  });
 
-      const marshallers = (MarshallerProvider as any).marshallersByJavaType;
-      Object.keys(JavaType)
-        .map((k: keyof typeof JavaType) => JavaType[k])
-        .forEach(javaType => expect(marshallers.get(javaType)).toBeDefined());
+  describe("properly initialized", () => {
+    beforeEach(() => {
+      MarshallerProvider.initialize();
     });
+
+    afterEach(() => {
+      // force reinitialization
+      (MarshallerProvider as any).initialized = false;
+    });
+
+    test("with Java's Byte fqcn, should return JavaByteMarshaller instance", () => {
+      expect(MarshallerProvider.getForFqcn(JavaType.BYTE)).toEqual(new JavaByteMarshaller());
+    });
+
+    test("with Java's Double fqcn, should return JavaDoubleMarshaller instance", () => {
+      expect(MarshallerProvider.getForFqcn(JavaType.DOUBLE)).toEqual(new JavaDoubleMarshaller());
+    });
+
+    test("with Java's Float fqcn, should return JavaFloatMarshaller instance", () => {
+      expect(MarshallerProvider.getForFqcn(JavaType.FLOAT)).toEqual(new JavaFloatMarshaller());
+    });
+
+    test("with Java's Integer fqcn, should return JavaIntegerMarshaller instance", () => {
+      expect(MarshallerProvider.getForFqcn(JavaType.INTEGER)).toEqual(new JavaIntegerMarshaller());
+    });
+
+    test("with Java's Long fqcn, should return JavaLongMarshaller instance", () => {
+      expect(MarshallerProvider.getForFqcn(JavaType.LONG)).toEqual(new JavaLongMarshaller());
+    });
+
+    test("with Java's Short fqcn, should return JavaShortMarshaller instance", () => {
+      expect(MarshallerProvider.getForFqcn(JavaType.SHORT)).toEqual(new JavaShortMarshaller());
+    });
+
+    test("with Java's Boolean fqcn, should return JavaBooleanMarshaller instance", () => {
+      expect(MarshallerProvider.getForFqcn(JavaType.BOOLEAN)).toEqual(new JavaBooleanMarshaller());
+    });
+
+    test("with Java's String fqcn, should return JavaStringMarshaller instance", () => {
+      expect(MarshallerProvider.getForFqcn(JavaType.STRING)).toEqual(new JavaStringMarshaller());
+    });
+
+    test("with Java's Date fqcn, should return JavaDateMarshaller instance", () => {
+      expect(MarshallerProvider.getForFqcn(JavaType.DATE)).toEqual(new JavaDateMarshaller());
+    });
+
+    test("with Java's BigDecimal fqcn, should return JavaBigDecimalMarshaller instance", () => {
+      expect(MarshallerProvider.getForFqcn(JavaType.BIG_DECIMAL)).toEqual(new JavaBigDecimalMarshaller());
+    });
+
+    test("with Java's BigInteger fqcn, should return JavaBigIntegerMarshaller instance", () => {
+      expect(MarshallerProvider.getForFqcn(JavaType.BIG_INTEGER)).toEqual(new JavaBigIntegerMarshaller());
+    });
+
+    test("with Java's ArrayList fqcn, should return JavaArrayListMarshaller instance", () => {
+      expect(MarshallerProvider.getForFqcn(JavaType.ARRAY_LIST)).toEqual(
+        new JavaCollectionMarshaller.JavaArrayListMarshaller()
+      );
+    });
+
+    test("with Java's HashSet fqcn, should return JavaHashSetMarshaller instance", () => {
+      expect(MarshallerProvider.getForFqcn(JavaType.HASH_SET)).toEqual(
+        new JavaCollectionMarshaller.JavaHashSetMarshaller()
+      );
+    });
+
+    test("with Java's HashMap fqcn, should return JavaHashMapMarshaller instance", () => {
+      expect(MarshallerProvider.getForFqcn(JavaType.HASH_MAP)).toEqual(new JavaHashMapMarshaller());
+    });
+
+    test("with Java's Optional fqcn, should return JavaOptionalMarshaller instance", () => {
+      expect(MarshallerProvider.getForFqcn(JavaType.OPTIONAL)).toEqual(new JavaOptionalMarshaller());
+    });
+
+    test("with null fqcn, should return default marshaller", () => {
+      const fqcn = null as any;
+
+      expect(MarshallerProvider.getForFqcn(fqcn)).toEqual(new DefaultMarshaller());
+    });
+
+    test("with undefined fqcn, should return default marshaller", () => {
+      const fqcn = undefined as any;
+
+      expect(MarshallerProvider.getForFqcn(fqcn)).toEqual(new DefaultMarshaller());
+    });
+
+    test("with empty string, should return default marshaller", () => {
+      const fqcn = "";
+
+      expect(MarshallerProvider.getForFqcn(fqcn)).toEqual(new DefaultMarshaller());
+    });
+
+    test("with custom fqcn, should return default marshaller", () => {
+      const fqcn = "com.myapp.custom.pojo";
+
+      // it is a custom pojo (i.e. no pre-defined marshaller)
+      expect(JavaWrapperUtils.isJavaType(fqcn)).toBeFalsy();
+
+      expect(MarshallerProvider.getForFqcn(fqcn)).toEqual(new DefaultMarshaller());
+    });
+  });
+});
+
+describe("consistency validations", () => {
+  beforeEach(() => {
+    (MarshallerProvider as any).initialized = false; // force reinitialization
+    MarshallerProvider.initialize();
+  });
+
+  test("all Java types should have a marshaller associated", () => {
+    // this test is important to avoid developers to forget to add marshallers to new JavaTypes
+
+    const marshallers = (MarshallerProvider as any).marshallersByJavaType;
+    Object.keys(JavaType)
+      .map((k: keyof typeof JavaType) => JavaType[k])
+      .forEach(javaType => expect(marshallers.get(javaType)).toBeDefined());
   });
 });

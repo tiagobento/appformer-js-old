@@ -4,7 +4,8 @@ import { NullableMarshaller } from "./NullableMarshaller";
 import { UnmarshallingContext } from "../UnmarshallingContext";
 import { instanceOfNumber } from "../../util/TypeUtils";
 import { ErraiObject } from "../model/ErraiObject";
-import { ErraiObjectConstants } from "../model/ErraiObjectConstants";
+import { NumValBasedErraiObject } from "../model/NumValBasedErraiObject";
+import { NumberUtils } from "../../util/NumberUtils";
 
 export class JavaShortMarshaller extends NullableMarshaller<JavaShort, number, ErraiObject | number, JavaShort> {
   public notNullMarshall(input: JavaShort, ctx: MarshallingContext): number {
@@ -12,19 +13,23 @@ export class JavaShortMarshaller extends NullableMarshaller<JavaShort, number, E
   }
 
   public notNullUnmarshall(input: ErraiObject | number, ctx: UnmarshallingContext): JavaShort {
-    if (instanceOfNumber(input)) {
-      return new JavaShort(input.toString(10));
-    }
-
-    return JavaShortMarshaller.fromErraiObject(input);
-  }
-
-  private static fromErraiObject(input: ErraiObject) {
-    const valueFromJson = input[ErraiObjectConstants.NUM_VAL];
-    if (!instanceOfNumber(valueFromJson)) {
+    const valueFromJson = instanceOfNumber(input) ? input : NumValBasedErraiObject.from(input).numVal;
+    if (!JavaShortMarshaller.isValid(valueFromJson)) {
       throw new Error(`Invalid short value ${valueFromJson}. Can't unmarshall json ${input}`);
     }
 
-    return new JavaShort(valueFromJson.toString(10));
+    return new JavaShort(`${valueFromJson}`);
+  }
+
+  private static isValid(valueFromJson: any): boolean {
+    if (valueFromJson === null || valueFromJson === undefined) {
+      return false;
+    }
+
+    if (!instanceOfNumber(valueFromJson)) {
+      return false;
+    }
+
+    return NumberUtils.isIntegerString(`${valueFromJson}`);
   }
 }

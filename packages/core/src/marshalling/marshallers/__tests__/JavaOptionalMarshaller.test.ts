@@ -1,16 +1,35 @@
 import { MarshallingContext } from "../../MarshallingContext";
-import { JavaBigInteger, JavaBoolean, JavaInteger, JavaOptional } from "../../../java-wrappers";
+import {
+  JavaArrayList,
+  JavaBigDecimal,
+  JavaBigInteger,
+  JavaBoolean,
+  JavaByte,
+  JavaDate,
+  JavaDouble,
+  JavaFloat,
+  JavaHashMap,
+  JavaHashSet,
+  JavaInteger,
+  JavaLong,
+  JavaOptional,
+  JavaShort,
+  JavaString
+} from "../../../java-wrappers";
 import { ErraiObjectConstants } from "../../model/ErraiObjectConstants";
 import { MarshallerProvider } from "../../MarshallerProvider";
 import { Portable } from "../../../internal";
-import { TestUtils } from "../../../__tests__/util/TestUtils";
 import { JavaOptionalMarshaller } from "../JavaOptionalMarshaller";
+import { NumValBasedErraiObject } from "../../model/NumValBasedErraiObject";
+import { ValueBasedErraiObject } from "../../model/ValueBasedErraiObject";
+import { NumberUtils } from "../../../util/NumberUtils";
+import { UnmarshallingContext } from "../../UnmarshallingContext";
+import { JavaType } from "../../../java-wrappers/JavaType";
 
 describe("marshall", () => {
   const encodedType = ErraiObjectConstants.ENCODED_TYPE;
   const objectId = ErraiObjectConstants.OBJECT_ID;
   const value = ErraiObjectConstants.VALUE;
-  const numVal = ErraiObjectConstants.NUM_VAL;
 
   let context: MarshallingContext;
 
@@ -24,11 +43,7 @@ describe("marshall", () => {
 
     const output = new JavaOptionalMarshaller().marshall(input, context);
 
-    expect(output).toStrictEqual({
-      [encodedType]: "java.util.Optional",
-      [objectId]: "-1",
-      [value]: null
-    });
+    expect(output).toStrictEqual(new ValueBasedErraiObject(JavaType.OPTIONAL, null).asErraiObject());
   });
 
   test("with JavaNumber optional, should wrap element into an errai object", () => {
@@ -36,15 +51,12 @@ describe("marshall", () => {
 
     const output = new JavaOptionalMarshaller().marshall(input, context);
 
-    expect(output).toStrictEqual({
-      [encodedType]: "java.util.Optional",
-      [objectId]: "-1",
-      [value]: {
-        [encodedType]: "java.lang.Integer",
-        [objectId]: "-1",
-        [numVal]: 1
-      }
-    });
+    expect(output).toStrictEqual(
+      new ValueBasedErraiObject(
+        JavaType.OPTIONAL,
+        new NumValBasedErraiObject(JavaType.INTEGER, 1).asErraiObject()
+      ).asErraiObject()
+    );
   });
 
   test("with JavaBoolean optional, should wrap element into an errai object", () => {
@@ -52,15 +64,12 @@ describe("marshall", () => {
 
     const output = new JavaOptionalMarshaller().marshall(input, context);
 
-    expect(output).toStrictEqual({
-      [encodedType]: "java.util.Optional",
-      [objectId]: "-1",
-      [value]: {
-        [encodedType]: "java.lang.Boolean",
-        [objectId]: "-1",
-        [numVal]: false
-      }
-    });
+    expect(output).toStrictEqual(
+      new ValueBasedErraiObject(
+        JavaType.OPTIONAL,
+        new NumValBasedErraiObject(JavaType.BOOLEAN, false).asErraiObject()
+      ).asErraiObject()
+    );
   });
 
   test("with JavaBigNumber optional, should serialize element normally", () => {
@@ -69,11 +78,11 @@ describe("marshall", () => {
     const output = new JavaOptionalMarshaller().marshall(input, context);
 
     expect(output).toStrictEqual({
-      [encodedType]: "java.util.Optional",
+      [encodedType]: JavaType.OPTIONAL,
       [objectId]: "-1",
       [value]: {
-        [encodedType]: "java.math.BigInteger",
-        [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
+        [encodedType]: JavaType.BIG_INTEGER,
+        [objectId]: expect.stringMatching(NumberUtils.nonNegativeIntegerRegex),
         [value]: "1"
       }
     });
@@ -85,11 +94,11 @@ describe("marshall", () => {
     const output = new JavaOptionalMarshaller().marshall(input, context);
 
     expect(output).toStrictEqual({
-      [encodedType]: "java.util.Optional",
+      [encodedType]: JavaType.OPTIONAL,
       [objectId]: "-1",
       [value]: {
         [encodedType]: "com.portable.my",
-        [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
+        [objectId]: expect.stringMatching(NumberUtils.nonNegativeIntegerRegex),
         foo: "foo1",
         bar: "bar1"
       }
@@ -113,6 +122,244 @@ describe("marshall", () => {
   });
 });
 
+describe("unmarshall", () => {
+  beforeEach(() => {
+    MarshallerProvider.initialize();
+  });
+
+  test("with empty optional, should return an empty optional", () => {
+    const marshaller = new JavaOptionalMarshaller();
+
+    const input = new JavaOptional<string>(undefined);
+    const marshalledInput = marshaller.marshall(input, new MarshallingContext());
+
+    const output = marshaller.unmarshall(marshalledInput!, new UnmarshallingContext(new Map()));
+
+    expect(output).toEqual(input);
+  });
+
+  test("with Array input, should unmarshall correctly", () => {
+    const marshaller = new JavaOptionalMarshaller();
+
+    const arrayInput = new JavaOptional<string[]>(["str1", "str2"]);
+    const arrayListInput = new JavaOptional<JavaArrayList<string>>(new JavaArrayList(["str1", "str2"]));
+
+    [arrayInput, arrayListInput].forEach(input => {
+      const marshalledInput = marshaller.notNullMarshall(input, new MarshallingContext());
+
+      const output = marshaller.notNullUnmarshall(marshalledInput, new UnmarshallingContext(new Map()));
+
+      expect(output).toEqual(new JavaOptional(["str1", "str2"]));
+    });
+  });
+
+  test("with Set input, should unmarshall correctly", () => {
+    const marshaller = new JavaOptionalMarshaller();
+
+    const setInput = new JavaOptional<Set<string>>(new Set(["str1", "str2"]));
+    const hashSetInput = new JavaOptional<JavaHashSet<string>>(new JavaHashSet(new Set(["str1", "str2"])));
+
+    [setInput, hashSetInput].forEach(input => {
+      const marshalledInput = marshaller.notNullMarshall(input, new MarshallingContext());
+
+      const output = marshaller.notNullUnmarshall(marshalledInput, new UnmarshallingContext(new Map()));
+
+      expect(output).toEqual(new JavaOptional(new Set(["str1", "str2"])));
+    });
+  });
+
+  test("with Map input, should unmarshall correctly", () => {
+    const marshaller = new JavaOptionalMarshaller();
+
+    const mapInput = new JavaOptional<Map<string, string>>(new Map([["str1", "str2"]]));
+    const hashMapInput = new JavaOptional<JavaHashMap<string, string>>(new JavaHashMap(new Map([["str1", "str2"]])));
+
+    [mapInput, hashMapInput].forEach(input => {
+      const marshalledInput = marshaller.notNullMarshall(input, new MarshallingContext());
+
+      const output = marshaller.notNullUnmarshall(marshalledInput, new UnmarshallingContext(new Map()));
+
+      expect(output).toEqual(new JavaOptional(new Map([["str1", "str2"]])));
+    });
+  });
+
+  test("with Date input, should unmarshall correctly", () => {
+    const marshaller = new JavaOptionalMarshaller();
+
+    const baseDate = new Date();
+
+    const dateInput = new JavaOptional<Date>(new Date(baseDate));
+    const javaDateInput = new JavaOptional<JavaDate>(new JavaDate(baseDate));
+
+    [dateInput, javaDateInput].forEach(input => {
+      const marshalledInput = marshaller.notNullMarshall(input, new MarshallingContext());
+
+      const output = marshaller.notNullUnmarshall(marshalledInput, new UnmarshallingContext(new Map()));
+
+      expect(output).toEqual(new JavaOptional<Date>(new Date(baseDate)));
+    });
+  });
+
+  test("with Boolean input, should unmarshall correctly", () => {
+    const marshaller = new JavaOptionalMarshaller();
+
+    const booleanInput = new JavaOptional<boolean>(false);
+    const javaBooleanInput = new JavaOptional<JavaBoolean>(new JavaBoolean(false));
+
+    [booleanInput, javaBooleanInput].forEach(input => {
+      const marshalledInput = marshaller.notNullMarshall(input, new MarshallingContext());
+
+      const output = marshaller.notNullUnmarshall(marshalledInput, new UnmarshallingContext(new Map()));
+
+      expect(output).toEqual(new JavaOptional<boolean>(false));
+    });
+  });
+
+  test("with String input, should unmarshall correctly", () => {
+    const marshaller = new JavaOptionalMarshaller();
+
+    const stringInput = new JavaOptional<string>("foo");
+    const javaStringInput = new JavaOptional<JavaString>(new JavaString("foo"));
+
+    [stringInput, javaStringInput].forEach(input => {
+      const marshalledInput = marshaller.notNullMarshall(input, new MarshallingContext());
+
+      const output = marshaller.notNullUnmarshall(marshalledInput, new UnmarshallingContext(new Map()));
+
+      expect(output).toEqual(new JavaOptional<string>("foo"));
+    });
+  });
+
+  test("with JavaOptional input, should unmarshall correctly", () => {
+    const marshaller = new JavaOptionalMarshaller();
+
+    const input = new JavaOptional(new JavaOptional<string>("foo"));
+    const marshalledInput = marshaller.notNullMarshall(input, new MarshallingContext());
+
+    const output = marshaller.notNullUnmarshall(marshalledInput, new UnmarshallingContext(new Map()));
+
+    expect(output).toEqual(new JavaOptional(new JavaOptional<string>("foo")));
+  });
+
+  test("with JavaBigDecimal input, should unmarshall correctly", () => {
+    const marshaller = new JavaOptionalMarshaller();
+
+    const input = new JavaOptional<JavaBigDecimal>(new JavaBigDecimal("1.1"));
+    const marshalledInput = marshaller.notNullMarshall(input, new MarshallingContext());
+
+    const output = marshaller.notNullUnmarshall(marshalledInput, new UnmarshallingContext(new Map()));
+
+    expect(output).toEqual(new JavaOptional<JavaBigDecimal>(new JavaBigDecimal("1.1")));
+  });
+
+  test("with JavaBigInteger should unmarshall correctly", () => {
+    const marshaller = new JavaOptionalMarshaller();
+
+    const input = new JavaOptional<JavaBigInteger>(new JavaBigInteger("1"));
+    const marshalledInput = marshaller.notNullMarshall(input, new MarshallingContext());
+
+    const output = marshaller.notNullUnmarshall(marshalledInput, new UnmarshallingContext(new Map()));
+
+    expect(output).toEqual(new JavaOptional<JavaBigInteger>(new JavaBigInteger("1")));
+  });
+
+  test("with JavaLong input, should unmarshall correctly", () => {
+    const marshaller = new JavaOptionalMarshaller();
+
+    const input = new JavaOptional<JavaLong>(new JavaLong("1"));
+    const marshalledInput = marshaller.notNullMarshall(input, new MarshallingContext());
+
+    const output = marshaller.notNullUnmarshall(marshalledInput, new UnmarshallingContext(new Map()));
+
+    expect(output).toEqual(new JavaOptional<JavaLong>(new JavaLong("1")));
+  });
+
+  test("with JavaByte input, should unmarshall correctly", () => {
+    const marshaller = new JavaOptionalMarshaller();
+
+    const input = new JavaOptional<JavaByte>(new JavaByte("1"));
+    const marshalledInput = marshaller.notNullMarshall(input, new MarshallingContext());
+
+    const output = marshaller.notNullUnmarshall(marshalledInput, new UnmarshallingContext(new Map()));
+
+    expect(output).toEqual(new JavaOptional<JavaByte>(new JavaByte("1")));
+  });
+
+  test("with JavaDouble input, should unmarshall correctly", () => {
+    const marshaller = new JavaOptionalMarshaller();
+
+    const input = new JavaOptional<JavaDouble>(new JavaDouble("1.1"));
+    const marshalledInput = marshaller.notNullMarshall(input, new MarshallingContext());
+
+    const output = marshaller.notNullUnmarshall(marshalledInput, new UnmarshallingContext(new Map()));
+
+    expect(output).toEqual(new JavaOptional<JavaDouble>(new JavaDouble("1.1")));
+  });
+
+  test("with JavaFloat input, should unmarshall correctly", () => {
+    const marshaller = new JavaOptionalMarshaller();
+
+    const input = new JavaOptional<JavaFloat>(new JavaFloat("1.1"));
+    const marshalledInput = marshaller.notNullMarshall(input, new MarshallingContext());
+
+    const output = marshaller.notNullUnmarshall(marshalledInput, new UnmarshallingContext(new Map()));
+
+    expect(output).toEqual(new JavaOptional<JavaFloat>(new JavaFloat("1.1")));
+  });
+
+  test("with JavaInteger input, should unmarshall correctly", () => {
+    const marshaller = new JavaOptionalMarshaller();
+
+    const input = new JavaOptional<JavaInteger>(new JavaInteger("1"));
+    const marshalledInput = marshaller.notNullMarshall(input, new MarshallingContext());
+
+    const output = marshaller.notNullUnmarshall(marshalledInput, new UnmarshallingContext(new Map()));
+
+    expect(output).toEqual(new JavaOptional<JavaInteger>(new JavaInteger("1")));
+  });
+
+  test("with JavaShort input, should unmarshall correctly", () => {
+    const marshaller = new JavaOptionalMarshaller();
+
+    const input = new JavaOptional<JavaShort>(new JavaShort("1"));
+    const marshalledInput = marshaller.notNullMarshall(input, new MarshallingContext());
+
+    const output = marshaller.notNullUnmarshall(marshalledInput, new UnmarshallingContext(new Map()));
+
+    expect(output).toEqual(new JavaOptional<JavaShort>(new JavaShort("1")));
+  });
+
+  test("with custom object optional, should unmarshall correctly", () => {
+    const oracle = new Map([["com.portable.my", () => new MyPortable({} as any)]]);
+    const marshaller = new JavaOptionalMarshaller();
+
+    const pojoInput = new MyPortable({ foo: "foo1", bar: "bar1" });
+    const optionalInput = new JavaOptional<MyPortable>(pojoInput);
+
+    const marshalledInput = marshaller.notNullMarshall(optionalInput, new MarshallingContext());
+
+    const output = marshaller.notNullUnmarshall(marshalledInput, new UnmarshallingContext(oracle));
+
+    expect(output).toEqual(new JavaOptional<MyPortable>(pojoInput));
+  });
+
+  test("with root null object, should unmarshall to null", () => {
+    const input = null as any;
+
+    const output = new JavaOptionalMarshaller().unmarshall(input, new UnmarshallingContext(new Map()));
+
+    expect(output).toBeUndefined();
+  });
+
+  test("with root undefined object, should unmarshall to undefined", () => {
+    const input = undefined as any;
+
+    const output = new JavaOptionalMarshaller().unmarshall(input, new UnmarshallingContext(new Map()));
+
+    expect(output).toBeUndefined();
+  });
+});
+
 class MyPortable implements Portable<MyPortable> {
   private readonly _fqcn = "com.portable.my";
 
@@ -120,21 +367,6 @@ class MyPortable implements Portable<MyPortable> {
   public readonly bar: string;
 
   constructor(self: { foo: string; bar: string }) {
-    this.foo = self.foo;
-    this.bar = self.bar;
-  }
-}
-
-class Node implements Portable<Node> {
-  private readonly _fqcn = "com.app.my.Node";
-
-  public readonly _data: any;
-  public readonly _left?: Node;
-  public readonly _right?: Node;
-
-  constructor(self: { data: any; left?: Node; right?: Node }) {
-    this._data = self.data;
-    this._left = self.left;
-    this._right = self.right;
+    Object.assign(this, self);
   }
 }

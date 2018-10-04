@@ -1,8 +1,9 @@
 import { JavaWrapper } from "./JavaWrapper";
 import { instanceOfMap } from "../util/TypeUtils";
+import { JavaType } from "./JavaType";
 
 export class JavaHashMap<T, U> extends JavaWrapper<Map<T, U>> {
-  private readonly _fqcn = "java.util.HashMap";
+  private readonly _fqcn = JavaType.HASH_MAP;
 
   private _value: Map<T, U>;
 

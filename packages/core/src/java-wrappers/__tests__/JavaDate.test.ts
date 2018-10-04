@@ -1,4 +1,5 @@
 import { JavaDate } from "../JavaDate";
+import { JavaType } from "../JavaType";
 
 describe("get", () => {
   test("with date, should return same value as Date", () => {
@@ -45,6 +46,6 @@ describe("_fqcn", () => {
   test("must be the same than in Java", () => {
     const fqcn = (new JavaDate(new Date()) as any)._fqcn;
 
-    expect(fqcn).toBe("java.util.Date");
+    expect(fqcn).toBe(JavaType.DATE);
   });
 });

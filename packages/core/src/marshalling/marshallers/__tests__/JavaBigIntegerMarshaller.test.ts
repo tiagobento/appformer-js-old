@@ -1,8 +1,11 @@
 import { MarshallingContext } from "../../MarshallingContext";
 import { ErraiObjectConstants } from "../../model/ErraiObjectConstants";
-import { TestUtils } from "../../../__tests__/util/TestUtils";
 import { JavaBigInteger } from "../../../java-wrappers";
 import { JavaBigIntegerMarshaller } from "../JavaBigIntegerMarshaller";
+import { UnmarshallingContext } from "../../UnmarshallingContext";
+import { JavaType } from "../../../java-wrappers/JavaType";
+import { ValueBasedErraiObject } from "../../model/ValueBasedErraiObject";
+import { NumberUtils } from "../../../util/NumberUtils";
 
 describe("marshall", () => {
   test("with regular big integer, should serialize it normally", () => {
@@ -11,8 +14,8 @@ describe("marshall", () => {
     const output = new JavaBigIntegerMarshaller().marshall(input, new MarshallingContext());
 
     expect(output).toStrictEqual({
-      [ErraiObjectConstants.ENCODED_TYPE]: "java.math.BigInteger",
-      [ErraiObjectConstants.OBJECT_ID]: expect.stringMatching(TestUtils.positiveNumberRegex),
+      [ErraiObjectConstants.ENCODED_TYPE]: JavaType.BIG_INTEGER,
+      [ErraiObjectConstants.OBJECT_ID]: expect.stringMatching(NumberUtils.nonNegativeIntegerRegex),
       [ErraiObjectConstants.VALUE]: "12"
     });
   });
@@ -31,5 +34,64 @@ describe("marshall", () => {
     const output = new JavaBigIntegerMarshaller().marshall(input, new MarshallingContext());
 
     expect(output).toBeNull();
+  });
+});
+
+describe("unmarshall", () => {
+  test("with regular input, should return a JavaBigInteger instance", () => {
+    const marshaller = new JavaBigIntegerMarshaller();
+    const context = new UnmarshallingContext(new Map());
+
+    const input = new JavaBigInteger("125");
+    const marshalledInput = marshaller.notNullMarshall(input, new MarshallingContext());
+
+    const output = marshaller.notNullUnmarshall(marshalledInput, context);
+
+    expect(output.get().toString(10)).toEqual(input.get().toString(10));
+  });
+
+  test("with non string value, should return a JavaBigInteger instance containing NaN", () => {
+    const marshaller = new JavaBigIntegerMarshaller();
+    const context = new UnmarshallingContext(new Map());
+
+    const marshalledInput = new ValueBasedErraiObject(JavaType.BIG_INTEGER, false, "1").asErraiObject();
+
+    expect(() => marshaller.notNullUnmarshall(marshalledInput, context)).toThrowError();
+  });
+
+  test("with non numeric string value, should throw error", () => {
+    const marshaller = new JavaBigIntegerMarshaller();
+    const context = new UnmarshallingContext(new Map());
+
+    const marshalledInput = new ValueBasedErraiObject(JavaType.BIG_INTEGER, "abc", "1").asErraiObject();
+
+    expect(() => marshaller.notNullUnmarshall(marshalledInput, context)).toThrowError();
+  });
+
+  test("with null value, should return a JavaBigInteger instance containing NaN", () => {
+    const marshaller = new JavaBigIntegerMarshaller();
+    const context = new UnmarshallingContext(new Map());
+
+    const marshalledInput = new ValueBasedErraiObject(JavaType.BIG_INTEGER, null, "1").asErraiObject();
+
+    expect(() => marshaller.notNullUnmarshall(marshalledInput, context)).toThrowError();
+  });
+
+  test("with undefined value, should return a JavaBigInteger instance containing NaN", () => {
+    const marshaller = new JavaBigIntegerMarshaller();
+    const context = new UnmarshallingContext(new Map());
+
+    const marshalledInput = new ValueBasedErraiObject(JavaType.BIG_INTEGER, undefined, "1").asErraiObject();
+
+    expect(() => marshaller.notNullUnmarshall(marshalledInput, context)).toThrowError();
+  });
+
+  test("with empty string value, should return a JavaBigInteger instance containing NaN", () => {
+    const marshaller = new JavaBigIntegerMarshaller();
+    const context = new UnmarshallingContext(new Map());
+
+    const marshalledInput = new ValueBasedErraiObject(JavaType.BIG_INTEGER, "", "1").asErraiObject();
+
+    expect(() => marshaller.notNullUnmarshall(marshalledInput, context)).toThrowError();
   });
 });

@@ -2,7 +2,10 @@ import { JavaBigDecimal } from "../../../java-wrappers";
 import { JavaBigDecimalMarshaller } from "../JavaBigDecimalMarshaller";
 import { MarshallingContext } from "../../MarshallingContext";
 import { ErraiObjectConstants } from "../../model/ErraiObjectConstants";
-import { TestUtils } from "../../../__tests__/util/TestUtils";
+import { UnmarshallingContext } from "../../UnmarshallingContext";
+import { JavaType } from "../../../java-wrappers/JavaType";
+import { ValueBasedErraiObject } from "../../model/ValueBasedErraiObject";
+import { NumberUtils } from "../../../util/NumberUtils";
 
 describe("marshall", () => {
   test("with regular big decimal, should serialize it normally", () => {
@@ -11,8 +14,8 @@ describe("marshall", () => {
     const output = new JavaBigDecimalMarshaller().marshall(input, new MarshallingContext());
 
     expect(output).toStrictEqual({
-      [ErraiObjectConstants.ENCODED_TYPE]: "java.math.BigDecimal",
-      [ErraiObjectConstants.OBJECT_ID]: expect.stringMatching(TestUtils.positiveNumberRegex),
+      [ErraiObjectConstants.ENCODED_TYPE]: JavaType.BIG_DECIMAL,
+      [ErraiObjectConstants.OBJECT_ID]: expect.stringMatching(NumberUtils.nonNegativeIntegerRegex),
       [ErraiObjectConstants.VALUE]: "12.12"
     });
   });
@@ -31,5 +34,64 @@ describe("marshall", () => {
     const output = new JavaBigDecimalMarshaller().marshall(input, new MarshallingContext());
 
     expect(output).toBeNull();
+  });
+});
+
+describe("unmarshall", () => {
+  test("with regular input, should return a JavaBigDecimal instance", () => {
+    const marshaller = new JavaBigDecimalMarshaller();
+    const context = new UnmarshallingContext(new Map());
+
+    const input = new JavaBigDecimal("125.2");
+    const marshalledInput = marshaller.notNullMarshall(input, new MarshallingContext());
+
+    const output = marshaller.notNullUnmarshall(marshalledInput, context);
+
+    expect(output.get().toString(10)).toEqual(input.get().toString(10));
+  });
+
+  test("with non string value, should throw error", () => {
+    const marshaller = new JavaBigDecimalMarshaller();
+    const context = new UnmarshallingContext(new Map());
+
+    const marshalledInput = new ValueBasedErraiObject(JavaType.BIG_DECIMAL, false, "1").asErraiObject();
+
+    expect(() => marshaller.notNullUnmarshall(marshalledInput, context)).toThrowError();
+  });
+
+  test("with non numeric string value, should throw error", () => {
+    const marshaller = new JavaBigDecimalMarshaller();
+    const context = new UnmarshallingContext(new Map());
+
+    const marshalledInput = new ValueBasedErraiObject(JavaType.BIG_DECIMAL, "abc", "1").asErraiObject();
+
+    expect(() => marshaller.notNullUnmarshall(marshalledInput, context)).toThrowError();
+  });
+
+  test("with null value, should return a JavaBigDecimal instance containing NaN", () => {
+    const marshaller = new JavaBigDecimalMarshaller();
+    const context = new UnmarshallingContext(new Map());
+
+    const marshalledInput = new ValueBasedErraiObject(JavaType.BIG_DECIMAL, null, "1").asErraiObject();
+
+    expect(() => marshaller.notNullUnmarshall(marshalledInput, context)).toThrowError();
+  });
+
+  test("with undefined value, should return a JavaBigDecimal instance containing NaN", () => {
+    const marshaller = new JavaBigDecimalMarshaller();
+    const context = new UnmarshallingContext(new Map());
+
+    const marshalledInput = new ValueBasedErraiObject(JavaType.BIG_DECIMAL, undefined, "1").asErraiObject();
+
+    expect(() => marshaller.notNullUnmarshall(marshalledInput, context)).toThrowError();
+  });
+
+  test("with empty string value, should return a JavaBigDecimal instance containing NaN", () => {
+    const marshaller = new JavaBigDecimalMarshaller();
+    const context = new UnmarshallingContext(new Map());
+
+    const marshalledInput = new ValueBasedErraiObject(JavaType.BIG_DECIMAL, "", "1").asErraiObject();
+
+    expect(() => marshaller.notNullUnmarshall(marshalledInput, context)).toThrowError();
   });
 });

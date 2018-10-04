@@ -1,4 +1,5 @@
 import { JavaByte } from "../JavaByte";
+import { JavaType } from "../JavaType";
 
 describe("get", () => {
   describe("with valid input", () => {
@@ -218,6 +219,6 @@ describe("_fqcn", () => {
   test("must be the same than in Java", () => {
     const fqcn = (new JavaByte("1") as any)._fqcn;
 
-    expect(fqcn).toBe("java.lang.Byte");
+    expect(fqcn).toBe(JavaType.BYTE);
   });
 });

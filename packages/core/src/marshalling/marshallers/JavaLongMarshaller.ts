@@ -1,20 +1,32 @@
 import { JavaLong } from "../../java-wrappers/JavaLong";
 import { ErraiObject } from "../model/ErraiObject";
 import { MarshallingContext } from "../MarshallingContext";
-import { ErraiObjectConstants } from "../model/ErraiObjectConstants";
 import { NullableMarshaller } from "./NullableMarshaller";
 import { UnmarshallingContext } from "../UnmarshallingContext";
+import { NumValBasedErraiObject } from "../model/NumValBasedErraiObject";
+import { NumberUtils } from "../../util/NumberUtils";
 
 export class JavaLongMarshaller extends NullableMarshaller<JavaLong, ErraiObject, ErraiObject, JavaLong> {
   public notNullMarshall(input: JavaLong, ctx: MarshallingContext): ErraiObject {
-    return {
-      [ErraiObjectConstants.ENCODED_TYPE]: (input as any)._fqcn,
-      [ErraiObjectConstants.OBJECT_ID]: "-1",
-      [ErraiObjectConstants.NUM_VAL]: `${input.get().toString(10)}`
-    };
+    const asString = `${input.get().toString(10)}`;
+    return new NumValBasedErraiObject((input as any)._fqcn, asString).asErraiObject();
   }
 
   public notNullUnmarshall(input: ErraiObject, ctx: UnmarshallingContext): JavaLong {
-    return new JavaLong(input[ErraiObjectConstants.NUM_VAL] as string);
+    const valueFromJson = NumValBasedErraiObject.from(input).numVal as string;
+
+    if (!JavaLongMarshaller.isValid(valueFromJson)) {
+      throw new Error(`Invalid long value ${valueFromJson}. Can't unmarshall json ${input}`);
+    }
+
+    return new JavaLong(valueFromJson);
+  }
+
+  private static isValid(jsonValue: string) {
+    if (jsonValue === null || jsonValue === undefined) {
+      return false;
+    }
+
+    return NumberUtils.isIntegerString(jsonValue);
   }
 }

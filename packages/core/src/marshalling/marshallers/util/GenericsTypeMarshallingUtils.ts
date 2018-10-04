@@ -1,15 +1,14 @@
 import { NumberWrapper } from "../../../java-wrappers/NumberWrapper";
 import { JavaBoolean } from "../../../java-wrappers";
 import { Portable } from "../../../internal";
-import { ErraiObjectConstants } from "../../model/ErraiObjectConstants";
 import { ErraiObject } from "../../model/ErraiObject";
 import { MarshallingContext } from "../../MarshallingContext";
 import { MarshallerProvider } from "../../MarshallerProvider";
 import { JavaWrapperUtils } from "../../../java-wrappers/JavaWrapperUtils";
-import { UnmarshallingContext } from "../../UnmarshallingContext";
+import { NumValBasedErraiObject } from "../../model/NumValBasedErraiObject";
 
 export class GenericsTypeMarshallingUtils {
-  private static shouldWrapWhenMarshallingAsGenericsType(value: Portable<any>) {
+  private static shouldWrapAsGenericsType(value: Portable<any>) {
     return value instanceof NumberWrapper || value instanceof JavaBoolean;
   }
 
@@ -17,12 +16,7 @@ export class GenericsTypeMarshallingUtils {
     // This is mandatory in order to comply with errai-marshalling protocol.
     // When marshalling numeric or boolean values, we use its raw value, without any ErraiObject envelope.
     // But, when the value is a generic type, we always wrap it inside an ErraiObject
-
-    return {
-      [ErraiObjectConstants.ENCODED_TYPE]: (value as any)._fqcn,
-      [ErraiObjectConstants.OBJECT_ID]: "-1",
-      [ErraiObjectConstants.NUM_VAL]: marshalledValue
-    };
+    return new NumValBasedErraiObject((value as any)._fqcn, marshalledValue).asErraiObject();
   }
 
   public static marshallGenericsTypeElement(value: any, ctx: MarshallingContext): ErraiObject {
@@ -32,15 +26,10 @@ export class GenericsTypeMarshallingUtils {
     const marshaller = MarshallerProvider.getForObject(enhancedInput);
     const marshalledValue = marshaller.marshall(enhancedInput, ctx);
 
-    if (this.shouldWrapWhenMarshallingAsGenericsType(enhancedInput)) {
+    if (this.shouldWrapAsGenericsType(enhancedInput)) {
       return this.wrapGenericsTypeElement(enhancedInput, marshalledValue)!;
     }
 
     return marshalledValue;
-  }
-
-  public static unmarshallGenericsTypeElement<T>(value: any, ctx: UnmarshallingContext): T {
-    const marshaller = MarshallerProvider.getForObject(value);
-    return marshaller.unmarshall(value, ctx);
   }
 }

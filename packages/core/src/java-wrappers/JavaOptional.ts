@@ -1,7 +1,8 @@
 import { JavaWrapper } from "./JavaWrapper";
+import { JavaType } from "./JavaType";
 
 export class JavaOptional<T> extends JavaWrapper<T | undefined> {
-  private readonly _fqcn = "java.util.Optional";
+  private readonly _fqcn = JavaType.OPTIONAL;
 
   private _value: T | undefined;
 
@@ -11,7 +12,7 @@ export class JavaOptional<T> extends JavaWrapper<T | undefined> {
   }
 
   public get(): T {
-    if (!this._value) {
+    if (this._value === null || this._value === undefined) {
       throw new Error("No value present");
     }
 

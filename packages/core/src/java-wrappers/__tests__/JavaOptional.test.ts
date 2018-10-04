@@ -1,5 +1,5 @@
 import { JavaOptional } from "../JavaOptional";
-import { JavaHashSet } from "../JavaHashSet";
+import { JavaType } from "../JavaType";
 
 describe("get", () => {
   describe("with valid input", () => {
@@ -39,7 +39,6 @@ describe("set", () => {
 
     expect(() => input.get()).toThrowError();
   });
-
 
   test("with defined value from function, should set", () => {
     const input = new JavaOptional("foo");
@@ -82,6 +81,6 @@ describe("_fqcn", () => {
   test("must be the same than in Java", () => {
     const fqcn = (new JavaOptional<string>("foo") as any)._fqcn;
 
-    expect(fqcn).toBe("java.util.Optional");
+    expect(fqcn).toBe(JavaType.OPTIONAL);
   });
 });

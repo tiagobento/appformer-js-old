@@ -4,7 +4,7 @@ import { MarshallingContext } from "../MarshallingContext";
 import { UnmarshallingContext } from "../UnmarshallingContext";
 import { ErraiObject } from "../model/ErraiObject";
 import { instanceOfBoolean } from "../../util/TypeUtils";
-import { ErraiObjectConstants } from "../model/ErraiObjectConstants";
+import { NumValBasedErraiObject } from "../model/NumValBasedErraiObject";
 
 export class JavaBooleanMarshaller extends NullableMarshaller<JavaBoolean, boolean, ErraiObject | boolean, boolean> {
   public notNullMarshall(input: JavaBoolean, ctx: MarshallingContext): boolean {
@@ -16,15 +16,20 @@ export class JavaBooleanMarshaller extends NullableMarshaller<JavaBoolean, boole
       return input;
     }
 
-    return JavaBooleanMarshaller.fromErraiObject(input);
-  }
+    const valueFromJson = NumValBasedErraiObject.from(input).numVal;
 
-  private static fromErraiObject(input: ErraiObject) {
-    const valueFromJson = input[ErraiObjectConstants.NUM_VAL];
-    if (!instanceOfBoolean(valueFromJson)) {
+    if (!JavaBooleanMarshaller.isValid(valueFromJson)) {
       throw new Error(`Invalid boolean value ${valueFromJson}. Can't unmarshall json ${input}`);
     }
 
-    return valueFromJson;
+    return valueFromJson as boolean;
+  }
+
+  private static isValid(valueFromJson: any): boolean {
+    if (valueFromJson === null || valueFromJson === undefined) {
+      return false;
+    }
+
+    return instanceOfBoolean(valueFromJson);
   }
 }

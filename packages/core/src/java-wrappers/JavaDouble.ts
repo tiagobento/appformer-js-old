@@ -5,9 +5,10 @@ import { JavaFloat } from "./JavaFloat";
 import { JavaInteger } from "./JavaInteger";
 import { JavaShort } from "./JavaShort";
 import { JavaLong } from "./JavaLong";
+import { JavaType } from "./JavaType";
 
 export class JavaDouble extends FloatBasedJavaNumber implements JavaNumber {
-  private readonly _fqcn = "java.lang.Double";
+  private readonly _fqcn = JavaType.DOUBLE;
 
   protected isInRange(n: number): boolean {
     // JS' numbers are 64 bits long like Java's Double

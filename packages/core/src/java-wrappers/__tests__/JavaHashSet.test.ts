@@ -1,4 +1,5 @@
 import { JavaHashSet } from "../JavaHashSet";
+import { JavaType } from "../JavaType";
 
 describe("get", () => {
   test("with populated set, returns the same set", () => {
@@ -46,6 +47,6 @@ describe("_fqcn", () => {
   test("must be the same than in Java", () => {
     const fqcn = (new JavaHashSet(new Set(["1", "2"])) as any)._fqcn;
 
-    expect(fqcn).toBe("java.util.HashSet");
+    expect(fqcn).toBe(JavaType.HASH_SET);
   });
 });

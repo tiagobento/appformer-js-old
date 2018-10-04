@@ -1,13 +1,14 @@
 import { JavaCollection } from "../../java-wrappers/JavaCollection";
 import { ErraiObject } from "../model/ErraiObject";
 import { MarshallingContext } from "../MarshallingContext";
-import { ErraiObjectConstants } from "../model/ErraiObjectConstants";
 import { Portable } from "../../internal/model/Portable";
 import { NullableMarshaller } from "./NullableMarshaller";
 import { GenericsTypeMarshallingUtils } from "./util/GenericsTypeMarshallingUtils";
 import { UnmarshallingContext } from "../UnmarshallingContext";
 import { isArray } from "../../util/TypeUtils";
 import { JavaArrayList, JavaHashSet } from "../../java-wrappers";
+import { ValueBasedErraiObject } from "../model/ValueBasedErraiObject";
+import { MarshallerProvider } from "../MarshallerProvider";
 
 abstract class JavaCollectionMarshaller<T extends Iterable<Portable<any> | null>> extends NullableMarshaller<
   JavaCollection<T>,
@@ -28,11 +29,10 @@ abstract class JavaCollectionMarshaller<T extends Iterable<Portable<any> | null>
       serializedValues.push(GenericsTypeMarshallingUtils.marshallGenericsTypeElement(element, ctx));
     }
 
-    const resultObject = {
-      [ErraiObjectConstants.ENCODED_TYPE]: (input as any)._fqcn,
-      [ErraiObjectConstants.OBJECT_ID]: `${ctx.incrementAndGetObjectId()}`,
-      [ErraiObjectConstants.VALUE]: serializedValues
-    };
+    const fqcn = (input as any)._fqcn;
+    const value = serializedValues;
+    const objectId = ctx.incrementAndGetObjectId().toString(10);
+    const resultObject = new ValueBasedErraiObject(fqcn, value, objectId).asErraiObject();
 
     ctx.cacheObject(input, resultObject);
 
@@ -45,19 +45,14 @@ abstract class JavaCollectionMarshaller<T extends Iterable<Portable<any> | null>
       return (cachedObject as JavaCollection<T>).get();
     }
 
-    const collection = input[ErraiObjectConstants.VALUE];
-    if (!collection) {
-      return null as any;
-    }
-
-    if (!isArray(collection)) {
-      // inside the json, all collections are represented as an array
+    const collection = ValueBasedErraiObject.from(input).value;
+    if (!JavaCollectionMarshaller.isValid(collection)) {
       throw new Error(`Invalid collection value ${collection}. Can't unmarshall json ${input}`);
     }
 
     const unmarshalledValues = [];
     for (const element of Array.from(collection)) {
-      unmarshalledValues.push(GenericsTypeMarshallingUtils.unmarshallGenericsTypeElement(element, ctx));
+      unmarshalledValues.push(MarshallerProvider.getForObject(element).unmarshall(element, ctx));
     }
 
     const javaCollection = this.fromArray(unmarshalledValues);
@@ -67,6 +62,15 @@ abstract class JavaCollectionMarshaller<T extends Iterable<Portable<any> | null>
   }
 
   protected abstract fromArray(values: Array<Portable<any>>): JavaCollection<T>;
+
+  private static isValid(input: any): boolean {
+    if (input === null || input === undefined) {
+      return false;
+    }
+
+    // inside the json, all collections are represented as an array
+    return isArray(input);
+  }
 }
 
 export class JavaArrayListMarshaller extends JavaCollectionMarshaller<Array<Portable<any> | null>> {

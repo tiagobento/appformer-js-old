@@ -4,7 +4,7 @@ import { MarshallingContext } from "../MarshallingContext";
 import { UnmarshallingContext } from "../UnmarshallingContext";
 import { instanceOfNumber } from "../../util/TypeUtils";
 import { ErraiObject } from "../model/ErraiObject";
-import { ErraiObjectConstants } from "../model/ErraiObjectConstants";
+import { NumValBasedErraiObject } from "../model/NumValBasedErraiObject";
 
 export class JavaFloatMarshaller extends NullableMarshaller<JavaFloat, number, ErraiObject | number, JavaFloat> {
   public notNullMarshall(input: JavaFloat, ctx: MarshallingContext): number {
@@ -13,18 +13,22 @@ export class JavaFloatMarshaller extends NullableMarshaller<JavaFloat, number, E
 
   public notNullUnmarshall(input: ErraiObject | number, ctx: UnmarshallingContext): JavaFloat {
     if (instanceOfNumber(input)) {
-      return new JavaFloat(input.toString(10));
+      return new JavaFloat(`${input}`);
     }
 
-    return JavaFloatMarshaller.fromErraiObject(input);
-  }
-
-  private static fromErraiObject(input: ErraiObject) {
-    const valueFromJson = input[ErraiObjectConstants.NUM_VAL];
-    if (!instanceOfNumber(valueFromJson)) {
+    const valueFromJson = NumValBasedErraiObject.from(input).numVal;
+    if (!JavaFloatMarshaller.isValid(valueFromJson)) {
       throw new Error(`Invalid float value ${valueFromJson}. Can't unmarshall json ${input}`);
     }
 
-    return new JavaFloat(valueFromJson.toString(10));
+    return new JavaFloat(`${valueFromJson}`);
+  }
+
+  private static isValid(valueFromJson: any): boolean {
+    if (valueFromJson === null || valueFromJson === undefined) {
+      return false;
+    }
+
+    return instanceOfNumber(valueFromJson);
   }
 }

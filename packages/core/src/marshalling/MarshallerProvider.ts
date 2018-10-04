@@ -91,7 +91,7 @@ export class MarshallerProvider {
 
   private static assertInitialization() {
     if (!this.initialized) {
-      throw new Error("MarshallerProvider should be initialized before using it.");
+      throw new Error("Initialize MarshallerProvider before using.");
     }
   }
 }

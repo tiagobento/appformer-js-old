@@ -1,5 +1,6 @@
 import { BigNumber } from "bignumber.js";
 import { JavaBigInteger } from "../JavaBigInteger";
+import { JavaType } from "../JavaType";
 
 describe("get", () => {
   describe("with valid input", () => {
@@ -219,6 +220,6 @@ describe("_fqcn", () => {
   test("must be the same than in Java", () => {
     const fqcn = (new JavaBigInteger("1") as any)._fqcn;
 
-    expect(fqcn).toBe("java.math.BigInteger");
+    expect(fqcn).toBe(JavaType.BIG_INTEGER);
   });
 });

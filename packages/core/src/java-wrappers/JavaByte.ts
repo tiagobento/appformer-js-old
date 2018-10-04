@@ -5,12 +5,13 @@ import { JavaFloat } from "./JavaFloat";
 import { JavaInteger } from "./JavaInteger";
 import { JavaShort } from "./JavaShort";
 import { JavaLong } from "./JavaLong";
+import { JavaType } from "./JavaType";
 
 export class JavaByte extends IntegerBasedJavaNumber implements JavaNumber {
   public static readonly MIN_VALUE = -128;
   public static readonly MAX_VALUE = 127;
 
-  private readonly _fqcn = "java.lang.Byte";
+  private readonly _fqcn = JavaType.BYTE;
 
   protected isInRange(n: number): boolean {
     return n >= JavaByte.MIN_VALUE && n <= JavaByte.MAX_VALUE;

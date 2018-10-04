@@ -6,12 +6,13 @@ import { JavaDouble } from "./JavaDouble";
 import { JavaFloat } from "./JavaFloat";
 import { JavaInteger } from "./JavaInteger";
 import { JavaShort } from "./JavaShort";
+import { JavaType } from "./JavaType";
 
 export class JavaLong extends BigNumberWrapper implements JavaNumber {
   public static readonly MIN_VALUE = new BigNumber("-9223372036854775808", 10);
   public static readonly MAX_VALUE = new BigNumber("9223372036854775807", 10);
 
-  private readonly _fqcn = "java.lang.Long";
+  private readonly _fqcn = JavaType.LONG;
 
   public from(asString: string): BigNumber {
     // simulate Java's Long number range

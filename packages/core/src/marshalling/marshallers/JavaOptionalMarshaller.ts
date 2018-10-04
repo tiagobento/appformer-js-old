@@ -3,38 +3,37 @@ import { NullableMarshaller } from "./NullableMarshaller";
 import { JavaOptional } from "../../java-wrappers/JavaOptional";
 import { ErraiObject } from "../model/ErraiObject";
 import { GenericsTypeMarshallingUtils } from "./util/GenericsTypeMarshallingUtils";
-import { ErraiObjectConstants } from "../model/ErraiObjectConstants";
 import { UnmarshallingContext } from "../UnmarshallingContext";
+import { ValueBasedErraiObject } from "../model/ValueBasedErraiObject";
+import { MarshallerProvider } from "../MarshallerProvider";
 
 export class JavaOptionalMarshaller<T> extends NullableMarshaller<
-  JavaOptional<T>,
+  JavaOptional<T | undefined>,
   ErraiObject,
   ErraiObject,
-  JavaOptional<T>
+  JavaOptional<T | undefined>
 > {
-  public notNullMarshall(input: JavaOptional<T>, ctx: MarshallingContext): ErraiObject {
+  public notNullMarshall(input: JavaOptional<T | undefined>, ctx: MarshallingContext): ErraiObject {
     const innerValue = this.retrieveOptionalInnerValue(input, ctx);
-
-    return {
-      [ErraiObjectConstants.ENCODED_TYPE]: (input as any)._fqcn,
-      [ErraiObjectConstants.OBJECT_ID]: "-1",
-      [ErraiObjectConstants.VALUE]: innerValue
-    };
+    return new ValueBasedErraiObject((input as any)._fqcn, innerValue).asErraiObject();
   }
 
-  private retrieveOptionalInnerValue(input: JavaOptional<T>, ctx: MarshallingContext) {
+  public notNullUnmarshall(input: ErraiObject, ctx: UnmarshallingContext): JavaOptional<T | undefined> {
+    const value = ValueBasedErraiObject.from(input).value;
+    if (value === null || value === undefined) {
+      return new JavaOptional(undefined);
+    }
+
+    const unmarshalledValue = MarshallerProvider.getForObject(value).unmarshall(value, ctx);
+
+    return new JavaOptional(unmarshalledValue);
+  }
+
+  private retrieveOptionalInnerValue(input: JavaOptional<T | undefined>, ctx: MarshallingContext) {
     if (!input.isPresent()) {
       return null;
     }
 
     return GenericsTypeMarshallingUtils.marshallGenericsTypeElement(input.get(), ctx);
-  }
-
-  public notNullUnmarshall(input: ErraiObject, ctx: UnmarshallingContext): JavaOptional<T> {
-    const value = input[ErraiObjectConstants.VALUE];
-
-    const unmarshalledValue = GenericsTypeMarshallingUtils.unmarshallGenericsTypeElement<T>(value, ctx);
-
-    return new JavaOptional(unmarshalledValue);
   }
 }

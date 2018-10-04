@@ -3,12 +3,14 @@ import {
   instanceOfBoolean,
   instanceOfDate,
   instanceOfMap,
+  instanceOfNumber,
   instanceOfSet,
   instanceOfString,
   isArray,
   isBoolean,
   isDate,
   isMap,
+  isNumber,
   isSet,
   isString
 } from "../TypeUtils";
@@ -272,6 +274,58 @@ describe("instanceOfDate", () => {
     const input = 1;
 
     const output = instanceOfDate(input);
+
+    expect(output).toBeFalsy();
+  });
+});
+
+describe("isNumber", () => {
+  test("with direct assigned number, should return true", () => {
+    const input = 1;
+
+    const output = isNumber(input);
+
+    expect(output).toBeTruthy();
+  });
+
+  test("with number created via constructor, should return true", () => {
+    const input = Number(1);
+
+    const output = isNumber(input);
+
+    expect(output).toBeTruthy();
+  });
+
+  test("with non-number input, should return false", () => {
+    const input = true;
+
+    const output = isNumber(input);
+
+    expect(output).toBeFalsy();
+  });
+});
+
+describe("instanceOfNumber", () => {
+  test("with direct assigned number, should return true", () => {
+    const input = 1;
+
+    const output = instanceOfNumber(input);
+
+    expect(output).toBeTruthy();
+  });
+
+  test("with number created via constructor, should return true", () => {
+    const input = Number(1);
+
+    const output = instanceOfNumber(input);
+
+    expect(output).toBeTruthy();
+  });
+
+  test("with non-number input, should return false", () => {
+    const input = true;
+
+    const output = instanceOfNumber(input);
 
     expect(output).toBeFalsy();
   });

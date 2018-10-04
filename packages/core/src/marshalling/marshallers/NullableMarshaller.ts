@@ -12,9 +12,9 @@ export abstract class NullableMarshaller<T extends Portable<T>, U, V, X> impleme
     return this.notNullMarshall(input, ctx);
   }
 
-  public unmarshall(input: V | null, ctx: UnmarshallingContext): X | null {
+  public unmarshall(input: V | undefined, ctx: UnmarshallingContext): X | undefined {
     if (input === null || input === undefined) {
-      return null;
+      return undefined;
     }
 
     return this.notNullUnmarshall(input, ctx);

@@ -1,4 +1,5 @@
 import { JavaShort } from "../JavaShort";
+import { JavaType } from "../JavaType";
 
 describe("get", () => {
   describe("with valid input", () => {
@@ -218,6 +219,6 @@ describe("_fqcn", () => {
   test("must be the same than in Java", () => {
     const fqcn = (new JavaShort("1") as any)._fqcn;
 
-    expect(fqcn).toBe("java.lang.Short");
+    expect(fqcn).toBe(JavaType.SHORT);
   });
 });

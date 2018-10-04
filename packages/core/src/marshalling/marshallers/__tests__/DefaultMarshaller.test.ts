@@ -18,65 +18,66 @@ import {
 import { DefaultMarshaller } from "../DefaultMarshaller";
 import { MarshallingContext } from "../../MarshallingContext";
 import { ErraiObjectConstants } from "../../model/ErraiObjectConstants";
-import { TestUtils } from "../../../__tests__/util/TestUtils";
 import { MarshallerProvider } from "../../MarshallerProvider";
 import { Portable } from "../../../internal";
+import { NumValBasedErraiObject } from "../../model/NumValBasedErraiObject";
+import { ValueBasedErraiObject } from "../../model/ValueBasedErraiObject";
+import { JavaType } from "../../../java-wrappers/JavaType";
+import { NumberUtils } from "../../../util/NumberUtils";
+import { UnmarshallingContext } from "../../UnmarshallingContext";
+
+beforeEach(() => {
+  MarshallerProvider.initialize();
+});
 
 describe("marshall", () => {
   const objectId = ErraiObjectConstants.OBJECT_ID;
   const encodedType = ErraiObjectConstants.ENCODED_TYPE;
   const value = ErraiObjectConstants.VALUE;
-  const numVal = ErraiObjectConstants.NUM_VAL;
-
-  beforeEach(() => {
-    MarshallerProvider.initialize();
-  });
 
   describe("pojo marshalling", () => {
     test("custom pojo, should return serialize it normally", () => {
-      const input = {
-        _fqcn: "com.app.my.Pojo",
+      const input = new User({
         name: "my name",
         sendSpam: false,
         age: new JavaInteger("10"),
-        address: {
-          _fqcn: "com.app.my.Address",
+        address: new Address({
           line1: "address line 1"
-        },
-        childPojo: {
-          _fqcn: "com.app.my.Pojo",
+        }),
+        bestFriend: new User({
           name: "my name 2",
           sendSpam: true,
-          address: {
-            _fqcn: "com.app.my.Address",
+          address: new Address({
             line1: "address 2 line 1"
-          }
-        }
-      };
+          })
+        })
+      });
 
       const output = new DefaultMarshaller().marshall(input, new MarshallingContext());
 
       expect(output).toStrictEqual({
         [encodedType]: "com.app.my.Pojo",
-        [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
+        [objectId]: expect.stringMatching(NumberUtils.nonNegativeIntegerRegex),
         name: "my name",
         age: 10,
         sendSpam: false,
         address: {
           [encodedType]: "com.app.my.Address",
-          [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
+          [objectId]: expect.stringMatching(NumberUtils.nonNegativeIntegerRegex),
           line1: "address line 1"
         },
-        childPojo: {
+        bestFriend: {
           [encodedType]: "com.app.my.Pojo",
-          [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
+          [objectId]: expect.stringMatching(NumberUtils.nonNegativeIntegerRegex),
           name: "my name 2",
           sendSpam: true,
+          age: null,
           address: {
             [encodedType]: "com.app.my.Address",
-            [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
+            [objectId]: expect.stringMatching(NumberUtils.nonNegativeIntegerRegex),
             line1: "address 2 line 1"
-          }
+          },
+          bestFriend: null
         }
       });
     });
@@ -94,7 +95,7 @@ describe("marshall", () => {
 
       expect(output).toStrictEqual({
         [encodedType]: "com.app.my.Pojo",
-        [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
+        [objectId]: expect.stringMatching(NumberUtils.nonNegativeIntegerRegex),
         foo: "bar"
       });
     });
@@ -128,35 +129,34 @@ describe("marshall", () => {
     test("custom pojo with java types, should serialize it normally", () => {
       const date = new Date();
 
-      const input = {
-        _fqcn: "com.app.my.Pojo",
+      const input = new JavaTypesPojo({
         bigDecimal: new JavaBigDecimal("1.1"),
         bigInteger: new JavaBigInteger("2"),
-        boolean: new JavaBoolean(false),
+        boolean: false,
         byte: new JavaByte("3"),
         double: new JavaDouble("1.2"),
         float: new JavaFloat("1.3"),
         integer: new JavaInteger("4"),
         long: new JavaLong("5"),
         short: new JavaShort("6"),
-        string: new JavaString("str"),
-        date: new JavaDate(date),
+        string: "str",
+        date: new Date(date),
         optional: new JavaOptional<string>("optstr")
-      };
+      });
 
       const output = new DefaultMarshaller().marshall(input, new MarshallingContext());
 
       expect(output).toStrictEqual({
         [encodedType]: "com.app.my.Pojo",
-        [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
+        [objectId]: expect.stringMatching(NumberUtils.nonNegativeIntegerRegex),
         bigDecimal: {
-          [encodedType]: "java.math.BigDecimal",
-          [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
+          [encodedType]: JavaType.BIG_DECIMAL,
+          [objectId]: expect.stringMatching(NumberUtils.nonNegativeIntegerRegex),
           [value]: "1.1"
         },
         bigInteger: {
-          [encodedType]: "java.math.BigInteger",
-          [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
+          [encodedType]: JavaType.BIG_INTEGER,
+          [objectId]: expect.stringMatching(NumberUtils.nonNegativeIntegerRegex),
           [value]: "2"
         },
         boolean: false,
@@ -164,23 +164,11 @@ describe("marshall", () => {
         double: 1.2,
         float: 1.3,
         integer: 4,
-        long: {
-          [encodedType]: "java.lang.Long",
-          [objectId]: "-1",
-          [numVal]: "5"
-        },
+        long: new NumValBasedErraiObject(JavaType.LONG, "5").asErraiObject(),
         short: 6,
         string: "str",
-        date: {
-          [encodedType]: "java.util.Date",
-          [objectId]: "-1",
-          [value]: `${date.getTime()}`
-        },
-        optional: {
-          [encodedType]: "java.util.Optional",
-          [objectId]: "-1",
-          [value]: "optstr"
-        }
+        date: new ValueBasedErraiObject(JavaType.DATE, `${date.getTime()}`).asErraiObject(),
+        optional: new ValueBasedErraiObject(JavaType.OPTIONAL, "optstr").asErraiObject()
       });
     });
 
@@ -196,20 +184,20 @@ describe("marshall", () => {
 
       expect(output).toStrictEqual({
         [encodedType]: "com.app.my.Pojo",
-        [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
+        [objectId]: expect.stringMatching(NumberUtils.nonNegativeIntegerRegex),
         list: {
-          [encodedType]: "java.util.ArrayList",
-          [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
+          [encodedType]: JavaType.ARRAY_LIST,
+          [objectId]: expect.stringMatching(NumberUtils.nonNegativeIntegerRegex),
           [value]: ["1", "2", "3"]
         },
         set: {
-          [encodedType]: "java.util.HashSet",
-          [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
+          [encodedType]: JavaType.HASH_SET,
+          [objectId]: expect.stringMatching(NumberUtils.nonNegativeIntegerRegex),
           [value]: ["3", "2", "1"]
         },
         map: {
-          [encodedType]: "java.util.HashMap",
-          [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
+          [encodedType]: JavaType.HASH_MAP,
+          [objectId]: expect.stringMatching(NumberUtils.nonNegativeIntegerRegex),
           [value]: {
             k1: "v1",
             k2: "v2"
@@ -220,20 +208,6 @@ describe("marshall", () => {
   });
 
   describe("object caching", () => {
-    class Node implements Portable<Node> {
-      private readonly _fqcn = "com.app.my.Node";
-
-      public readonly _data: any;
-      public readonly _left?: Node;
-      public readonly _right?: Node;
-
-      constructor(self: { data: any; left?: Node; right?: Node }) {
-        this._data = self.data;
-        this._left = self.left;
-        this._right = self.right;
-      }
-    }
-
     test("custom pojo with repeated pojo objects, should cache the object and don't repeat data", () => {
       // === scenario
 
@@ -255,28 +229,28 @@ describe("marshall", () => {
 
       const rootObjId = output![objectId];
       expect(output![encodedType]).toEqual("com.app.my.Node");
-      expect((output as any)._data).toEqual("root");
+      expect((output as any).data).toEqual("root");
 
-      const firstLeftLeaf = (output as any)._left;
+      const firstLeftLeaf = (output as any).left;
       const firstLeftLeafObjId = firstLeftLeaf[objectId];
-      expect(firstLeftLeaf._data).toEqual("repeatedNode");
+      expect(firstLeftLeaf.data).toEqual("repeatedNode");
 
-      const rightNodeOut = (output as any)._right;
+      const rightNodeOut = (output as any).right;
       const rightNodeObjId = rightNodeOut[objectId];
-      expect(rightNodeOut._data).toEqual("rightNode");
+      expect(rightNodeOut.data).toEqual("rightNode");
 
-      const repeatedLeftLeaf = (rightNodeOut as any)._left;
+      const repeatedLeftLeaf = (rightNodeOut as any).left;
       const repeatedLeftLeafObjId = repeatedLeftLeaf[objectId];
-      expect(repeatedLeftLeaf._data).toBeUndefined();
+      expect(repeatedLeftLeaf.data).toBeUndefined();
 
-      const rightLeafOut = (rightNodeOut as any)._right;
+      const rightLeafOut = (rightNodeOut as any).right;
       const rightLeafObjId = rightLeafOut[objectId];
-      expect(rightLeafOut._data).toEqual("rightLeaf");
+      expect(rightLeafOut.data).toEqual("rightLeaf");
 
       expect(firstLeftLeafObjId).toEqual(repeatedLeftLeafObjId); // reuse same id
 
       const allObjIds = [rootObjId, firstLeftLeafObjId, rightNodeObjId, repeatedLeftLeafObjId, rightLeafObjId];
-      expect(allObjIds.forEach(id => expect(id).toMatch(TestUtils.positiveNumberRegex)));
+      expect(allObjIds.forEach(id => expect(id).toMatch(NumberUtils.nonNegativeIntegerRegex)));
 
       // all ids unique (excluding the reused one)
       const uniqueObjIds = new Set(allObjIds);
@@ -299,16 +273,16 @@ describe("marshall", () => {
       // === assertions
 
       const rootObjId = output![objectId];
-      const rootDataObjId = (output as any)._data[objectId];
-      expect((output as any)._data[value]).toEqual("1.1");
+      const rootDataObjId = (output as any).data[objectId];
+      expect((output as any).data[value]).toEqual("1.1");
 
-      const leftObjId = (output as any)._left[objectId];
-      const leftDataObjId = (output as any)._left._data[objectId];
-      expect((output as any)._left._data[value]).toEqual("1.2");
+      const leftObjId = (output as any).left[objectId];
+      const leftDataObjId = (output as any).left.data[objectId];
+      expect((output as any).left.data[value]).toEqual("1.2");
 
-      const rightObjId = (output as any)._right[objectId];
-      const rightDataObjId = (output as any)._right._data[objectId];
-      expect((output as any)._right._data[value]).toEqual("1.1");
+      const rightObjId = (output as any).right[objectId];
+      const rightDataObjId = (output as any).right.data[objectId];
+      expect((output as any).right.data[value]).toEqual("1.1");
 
       const allObjectIds = [rootObjId, rootDataObjId, leftObjId, leftDataObjId, rightObjId, rightDataObjId];
 
@@ -337,16 +311,16 @@ describe("marshall", () => {
       // === assertions
 
       const rootObjId = output![objectId];
-      const rootDataObjId = (output as any)._data[objectId];
-      expect((output as any)._data[value]).toEqual("1");
+      const rootDataObjId = (output as any).data[objectId];
+      expect((output as any).data[value]).toEqual("1");
 
-      const leftObjId = (output as any)._left[objectId];
-      const leftDataObjId = (output as any)._left._data[objectId];
-      expect((output as any)._left._data[value]).toEqual("2");
+      const leftObjId = (output as any).left[objectId];
+      const leftDataObjId = (output as any).left.data[objectId];
+      expect((output as any).left.data[value]).toEqual("2");
 
-      const rightObjId = (output as any)._right[objectId];
-      const rightDataObjId = (output as any)._right._data[objectId];
-      expect((output as any)._right._data[value]).toEqual("1");
+      const rightObjId = (output as any).right[objectId];
+      const rightDataObjId = (output as any).right.data[objectId];
+      expect((output as any).right.data[value]).toEqual("1");
 
       const allObjectIds = [rootObjId, rootDataObjId, leftObjId, leftDataObjId, rightObjId, rightDataObjId];
 
@@ -419,25 +393,25 @@ describe("marshall", () => {
         // === assertions
 
         const rootObjId = output![objectId];
-        const rootDataObjId = (output as any)._data[objectId];
-        expect((output as any)._data).toStrictEqual({
-          [encodedType]: "java.util.ArrayList",
+        const rootDataObjId = (output as any).data[objectId];
+        expect((output as any).data).toStrictEqual({
+          [encodedType]: JavaType.ARRAY_LIST,
           [objectId]: expect.anything(),
           [value]: ["a", "b", "c"]
         });
 
-        const leftObjId = (output as any)._left[objectId];
-        const leftDataObjId = (output as any)._left._data[objectId];
-        expect((output as any)._left._data).toStrictEqual({
-          [encodedType]: "java.util.ArrayList",
+        const leftObjId = (output as any).left[objectId];
+        const leftDataObjId = (output as any).left.data[objectId];
+        expect((output as any).left.data).toStrictEqual({
+          [encodedType]: JavaType.ARRAY_LIST,
           [objectId]: expect.anything(),
           [value]: ["d", "e"]
         });
 
-        const rightObjId = (output as any)._right[objectId];
-        const rightDataObjId = (output as any)._right._data[objectId];
-        expect((output as any)._right._data).toStrictEqual({
-          [encodedType]: "java.util.ArrayList",
+        const rightObjId = (output as any).right[objectId];
+        const rightDataObjId = (output as any).right.data[objectId];
+        expect((output as any).right.data).toStrictEqual({
+          [encodedType]: JavaType.ARRAY_LIST,
           [objectId]: expect.anything()
           // missing value since it is cached
         });
@@ -452,10 +426,10 @@ describe("marshall", () => {
         );
 
         // do not cache repeated object
-        expect(context.getCached(repeatedValue)).toStrictEqual({
-          [encodedType]: "java.util.ArrayList",
-          [objectId]: rootDataObjId
-        });
+        const cached = context.getCached(repeatedValue);
+        expect(ValueBasedErraiObject.from(cached!)).toStrictEqual(
+          new ValueBasedErraiObject(JavaType.ARRAY_LIST, undefined, rootDataObjId)
+        );
       });
     });
 
@@ -481,25 +455,25 @@ describe("marshall", () => {
         // === assertions
 
         const rootObjId = output![objectId];
-        const rootDataObjId = (output as any)._data[objectId];
-        expect((output as any)._data).toStrictEqual({
-          [encodedType]: "java.util.HashSet",
+        const rootDataObjId = (output as any).data[objectId];
+        expect((output as any).data).toStrictEqual({
+          [encodedType]: JavaType.HASH_SET,
           [objectId]: expect.anything(),
           [value]: ["a", "b", "c"]
         });
 
-        const leftObjId = (output as any)._left[objectId];
-        const leftDataObjId = (output as any)._left._data[objectId];
-        expect((output as any)._left._data).toStrictEqual({
-          [encodedType]: "java.util.HashSet",
+        const leftObjId = (output as any).left[objectId];
+        const leftDataObjId = (output as any).left.data[objectId];
+        expect((output as any).left.data).toStrictEqual({
+          [encodedType]: JavaType.HASH_SET,
           [objectId]: expect.anything(),
           [value]: ["d", "e"]
         });
 
-        const rightObjId = (output as any)._right[objectId];
-        const rightDataObjId = (output as any)._right._data[objectId];
-        expect((output as any)._right._data).toStrictEqual({
-          [encodedType]: "java.util.HashSet",
+        const rightObjId = (output as any).right[objectId];
+        const rightDataObjId = (output as any).right.data[objectId];
+        expect((output as any).right.data).toStrictEqual({
+          [encodedType]: JavaType.HASH_SET,
           [objectId]: expect.anything()
           // missing value since it is cached
         });
@@ -514,10 +488,10 @@ describe("marshall", () => {
         );
 
         // do not cache repeated object
-        expect(context.getCached(repeatedValue)).toStrictEqual({
-          [encodedType]: "java.util.HashSet",
-          [objectId]: rootDataObjId
-        });
+        const cached = context.getCached(repeatedValue);
+        expect(ValueBasedErraiObject.from(cached!)).toStrictEqual(
+          new ValueBasedErraiObject(JavaType.HASH_SET, undefined, rootDataObjId)
+        );
       });
     });
 
@@ -543,29 +517,29 @@ describe("marshall", () => {
         // === assertions
 
         const rootObjId = output![objectId];
-        const rootDataObjId = (output as any)._data[objectId];
-        expect((output as any)._data).toStrictEqual({
-          [encodedType]: "java.util.HashMap",
+        const rootDataObjId = (output as any).data[objectId];
+        expect((output as any).data).toStrictEqual({
+          [encodedType]: JavaType.HASH_MAP,
           [objectId]: expect.anything(),
           [value]: {
             k1: "v1"
           }
         });
 
-        const leftObjId = (output as any)._left[objectId];
-        const leftDataObjId = (output as any)._left._data[objectId];
-        expect((output as any)._left._data).toStrictEqual({
-          [encodedType]: "java.util.HashMap",
+        const leftObjId = (output as any).left[objectId];
+        const leftDataObjId = (output as any).left.data[objectId];
+        expect((output as any).left.data).toStrictEqual({
+          [encodedType]: JavaType.HASH_MAP,
           [objectId]: expect.anything(),
           [value]: {
             k2: "v2"
           }
         });
 
-        const rightObjId = (output as any)._right[objectId];
-        const rightDataObjId = (output as any)._right._data[objectId];
-        expect((output as any)._right._data).toStrictEqual({
-          [encodedType]: "java.util.HashMap",
+        const rightObjId = (output as any).right[objectId];
+        const rightDataObjId = (output as any).right.data[objectId];
+        expect((output as any).right.data).toStrictEqual({
+          [encodedType]: JavaType.HASH_MAP,
           [objectId]: expect.anything()
           // missing value since it is cached
         });
@@ -580,10 +554,10 @@ describe("marshall", () => {
         );
 
         // do not cache repeated object's data
-        expect(context.getCached(repeatedMap)).toStrictEqual({
-          [encodedType]: "java.util.HashMap",
-          [objectId]: rootDataObjId
-        });
+        const cached = context.getCached(repeatedMap);
+        expect(ValueBasedErraiObject.from(cached!)).toStrictEqual(
+          new ValueBasedErraiObject(JavaType.HASH_MAP, undefined, rootDataObjId)
+        );
       });
     });
 
@@ -660,18 +634,18 @@ describe("marshall", () => {
       // === assertions
 
       const rootObjId = output![objectId];
-      const rootDataObjId = (output as any)._data[objectId];
-      expect((output as any)._data[numVal]).toEqual("1");
+      const rootData = NumValBasedErraiObject.from((output as any).data);
+      expect(rootData.numVal).toEqual("1");
 
-      const leftObjId = (output as any)._left[objectId];
-      const leftDataObjId = (output as any)._left._data[objectId];
-      expect((output as any)._left._data[numVal]).toEqual("2");
+      const leftObj = NumValBasedErraiObject.from((output as any).left);
+      const leftData = NumValBasedErraiObject.from((output as any).left.data);
+      expect(leftData.numVal).toEqual("2");
 
-      const rightObjId = (output as any)._right[objectId];
-      const rightDataObjId = (output as any)._right._data[objectId];
-      expect((output as any)._right._data[numVal]).toEqual("1");
+      const rightObj = NumValBasedErraiObject.from((output as any).right);
+      const rightData = NumValBasedErraiObject.from((output as any).right.data);
+      expect(rightData.numVal).toEqual("1");
 
-      const allObjectIds = [rootObjId, rootDataObjId, leftObjId, leftDataObjId, rightObjId, rightDataObjId];
+      const allObjectIds = [rootObjId, rootData.objId, leftObj.objId, leftData.objId, rightObj.objId, rightData.objId];
 
       allObjectIds.forEach(id => expect(id).toBeDefined());
 
@@ -736,16 +710,16 @@ describe("marshall", () => {
       // === assertions
 
       const rootObjId = output![objectId];
-      const rootDataObjId = (output as any)._data[objectId];
-      expect((output as any)._data[value]).toStrictEqual("str1");
+      const rootDataObjId = (output as any).data[objectId];
+      expect((output as any).data[value]).toStrictEqual("str1");
 
-      const leftObjId = (output as any)._left[objectId];
-      const leftDataObjId = (output as any)._left._data[objectId];
-      expect((output as any)._left._data[value]).toEqual("str2");
+      const leftObjId = (output as any).left[objectId];
+      const leftDataObjId = (output as any).left.data[objectId];
+      expect((output as any).left.data[value]).toEqual("str2");
 
-      const rightObjId = (output as any)._right[objectId];
-      const rightDataObjId = (output as any)._right._data[objectId];
-      expect((output as any)._right._data[value]).toEqual("str1");
+      const rightObjId = (output as any).right[objectId];
+      const rightDataObjId = (output as any).right.data[objectId];
+      expect((output as any).right.data[value]).toEqual("str1");
 
       const allObjectIds = [rootObjId, rootDataObjId, leftObjId, leftDataObjId, rightObjId, rightDataObjId];
 
@@ -784,8 +758,8 @@ describe("marshall", () => {
       const output = new DefaultMarshaller().marshall(input, new MarshallingContext());
 
       expect(output).toStrictEqual({
-        [encodedType]: "java.math.BigDecimal",
-        [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
+        [encodedType]: JavaType.BIG_DECIMAL,
+        [objectId]: expect.stringMatching(NumberUtils.nonNegativeIntegerRegex),
         [value]: "1.2"
       });
     });
@@ -796,8 +770,8 @@ describe("marshall", () => {
       const output = new DefaultMarshaller().marshall(input, new MarshallingContext());
 
       expect(output).toStrictEqual({
-        [encodedType]: "java.math.BigInteger",
-        [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
+        [encodedType]: JavaType.BIG_INTEGER,
+        [objectId]: expect.stringMatching(NumberUtils.nonNegativeIntegerRegex),
         [value]: "1"
       });
     });
@@ -839,11 +813,7 @@ describe("marshall", () => {
 
       const output = new DefaultMarshaller().marshall(input, new MarshallingContext());
 
-      expect(output).toStrictEqual({
-        [encodedType]: "java.lang.Long",
-        [objectId]: "-1",
-        [numVal]: "1"
-      });
+      expect(output).toStrictEqual(new NumValBasedErraiObject(JavaType.LONG, "1").asErraiObject());
     });
 
     test("root JavaShort object, should serialize it normally to short raw value", () => {
@@ -859,11 +829,7 @@ describe("marshall", () => {
 
       const output = new DefaultMarshaller().marshall(input, new MarshallingContext());
 
-      expect(output).toStrictEqual({
-        [encodedType]: "java.util.Optional",
-        [objectId]: "-1",
-        [value]: "str"
-      });
+      expect(output).toStrictEqual(new ValueBasedErraiObject(JavaType.OPTIONAL, "str").asErraiObject());
     });
 
     test("root string object, should serialize it to string raw value", () => {
@@ -884,11 +850,7 @@ describe("marshall", () => {
       [date, javaDate].forEach(input => {
         const output = new DefaultMarshaller().marshall(input, new MarshallingContext());
 
-        expect(output).toStrictEqual({
-          [encodedType]: "java.util.Date",
-          [objectId]: "-1",
-          [value]: `${date.getTime()}`
-        });
+        expect(output).toStrictEqual(new ValueBasedErraiObject(JavaType.DATE, `${date.getTime()}`).asErraiObject());
       });
     });
 
@@ -920,8 +882,8 @@ describe("marshall", () => {
         const output = new DefaultMarshaller().marshall(input, new MarshallingContext());
 
         expect(output).toStrictEqual({
-          [encodedType]: "java.util.ArrayList",
-          [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
+          [encodedType]: JavaType.ARRAY_LIST,
+          [objectId]: expect.stringMatching(NumberUtils.nonNegativeIntegerRegex),
           [value]: ["1", "2", "3"]
         });
       });
@@ -935,8 +897,8 @@ describe("marshall", () => {
         const output = new DefaultMarshaller().marshall(input, new MarshallingContext());
 
         expect(output).toStrictEqual({
-          [encodedType]: "java.util.HashSet",
-          [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
+          [encodedType]: JavaType.HASH_SET,
+          [objectId]: expect.stringMatching(NumberUtils.nonNegativeIntegerRegex),
           [value]: ["1", "2", "3"]
         });
       });
@@ -950,8 +912,8 @@ describe("marshall", () => {
         const output = new DefaultMarshaller().marshall(input, new MarshallingContext());
 
         expect(output).toStrictEqual({
-          [encodedType]: "java.util.HashMap",
-          [objectId]: expect.stringMatching(TestUtils.positiveNumberRegex),
+          [encodedType]: JavaType.HASH_MAP,
+          [objectId]: expect.stringMatching(NumberUtils.nonNegativeIntegerRegex),
           [value]: {
             k1: "v1",
             k2: "v2"
@@ -960,4 +922,740 @@ describe("marshall", () => {
       });
     });
   });
+
+  class Node implements Portable<Node> {
+    private readonly _fqcn = "com.app.my.Node";
+
+    public readonly data?: any = undefined;
+    public readonly left?: Node = undefined;
+    public readonly right?: Node = undefined;
+
+    constructor(self: { data?: any; left?: Node; right?: Node }) {
+      Object.assign(this, self);
+    }
+  }
 });
+
+describe("unmarshall", () => {
+  describe("non-pojo root types", () => {
+    test("root null object, should unmarshall to undefined", () => {
+      const marshaller = new DefaultMarshaller();
+
+      const input = null as any;
+      const marshalledInput = marshaller.marshall(input, new MarshallingContext()) as any;
+
+      const output = marshaller.unmarshall(marshalledInput, new UnmarshallingContext(new Map()));
+
+      expect(output).toBeUndefined();
+    });
+
+    test("root undefined object, should unmarshall to null", () => {
+      const marshaller = new DefaultMarshaller();
+
+      const input = undefined as any;
+      const marshalledInput = marshaller.marshall(input, new MarshallingContext()) as any;
+
+      const output = marshaller.unmarshall(marshalledInput, new UnmarshallingContext(new Map()));
+
+      expect(output).toBeUndefined();
+    });
+
+    test("root JavaBigDecimal object, should unmarshall it normally", () => {
+      const marshaller = new DefaultMarshaller();
+
+      const input = new JavaBigDecimal("1.1");
+      const marshalledInput = marshaller.marshall(input, new MarshallingContext())!;
+
+      const output = marshaller.unmarshall(marshalledInput, new UnmarshallingContext(new Map()));
+
+      expect(output).toEqual(new JavaBigDecimal("1.1"));
+    });
+
+    test("root JavaBigInteger object, should unmarshall it normally", () => {
+      const marshaller = new DefaultMarshaller();
+
+      const input = new JavaBigInteger("1");
+      const marshalledInput = marshaller.marshall(input, new MarshallingContext())!;
+
+      const output = marshaller.unmarshall(marshalledInput, new UnmarshallingContext(new Map()));
+
+      expect(output).toEqual(new JavaBigInteger("1"));
+    });
+
+    test("root JavaByte object, should unmarshall it normally", () => {
+      const marshaller = new DefaultMarshaller();
+
+      const input = 1;
+      const marshalledInput = new NumValBasedErraiObject(JavaType.BYTE, input).asErraiObject();
+
+      const output = marshaller.unmarshall(marshalledInput, new UnmarshallingContext(new Map()));
+
+      expect(output).toEqual(new JavaByte("1"));
+    });
+
+    test("root JavaDouble object, should unmarshall it normally", () => {
+      const marshaller = new DefaultMarshaller();
+
+      const input = 1.1;
+      const marshalledInput = new NumValBasedErraiObject(JavaType.DOUBLE, input).asErraiObject();
+
+      const output = marshaller.unmarshall(marshalledInput, new UnmarshallingContext(new Map()));
+
+      expect(output).toEqual(new JavaDouble("1.1"));
+    });
+
+    test("root JavaFloat object, should unmarshall it normally", () => {
+      const marshaller = new DefaultMarshaller();
+
+      const input = 1.1;
+      const marshalledInput = new NumValBasedErraiObject(JavaType.FLOAT, input).asErraiObject();
+
+      const output = marshaller.unmarshall(marshalledInput, new UnmarshallingContext(new Map()));
+
+      expect(output).toEqual(new JavaFloat("1.1"));
+    });
+
+    test("root JavaInteger object, should unmarshall it normally", () => {
+      const marshaller = new DefaultMarshaller();
+
+      const input = 1;
+      const marshalledInput = new NumValBasedErraiObject(JavaType.INTEGER, input).asErraiObject();
+
+      const output = marshaller.unmarshall(marshalledInput, new UnmarshallingContext(new Map()));
+
+      expect(output).toEqual(new JavaInteger("1"));
+    });
+
+    test("root JavaLong object, should unmarshall it normally", () => {
+      const marshaller = new DefaultMarshaller();
+
+      const input = new JavaLong("1");
+      const marshalledInput = marshaller.marshall(input, new MarshallingContext())!;
+
+      const output = marshaller.unmarshall(marshalledInput, new UnmarshallingContext(new Map()));
+
+      expect(output).toEqual(new JavaLong("1"));
+    });
+
+    test("root JavaShort object, should unmarshall it normally", () => {
+      const marshaller = new DefaultMarshaller();
+
+      const input = 1;
+      const marshalledInput = new NumValBasedErraiObject(JavaType.SHORT, input).asErraiObject();
+
+      const output = marshaller.unmarshall(marshalledInput, new UnmarshallingContext(new Map()));
+
+      expect(output).toEqual(new JavaShort("1"));
+    });
+
+    test("root JavaOptional object, should serialize it normally", () => {
+      const marshaller = new DefaultMarshaller();
+
+      const input = new JavaOptional("1");
+      const marshalledInput = marshaller.marshall(input, new MarshallingContext())!;
+
+      const output = marshaller.unmarshall(marshalledInput, new UnmarshallingContext(new Map()));
+
+      expect(output).toEqual(new JavaOptional("1"));
+    });
+
+    test("root string object, should unmarshall it to native string", () => {
+      const marshaller = new DefaultMarshaller();
+
+      const stringInput = "foo";
+      const javaStringInput = new JavaString("foo");
+
+      [stringInput, javaStringInput].forEach(input => {
+        const marshalledInput = marshaller.marshall(input, new MarshallingContext())!;
+
+        const output = marshaller.unmarshall(marshalledInput, new UnmarshallingContext(new Map()));
+
+        expect(output).toEqual("foo");
+      });
+    });
+
+    test("root date object, should unmarshall it to native date", () => {
+      const marshaller = new DefaultMarshaller();
+
+      const baseDate = new Date();
+
+      const dateInput = new Date(baseDate);
+      const javaDateInput = new JavaDate(new Date(baseDate));
+
+      [dateInput, javaDateInput].forEach(input => {
+        const marshalledInput = marshaller.marshall(input, new MarshallingContext())!;
+
+        const output = marshaller.unmarshall(marshalledInput, new UnmarshallingContext(new Map()));
+
+        expect(output).toEqual(baseDate);
+      });
+    });
+
+    test("root boolean object, should unmarshall it to native boolean", () => {
+      const marshaller = new DefaultMarshaller();
+
+      const booleanInput = false;
+      const javaBooleanInput = new JavaBoolean(false);
+
+      [booleanInput, javaBooleanInput].forEach(input => {
+        const marshalledInput = marshaller.marshall(input, new MarshallingContext())!;
+
+        const output = marshaller.unmarshall(marshalledInput, new UnmarshallingContext(new Map()));
+
+        expect(output).toEqual(false);
+      });
+    });
+
+    test("root array object, should unmarshall it to native array", () => {
+      const marshaller = new DefaultMarshaller();
+
+      const arrayInput = ["foo"];
+      const javaArrayInput = new JavaArrayList(["foo"]);
+
+      [arrayInput, javaArrayInput].forEach(input => {
+        const marshalledInput = marshaller.marshall(input, new MarshallingContext())!;
+
+        const output = marshaller.unmarshall(marshalledInput, new UnmarshallingContext(new Map()));
+
+        expect(output).toEqual(["foo"]);
+      });
+    });
+
+    test("root set object, should unmarshall it to native set", () => {
+      const marshaller = new DefaultMarshaller();
+
+      const setInput = new Set(["foo"]);
+      const javaSetInput = new JavaHashSet(new Set(["foo"]));
+
+      [setInput, javaSetInput].forEach(input => {
+        const marshalledInput = marshaller.marshall(input, new MarshallingContext())!;
+
+        const output = marshaller.unmarshall(marshalledInput, new UnmarshallingContext(new Map()));
+
+        expect(output).toEqual(new Set(["foo"]));
+      });
+    });
+
+    test("root map object, should unmarshall it native map", () => {
+      const marshaller = new DefaultMarshaller();
+
+      const mapInput = new Map([["foo", "bar"]]);
+      const javaMapInput = new JavaHashMap(new Map([["foo", "bar"]]));
+
+      [mapInput, javaMapInput].forEach(input => {
+        const marshalledInput = marshaller.marshall(input, new MarshallingContext())!;
+
+        const output = marshaller.unmarshall(marshalledInput, new UnmarshallingContext(new Map()));
+
+        expect(output).toEqual(new Map([["foo", "bar"]]));
+      });
+    });
+
+    test("root integer number object, should throw error", () => {
+      const marshaller = new DefaultMarshaller();
+
+      const input = 1;
+
+      expect(() => marshaller.unmarshall(input as any, new UnmarshallingContext(new Map()))).toThrowError();
+    });
+
+    test("root float number object, should throw error", () => {
+      const marshaller = new DefaultMarshaller();
+
+      const input = 1.1;
+
+      expect(() => marshaller.unmarshall(input as any, new UnmarshallingContext(new Map()))).toThrowError();
+    });
+  });
+
+  describe("pojo root types", () => {
+    test("with custom pojo, should unmarshall correctly", () => {
+      const oracle = new Map([
+        ["com.app.my.Pojo", () => new User({ age: new JavaInteger("0") }) as any],
+        ["com.app.my.Address", () => new Address({} as any) as any]
+      ]);
+
+      const marshaller = new DefaultMarshaller();
+
+      const input = new User({
+        name: "my name",
+        sendSpam: false,
+        age: new JavaInteger("10"),
+        address: new Address({
+          line1: "address line 1"
+        }),
+        bestFriend: new User({
+          name: "my name 2",
+          sendSpam: true,
+          address: new Address({
+            line1: "address 2 line 1"
+          })
+        })
+      });
+
+      const marshalledInput = marshaller.marshall(input, new MarshallingContext())!;
+
+      const output = marshaller.unmarshall(marshalledInput, new UnmarshallingContext(oracle));
+
+      expect(output).toEqual(input);
+    });
+
+    test("with custom pojo with function, should unmarshall to a correct object containing the function", () => {
+      const oracle = new Map([["com.app.my.PojoWithFunction", () => new PojoWithFunction({})]]);
+      const marshaller = new DefaultMarshaller();
+
+      const input = new PojoWithFunction({ foo: "bar" });
+      const marshalledInput = marshaller.marshall(input, new MarshallingContext())!;
+
+      const output = marshaller.unmarshall(marshalledInput, new UnmarshallingContext(oracle)) as PojoWithFunction;
+
+      expect(output).toEqual(input);
+
+      // generates a full functional object of the correct type
+      expect(output.whatToSay()).toEqual("Hello, bar!");
+    });
+
+    test("with custom pojo with java types, should unmarshall normally", () => {
+      const marshaller = new DefaultMarshaller();
+      const oracle = new Map([
+        [
+          "com.app.my.Pojo",
+          () =>
+            new JavaTypesPojo({
+              bigDecimal: new JavaBigDecimal("0"),
+              bigInteger: new JavaBigInteger("0"),
+              byte: new JavaByte("0"),
+              double: new JavaDouble("0"),
+              float: new JavaFloat("0"),
+              integer: new JavaInteger("0"),
+              short: new JavaShort("0")
+            })
+        ]
+      ]);
+
+      const input = new JavaTypesPojo({
+        bigDecimal: new JavaBigDecimal("1.1"),
+        bigInteger: new JavaBigInteger("2"),
+        boolean: false,
+        byte: new JavaByte("3"),
+        double: new JavaDouble("1.2"),
+        float: new JavaFloat("1.3"),
+        integer: new JavaInteger("4"),
+        long: new JavaLong("5"),
+        short: new JavaShort("6"),
+        string: "str",
+        date: new Date(),
+        optional: new JavaOptional<string>("optstr")
+      });
+
+      const marshalledInput = marshaller.marshall(input, new MarshallingContext())!;
+
+      const output = marshaller.unmarshall(marshalledInput, new UnmarshallingContext(oracle));
+
+      expect(output).toEqual(input);
+    });
+
+    test("with custom pojo with java collection types, should unmarshall normally", () => {
+      const marshaller = new DefaultMarshaller();
+      const oracle = new Map([["com.app.my.JavaCollectionTypesPojo", () => new JavaCollectionTypesPojo({})]]);
+
+      const input = new JavaCollectionTypesPojo({
+        list: ["1", "2"],
+        set: new Set<string>(["3", "2"]),
+        map: new Map([["k1", "v1"], ["k2", "v2"]])
+      });
+
+      const marshalledInput = marshaller.marshall(input, new MarshallingContext())!;
+
+      const output = marshaller.unmarshall(marshalledInput, new UnmarshallingContext(oracle));
+
+      expect(output).toEqual(input);
+    });
+
+    test("with custom pojo without fqcn, should throw error", () => {
+      const marshaller = new DefaultMarshaller();
+      const unmarshallContext = new UnmarshallingContext(
+        new Map([["com.app.my.Pojo", () => new User({ age: new JavaInteger("0") })]])
+      );
+
+      const input = new User({});
+      const marshalledInput = marshaller.marshall(input, new MarshallingContext())!;
+
+      // remove its fqcn
+      delete marshalledInput[ErraiObjectConstants.ENCODED_TYPE];
+
+      expect(() => marshaller.unmarshall(marshalledInput, unmarshallContext)).toThrowError();
+    });
+
+    test("with custom pojo without factory, should throw error", () => {
+      const marshaller = new DefaultMarshaller();
+      const unmarshallContext = new UnmarshallingContext(new Map());
+
+      const input = new User({});
+      const marshalledInput = marshaller.marshall(input, new MarshallingContext())!;
+
+      expect(() => marshaller.unmarshall(marshalledInput, unmarshallContext)).toThrowError();
+    });
+
+    test("with custom pojo with property without fqcn, should throw error", () => {
+      const marshaller = new DefaultMarshaller();
+      const unmarshallContext = new UnmarshallingContext(
+        new Map([
+          ["com.app.my.Pojo", () => new User({ age: new JavaInteger("0") }) as any],
+          ["com.app.my.Address", () => new Address({} as any) as any]
+        ])
+      );
+
+      const input = new User({ name: "foo", address: new Address({ line1: "bla" }) });
+      const marshalledInput = marshaller.marshall(input, new MarshallingContext())!;
+
+      // remove its fqcn
+      delete (marshalledInput as any).address[ErraiObjectConstants.ENCODED_TYPE];
+
+      expect(() => marshaller.unmarshall(marshalledInput, unmarshallContext)).toThrowError();
+    });
+
+    class PojoWithFunction implements Portable<PojoWithFunction> {
+      private readonly _fqcn = "com.app.my.PojoWithFunction";
+
+      public readonly foo?: string = undefined;
+
+      constructor(self: { foo?: string }) {
+        Object.assign(this, self);
+      }
+
+      public whatToSay() {
+        return `Hello, ${this.foo}!`;
+      }
+    }
+
+    class JavaCollectionTypesPojo implements Portable<JavaCollectionTypesPojo> {
+      private readonly _fqcn = "com.app.my.JavaCollectionTypesPojo";
+
+      public readonly list?: string[] = undefined;
+      public readonly set?: Set<string> = undefined;
+      public readonly map?: Map<string, string> = undefined;
+
+      constructor(self: { list?: string[]; set?: Set<string>; map?: Map<string, string> }) {
+        Object.assign(this, self);
+      }
+    }
+  });
+
+  describe("object caching", () => {
+    test("custom pojo with repeated pojo objects, should cache the object and reuse data", () => {
+      const marshaller = new DefaultMarshaller();
+      const unmarshallContext = new UnmarshallingContext(
+        new Map([
+          ["com.app.my.Address", () => new Address({}) as any],
+          ["com.app.my.RepeatedFieldsPojo", () => new RepeatedFieldsPojo({}) as any]
+        ])
+      );
+
+      const repeatedObject = new Address({ line1: "bla address" });
+      const input = new RepeatedFieldsPojo({ field1: repeatedObject, field2: repeatedObject });
+      const marshalledInput = marshaller.marshall(input, new MarshallingContext())!;
+
+      const output = marshaller.unmarshall(marshalledInput, unmarshallContext) as RepeatedFieldsPojo<Address>;
+
+      expect(output).toEqual(input);
+      expect(output.field1!).toBe(output.field2!);
+    });
+
+    test("custom pojo with repeated JavaBigDecimal objects, should not cache it and don't reuse data", () => {
+      const marshaller = new DefaultMarshaller();
+      const unmarshallContext = new UnmarshallingContext(
+        new Map([["com.app.my.RepeatedFieldsPojo", () => new RepeatedFieldsPojo({}) as any]])
+      );
+
+      const repeatedObject = new JavaBigDecimal("1.1");
+      const input = new RepeatedFieldsPojo({ field1: repeatedObject, field2: repeatedObject });
+      const marshalledInput = marshaller.marshall(input, new MarshallingContext())!;
+
+      const output = marshaller.unmarshall(marshalledInput, unmarshallContext) as RepeatedFieldsPojo<JavaBigDecimal>;
+
+      expect(output).toEqual(input);
+      expect(output.field1!).not.toBe(output.field2!);
+    });
+
+    test("custom pojo with repeated JavaBigInteger objects, should not cache it and don't reuse data", () => {
+      const marshaller = new DefaultMarshaller();
+      const unmarshallContext = new UnmarshallingContext(
+        new Map([["com.app.my.RepeatedFieldsPojo", () => new RepeatedFieldsPojo({}) as any]])
+      );
+
+      const repeatedObject = new JavaBigInteger("1");
+      const input = new RepeatedFieldsPojo({ field1: repeatedObject, field2: repeatedObject });
+      const marshalledInput = marshaller.marshall(input, new MarshallingContext())!;
+
+      const output = marshaller.unmarshall(marshalledInput, unmarshallContext) as RepeatedFieldsPojo<JavaBigInteger>;
+
+      expect(output).toEqual(input);
+      expect(output.field1!).not.toBe(output.field2!);
+    });
+
+    test("custom pojo with repeated JavaByte objects, should not cache it and don't reuse data", () => {
+      const marshaller = new DefaultMarshaller();
+      const unmarshallContext = new UnmarshallingContext(
+        new Map([
+          [
+            "com.app.my.RepeatedFieldsPojo",
+            () => new RepeatedFieldsPojo({ field1: new JavaByte("0"), field2: new JavaByte("0") }) as any
+          ]
+        ])
+      );
+
+      const repeatedObject = new JavaByte("1");
+      const input = new RepeatedFieldsPojo({ field1: repeatedObject, field2: repeatedObject });
+      const marshalledInput = marshaller.marshall(input, new MarshallingContext())!;
+
+      const output = marshaller.unmarshall(marshalledInput, unmarshallContext) as RepeatedFieldsPojo<JavaByte>;
+
+      expect(output).toEqual(input);
+      expect(output.field1!).not.toBe(output.field2!);
+    });
+
+    test("custom pojo with repeated JavaDouble objects, should not cache it and don't reuse data", () => {
+      const marshaller = new DefaultMarshaller();
+      const unmarshallContext = new UnmarshallingContext(
+        new Map([
+          [
+            "com.app.my.RepeatedFieldsPojo",
+            () => new RepeatedFieldsPojo({ field1: new JavaDouble("0"), field2: new JavaDouble("0") }) as any
+          ]
+        ])
+      );
+
+      const repeatedObject = new JavaDouble("1.1");
+      const input = new RepeatedFieldsPojo({ field1: repeatedObject, field2: repeatedObject });
+      const marshalledInput = marshaller.marshall(input, new MarshallingContext())!;
+
+      const output = marshaller.unmarshall(marshalledInput, unmarshallContext) as RepeatedFieldsPojo<JavaDouble>;
+
+      expect(output).toEqual(input);
+      expect(output.field1!).not.toBe(output.field2!);
+    });
+
+    test("custom pojo with repeated JavaFloat objects, should not cache it and don't reuse data", () => {
+      const marshaller = new DefaultMarshaller();
+      const unmarshallContext = new UnmarshallingContext(
+        new Map([
+          [
+            "com.app.my.RepeatedFieldsPojo",
+            () => new RepeatedFieldsPojo({ field1: new JavaFloat("0"), field2: new JavaFloat("0") }) as any
+          ]
+        ])
+      );
+
+      const repeatedObject = new JavaFloat("1.1");
+      const input = new RepeatedFieldsPojo({ field1: repeatedObject, field2: repeatedObject });
+      const marshalledInput = marshaller.marshall(input, new MarshallingContext())!;
+
+      const output = marshaller.unmarshall(marshalledInput, unmarshallContext) as RepeatedFieldsPojo<JavaFloat>;
+
+      expect(output).toEqual(input);
+      expect(output.field1!).not.toBe(output.field2!);
+    });
+
+    test("custom pojo with repeated JavaInteger objects, should not cache it and don't reuse data", () => {
+      const marshaller = new DefaultMarshaller();
+      const unmarshallContext = new UnmarshallingContext(
+        new Map([
+          [
+            "com.app.my.RepeatedFieldsPojo",
+            () => new RepeatedFieldsPojo({ field1: new JavaInteger("0"), field2: new JavaInteger("0") }) as any
+          ]
+        ])
+      );
+
+      const repeatedObject = new JavaInteger("1");
+      const input = new RepeatedFieldsPojo({ field1: repeatedObject, field2: repeatedObject });
+      const marshalledInput = marshaller.marshall(input, new MarshallingContext())!;
+
+      const output = marshaller.unmarshall(marshalledInput, unmarshallContext) as RepeatedFieldsPojo<JavaInteger>;
+
+      expect(output).toEqual(input);
+      expect(output.field1!).not.toBe(output.field2!);
+    });
+
+    test("custom pojo with repeated JavaLong objects, should not cache it and don't reuse data", () => {
+      const marshaller = new DefaultMarshaller();
+      const unmarshallContext = new UnmarshallingContext(
+        new Map([["com.app.my.RepeatedFieldsPojo", () => new RepeatedFieldsPojo({}) as any]])
+      );
+
+      const repeatedObject = new JavaLong("1");
+      const input = new RepeatedFieldsPojo({ field1: repeatedObject, field2: repeatedObject });
+      const marshalledInput = marshaller.marshall(input, new MarshallingContext())!;
+
+      const output = marshaller.unmarshall(marshalledInput, unmarshallContext) as RepeatedFieldsPojo<JavaLong>;
+
+      expect(output).toEqual(input);
+      expect(output.field1!).not.toBe(output.field2!);
+    });
+
+    test("custom pojo with repeated JavaShort objects, should not cache it and don't reuse data", () => {
+      const marshaller = new DefaultMarshaller();
+      const unmarshallContext = new UnmarshallingContext(
+        new Map([
+          [
+            "com.app.my.RepeatedFieldsPojo",
+            () => new RepeatedFieldsPojo({ field1: new JavaShort("0"), field2: new JavaShort("0") }) as any
+          ]
+        ])
+      );
+
+      const repeatedObject = new JavaShort("1");
+      const input = new RepeatedFieldsPojo({ field1: repeatedObject, field2: repeatedObject });
+      const marshalledInput = marshaller.marshall(input, new MarshallingContext())!;
+
+      const output = marshaller.unmarshall(marshalledInput, unmarshallContext) as RepeatedFieldsPojo<JavaShort>;
+
+      expect(output).toEqual(input);
+      expect(output.field1!).not.toBe(output.field2!);
+    });
+
+    test("custom pojo with repeated JavaOptional objects, should not cache it and don't reuse data", () => {
+      const marshaller = new DefaultMarshaller();
+      const unmarshallContext = new UnmarshallingContext(
+        new Map([["com.app.my.RepeatedFieldsPojo", () => new RepeatedFieldsPojo({}) as any]])
+      );
+
+      const repeatedObject = new JavaOptional("foo");
+      const input = new RepeatedFieldsPojo({ field1: repeatedObject, field2: repeatedObject });
+      const marshalledInput = marshaller.marshall(input, new MarshallingContext())!;
+
+      const output = marshaller.unmarshall(marshalledInput, unmarshallContext) as RepeatedFieldsPojo<
+        JavaOptional<string>
+      >;
+
+      expect(output).toEqual(input);
+      expect(output.field1!).not.toBe(output.field2!);
+    });
+
+    test("custom pojo with repeated array objects, should cache the object and reuse data", () => {
+      const marshaller = new DefaultMarshaller();
+      const unmarshallContext = new UnmarshallingContext(
+        new Map([["com.app.my.RepeatedFieldsPojo", () => new RepeatedFieldsPojo({}) as any]])
+      );
+
+      const repeatedInlineArray = ["foo", "bar"];
+      const inlineArrayInput = new RepeatedFieldsPojo({ field1: repeatedInlineArray, field2: repeatedInlineArray });
+
+      const repeatedNewArray = new Array("foo", "bar");
+      const newArrayInput = new RepeatedFieldsPojo({ field1: repeatedNewArray, field2: repeatedNewArray });
+
+      [inlineArrayInput, newArrayInput].forEach(input => {
+        const marshalledInput = marshaller.marshall(input, new MarshallingContext())!;
+
+        const output = marshaller.unmarshall(marshalledInput, unmarshallContext) as RepeatedFieldsPojo<string[]>;
+
+        expect(output).toEqual(input);
+        expect(output.field1!).toBe(output.field2!);
+      });
+    });
+
+    test("custom pojo with repeated set objects, should cache the object and reuse data", () => {
+      const marshaller = new DefaultMarshaller();
+      const unmarshallContext = new UnmarshallingContext(
+        new Map([["com.app.my.RepeatedFieldsPojo", () => new RepeatedFieldsPojo({}) as any]])
+      );
+
+      const repeatedObject = new Set(["foo", "bar"]);
+      const input = new RepeatedFieldsPojo({ field1: repeatedObject, field2: repeatedObject });
+      const marshalledInput = marshaller.marshall(input, new MarshallingContext())!;
+
+      const output = marshaller.unmarshall(marshalledInput, unmarshallContext) as RepeatedFieldsPojo<Set<string>>;
+
+      expect(output).toEqual(input);
+      expect(output.field1!).toBe(output.field2!);
+    });
+
+    test("custom pojo with repeated map objects, should cache the object and reuse data", () => {
+      const marshaller = new DefaultMarshaller();
+      const unmarshallContext = new UnmarshallingContext(
+        new Map([["com.app.my.RepeatedFieldsPojo", () => new RepeatedFieldsPojo({}) as any]])
+      );
+
+      const repeatedObject = new Map([["foo1", "bar1"], ["foo2", "bar2"]]);
+      const input = new RepeatedFieldsPojo({ field1: repeatedObject, field2: repeatedObject });
+      const marshalledInput = marshaller.marshall(input, new MarshallingContext())!;
+
+      const output = marshaller.unmarshall(marshalledInput, unmarshallContext) as RepeatedFieldsPojo<
+        Map<string, string>
+      >;
+
+      expect(output).toEqual(input);
+      expect(output.field1!).toBe(output.field2!);
+    });
+
+    class RepeatedFieldsPojo<T> implements Portable<RepeatedFieldsPojo<T>> {
+      private readonly _fqcn = "com.app.my.RepeatedFieldsPojo";
+
+      public field1?: T = undefined;
+      public field2?: T = undefined;
+
+      constructor(self: { field1?: T; field2?: T }) {
+        Object.assign(this, self);
+      }
+    }
+  });
+});
+
+class User implements Portable<User> {
+  private readonly _fqcn = "com.app.my.Pojo";
+
+  public readonly name?: string = undefined;
+  public readonly sendSpam?: boolean = undefined;
+  public readonly age?: JavaInteger = undefined;
+  public readonly address?: Address = undefined;
+  public readonly bestFriend?: User = undefined;
+
+  constructor(self: { name?: string; sendSpam?: boolean; age?: JavaInteger; address?: Address; bestFriend?: User }) {
+    Object.assign(this, self);
+  }
+}
+
+class Address implements Portable<Address> {
+  private readonly _fqcn = "com.app.my.Address";
+
+  public line1?: string = undefined;
+
+  constructor(self: { line1?: string }) {
+    Object.assign(this, self);
+  }
+}
+
+class JavaTypesPojo implements Portable<JavaTypesPojo> {
+  private readonly _fqcn = "com.app.my.Pojo";
+
+  public readonly bigDecimal?: JavaBigDecimal = undefined;
+  public readonly bigInteger?: JavaBigInteger = undefined;
+  public readonly boolean?: boolean = undefined;
+  public readonly byte?: JavaByte = undefined;
+  public readonly double?: JavaDouble = undefined;
+  public readonly float?: JavaFloat = undefined;
+  public readonly integer?: JavaInteger = undefined;
+  public readonly long?: JavaLong = undefined;
+  public readonly short?: JavaShort = undefined;
+  public readonly string?: string = undefined;
+  public readonly date?: Date = undefined;
+  public readonly optional?: JavaOptional<string> = undefined;
+
+  constructor(self: {
+    bigDecimal?: JavaBigDecimal;
+    bigInteger?: JavaBigInteger;
+    boolean?: boolean;
+    byte?: JavaByte;
+    double?: JavaDouble;
+    float?: JavaFloat;
+    integer?: JavaInteger;
+    long?: JavaLong;
+    short?: JavaShort;
+    string?: string;
+    date?: Date;
+    optional?: JavaOptional<string>;
+  }) {
+    Object.assign(this, self);
+  }
+}

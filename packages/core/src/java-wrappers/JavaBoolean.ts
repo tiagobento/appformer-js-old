@@ -1,8 +1,9 @@
 import { JavaWrapper } from "./JavaWrapper";
 import { instanceOfBoolean } from "../util/TypeUtils";
+import { JavaType } from "./JavaType";
 
 export class JavaBoolean extends JavaWrapper<boolean> {
-  private readonly _fqcn = "java.lang.Boolean";
+  private readonly _fqcn = JavaType.BOOLEAN;
 
   private _value: boolean;
 
