@@ -35,7 +35,7 @@ public class LernaJson implements TsExporterResource {
                 "  \"lerna\": \"3.4.0\",",
                 "  \"version\": \"" + version + "\",",
                 "  \"npmClientArgs\": [",
-                "    \"--no-package-lock\", \"--no-lock-file\", \"--registry=http://localhost:4873\"",
+                "    \"--no-package-lock\", \"--no-lock-file\", \"--registry http://localhost:4873\"",
                 "  ]",
                 "}"
         );
