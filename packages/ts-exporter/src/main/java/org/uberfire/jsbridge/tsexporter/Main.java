@@ -25,7 +25,6 @@ import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
 
 import static java.lang.System.currentTimeMillis;
 import static java.lang.System.getProperty;
-import static java.util.Arrays.asList;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
@@ -65,12 +64,12 @@ public class Main extends AbstractProcessor {
     public boolean process(final Set<? extends TypeElement> annotations,
                            final RoundEnvironment roundEnv) {
 
-        if (!asList("none", "all", "single").contains(getProperty("ts-exporter"))) {
-            System.out.println("TypeScript exporter is not activated.");
-            return false;
-        }
-
         try {
+            if ("skip".equals(getProperty("ts-exporter"))) {
+                System.out.println("TypeScript exporter is not activated.");
+                return false;
+            }
+
             process(roundEnv, annotations.stream().collect(toMap(identity(), roundEnv::getElementsAnnotatedWith)));
             return false;
         } catch (final Exception e) {
@@ -96,42 +95,30 @@ public class Main extends AbstractProcessor {
                 }
             });
         } else {
+
             writeExportFile(seenPortableTypes, "portables.tsexporter");
             writeExportFile(seenRemoteInterfaces, "remotes.tsexporter");
 
-            switch (getProperty("ts-exporter")) {
-                case "single": {
-                    throw new RuntimeException("Exporting single modules is not supported yet.");
-                }
+            if ("export".equals(getProperty("ts-exporter"))) {
+                final long start = currentTimeMillis();
+                System.out.println("Generating all TypeScript npm packages...");
 
-                case "portables-only": {
-                    throw new RuntimeException("Exporting portables only is not supported yet.");
-                }
+                final String version = "1.0.0"; //TODO: Read from System property or something
+                final Configuration config = new Configuration();
+                final TsCodegenResult result = new TsCodegen(version, new DecoratorStore(config)).generate();
 
-                case "all": {
-                    final long start = currentTimeMillis();
-                    System.out.println("Generating all TypeScript npm packages...");
+                final TsCodegenWriter writer = new TsCodegenWriter(config, result);
+                writer.write();
 
-                    final String version = "1.0.0"; //TODO: Read from System property or something
-                    final Configuration config = new Configuration();
-                    final TsCodegenResult result = new TsCodegen(version, new DecoratorStore(config)).generate();
+                final TsCodegenBuilder builder = new TsCodegenBuilder(writer.getOutputDir());
+                builder.build();
 
-                    final TsCodegenWriter writer = new TsCodegenWriter(config, result);
-                    writer.write();
+                final TsCodegenLibBundler bundler = new TsCodegenLibBundler(config, writer);
+                bundler.bundle();
 
-                    final TsCodegenBuilder builder = new TsCodegenBuilder(writer.getOutputDir());
-                    builder.build();
-
-                    final TsCodegenLibBundler bundler = new TsCodegenLibBundler(config, writer);
-                    bundler.bundle();
-
-                    System.out.println("TypeScript exporter has successfully run. (" + (currentTimeMillis() - start) + "ms)");
-                    break;
-                }
-
-                default:
-                    System.out.println("TypeScript exporter will not run because ts-exporter-generate property is not set.");
-                    break;
+                System.out.println("TypeScript exporter has successfully run. (" + (currentTimeMillis() - start) + "ms)");
+            } else {
+                System.out.println("TypeScript exporter will not run because ts-exporter property is not set to \"export\".");
             }
         }
     }
