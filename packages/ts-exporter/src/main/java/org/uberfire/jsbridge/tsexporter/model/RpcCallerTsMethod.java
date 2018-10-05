@@ -25,6 +25,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 
+import com.sun.tools.javac.code.Symbol;
 import org.uberfire.jsbridge.tsexporter.Main;
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
 import org.uberfire.jsbridge.tsexporter.dependency.DependencyGraph;
@@ -176,7 +177,7 @@ public class RpcCallerTsMethod {
                 .collect(joining(", "));
 
         return format("[\"%s\", () => new %s({ %s }) as any]",
-                      tsClass.asElement().getQualifiedName().toString(),
+                      ((Symbol) tsClass.asElement()).flatName().toString(),
                       importing(javaType.translate(decoratorStore)).toTypeScript(TYPE_ARGUMENT_USE),
                       defaultNumbersInitialization);
     }

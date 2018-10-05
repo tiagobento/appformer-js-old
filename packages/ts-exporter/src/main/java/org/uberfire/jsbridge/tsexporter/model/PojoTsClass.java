@@ -24,6 +24,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 
+import com.sun.tools.javac.code.Symbol;
 import org.uberfire.jsbridge.tsexporter.Main;
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
 import org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation;
@@ -140,7 +141,7 @@ public class PojoTsClass implements TsClass {
     }
 
     private String fqcn() {
-        return asElement().getQualifiedName().toString();
+        return ((Symbol) asElement()).flatName().toString();
     }
 
     private String enumFields() {
