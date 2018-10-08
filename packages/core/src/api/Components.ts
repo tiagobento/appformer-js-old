@@ -20,11 +20,22 @@ export type GenericComponent = Screen | Perspective;
 
 export type Element = React.ReactPortal | React.ReactElement<any> | HTMLElement | string;
 
+export class Menu {
+  // TODO
+}
+
+export class Toolbar {
+  // TODO
+}
+
 export abstract class Perspective {
   public isReact: boolean = false;
   public af_componentId: string;
   public af_perspectiveScreens: string[];
-  public af_isDefaultPerspective: boolean;
+  public af_isDefault: boolean = false;
+  public af_isTransient: boolean = true;
+  public af_menus?: Menu[] = undefined;
+  public af_toolbar?: Toolbar = undefined;
 
   public abstract af_perspectiveRoot(root?: { ss: Screen[]; ps: Perspective[] }): Element;
 

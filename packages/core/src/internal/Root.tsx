@@ -33,10 +33,10 @@ const actions = {
     perspectives: [...state.perspectives, perspective],
     currentPerspective: state.currentPerspective
       ? state.currentPerspective
-      : perspective.af_isDefaultPerspective
+      : perspective.af_isDefault
         ? perspective // Last default perspective found is the one that wins.
         : undefined,
-    openScreens: perspective.af_isDefaultPerspective
+    openScreens: perspective.af_isDefault
       ? state.screens.filter(screen => perspective.has(screen))
       : state.openScreens
   }),
