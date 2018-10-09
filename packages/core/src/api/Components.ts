@@ -39,6 +39,22 @@ export abstract class Perspective {
 
   public abstract af_perspectiveRoot(root?: { ss: Screen[]; ps: Perspective[] }): Element;
 
+  public af_onStartup(): void {
+    // TODO
+  }
+
+  public af_onOpen(): void {
+    // TODO
+  }
+
+  public af_onClose(): void {
+    // TODO
+  }
+
+  public af_onShutdown(): void {
+    // TODO
+  }
+
   public has(screen: Screen | string) {
     const id = typeof screen === "string" ? screen : screen.af_componentId;
     return this.af_perspectiveScreens.indexOf(id) > -1;
