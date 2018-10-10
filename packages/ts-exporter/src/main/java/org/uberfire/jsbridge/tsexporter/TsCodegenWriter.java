@@ -21,8 +21,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.uberfire.jsbridge.tsexporter.config.Configuration;
 import org.uberfire.jsbridge.tsexporter.config.AppFormerLib;
+import org.uberfire.jsbridge.tsexporter.config.Configuration;
 import org.uberfire.jsbridge.tsexporter.model.NpmPackage;
 import org.uberfire.jsbridge.tsexporter.model.NpmPackageForAppFormerLibs;
 import org.uberfire.jsbridge.tsexporter.model.NpmPackageGenerated;
@@ -34,6 +34,9 @@ import org.uberfire.jsbridge.tsexporter.model.config.PackageJsonForAggregationNp
 import static java.io.File.separator;
 import static java.lang.String.format;
 import static java.lang.System.getProperty;
+import static java.nio.file.Files.createDirectories;
+import static java.nio.file.Files.createSymbolicLink;
+import static java.nio.file.Files.exists;
 import static org.uberfire.jsbridge.tsexporter.config.AppFormerLib.Type.DECORATORS;
 import static org.uberfire.jsbridge.tsexporter.config.AppFormerLib.Type.LIB;
 import static org.uberfire.jsbridge.tsexporter.model.NpmPackage.Type.FINAL;
@@ -108,9 +111,12 @@ public class TsCodegenWriter {
                                             final String finalNpmPackageBaseDir) {
 
         final String baseDir = finalNpmPackageBaseDir + "../../";
+        final Path distSymlinkPath = buildPath(baseDir, "dist");
 
         try {
-            Files.createSymbolicLink(buildPath(baseDir, "dist"), buildPath(finalNpmPackageBaseDir, "dist"));
+            if (!exists(distSymlinkPath)) {
+                createSymbolicLink(distSymlinkPath, buildPath(finalNpmPackageBaseDir, "dist"));
+            }
         } catch (final IOException e) {
             throw new RuntimeException(e);
         }
@@ -150,7 +156,7 @@ public class TsCodegenWriter {
 
         try {
             System.out.println("Writing file: " + path + "...");
-            Files.createDirectories(path.getParent());
+            createDirectories(path.getParent());
             Files.write(createFileIfNotExists(path), resource.toSource().getBytes());
         } catch (final IOException e) {
             throw new RuntimeException(e);
