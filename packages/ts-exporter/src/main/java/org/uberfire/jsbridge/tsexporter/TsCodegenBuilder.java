@@ -44,7 +44,7 @@ public class TsCodegenBuilder {
                 "cd " + baseDir,
                 "npm i --registry http://localhost:4873 --no-lock-file --no-package-lock",
                 "npx lerna bootstrap --registry http://localhost:4873",
-                "npx lerna exec --concurrency `nproc || sysctl -n hw.ncpu` -- npm run build"
+                "npx lerna exec --concurrency `nproc || sysctl -n hw.ncpu` -- npm run build:ts-exporter"
         }));
 
         if (buildSuccess != 0) {

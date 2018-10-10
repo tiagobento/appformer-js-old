@@ -78,7 +78,7 @@ public class PackageJsonForGeneratedNpmPackages implements TsExporterResource {
                             "%s",
                             "  },",
                             "  \"scripts\": {",
-                            "    \"build\": \"" + installDecoratorsPart + " webpack && npm run doUnpublish && npm run doPublish\",",
+                            "    \"build:ts-exporter\": \"" + installDecoratorsPart + " webpack && npm run doUnpublish && npm run doPublish\",",
                             "    \"doUnpublish\": \"npm unpublish --force --registry http://localhost:4873 || echo 'Was not published'\",",
                             "    \"doPublish\": \"%s\"",
                             "  }",

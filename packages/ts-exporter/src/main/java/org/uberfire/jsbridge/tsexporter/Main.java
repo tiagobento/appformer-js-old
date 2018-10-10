@@ -23,6 +23,7 @@ import javax.lang.model.util.Types;
 import org.uberfire.jsbridge.tsexporter.config.Configuration;
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
 
+import static java.lang.Boolean.getBoolean;
 import static java.lang.System.currentTimeMillis;
 import static java.lang.System.getProperty;
 import static java.util.function.Function.identity;
@@ -98,6 +99,11 @@ public class Main extends AbstractProcessor {
 
             writeExportFile(seenPortableTypes, "portables.tsexporter");
             writeExportFile(seenRemoteInterfaces, "remotes.tsexporter");
+
+            if (getBoolean("ts-exporter.skip")) {
+                System.out.println("TypeScript exporter is skipped.");
+                return;
+            }
 
             if ("export".equals(getProperty("ts-exporter"))) {
                 final long start = currentTimeMillis();

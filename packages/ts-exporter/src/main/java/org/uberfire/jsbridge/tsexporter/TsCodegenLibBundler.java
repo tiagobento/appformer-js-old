@@ -49,7 +49,7 @@ public class TsCodegenLibBundler {
         final String registryEntries = config.getLibraries().stream()
                 .filter(lib -> lib.getType().equals(LIB))
                 .peek(this::writeLibMainFile)
-                .flatMap(lib -> lib.getComponents().stream().map(componentId -> new SimpleImmutableEntry<>(componentId, getLibMainFileName(lib))))
+                .flatMap(lib -> lib.getComponents().stream().map(componentId -> new SimpleImmutableEntry<>(componentId, getLibMainFileCopyName(lib))))
                 .map(e -> format("\"%s\": \"%s\"", e.getKey(), e.getValue()))
                 .collect(joining(",\n"));
 
@@ -58,7 +58,7 @@ public class TsCodegenLibBundler {
     }
 
     private void writeLibMainFile(final AppFormerLib lib) {
-        final String fileName = getLibMainFileName(lib);
+        final String fileName = getLibMainFileCopyName(lib);
 
         final NpmPackage npmPackage = new NpmPackageForAppFormerLibs(
                 lib.getName(),
@@ -86,7 +86,7 @@ public class TsCodegenLibBundler {
         }
     }
 
-    private String getLibMainFileName(final AppFormerLib lib) {
+    private String getLibMainFileCopyName(final AppFormerLib lib) {
         return lib.getName() + ".js";
     }
 }
