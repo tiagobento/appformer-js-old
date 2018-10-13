@@ -63,13 +63,14 @@ public class PackageJsonForAggregationNpmPackage implements TsExporterResource {
                 "  \"license\": \"Apache-2.0\",",
                 "  \"main\": \"./dist/index.js\",",
                 "  \"types\": \"./dist/index.d.ts\",",
+                "  \"publishConfig\": {\"registry\": \"http://localhost:4873\"},",
                 "  \"dependencies\": {",
                 "%s",
                 "  },",
                 "  \"scripts\": {",
-                "    \"build:ts-exporter\": \"npm i --no-package-lock && npx lerna bootstrap && npx lerna exec -- npm run build:ts-exporter && npm i " + decoratorsNpmPackageName + " --registry http://localhost:4873 && npm run doUnpublish && npm run doPublish\",",
+                "    \"build:ts-exporter\": \"yarn install --no-lockfile && npx lerna exec -- yarn run build:ts-exporter && yarn install " + decoratorsNpmPackageName + " --registry http://localhost:4873 && yarn run doUnpublish && yarn run doPublish\",",
                 "    \"doUnpublish\": \"npm unpublish --force --registry http://localhost:4873 || echo 'Was not published'\",",
-                "    \"doPublish\": \"mv dist dist.tmp && mv `readlink dist.tmp` . && rm dist.tmp && npm publish --registry http://localhost:4873\"",
+                "    \"doPublish\": \"mv dist dist.tmp && mv `readlink dist.tmp` . && rm dist.tmp && yarn publish --new-version %s\"",
                 "  },",
                 "  \"devDependencies\": {",
                 "    \"circular-dependency-plugin\": \"^5.0.2\",",
@@ -84,7 +85,8 @@ public class PackageJsonForAggregationNpmPackage implements TsExporterResource {
 
                       npmPackage.getName(),
                       npmPackage.getVersion(),
-                      dependenciesPart
+                      dependenciesPart,
+                      npmPackage.getVersion()
 
         );
     }

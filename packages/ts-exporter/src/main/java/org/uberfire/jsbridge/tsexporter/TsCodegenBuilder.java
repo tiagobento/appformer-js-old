@@ -42,9 +42,8 @@ public class TsCodegenBuilder {
         System.out.println("Building packages..");
         final int buildSuccess = bash(linesJoinedBy(" && ", new String[]{
                 "cd " + baseDir,
-                "npm i --registry http://localhost:4873 --no-lock-file --no-package-lock",
-                "npx lerna bootstrap --registry http://localhost:4873",
-                "npx lerna exec --concurrency `nproc || sysctl -n hw.ncpu` -- npm run build:ts-exporter"
+                "yarn install --registry http://localhost:4873 --no-lockfile",
+                "npx lerna exec --concurrency `nproc || sysctl -n hw.ncpu` -- yarn run build:ts-exporter"
         }));
 
         if (buildSuccess != 0) {

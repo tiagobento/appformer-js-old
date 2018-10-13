@@ -66,7 +66,9 @@ public class PackageJsonForGeneratedNpmPackages implements TsExporterResource {
 
         final String installDecoratorsPart = decoratorPackagesToInstallBeforeBuild.isEmpty()
                 ? ""
-                : (" npm i " + decoratorPackagesToInstallBeforeBuild.stream().collect(joining(" ")) + " --registry http://localhost:4873 && ");
+                : (" yarn install " + decoratorPackagesToInstallBeforeBuild.stream().collect(joining(" ")) + " --no-lockfile --registry http://localhost:4873 && ");
+
+        final String version = npmPackage.getVersion() + (npmPackage.getType().equals(RAW) ? "-raw" : "");
 
         return format(lines("{",
                             "  \"name\": \"%s\",",
@@ -74,22 +76,23 @@ public class PackageJsonForGeneratedNpmPackages implements TsExporterResource {
                             "  \"license\": \"Apache-2.0\",",
                             "  \"main\": \"./dist/index.js\",",
                             "  \"types\": \"./dist/index.d.ts\",",
+                            "  \"publishConfig\": {\"registry\": \"http://localhost:4873\"},",
                             "  \"dependencies\": {",
                             "%s",
                             "  },",
                             "  \"scripts\": {",
-                            "    \"build:ts-exporter\": \"" + installDecoratorsPart + " webpack && npm run doUnpublish && npm run doPublish\",",
+                            "    \"build:ts-exporter\": \"" + installDecoratorsPart + " webpack && yarn run doUnpublish && yarn run doPublish\",",
                             "    \"doUnpublish\": \"npm unpublish --force --registry http://localhost:4873 || echo 'Was not published'\",",
                             "    \"doPublish\": \"%s\"",
                             "  }",
                             "}"),
 
                       getNpmPackageName(),
-                      npmPackage.getVersion() + (npmPackage.getType().equals(RAW) ? "-raw" : ""),
+                      version,
                       dependenciesPart,
                       npmPackage.getType().equals(FINAL)
                               ? "echo 'Skipping publish'"
-                              : "npm publish --registry http://localhost:4873"
+                              : ("yarn publish --new-version " + version)
         );
     }
 

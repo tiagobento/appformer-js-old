@@ -39,6 +39,7 @@ public class PackageJsonRoot implements TsExporterResource {
                 "  \"dependencies\": {",
                 "    \"appformer-js\": \"^" + appformerJsVersion + "\"",
                 "  },",
+                "  \"workspaces\": [\"packages/*\"],",
                 "  \"devDependencies\": {",
                 "    \"circular-dependency-plugin\": \"^5.0.2\",",
                 "    \"clean-webpack-plugin\": \"^0.1.19\",",
