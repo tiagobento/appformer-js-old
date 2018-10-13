@@ -68,7 +68,7 @@ public class PackageJsonForAggregationNpmPackage implements TsExporterResource {
                 "%s",
                 "  },",
                 "  \"scripts\": {",
-                "    \"build:ts-exporter\": \"yarn install --no-lockfile && npx lerna exec -- yarn run build:ts-exporter && yarn install " + decoratorsNpmPackageName + " --registry http://localhost:4873 && yarn run doUnpublish && yarn run doPublish\",",
+                "    \"build:ts-exporter\": \"yarn install --no-lockfile && npx lerna bootstrap --registry http://localhost:4873 && npx lerna exec -- yarn run build:ts-exporter && yarn add " + decoratorsNpmPackageName + " --no-lockfile --registry http://localhost:4873 && yarn run doUnpublish && yarn run doPublish\",",
                 "    \"doUnpublish\": \"npm unpublish --force --registry http://localhost:4873 || echo 'Was not published'\",",
                 "    \"doPublish\": \"mv dist dist.tmp && mv `readlink dist.tmp` . && rm dist.tmp && yarn publish --new-version %s\"",
                 "  },",

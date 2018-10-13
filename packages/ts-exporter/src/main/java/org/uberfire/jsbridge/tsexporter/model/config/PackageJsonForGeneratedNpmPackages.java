@@ -64,9 +64,10 @@ public class PackageJsonForGeneratedNpmPackages implements TsExporterResource {
                 .map(name -> format("\"%s\": \"%s\"", name, npmPackage.getVersion()))
                 .collect(joining(",\n"));
 
-        final String installDecoratorsPart = decoratorPackagesToInstallBeforeBuild.isEmpty()
-                ? ""
-                : (" yarn install " + decoratorPackagesToInstallBeforeBuild.stream().collect(joining(" ")) + " --no-lockfile --registry http://localhost:4873 && ");
+        final String installDecoratorsPart = "";
+//        decoratorPackagesToInstallBeforeBuild.isEmpty()
+//                ? ""
+//                : (" yarn add " + decoratorPackagesToInstallBeforeBuild.stream().collect(joining(" ")) + " -W --no-lockfile --registry http://localhost:4873 && ");
 
         final String version = npmPackage.getVersion() + (npmPackage.getType().equals(RAW) ? "-raw" : "");
 
@@ -81,7 +82,7 @@ public class PackageJsonForGeneratedNpmPackages implements TsExporterResource {
                             "%s",
                             "  },",
                             "  \"scripts\": {",
-                            "    \"build:ts-exporter\": \"" + installDecoratorsPart + " webpack && yarn run doUnpublish && yarn run doPublish\",",
+                            "    \"build:ts-exporter\": \"" + installDecoratorsPart + " npx webpack && yarn run doUnpublish && yarn run doPublish\",",
                             "    \"doUnpublish\": \"npm unpublish --force --registry http://localhost:4873 || echo 'Was not published'\",",
                             "    \"doPublish\": \"%s\"",
                             "  }",
