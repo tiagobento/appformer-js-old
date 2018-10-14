@@ -72,7 +72,7 @@ public class PackageJsonForGeneratedNpmPackages implements TsExporterResource {
                             "  \"scripts\": {",
                             "    \"build:ts-exporter\": \"" +
                                     "npx webpack && " +
-                                    "%s || (npm unpublish -f --registry http://localhost:4873 && %s)" +
+                                    "(%s || (npm unpublish -f --registry http://localhost:4873 && %s))" +
                                     "\"",
                             "  }",
                             "}"),

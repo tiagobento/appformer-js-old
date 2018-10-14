@@ -75,10 +75,10 @@ public class PackageJsonForAggregationNpmPackage implements TsExporterResource {
                         "mv dist dist.tmp && " +
                         "mv `readlink dist.tmp` . && " +
                         "rm dist.tmp && " +
-                        "%s || (" +
+                        "(%s || (" +
                         "npm unpublish -f --registry http://localhost:4873 && " +
                         "yarn publish --new-version %s --registry http://localhost:4873" +
-                        ")" +
+                        "))" +
                         "\"",
                 "  },",
                 "  \"devDependencies\": {",
