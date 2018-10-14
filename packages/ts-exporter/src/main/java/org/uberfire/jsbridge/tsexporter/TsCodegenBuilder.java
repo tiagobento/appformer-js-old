@@ -17,7 +17,6 @@
 package org.uberfire.jsbridge.tsexporter;
 
 import static java.lang.String.format;
-import static org.uberfire.jsbridge.tsexporter.util.Utils.linesJoinedBy;
 
 public class TsCodegenBuilder {
 
@@ -40,13 +39,7 @@ public class TsCodegenBuilder {
         }
 
         System.out.println("Building packages..");
-        final int buildSuccess = bash(linesJoinedBy(" && ", new String[]{
-                "cd " + baseDir,
-                "yarn install --registry http://localhost:4873 --no-lockfile",
-                "npx lerna exec --concurrency `nproc || sysctl -n hw.ncpu` -- yarn run build:ts-exporter"
-        }));
-
-        if (buildSuccess != 0) {
+        if (bash(format("cd %s && yarn run build:ts-exporter", baseDir)) != 0) {
             throw new RuntimeException("Build failed. Scroll up to see the logs.");
         }
     }

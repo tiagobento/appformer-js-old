@@ -56,6 +56,10 @@ public class PackageJsonForGeneratedNpmPackages implements TsExporterResource {
 
         final String version = npmPackage.getVersion() + (npmPackage.getType().equals(RAW) ? "-raw" : "");
 
+        final String publishCommand = npmPackage.getType().equals(FINAL)
+                ? "echo 'Skipping publish'"
+                : format("yarn publish --new-version %s --registry http://localhost:4873", version);
+
         return format(lines("{",
                             "  \"name\": \"%s\",",
                             "  \"version\": \"%s\",",
@@ -66,18 +70,18 @@ public class PackageJsonForGeneratedNpmPackages implements TsExporterResource {
                             "%s",
                             "  },",
                             "  \"scripts\": {",
-                            "    \"build:ts-exporter\": \"npx webpack && yarn run doUnpublish && yarn run doPublish\",",
-                            "    \"doUnpublish\": \"npm unpublish -f --registry http://localhost:4873\",",
-                            "    \"doPublish\": \"%s\"",
+                            "    \"build:ts-exporter\": \"" +
+                                    "npx webpack && " +
+                                    "%s || (npm unpublish -f --registry http://localhost:4873 && %s)" +
+                                    "\"",
                             "  }",
                             "}"),
 
                       getNpmPackageName(),
                       version,
                       dependenciesPart,
-                      npmPackage.getType().equals(FINAL)
-                              ? "echo 'Skipping publish'"
-                              : ("yarn publish --new-version " + version + "  --registry http://localhost:4873")
+                      Boolean.getBoolean("ts-exporter.publish.skip"),
+                      publishCommand
         );
     }
 
