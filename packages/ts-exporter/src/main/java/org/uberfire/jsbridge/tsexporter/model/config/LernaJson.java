@@ -41,13 +41,14 @@ public class LernaJson implements TsExporterResource {
                 "  \"lerna\": \"3.4.0\",",
                 "  \"npmClient\": \"yarn\",",
                 "  \"useWorkspaces\": %s,",
-                "  \"version\": \"" + version + "\",",
+                "  \"version\": \"%s\",",
                 "  \"npmClientArgs\": [",
                 "    \"--no-lockfile\", \"--registry http://localhost:4873\"",
                 "  ]",
                 "}"),
 
-                      type.equals(AppFormerLib.Type.DECORATORS) ? "false" : "true");
+                      type.equals(AppFormerLib.Type.DECORATORS) ? "false" : "true",
+                      version);
     }
 
     @Override
