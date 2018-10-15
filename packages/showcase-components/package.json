@@ -17,7 +17,7 @@
     "test": "jest",
     "build:dev-fast": "webpack",
     "build:dev": "npm test && webpack",
-    "build:prod": "npm run lint && npm test && webpack --mode production",
+    "build:prod": "yarn run lint && npm test && webpack --mode production",
     "build:mvn": "mvn clean install -f ./jar/pom.xml"
   },
   "babel": {

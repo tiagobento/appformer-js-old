@@ -17,7 +17,6 @@
 package org.uberfire.jsbridge.tsexporter;
 
 import static java.lang.String.format;
-import static org.uberfire.jsbridge.tsexporter.util.Utils.linesJoinedBy;
 
 public class TsCodegenBuilder {
 
@@ -35,19 +34,12 @@ public class TsCodegenBuilder {
         }
 
         System.out.println("Checking if Verdaccio is up..");
-        if (bash("test -n `ps -ef | awk '/[V]erdaccio/{print $2}'`") != 0) {
+        if (bash("test -z `ps -ef | awk '/[V]erdaccio/{print $2}'`") == 0) {
             throw new RuntimeException("Verdaccio is not running.");
         }
 
         System.out.println("Building packages..");
-        final int buildSuccess = bash(linesJoinedBy(" && ", new String[]{
-                "cd " + baseDir,
-                "npm i --registry http://localhost:4873 --no-lock-file --no-package-lock",
-                "npx lerna bootstrap --registry http://localhost:4873",
-                "npx lerna exec --concurrency `nproc || sysctl -n hw.ncpu` -- npm run build:ts-exporter"
-        }));
-
-        if (buildSuccess != 0) {
+        if (bash(format("cd %s && yarn run build:ts-exporter", baseDir)) != 0) {
             throw new RuntimeException("Build failed. Scroll up to see the logs.");
         }
     }

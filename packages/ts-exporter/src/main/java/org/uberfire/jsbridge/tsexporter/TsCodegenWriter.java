@@ -126,7 +126,7 @@ public class TsCodegenWriter {
                 tsCodegenResult.getDecoratorsNpmPackageName(npmPackageFinal));
 
         write(packageJson, buildPath(baseDir, "package.json"));
-        write(new LernaJson(npmPackageFinal.getVersion()), buildPath(baseDir, "lerna.json"));
+        write(new LernaJson(npmPackageFinal.getVersion(), DECORATORS), buildPath(baseDir, "lerna.json"));
         write(new NpmIgnore(npmPackageFinal), buildPath(baseDir, ".npmignore"));
     }
 

@@ -1,5 +1,7 @@
 {
   "lerna": "3.4.0",
   "version": "1.0.0",
-  "npmClientArgs": ["--no-package-lock"]
+  "npmClient":"yarn",
+  "npmClientArgs": ["--no-package-lock", "--no-lock-file"],
+  "useWorkspaces": true
 }

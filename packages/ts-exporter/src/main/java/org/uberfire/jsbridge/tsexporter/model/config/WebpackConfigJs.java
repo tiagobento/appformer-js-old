@@ -78,7 +78,7 @@ public class WebpackConfigJs implements TsExporterResource {
                 "  },",
                 "  resolve: {",
                 "    extensions: ['.ts'],",
-                "    modules: [path.resolve('./node_modules'), path.resolve('./src')]",
+                "    modules: [path.resolve('../../node_modules'), path.resolve('./node_modules'), path.resolve('./src')]",
                 "  }",
                 "};",
                 ""),

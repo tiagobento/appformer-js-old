@@ -67,24 +67,31 @@ public class PackageJsonForAggregationNpmPackage implements TsExporterResource {
                 "%s",
                 "  },",
                 "  \"scripts\": {",
-                "    \"build:ts-exporter\": \"npm i --no-package-lock && npx lerna bootstrap && npx lerna exec -- npm run build:ts-exporter && npm i " + decoratorsNpmPackageName + " --registry http://localhost:4873 && npm run doUnpublish && npm run doPublish\",",
-                "    \"doUnpublish\": \"npm unpublish --force --registry http://localhost:4873 || echo 'Was not published'\",",
-                "    \"doPublish\": \"mv dist dist.tmp && mv `readlink dist.tmp` . && rm dist.tmp && npm publish --registry http://localhost:4873\"",
+                "    \"build:ts-exporter\": \"" +
+                        "ln -s ../../node_modules node_modules && " +
+                        "npx lerna bootstrap --registry http://localhost:4873 && " +
+                        "npx lerna exec -- yarn run build:ts-exporter && " +
+                        "yarn add %s --no-lockfile --registry http://localhost:4873 && " +
+                        "mv dist dist.tmp && " +
+                        "mv `readlink dist.tmp` . && " +
+                        "rm dist.tmp && " +
+                        "(%s || (" +
+                        "npm unpublish -f --registry http://localhost:4873 && " +
+                        "yarn publish --new-version %s --registry http://localhost:4873" +
+                        "))" +
+                        "\"",
                 "  },",
                 "  \"devDependencies\": {",
-                "    \"circular-dependency-plugin\": \"^5.0.2\",",
-                "    \"clean-webpack-plugin\": \"^0.1.19\",",
-                "    \"ts-loader\": \"^4.4.2\",",
-                "    \"typescript\": \"^2.9.2\",",
-                "    \"webpack\": \"^4.15.1\",",
-                "    \"webpack-cli\": \"^3.0.8\",",
                 "    \"lerna\": \"^3.4.0\"",
                 "  }",
                 "}"),
 
                       npmPackage.getName(),
                       npmPackage.getVersion(),
-                      dependenciesPart
+                      dependenciesPart,
+                      decoratorsNpmPackageName,
+                      Boolean.getBoolean("ts-exporter.publish.skip"),
+                      npmPackage.getVersion()
 
         );
     }
