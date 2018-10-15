@@ -25,7 +25,7 @@
     "test": "",
     "build:dev-fast": "webpack",
     "build:dev": "npm test && webpack",
-    "build:prod": "npm run lint && npm test && webpack --mode production",
+    "build:prod": "yarn run lint && npm test && webpack --mode production",
     "showcase": "webpack-dev-server --open"
   },
   "babel": {

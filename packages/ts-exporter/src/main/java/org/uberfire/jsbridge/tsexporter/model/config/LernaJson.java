@@ -16,29 +16,39 @@
 
 package org.uberfire.jsbridge.tsexporter.model.config;
 
+import org.uberfire.jsbridge.tsexporter.config.AppFormerLib;
 import org.uberfire.jsbridge.tsexporter.model.TsExporterResource;
 
+import static java.lang.String.format;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
 
 public class LernaJson implements TsExporterResource {
 
     private final String version;
+    private final AppFormerLib.Type type;
 
-    public LernaJson(final String version) {
+    public LernaJson(final String version,
+                     final AppFormerLib.Type type) {
+
         this.version = version;
+        this.type = type;
     }
 
     @Override
     public String toSource() {
-        return lines(
+        return format(lines(
                 "{",
                 "  \"lerna\": \"3.4.0\",",
-                "  \"version\": \"" + version + "\",",
+                "  \"npmClient\": \"yarn\",",
+                "  \"useWorkspaces\": %s,",
+                "  \"version\": \"%s\",",
                 "  \"npmClientArgs\": [",
-                "    \"--no-package-lock\", \"--no-lock-file\", \"--registry http://localhost:4873\"",
+                "    \"--no-lockfile\", \"--registry http://localhost:4873\"",
                 "  ]",
-                "}"
-        );
+                "}"),
+
+                      type.equals(AppFormerLib.Type.DECORATORS) ? "false" : "true",
+                      version);
     }
 
     @Override

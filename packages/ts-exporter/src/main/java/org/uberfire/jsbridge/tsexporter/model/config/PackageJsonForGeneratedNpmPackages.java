@@ -16,9 +16,6 @@
 
 package org.uberfire.jsbridge.tsexporter.model.config;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.uberfire.jsbridge.tsexporter.decorators.ImportEntryForDecorator;
 import org.uberfire.jsbridge.tsexporter.decorators.ImportEntryForShadowedDecorator;
 import org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation;
@@ -43,19 +40,12 @@ public class PackageJsonForGeneratedNpmPackages implements TsExporterResource {
 
     @Override
     public String toSource() {
-        final Set<String> decoratorPackagesToInstallBeforeBuild = new HashSet<>();
-
         final String dependenciesPart = npmPackage.getClasses().stream()
                 .flatMap(clazz -> clazz.getDependencies().stream())
                 .map(DependencyRelation::getImportEntry)
-                .map(importEntry -> {
-                    if (npmPackage.getType().equals(FINAL) || !(importEntry instanceof ImportEntryForDecorator)) {
-                        return importEntry;
-                    }
-
-                    decoratorPackagesToInstallBeforeBuild.add(importEntry.getNpmPackageName());
-                    return new ImportEntryForShadowedDecorator((ImportEntryForDecorator) importEntry);
-                })
+                .map(importEntry -> npmPackage.getType().equals(FINAL) || !(importEntry instanceof ImportEntryForDecorator)
+                        ? importEntry
+                        : new ImportEntryForShadowedDecorator((ImportEntryForDecorator) importEntry))
                 .collect(groupingBy(ImportEntry::getNpmPackageName))
                 .keySet().stream()
                 .filter(name -> !name.equals(npmPackage.getName()))
@@ -64,9 +54,11 @@ public class PackageJsonForGeneratedNpmPackages implements TsExporterResource {
                 .map(name -> format("\"%s\": \"%s\"", name, npmPackage.getVersion()))
                 .collect(joining(",\n"));
 
-        final String installDecoratorsPart = decoratorPackagesToInstallBeforeBuild.isEmpty()
-                ? ""
-                : (" npm i " + decoratorPackagesToInstallBeforeBuild.stream().collect(joining(" ")) + " --registry http://localhost:4873 && ");
+        final String version = npmPackage.getVersion() + (npmPackage.getType().equals(RAW) ? "-raw" : "");
+
+        final String publishCommand = npmPackage.getType().equals(FINAL)
+                ? "echo 'Skipping publish'"
+                : format("yarn publish --new-version %s --registry http://localhost:4873", version);
 
         return format(lines("{",
                             "  \"name\": \"%s\",",
@@ -78,18 +70,18 @@ public class PackageJsonForGeneratedNpmPackages implements TsExporterResource {
                             "%s",
                             "  },",
                             "  \"scripts\": {",
-                            "    \"build:ts-exporter\": \"" + installDecoratorsPart + " webpack && npm run doUnpublish && npm run doPublish\",",
-                            "    \"doUnpublish\": \"npm unpublish --force --registry http://localhost:4873 || echo 'Was not published'\",",
-                            "    \"doPublish\": \"%s\"",
+                            "    \"build:ts-exporter\": \"" +
+                                    "npx webpack && " +
+                                    "(%s || (npm unpublish -f --registry http://localhost:4873 && %s))" +
+                                    "\"",
                             "  }",
                             "}"),
 
                       getNpmPackageName(),
-                      npmPackage.getVersion() + (npmPackage.getType().equals(RAW) ? "-raw" : ""),
+                      version,
                       dependenciesPart,
-                      npmPackage.getType().equals(FINAL)
-                              ? "echo 'Skipping publish'"
-                              : "npm publish --registry http://localhost:4873"
+                      Boolean.getBoolean("ts-exporter.publish.skip"),
+                      publishCommand
         );
     }
 
