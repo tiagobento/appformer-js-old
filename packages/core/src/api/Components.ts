@@ -28,6 +28,52 @@ export class Toolbar {
   // TODO
 }
 
+export enum ContextDisplayMode {
+  SHOW = "SHOW",
+  HIDE = "HIDE"
+}
+
+export class DisplayInfo {
+  public contextId?: string = undefined;
+  public contextDisplayMode: ContextDisplayMode = ContextDisplayMode.SHOW;
+}
+
+export enum PanelType {
+  MULTI_LIST = "org.uberfire.client.workbench.panels.impl.MultiListWorkbenchPanelPresenter",
+  STATIC = "org.uberfire.client.workbench.panels.impl.StaticWorkbenchPanelPresenter"
+}
+
+export class Part {
+  public placeName: string;
+  public displayInfo: DisplayInfo = new DisplayInfo();
+  public parameters?: {} = undefined;
+}
+
+export enum CompassPosition {
+  NONE = "NONE",
+  NORTH = "NORTH",
+  SOUTH = "SOUTH",
+  EAST = "EAST",
+  WEST = "WEST",
+  SELF = "SELF",
+  ROOT = "ROOT",
+  CENTER = "CENTER"
+}
+
+export class Panel {
+  public position?: CompassPosition = undefined;
+  public width?: number = undefined;
+  public minWidth?: number = undefined;
+  public height?: number = undefined;
+  public minHeight?: number = undefined;
+
+  public children: Panel[] = [];
+  public parts: Part[] = [];
+
+  public panelType: PanelType = PanelType.MULTI_LIST;
+  public displayInfo: DisplayInfo = new DisplayInfo();
+}
+
 export abstract class Perspective {
   public isReact: boolean = false;
   public af_componentId: string;
@@ -36,6 +82,12 @@ export abstract class Perspective {
   public af_isTransient: boolean = true;
   public af_menus?: Menu[] = undefined;
   public af_toolbar?: Toolbar = undefined;
+
+  public af_defaultPanelType: PanelType = PanelType.MULTI_LIST;
+  public af_displayInfo: DisplayInfo = new DisplayInfo();
+
+  public af_parts: Part[] = [];
+  public af_panels: Panel[] = [];
 
   public abstract af_perspectiveRoot(root?: { ss: Screen[]; ps: Perspective[] }): Element;
 
