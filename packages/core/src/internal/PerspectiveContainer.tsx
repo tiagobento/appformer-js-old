@@ -1,8 +1,10 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import { DefaultScreenContainerId, Perspective, Screen } from "../api/Components";
+import { DefaultScreenContainerId } from "../api/Components";
 import { JsBridge } from "./JsBridge";
 import { ScreenContainer } from "./ScreenContainer";
+import { Perspective } from "../api/Perspective";
+import { Screen } from "../api/Screen";
 
 interface Props {
   root: { ss: Screen[]; ps: Perspective[] };
@@ -96,13 +98,13 @@ export class PerspectiveContainer extends React.Component<Props, State> {
   private openScreen(screen: Screen) {
     const container = this.findContainerForScreen(screen);
     if (!container) {
-      console.error(`[O] A default screen container for ${screen.af_componentId} should exist at this point for sure.`);
+      console.error(`[O] A default screen container for ${screen.componentId} should exist at this point for sure.`);
       return;
     }
 
     const screenContainer = (
       <ScreenContainer
-        key={screen.af_componentId}
+        key={screen.componentId}
         screen={screen}
         bridge={this.props.bridge}
         root={this.props.root}
@@ -110,14 +112,14 @@ export class PerspectiveContainer extends React.Component<Props, State> {
       />
     );
 
-    container.setAttribute(PerspectiveContainer.AfOpenScreenAttr, screen.af_componentId);
+    container.setAttribute(PerspectiveContainer.AfOpenScreenAttr, screen.componentId);
     ReactDOM.render(screenContainer, container as HTMLElement);
   }
 
   private keepScreen(screen: Screen, exContainer: HTMLElement) {
     const newContainer = this.findContainerForScreen(screen);
     if (!newContainer) {
-      console.error(`[K] A default screen container for ${screen.af_componentId} should exist at this point for sure.`);
+      console.error(`[K] A default screen container for ${screen.componentId} should exist at this point for sure.`);
       return;
     }
 
@@ -129,7 +131,7 @@ export class PerspectiveContainer extends React.Component<Props, State> {
       }
     });
 
-    exContainer.setAttribute(PerspectiveContainer.AfOpenScreenAttr, screen.af_componentId);
+    exContainer.setAttribute(PerspectiveContainer.AfOpenScreenAttr, screen.componentId);
 
     // FIXME: this "replaceWith" method does not work on IE.
     (newContainer as any).replaceWith(exContainer);
@@ -138,7 +140,7 @@ export class PerspectiveContainer extends React.Component<Props, State> {
   private closeScreen(screen: Screen) {
     const container = this.findContainerForScreen(screen);
     if (!container) {
-      console.error(`[C] A screen container for ${screen.af_componentId} should exist at this point for sure.`);
+      console.error(`[C] A screen container for ${screen.componentId} should exist at this point for sure.`);
       return;
     }
 
@@ -160,7 +162,7 @@ export class PerspectiveContainer extends React.Component<Props, State> {
       <div
         className={"af-perspective-container"}
         ref={e => (this.ref = e!)}
-        key={this.props.perspective.af_componentId}
+        key={this.props.perspective.componentId}
         id={PerspectiveContainer.getSelfContainerElementId(this.props.perspective)}
       >
         {/*This is where the perspective will be rendered on.*/}
@@ -172,7 +174,7 @@ export class PerspectiveContainer extends React.Component<Props, State> {
   }
 
   private static getSelfContainerElementId(perspective: Perspective) {
-    return "self-perspective-" + perspective.af_componentId;
+    return "self-perspective-" + perspective.componentId;
   }
 
   public static findContainerFor(screen: Screen, perspective: Perspective) {

@@ -1,7 +1,9 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import { Element, Perspective, Screen } from "../api/Components";
 import { Root } from "./Root";
+import { Perspective } from "../api/Perspective";
+import { Screen } from "../api/Screen";
+import { RootElement } from "../api/Components";
 
 export class JsBridge {
   private root: () => Root;
@@ -33,7 +35,7 @@ export class JsBridge {
     return Promise.reject("Sorry, RPC mocks are not available yet :(");
   }
 
-  public render(component: Element, container: HTMLElement, callback = (): void => undefined) {
+  public render(component: RootElement, container: HTMLElement, callback = (): void => undefined) {
     if (component instanceof HTMLElement) {
       container.innerHTML = "";
       container.appendChild(component);

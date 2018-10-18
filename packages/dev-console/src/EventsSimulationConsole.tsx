@@ -34,8 +34,8 @@ export class EventsSimulationConsole extends React.Component<Props, State> {
     const all: Subscriptions = {};
 
     props.screens
-      .filter(s => s.af_subscriptions)
-      .map(s => s.af_subscriptions)
+      .filter(s => s.subscriptions)
+      .map(s => s.subscriptions)
       .forEach(subscription => {
         for (const channel in subscription) {
           if (subscription.hasOwnProperty(channel)) {

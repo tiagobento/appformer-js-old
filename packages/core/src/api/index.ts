@@ -1,8 +1,15 @@
 import * as ReactDOM from "react-dom";
-import { Perspective, Screen } from "./Components";
 import { JsBridge } from "../internal/JsBridge";
+import { Perspective } from "./Perspective";
+import { Screen } from "./Screen";
+import { RootElement } from "./Components";
 
 export * from "./Components";
+export * from "./DisplayInfo";
+export * from "./Panel";
+export * from "./Part";
+export * from "./Perspective";
+export * from "./Screen";
 
 const jsBridge = new JsBridge();
 
@@ -14,7 +21,7 @@ const bridge =
 
 export const render =
   bridge.render ||
-  ((component: Element, container: HTMLElement, callback = (): void => undefined) => {
+  ((component: RootElement, container: HTMLElement, callback = (): void => undefined) => {
     // FIXME: Duplicated!!
 
     if (component instanceof HTMLElement) {
@@ -53,6 +60,7 @@ export function register(potentialComponents: any) {
         console.info(`Registering perspective [${Component.prototype.constructor.name}]`);
         bridge.registerPerspective(component);
       } else {
+        console.info(`Registering other kind of component [${Component.prototype.constructor.name}]`);
         // TODO: Register other kinds of components
       }
     }
