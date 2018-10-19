@@ -1,17 +1,16 @@
 import * as React from "react";
-import {Console} from "./Console";
-import {Element, Perspective, Screen} from "appformer-js";
+import { Console } from "./Console";
+import { Perspective, RootElement, Screen } from "appformer-js";
 
 export class ConsoleDefaultPerspective extends Perspective {
   constructor() {
-    super();
+    super("default-perspective");
     this.isReact = true;
-    this.af_componentId = "default-perspective";
-    this.af_perspectiveScreens = ["console-dock", "console-header", "A-react-screen"];
-    this.af_isDefaultPerspective = true;
+    this.perspectiveScreens = ["console-dock", "console-header", "A-react-screen"];
+    this.isDefault = true;
   }
 
-  public af_perspectiveRoot(root: { ss: Screen[]; ps: Perspective[] }): Element {
+  public af_perspectiveRoot(root: { ss: Screen[]; ps: Perspective[] }): RootElement {
     return <Console screens={root.ss} />;
   }
 }

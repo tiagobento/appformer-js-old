@@ -1,15 +1,14 @@
 import * as React from "react";
-import {Link, Element, Perspective, Screen} from "appformer-js";
+import { RootElement, Link, Perspective, Screen } from "appformer-js";
 
 export class ConsoleHeader extends Screen {
   constructor() {
-    super();
+    super("console-header");
     this.isReact = true;
-    this.af_componentId = "console-header";
-    this.af_componentTitle = undefined;
+    this.componentTitle = undefined;
   }
 
-  public af_componentRoot(root?: { ss: Screen[]; ps: Perspective[] }): Element {
+  public af_componentRoot(root?: { ss: Screen[]; ps: Perspective[] }): RootElement {
     return (
       <div
         style={{
@@ -24,8 +23,8 @@ export class ConsoleHeader extends Screen {
         <div>
           <span>
             {root!.ps.map(p => (
-              <Link to={p.af_componentId} key={p.af_componentId}>
-                <button>{p.af_componentId}</button>
+              <Link to={p.componentId} key={p.componentId}>
+                <button>{p.componentId}</button>
               </Link>
             ))}
           </span>
@@ -34,8 +33,8 @@ export class ConsoleHeader extends Screen {
 
           <span>
             {root!.ss.map(s => (
-              <Link to={s.af_componentId} key={s.af_componentId}>
-                <button>{s.af_componentId}</button>
+              <Link to={s.componentId} key={s.componentId}>
+                <button>{s.componentId}</button>
               </Link>
             ))}
           </span>
