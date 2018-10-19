@@ -5,7 +5,7 @@ export const Link = (props: { to: string; children: any }) => (
   <span onClick={() => API.goTo(props.to)}>{props.children}</span>
 );
 
-export const __i18 = (props: { tkey: string }) => <>{API.translate(props.tkey)}</>;
+export const __i18n = (props: { tkey: string, args: string[]}) => <>{API.translate(props.tkey, props.args)}</>;
 
 interface Props {
   name: string;
@@ -21,7 +21,7 @@ export class ExampleList extends React.Component<Props, {}> {
         <ul>
           <li>Id: {this.props.id}</li>
           <li>
-            <__i18 tkey={"message.that.should.be.translated"} />
+            <__i18n tkey={"message.that.should.be.translated"} args={[]}/>
           </li>
           <li>
             Oculus (and

@@ -1,6 +1,7 @@
 import * as ReactDOM from "react-dom";
 import { Perspective, Screen } from "./Components";
 import { JsBridge } from "../internal/JsBridge";
+import { marshall } from "../marshalling"
 
 export * from "./Components";
 
@@ -37,6 +38,10 @@ export function goTo(place: string) {
 
 export function rpc(path: string, ...args: any[]): Promise<string> {
   return bridge.rpc(path, args);
+}
+
+export function fireEvent(obj: any) {
+  bridge.sendEvent(marshall(obj));
 }
 
 export function register(potentialComponents: any) {

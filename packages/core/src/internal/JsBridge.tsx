@@ -25,7 +25,7 @@ export class JsBridge {
     this.root().open(place);
   }
 
-  public translate(key: string, ...a: any[]) {
+  public translate(key: string, args: string[]) {
     return `Translated ${key}`;
   }
 
