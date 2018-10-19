@@ -1,9 +1,7 @@
 import * as React from "react";
 import { JsBridge } from "./JsBridge";
 import { PerspectiveContainer } from "./PerspectiveContainer";
-import { GenericComponent } from "../api/Components";
-import { Perspective } from "../api/Perspective";
-import { Screen } from "../api/Screen";
+import { Perspective, GenericComponent, Screen } from "../api/Components";
 
 interface Props {
   exposing: (self: () => Root) => void;
@@ -26,7 +24,7 @@ class State {
 
   public static without = (state: State) => (screenId: string) => ({
     ...state,
-    openScreens: state.openScreens.filter(s => s.componentId !== screenId)
+    openScreens: state.openScreens.filter(s => s.af_componentId !== screenId)
   });
 }
 
@@ -35,10 +33,12 @@ const actions = {
     perspectives: [...state.perspectives, perspective],
     currentPerspective: state.currentPerspective
       ? state.currentPerspective
-      : perspective.isDefault
+      : perspective.af_isDefaultPerspective
         ? perspective // Last default perspective found is the one that wins.
         : undefined,
-    openScreens: perspective.isDefault ? state.screens.filter(screen => perspective.has(screen)) : state.openScreens
+    openScreens: perspective.af_isDefaultPerspective
+      ? state.screens.filter(screen => perspective.has(screen))
+      : state.openScreens
   }),
 
   registerScreen: (screen: Screen) => (state: State): any => {
@@ -52,7 +52,7 @@ const actions = {
   },
 
   open: (place: string) => (state: State): any => {
-    const perspective = state.perspectives.filter(s => s.componentId === place).pop();
+    const perspective = state.perspectives.filter(s => s.af_componentId === place).pop();
     if (perspective) {
       return actions.openPerspective(perspective!)(state);
     } else {
@@ -65,11 +65,11 @@ const actions = {
       .filter(screen => !perspective.has(screen)) // Filters out screens that will remain open
       .map(s => ({ screen: s, canBeClosed: s.af_onMayClose() }))
       .filter(t => !t.canBeClosed)
-      .map(t => t.screen.componentId);
+      .map(t => t.screen.af_componentId);
 
     // FIXME: Using sync "confirm" method is not ideal because it cannot be styled.
     const msg = `[${uncloseableScreens}] cannot be closed at the moment. Force closing and proceed to ${
-      perspective.componentId
+      perspective.af_componentId
     }?`;
     if (uncloseableScreens.length > 0 && !confirm(msg)) {
       return state;
@@ -83,7 +83,7 @@ const actions = {
 
   closeScreen: (screen: Screen) => (state: State): any => {
     // FIXME: Using sync "confirm" method is not ideal because it cannot be styled.
-    const msg = `${screen.componentId} cannot be closed. Do you want to force it?`;
+    const msg = `${screen.af_componentId} cannot be closed. Do you want to force it?`;
     if (!screen.af_onMayClose() && !confirm(msg)) {
       return state;
     }
@@ -92,7 +92,7 @@ const actions = {
   },
 
   openScreen: (screenId: string) => (state: State): any => {
-    const screen = state.screens.filter(x => x.componentId === screenId).pop();
+    const screen = state.screens.filter(x => x.af_componentId === screenId).pop();
     if (!screen) {
       console.error(`No screen found with id ${screenId}.`);
       return state;
@@ -101,8 +101,8 @@ const actions = {
     const container = PerspectiveContainer.findContainerFor(screen, state.currentPerspective!);
     if (!container) {
       console.error(
-        `Could not render ${screen.componentId}. No default container for screens found on perspective [${
-          state.currentPerspective!.componentId
+        `Could not render ${screen.af_componentId}. No default container for screens found on perspective [${
+          state.currentPerspective!.af_componentId
         }]. Add a div with id \"default-container-for-screens\" to your perspective and try again.`
       );
       return state;
@@ -117,7 +117,7 @@ const actions = {
     }
 
     if (state.hasAnOpen(screen)) {
-      console.info(`Screen ${screen.componentId} is already open.`);
+      console.info(`Screen ${screen.af_componentId} is already open.`);
       return;
     }
 
@@ -161,9 +161,9 @@ export class Root extends React.Component<Props, State> {
 
   public componentWillUnmount() {
     this.state.screens.forEach(screen => {
-      console.info(`...Shutting down ${screen.componentId}...`);
+      console.info(`...Shutting down ${screen.af_componentId}...`);
       screen.af_onShutdown();
-      console.info(`Shut down ${screen.componentId}.`);
+      console.info(`Shut down ${screen.af_componentId}.`);
     });
   }
 
