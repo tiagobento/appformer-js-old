@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Screen, Subscriptions} from "appformer-js";
+import { Screen, Subscriptions } from "appformer-js";
 
 interface Props {
   screens: Screen[];
@@ -34,8 +34,8 @@ export class EventsSimulationConsole extends React.Component<Props, State> {
     const all: Subscriptions = {};
 
     props.screens
-      .filter(s => s.subscriptions)
-      .map(s => s.subscriptions)
+      .filter(s => s.af_subscriptions)
+      .map(s => s.af_subscriptions)
       .forEach(subscription => {
         for (const channel in subscription) {
           if (subscription.hasOwnProperty(channel)) {

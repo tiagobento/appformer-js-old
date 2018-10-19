@@ -2,14 +2,14 @@ import { RootElement, Service, Subscriptions } from "./Components";
 import { Perspective } from "./Perspective";
 
 export abstract class Screen {
-  private readonly _componentId: string;
-  private _isReact: boolean = false;
-  private _componentTitle?: string = undefined;
-  private _componentService: Service = {};
-  private _subscriptions: Subscriptions = {}; // FIXME: Maybe this one should be a method?
+  private readonly _af_componentId: string;
+  private _af_isReact: boolean = false;
+  private _af_componentTitle?: string = undefined;
+  private _af_componentService: Service = {};
+  private _af_subscriptions: Subscriptions = {}; // FIXME: Maybe this one should be a method?
 
   protected constructor(componentId: string) {
-    this._componentId = componentId;
+    this._af_componentId = componentId;
   }
 
   public af_onStartup(): void {
@@ -43,42 +43,42 @@ export abstract class Screen {
   public abstract af_componentRoot(root?: { ss: Screen[]; ps: Perspective[] }): RootElement;
 
   public static containerId(screen: Screen) {
-    return `container-for-screen-${screen.componentId}`;
+    return `container-for-screen-${screen.af_componentId}`;
   }
 
-  get componentId(): string {
-    return this._componentId;
+  get af_componentId(): string {
+    return this._af_componentId;
   }
 
-  get isReact(): boolean {
-    return this._isReact;
+  get af_isReact(): boolean {
+    return this._af_isReact;
   }
 
-  set isReact(value: boolean) {
-    this._isReact = value;
+  set af_isReact(value: boolean) {
+    this._af_isReact = value;
   }
 
-  get componentTitle(): string | undefined {
-    return this._componentTitle;
+  get af_componentTitle(): string | undefined {
+    return this._af_componentTitle;
   }
 
-  set componentTitle(value: string | undefined) {
-    this._componentTitle = value;
+  set af_componentTitle(value: string | undefined) {
+    this._af_componentTitle = value;
   }
 
-  get componentService(): Service {
-    return this._componentService;
+  get af_componentService(): Service {
+    return this._af_componentService;
   }
 
-  set componentService(value: Service) {
-    this._componentService = value;
+  set af_componentService(value: Service) {
+    this._af_componentService = value;
   }
 
-  get subscriptions(): Subscriptions {
-    return this._subscriptions;
+  get af_subscriptions(): Subscriptions {
+    return this._af_subscriptions;
   }
 
-  set subscriptions(value: Subscriptions) {
-    this._subscriptions = value;
+  set af_subscriptions(value: Subscriptions) {
+    this._af_subscriptions = value;
   }
 }

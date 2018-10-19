@@ -5,9 +5,9 @@ import { Perspective, RootElement, Screen } from "appformer-js";
 export class ConsoleDefaultPerspective extends Perspective {
   constructor() {
     super("default-perspective");
-    this.isReact = true;
-    this.perspectiveScreens = ["console-dock", "console-header", "A-react-screen"];
-    this.isDefault = true;
+    this.af_isReact = true;
+    this.af_perspectiveScreens = ["console-dock", "console-header", "A-react-screen"];
+    this.af_isDefault = true;
   }
 
   public af_perspectiveRoot(root: { ss: Screen[]; ps: Perspective[] }): RootElement {

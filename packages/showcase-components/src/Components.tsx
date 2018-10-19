@@ -9,36 +9,36 @@ export class ReactComponentScreen extends Screen {
 
   constructor() {
     super("A-react-screen");
-    this.isReact = true;
-    this.componentTitle = "React Component";
-    this.subscriptions = {};
-    this.componentService = {};
+    this.af_isReact = true;
+    this.af_componentTitle = "React Component";
+    this.af_subscriptions = {};
+    this.af_componentService = {};
 
     console.info("Testing builtin type: " + new JavaInteger("42").get());
   }
 
   public af_onStartup() {
-    console.info(`Startup ${this.componentId}`);
+    console.info(`Startup ${this.af_componentId}`);
   }
 
   public af_onOpen() {
-    console.info(`[${this.componentId}] is open! :: It's a pure React component`);
+    console.info(`[${this.af_componentId}] is open! :: It's a pure React component`);
   }
 
   public af_onFocus() {
-    console.info(`Focused on ${this.componentId}`);
+    console.info(`Focused on ${this.af_componentId}`);
   }
 
   public af_onLostFocus() {
-    console.info(`Lost focus on ${this.componentId}`);
+    console.info(`Lost focus on ${this.af_componentId}`);
   }
 
   public af_onClose() {
-    console.info(`Closed ${this.componentId}`);
+    console.info(`Closed ${this.af_componentId}`);
   }
 
   public af_onShutdown() {
-    console.info(`Shut down ${this.componentId}`);
+    console.info(`Shut down ${this.af_componentId}`);
   }
 
   public af_componentRoot() {
@@ -50,7 +50,7 @@ export class ReactComponentScreen extends Screen {
         </button>
         <br />
 
-        <DemoReactComponent number={this.componentId} onFoo={(x: any) => (this.onFoo = x)} />
+        <DemoReactComponent number={this.af_componentId} onFoo={(x: any) => (this.onFoo = x)} />
       </div>
     );
   }
@@ -61,9 +61,9 @@ export class PureDomElementScreen extends Screen {
 
   constructor() {
     super("dom-elements-screen");
-    this.componentTitle = "DOM Elements Component";
+    this.af_componentTitle = "DOM Elements Component";
     this.span = document.createElement("span");
-    this.componentService = {};
+    this.af_componentService = {};
   }
 
   public af_onMayClose() {
@@ -90,7 +90,7 @@ export class PureDomElementScreen extends Screen {
 export class StringElementScreen extends Screen {
   constructor() {
     super("string-template-screen");
-    this.componentTitle = "Pure HTML String Component";
+    this.af_componentTitle = "Pure HTML String Component";
   }
 
   public af_onMayClose() {
@@ -105,8 +105,8 @@ export class StringElementScreen extends Screen {
 export class SillyReactScreen extends Screen {
   constructor() {
     super("silly-react-screen");
-    this.isReact = true;
-    this.componentTitle = "Silly React Component";
+    this.af_isReact = true;
+    this.af_componentTitle = "Silly React Component";
   }
 
   public af_componentRoot() {

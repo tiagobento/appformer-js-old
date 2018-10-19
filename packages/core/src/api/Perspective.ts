@@ -1,26 +1,26 @@
 import { Screen } from "./Screen";
-import { Menu, Toolbar, RootElement } from "./Components";
+import { Menu, RootElement, Toolbar } from "./Components";
 import { Panel, PanelType } from "./Panel";
 import { DisplayInfo } from "./DisplayInfo";
 import { Part } from "./Part";
 
 export abstract class Perspective {
-  private readonly _componentId: string;
-  private _isReact: boolean = false;
-  private _perspectiveScreens: string[] = [];
-  private _isDefault: boolean = false;
-  private _isTransient: boolean = true;
-  private _menus?: Menu[] = undefined;
-  private _toolbar?: Toolbar = undefined;
+  private readonly _af_componentId: string;
+  private _af_isReact: boolean = false;
+  private _af_perspectiveScreens: string[] = [];
+  private _af_isDefault: boolean = false;
+  private _af_isTransient: boolean = true;
+  private _af_menus?: Menu[] = undefined;
+  private _af_toolbar?: Toolbar = undefined;
 
-  private _defaultPanelType: PanelType = PanelType.MULTI_LIST;
-  private _displayInfo: DisplayInfo = new DisplayInfo();
+  private _af_defaultPanelType: PanelType = PanelType.MULTI_LIST;
+  private _af_displayInfo: DisplayInfo = new DisplayInfo();
 
-  private _parts: Part[] = [];
-  private _panels: Panel[] = [];
+  private _af_parts: Part[] = [];
+  private _af_panels: Panel[] = [];
 
   protected constructor(componentId: string) {
-    this._componentId = componentId;
+    this._af_componentId = componentId;
   }
 
   public abstract af_perspectiveRoot(root?: { ss: Screen[]; ps: Perspective[] }): RootElement;
@@ -42,91 +42,91 @@ export abstract class Perspective {
   }
 
   public has(screen: Screen | string) {
-    const id = typeof screen === "string" ? screen : screen.componentId;
-    return this.perspectiveScreens.indexOf(id) > -1;
+    const id = typeof screen === "string" ? screen : screen.af_componentId;
+    return this.af_perspectiveScreens.indexOf(id) > -1;
   }
 
-  get componentId(): string {
-    return this._componentId;
+  get af_componentId(): string {
+    return this._af_componentId;
   }
 
-  get isReact(): boolean {
-    return this._isReact;
+  get af_isReact(): boolean {
+    return this._af_isReact;
   }
 
-  set isReact(value: boolean) {
-    this._isReact = value;
+  set af_isReact(value: boolean) {
+    this._af_isReact = value;
   }
 
-  get perspectiveScreens(): string[] {
-    return this._perspectiveScreens;
+  get af_perspectiveScreens(): string[] {
+    return this._af_perspectiveScreens;
   }
 
-  set perspectiveScreens(value: string[]) {
-    this._perspectiveScreens = value;
+  set af_perspectiveScreens(value: string[]) {
+    this._af_perspectiveScreens = value;
   }
 
-  get isDefault(): boolean {
-    return this._isDefault;
+  get af_isDefault(): boolean {
+    return this._af_isDefault;
   }
 
-  set isDefault(value: boolean) {
-    this._isDefault = value;
+  set af_isDefault(value: boolean) {
+    this._af_isDefault = value;
   }
 
-  get isTransient(): boolean {
-    return this._isTransient;
+  get af_isTransient(): boolean {
+    return this._af_isTransient;
   }
 
-  set isTransient(value: boolean) {
-    this._isTransient = value;
+  set af_isTransient(value: boolean) {
+    this._af_isTransient = value;
   }
 
-  get menus(): Menu[] | undefined {
-    return this._menus;
+  get af_menus(): Menu[] | undefined {
+    return this._af_menus;
   }
 
-  set menus(value: Menu[] | undefined) {
-    this._menus = value;
+  set af_menus(value: Menu[] | undefined) {
+    this._af_menus = value;
   }
 
-  get toolbar(): Toolbar | undefined {
-    return this._toolbar;
+  get af_toolbar(): Toolbar | undefined {
+    return this._af_toolbar;
   }
 
-  set toolbar(value: Toolbar | undefined) {
-    this._toolbar = value;
+  set af_toolbar(value: Toolbar | undefined) {
+    this._af_toolbar = value;
   }
 
-  get defaultPanelType(): PanelType {
-    return this._defaultPanelType;
+  get af_defaultPanelType(): PanelType {
+    return this._af_defaultPanelType;
   }
 
-  set defaultPanelType(value: PanelType) {
-    this._defaultPanelType = value;
+  set af_defaultPanelType(value: PanelType) {
+    this._af_defaultPanelType = value;
   }
 
-  get displayInfo(): DisplayInfo {
-    return this._displayInfo;
+  get af_displayInfo(): DisplayInfo {
+    return this._af_displayInfo;
   }
 
-  set displayInfo(value: DisplayInfo) {
-    this._displayInfo = value;
+  set af_displayInfo(value: DisplayInfo) {
+    this._af_displayInfo = value;
   }
 
-  get parts(): Part[] {
-    return this._parts;
+  get af_parts(): Part[] {
+    return this._af_parts;
   }
 
-  set parts(value: Part[]) {
-    this._parts = value;
+  set af_parts(value: Part[]) {
+    this._af_parts = value;
   }
 
-  get panels(): Panel[] {
-    return this._panels;
+  get af_panels(): Panel[] {
+    return this._af_panels;
   }
 
-  set panels(value: Panel[]) {
-    this._panels = value;
+  set af_panels(value: Panel[]) {
+    this._af_panels = value;
   }
 }
