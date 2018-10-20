@@ -1,6 +1,6 @@
 import * as React from "react";
 import { JsBridge } from "./JsBridge";
-import { PerspectiveContainer } from "./PerspectiveContainer";
+import { PerspectiveEnvelope } from "./PerspectiveEnvelope";
 import { Perspective, GenericComponent, Screen } from "../api/Components";
 
 interface Props {
@@ -8,7 +8,7 @@ interface Props {
   bridge: JsBridge;
 }
 
-class State {
+export class State {
   public currentPerspective?: Perspective;
   public perspectives: Perspective[];
   public screens: Screen[];
@@ -34,11 +34,13 @@ const actions = {
     currentPerspective: state.currentPerspective
       ? state.currentPerspective
       : perspective.af_isDefaultPerspective
-        ? perspective // Last default perspective found is the one that wins.
+        ? perspective //First registered default perspective stays.
         : undefined,
-    openScreens: perspective.af_isDefaultPerspective
-      ? state.screens.filter(screen => perspective.has(screen))
-      : state.openScreens
+    openScreens: state.currentPerspective
+      ? state.openScreens
+      : perspective.af_isDefaultPerspective
+        ? state.screens.filter(screen => perspective.has(screen))
+        : []
   }),
 
   registerScreen: (screen: Screen) => (state: State): any => {
@@ -92,13 +94,13 @@ const actions = {
   },
 
   openScreen: (screenId: string) => (state: State): any => {
-    const screen = state.screens.filter(x => x.af_componentId === screenId).pop();
+    const screen = state.screens.filter(s => s.af_componentId === screenId).pop();
     if (!screen) {
       console.error(`No screen found with id ${screenId}.`);
       return state;
     }
 
-    const container = PerspectiveContainer.findContainerFor(screen, state.currentPerspective!);
+    const container = PerspectiveEnvelope.findContainerFor(screen, state.currentPerspective!);
     if (!container) {
       console.error(
         `Could not render ${screen.af_componentId}. No default container for screens found on perspective [${
@@ -108,7 +110,12 @@ const actions = {
       return state;
     }
 
-    const existingScreenId = container.getAttribute(PerspectiveContainer.AfOpenScreenAttr);
+    if (state.hasAnOpen(screen)) {
+      console.info(`Screen ${screen.af_componentId} is already open.`);
+      return;
+    }
+
+    const existingScreenId = container.getAttribute(PerspectiveEnvelope.AfOpenScreenAttr);
     if (existingScreenId) {
       // FIXME: Not checking onMayClose to close the existing screen
       return {
@@ -116,31 +123,31 @@ const actions = {
       };
     }
 
-    if (state.hasAnOpen(screen)) {
-      console.info(`Screen ${screen.af_componentId} is already open.`);
-      return;
-    }
-
     return { openScreens: [...state.openScreens, screen] };
   }
 };
+
+const defaultState = {
+  currentPerspective: undefined,
+  perspectives: [],
+  screens: [],
+  openScreens: [],
+  hasAnOpen(c: any) {
+    return State.hasAnOpen(this)(c);
+  },
+  without(c: any) {
+    return State.without(this)(c);
+  }
+};
+
+export const RootContext = React.createContext<State>(defaultState);
+export type RootContextValue = State;
 
 export class Root extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.props.exposing(() => this);
-    this.state = {
-      currentPerspective: undefined,
-      perspectives: [],
-      screens: [],
-      openScreens: [],
-      hasAnOpen(c) {
-        return State.hasAnOpen(this)(c);
-      },
-      without(c) {
-        return State.without(this)(c);
-      }
-    };
+    this.state = defaultState;
   }
 
   public registerScreen(screen: Screen) {
@@ -153,6 +160,10 @@ export class Root extends React.Component<Props, State> {
 
   public open(place: string) {
     this.setState(actions.open(place));
+  }
+
+  public close(screen: Screen) {
+    this.setState(actions.closeScreen(screen));
   }
 
   public componentDidUpdate(pp: Readonly<Props>, ps: Readonly<State>, snapshot?: any): void {
@@ -170,15 +181,14 @@ export class Root extends React.Component<Props, State> {
   public render() {
     return (
       <div className={"af-js-root"}>
-        {this.state.currentPerspective && (
-          <PerspectiveContainer
-            root={{ ss: this.state.screens, ps: this.state.perspectives }}
-            perspective={this.state.currentPerspective!}
-            screens={this.state.openScreens}
-            bridge={this.props.bridge}
-            onCloseScreen={screen => this.setState(actions.closeScreen(screen))}
-          />
-        )}
+        <RootContext.Provider value={this.state}>
+          {this.state.currentPerspective && (
+            <PerspectiveEnvelope
+              key={this.state.currentPerspective!.af_componentId}
+              perspective={this.state.currentPerspective!}
+            />
+          )}
+        </RootContext.Provider>
       </div>
     );
   }

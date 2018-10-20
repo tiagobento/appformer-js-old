@@ -7,7 +7,7 @@ export * from "./Components";
 
 const jsBridge = new JsBridge();
 
-const bridge =
+export const bridge =
   (window as any).appformerGwtBridge ||
   jsBridge.init(() => {
     console.info("Finished mounting AppFormer JS");
@@ -16,7 +16,7 @@ const bridge =
 export const render =
   bridge.render ||
   ((component: Element, container: HTMLElement, callback = (): void => undefined) => {
-    // FIXME: Duplicated!!
+    // FIXME: Duplicated!! Move it to AppFormerJsBridge
 
     if (component instanceof HTMLElement) {
       container.innerHTML = "";

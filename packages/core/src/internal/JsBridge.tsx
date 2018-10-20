@@ -25,6 +25,10 @@ export class JsBridge {
     this.root().open(place);
   }
 
+  public close(place: Screen) {
+      this.root().close(place);
+  }
+
   public translate(key: string, args: string[]) {
     return `Translated ${key}`;
   }

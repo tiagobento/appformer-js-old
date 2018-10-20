@@ -26,7 +26,7 @@ export abstract class Perspective {
   public af_perspectiveScreens: string[];
   public af_isDefaultPerspective: boolean;
 
-  public abstract af_perspectiveRoot(root?: { ss: Screen[]; ps: Perspective[] }): Element;
+  public abstract af_perspectiveRoot(): Element;
 
   public has(screen: Screen | string) {
     const id = typeof screen === "string" ? screen : screen.af_componentId;
@@ -69,9 +69,9 @@ export abstract class Screen {
     // FIXME: When to call?
   }
 
-  public abstract af_componentRoot(root?: { ss: Screen[]; ps: Perspective[] }): Element;
+  public abstract af_componentRoot(): Element;
 
-  public static containerId(screen: Screen) {
-    return `container-for-screen-${screen.af_componentId}`;
+  public static containerId(af_componentId: string) {
+    return `container-for-screen-${af_componentId}`;
   }
 }
