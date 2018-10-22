@@ -50,3 +50,30 @@ export class ConsolePerspective extends Perspective {
     return <Console />;
   }
 }
+
+export class NonReactShowcasePerspective extends Perspective {
+    constructor() {
+        super();
+        this.isReact = false;
+        this.af_componentId = "non-react-showcase-perspective";
+        this.af_perspectiveScreens = [
+            "console-header",
+            "string-template-screen",
+            "silly-react-screen"
+        ];
+        this.af_isDefaultPerspective = true;
+    }
+
+    public af_perspectiveRoot(): string {
+        return (
+            `\<div class="wrapper">
+                \<header>
+                    <div id="af-js-component--console-header" />
+                \</header>
+
+                \<div id="af-js-component--string-template-screen" />
+                \<div id="af-js-component--silly-react-screen" />
+            \</div>`
+        );
+    }
+}

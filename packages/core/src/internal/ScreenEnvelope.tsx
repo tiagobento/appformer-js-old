@@ -11,11 +11,9 @@ export class ScreenEnvelope extends React.Component<Props, {}> {
   private ref: HTMLDivElement;
 
   public componentDidMount(): void {
-    if (!this.props.screen.isReact) {
-      console.info(`...Rendering ${this.props.screen.af_componentId}...`);
-      this.props.bridge.render(this.props.screen.af_componentRoot(), this.ref);
-      console.info(`Rendered ${this.props.screen.af_componentId}`);
-    }
+    console.info(`...Rendering ${this.props.screen.af_componentId}...`);
+    this.props.bridge.render(this.props.screen.af_componentRoot(), this.ref);
+    console.info(`Rendered ${this.props.screen.af_componentId}`);
 
     console.info(`...Opening ${this.props.screen.af_componentId}...`);
     this.props.screen.af_onOpen();
