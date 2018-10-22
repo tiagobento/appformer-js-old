@@ -17,8 +17,8 @@ const actions = {
 };
 
 export class Console extends React.Component<{}, State> {
-  constructor() {
-    super({});
+  constructor(props: {}) {
+    super(props);
     this.state = { rpcConsole: false, eventsConsole: false };
   }
 
