@@ -27,7 +27,9 @@ export class PerspectiveEnvelope extends React.Component<Props, State> {
   }
 
   public componentDidMount(): void {
-    this.props.bridge.render(this.props.perspective.af_perspectiveRoot(), this.ref);
+    if (!this.props.perspective.isReact) {
+      this.props.bridge.render(this.props.perspective.af_perspectiveRoot(), this.ref);
+    }
     this.refreshPortaledScreens();
   }
 
