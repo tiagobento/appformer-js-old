@@ -4,7 +4,7 @@ import { PerspectiveEnvelope } from "./PerspectiveEnvelope";
 import { Perspective, GenericComponent, Screen } from "../api/Components";
 
 interface Props {
-  exposing: (self: () => Root) => void;
+  exposing: (ref: () => Root) => void;
   bridge: JsBridge;
 }
 

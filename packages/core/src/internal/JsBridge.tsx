@@ -20,12 +20,12 @@ export class JsBridge {
     this.root.registerPerspective(perspective);
   }
 
-  public goTo(place: string) {
-    this.root.open(place);
+  public goTo(af_componentId: string) {
+    this.root.open(af_componentId);
   }
 
-  public close(place: Screen) {
-    this.root.close(place);
+  public close(af_componentId: Screen) {
+    this.root.close(af_componentId);
   }
 
   public translate(key: string, args: string[]) {

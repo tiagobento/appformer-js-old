@@ -14,8 +14,8 @@ export const render = bridge.render;
 
 export const translate = bridge.translate;
 
-export function goTo(place: string) {
-  return bridge.goTo(place);
+export function goTo(af_componentId: string) {
+  return bridge.goTo(af_componentId);
 }
 
 export function rpc(path: string, ...args: any[]): Promise<string> {

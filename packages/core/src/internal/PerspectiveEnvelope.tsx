@@ -7,7 +7,7 @@ import { JsBridge } from "./JsBridge";
 interface Props {
   perspective: Perspective;
   openScreens: Screen[];
-  exposing: (self: () => PerspectiveEnvelope) => void;
+  exposing: (ref: () => PerspectiveEnvelope) => void;
   bridge: JsBridge;
 }
 
@@ -27,8 +27,11 @@ export class PerspectiveEnvelope extends React.Component<Props, State> {
 
   public componentDidMount(): void {
     if (!this.props.perspective.isReact) {
+      console.info(`...Rendering ${this.props.perspective.af_componentId}...`);
       this.props.bridge.render(this.props.perspective.af_perspectiveRoot(), this.ref);
+      console.info(`Rendered ${this.props.perspective.af_componentId}`);
     }
+
     this.refreshPortaledScreens();
   }
 
