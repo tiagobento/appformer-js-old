@@ -1,7 +1,8 @@
 import * as React from "react";
-import {DefaultScreenContainerId, Screen} from "appformer-js";
-import {ConsoleDock} from "./ConsoleDock";
-import {EventsSimulationConsole} from "./EventsSimulationConsole";
+import * as AppFormer from "appformer-js";
+import { DefaultComponentContainer, ComponentContainer } from "appformer-js";
+import { ConsoleDock } from "./ConsoleDock";
+import { EventsSimulationConsole } from "./EventsSimulationConsole";
 
 interface State {
   rpcConsole: boolean;
@@ -15,22 +16,29 @@ const actions = {
   })
 };
 
-export class Console extends React.Component<{ screens: Screen[] }, State> {
-  constructor(props: { screens: Screen[] }) {
+export class Console extends React.Component<{}, State> {
+  constructor(props: {}) {
     super(props);
     this.state = { rpcConsole: false, eventsConsole: false };
+  }
+
+  public componentDidMount(): void {
+    setTimeout(() => AppFormer.goTo("A-react-screen"), 0);
   }
 
   public render() {
     return (
       <div className={"wrapper"}>
-        <header id={"container-for-screen-console-header"}>{/*Container*/}</header>
+        <header>
+          <ComponentContainer af_componentId={"console-header"} />
+        </header>
 
-        <div id={DefaultScreenContainerId} className={"main"}>
-          {/*Container*/}
+        <div className={"main"}>
+          <DefaultComponentContainer />
+          <div id={"af-js-component--dom-elements-screen"} />
         </div>
 
-        <aside className="aside" id={"container-for-screen-console-dock"}>
+        <aside className="aside">
           <ConsoleDock
             status={{ ...this.state }}
             showEvents={() => this.setState(actions.toggleEventsConsole)}
@@ -44,10 +52,7 @@ export class Console extends React.Component<{ screens: Screen[] }, State> {
         </span>
 
         <span style={{ gridColumn: "span 6" }} hidden={!this.state.eventsConsole}>
-          <EventsSimulationConsole
-            screens={this.props.screens}
-            onClose={() => this.setState(actions.toggleEventsConsole)}
-          />
+          <EventsSimulationConsole screens={[]} onClose={() => this.setState(actions.toggleEventsConsole)} />
         </span>
       </div>
     );

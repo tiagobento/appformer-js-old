@@ -23,7 +23,7 @@ export abstract class Perspective {
     this._af_componentId = componentId;
   }
 
-  public abstract af_perspectiveRoot(root?: { ss: Screen[]; ps: Perspective[] }): RootElement;
+  public abstract af_perspectiveRoot(): RootElement;
 
   public af_onStartup(): void {
     // TODO

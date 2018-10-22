@@ -1,45 +1,20 @@
 import * as API from "../";
 import * as React from "react";
+import { DefaultComponentContainerId } from "../api/Components";
+import { Screen } from "../api/Screen";
 
 export const Link = (props: { to: string; children: any }) => (
   <span onClick={() => API.goTo(props.to)}>{props.children}</span>
 );
 
-export const __i18 = (props: { tkey: string }) => <>{API.translate(props.tkey)}</>;
+export const __i18n = (props: { tkey: string; args: string[] }) => (
+  <React.Fragment>{API.translate(props.tkey, props.args)}</React.Fragment>
+);
 
-interface Props {
-  name: string;
-  id: string;
-}
+export const DefaultComponentContainer = () => {
+  return <div id={DefaultComponentContainerId} />;
+};
 
-// FIXME: This is a temporary component \/
-export class ExampleList extends React.Component<Props, {}> {
-  public render() {
-    return (
-      <div>
-        <h4>List of {this.props.name}</h4>
-        <ul>
-          <li>Id: {this.props.id}</li>
-          <li>
-            <__i18 tkey={"message.that.should.be.translated"} />
-          </li>
-          <li>
-            Oculus (and
-            <Link to={"TodoListScreen"}>
-              &nbsp;
-              <a href="#">link</a>
-              &nbsp;
-            </Link>
-            to the TodoListScreen!)
-          </li>
-          <li>
-            <Link to={"dom-elements-screen"}>
-              <a href="#">Open DOM Elements screen</a>
-              &nbsp;
-            </Link>
-          </li>
-        </ul>
-      </div>
-    );
-  }
-}
+export const ComponentContainer = (props: { af_componentId: string }) => {
+  return <div id={Screen.containerId(props.af_componentId)} />;
+};

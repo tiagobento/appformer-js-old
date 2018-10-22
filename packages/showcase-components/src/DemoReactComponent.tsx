@@ -1,5 +1,5 @@
 import * as React from "react";
-import { ExampleList } from "appformer-js";
+import { __i18n, Link } from "appformer-js";
 
 interface Props {
   number: string;
@@ -60,4 +60,42 @@ export class DemoReactComponent extends React.Component<Props, State> {
       </div>
     );
   }
+}
+
+
+class ExampleList extends React.Component<
+    {
+        name: string;
+        id: string;
+    },
+    {}
+    > {
+    public render() {
+        return (
+            <div>
+                <h4>List of {this.props.name}</h4>
+                <ul>
+                    <li>Id: {this.props.id}</li>
+                    <li>
+                        <__i18n tkey={"message.that.should.be.translated"} args={[]} />
+                    </li>
+                    <li>
+                        Oculus (and
+                        <Link to={"TodoListScreen"}>
+                            &nbsp;
+                            <a href="#">link</a>
+                            &nbsp;
+                        </Link>
+                        to the TodoListScreen!)
+                    </li>
+                    <li>
+                        <Link to={"dom-elements-screen"}>
+                            <a href="#">Open DOM Elements screen</a>
+                            &nbsp;
+                        </Link>
+                    </li>
+                </ul>
+            </div>
+        );
+    }
 }

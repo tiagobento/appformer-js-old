@@ -8,7 +8,7 @@ import * as React from "react";
 import { Screen } from "./Screen";
 import { Perspective } from "./Perspective";
 
-export const DefaultScreenContainerId = "default-container-for-screens";
+export const DefaultComponentContainerId = "af-js-default-screen-container";
 
 export interface Subscriptions {
   [channel: string]: (event: any) => void;

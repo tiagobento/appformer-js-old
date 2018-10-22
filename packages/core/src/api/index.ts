@@ -3,6 +3,7 @@ import { JsBridge } from "../internal/JsBridge";
 import { Perspective } from "./Perspective";
 import { Screen } from "./Screen";
 import { RootElement } from "./Components";
+import { marshall } from "../marshalling";
 
 export * from "./Components";
 export * from "./DisplayInfo";
@@ -13,7 +14,7 @@ export * from "./Screen";
 
 const jsBridge = new JsBridge();
 
-const bridge =
+export const bridge =
   (window as any).appformerGwtBridge ||
   jsBridge.init(() => {
     console.info("Finished mounting AppFormer JS");
@@ -22,7 +23,7 @@ const bridge =
 export const render =
   bridge.render ||
   ((component: RootElement, container: HTMLElement, callback = (): void => undefined) => {
-    // FIXME: Duplicated!!
+    // FIXME: Duplicated!! Move it to AppFormerJsBridge
 
     if (component instanceof HTMLElement) {
       container.innerHTML = "";
@@ -44,6 +45,10 @@ export function goTo(place: string) {
 
 export function rpc(path: string, ...args: any[]): Promise<string> {
   return bridge.rpc(path, args);
+}
+
+export function fireEvent(obj: any) {
+  bridge.sendEvent(marshall(obj));
 }
 
 export function register(potentialComponents: any) {

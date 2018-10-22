@@ -1,22 +1,19 @@
 import * as React from "react";
 import { JsBridge } from "./JsBridge";
-import { Perspective } from "../api/Perspective";
 import { Screen } from "../api/Screen";
 
 interface Props {
-  root: { ss: Screen[]; ps: Perspective[] };
   screen: Screen;
-  onClose: () => void;
   bridge: JsBridge;
 }
 
-export class ScreenContainer extends React.Component<Props, {}> {
+export class ScreenEnvelope extends React.Component<Props, {}> {
   private ref: HTMLDivElement;
 
   public componentDidMount(): void {
     if (!this.props.screen.af_isReact) {
       console.info(`...Rendering ${this.props.screen.af_componentId}...`);
-      this.props.bridge.render(this.props.screen.af_componentRoot(this.props.root), this.ref);
+      this.props.bridge.render(this.props.screen.af_componentRoot(), this.ref);
       console.info(`Rendered ${this.props.screen.af_componentId}`);
     }
 
@@ -42,7 +39,7 @@ export class ScreenContainer extends React.Component<Props, {}> {
 
         {/*This is where the screens will be rendered on.*/}
         {/*If it is a ReactElement we can embedded it directly*/}
-        {this.props.screen.af_isReact && this.props.screen.af_componentRoot(this.props.root)}
+        {this.props.screen.af_isReact && this.props.screen.af_componentRoot()}
 
         {/*If not, we simply add a container div where the component will be rendered on */}
         {/*See: componentDidMount*/}
@@ -56,7 +53,7 @@ export class ScreenContainer extends React.Component<Props, {}> {
       <span>
         <span>{screen.af_componentTitle}</span>
         &nbsp;&nbsp;
-        <a href="#" onClick={() => this.props.onClose()}>
+        <a href="#" onClick={() => this.props.bridge.close(screen)}>
           Close
         </a>
       </span>

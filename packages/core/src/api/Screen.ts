@@ -40,10 +40,10 @@ export abstract class Screen {
     // FIXME: When to call?
   }
 
-  public abstract af_componentRoot(root?: { ss: Screen[]; ps: Perspective[] }): RootElement;
+  public abstract af_componentRoot(): RootElement;
 
-  public static containerId(screen: Screen) {
-    return `container-for-screen-${screen.af_componentId}`;
+  public static containerId(af_componentId: string) {
+    return `af-js-component--${af_componentId}`;
   }
 
   get af_componentId(): string {

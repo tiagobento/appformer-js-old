@@ -6,28 +6,32 @@ import { Screen } from "../api/Screen";
 import { RootElement } from "../api/Components";
 
 export class JsBridge {
-  private root: () => Root;
+  private root: Root;
 
   public init(callback: () => void) {
-    const root = <Root exposing={r => (this.root = r)} bridge={this} />;
+    const root = <Root exposing={ref => (this.root = ref())} bridge={this} />;
     const rootContainer = document.body.children[0] as HTMLElement; // FIXME: Maybe get a Div with a fixed id/class?
     ReactDOM.render(root, rootContainer, callback);
     return this;
   }
 
   public registerScreen(screen: Screen) {
-    this.root().registerScreen(screen);
+    this.root.registerScreen(screen);
   }
 
   public registerPerspective(perspective: Perspective) {
-    this.root().registerPerspective(perspective);
+    this.root.registerPerspective(perspective);
   }
 
   public goTo(place: string) {
-    this.root().open(place);
+    this.root.open(place);
   }
 
-  public translate(key: string, ...a: any[]) {
+  public close(place: Screen) {
+    this.root.close(place);
+  }
+
+  public translate(key: string, args: string[]) {
     return `Translated ${key}`;
   }
 
