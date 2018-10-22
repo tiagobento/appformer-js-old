@@ -153,11 +153,15 @@ public class RpcCallerTsMethod {
 
     private String factoriesOracle() {
 
-        final Set<Element> directDependencyElements = translatedReturnType().getAggregatedImportEntries().stream()
+        final Set<Element> aggregatedTypesOfReturnType = translatedReturnType().getAggregatedImportEntries().stream()
                 .map(ImportEntry::asElement)
                 .collect(toSet());
 
-        final Set<Element> allDependenciesElements = dependencyGraph.findAllDependencies(directDependencyElements, FIELD).stream()
+        final Set<Element> childrenOfReturnType = dependencyGraph.findAllDependents(aggregatedTypesOfReturnType, HIERARCHY).stream()
+                .map(DependencyGraph.Vertex::asElement)
+                .collect(toSet());
+
+        final Set<Element> allDependenciesElements = dependencyGraph.findAllDependencies(childrenOfReturnType, FIELD).stream()
                 .map(DependencyGraph.Vertex::asElement)
                 .collect(toSet());
 
