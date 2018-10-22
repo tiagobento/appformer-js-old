@@ -159,8 +159,8 @@ export class Root extends React.Component<Props, State> {
     this.setState(actions.registerPerspective(perspective));
   }
 
-  public open(place: string) {
-    this.setState(actions.open(place, this.perspectiveEnvelope.findContainerFor(place)));
+  public open(af_componentId: string) {
+    this.setState(actions.open(af_componentId, this.perspectiveEnvelope.findContainerFor(af_componentId)));
   }
 
   public close(screen: Screen) {
@@ -191,7 +191,7 @@ export class Root extends React.Component<Props, State> {
             <PerspectiveEnvelope
               key={this.state.currentPerspective!.af_componentId}
               exposing={ref => (this.perspectiveEnvelope = ref())}
-              root={this.state}
+              openScreens={this.state.openScreens}
               bridge={this.props.bridge}
               perspective={this.state.currentPerspective!}
             />

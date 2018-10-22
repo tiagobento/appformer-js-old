@@ -1,13 +1,12 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { DefaultComponentContainerId, Perspective, Screen } from "../api/Components";
-import { RootContextValue } from "./Root";
 import { ScreenEnvelope } from "./ScreenEnvelope";
 import { JsBridge } from "./JsBridge";
 
 interface Props {
   perspective: Perspective;
-  root: RootContextValue;
+  openScreens: Screen[];
   exposing: (self: () => PerspectiveEnvelope) => void;
   bridge: JsBridge;
 }
@@ -34,13 +33,13 @@ export class PerspectiveEnvelope extends React.Component<Props, State> {
   }
 
   public componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any): void {
-    if (this.props.root.openScreens !== prevProps.root.openScreens) {
+    if (this.props.openScreens !== prevProps.openScreens) {
       this.refreshPortaledScreens();
     }
   }
 
   private refreshPortaledScreens() {
-    this.setState({ portaledScreens: this.props.root.openScreens });
+    this.setState({ portaledScreens: this.props.openScreens });
   }
 
   private makePortal(screen: Screen) {
@@ -59,6 +58,12 @@ export class PerspectiveEnvelope extends React.Component<Props, State> {
     );
   }
 
+  public findContainerFor(af_componentId: string) {
+    return (
+      searchTree(this.ref, Screen.containerId(af_componentId)) || searchTree(this.ref, DefaultComponentContainerId)
+    );
+  }
+
   public render() {
     return (
       <div ref={r => (this.ref = r!)} className={"af-perspective-container"}>
@@ -71,14 +76,9 @@ export class PerspectiveEnvelope extends React.Component<Props, State> {
       </div>
     );
   }
-
-  public findContainerFor(af_componentId: string) {
-    return (
-      searchTree(this.ref, Screen.containerId(af_componentId)) || searchTree(this.ref, DefaultComponentContainerId)
-    );
-  }
 }
 
+//Do not traverse inside a container divs
 function searchTree(root: HTMLElement, id: string): HTMLElement | undefined {
   let node: any;
 

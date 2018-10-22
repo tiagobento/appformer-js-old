@@ -1,34 +1,16 @@
-import * as ReactDOM from "react-dom";
 import { Perspective, Screen } from "./Components";
 import { JsBridge } from "../internal/JsBridge";
-import { marshall } from "../marshalling"
+import { marshall } from "../marshalling";
 
 export * from "./Components";
 
-const jsBridge = new JsBridge();
-
 export const bridge =
-  (window as any).appformerGwtBridge ||
-  jsBridge.init(() => {
+  ((window as any).appformerGwtBridge as JsBridge) ||
+  new JsBridge().init(document.body.children[0] as HTMLElement, () => {
     console.info("Finished mounting AppFormer JS");
   });
 
-export const render =
-  bridge.render ||
-  ((component: Element, container: HTMLElement, callback = (): void => undefined) => {
-    // FIXME: Duplicated!! Move it to AppFormerJsBridge
-
-    if (component instanceof HTMLElement) {
-      container.innerHTML = "";
-      container.appendChild(component);
-      callback();
-    } else if (typeof component === "string") {
-      container.innerHTML = component;
-      callback();
-    } else {
-      ReactDOM.render(component as any, container, callback);
-    }
-  });
+export const render = bridge.render;
 
 export const translate = bridge.translate;
 
@@ -51,11 +33,11 @@ export function register(potentialComponents: any) {
 
       if (Component.prototype instanceof Screen) {
         const component = new Component();
-        console.info(`Registering screen [${Component.prototype.constructor.name}]`);
+        console.info(`Registering screen [${component.af_componentId}]`);
         bridge.registerScreen(component);
       } else if (Component.prototype instanceof Perspective) {
         const component = new Component();
-        console.info(`Registering perspective [${Component.prototype.constructor.name}]`);
+        console.info(`Registering perspective [${component.af_componentId}]`);
         bridge.registerPerspective(component);
       } else {
         // TODO: Register other kinds of components
