@@ -1,6 +1,6 @@
 import * as AppFormer from "appformer-js";
 import * as ShowcaseComponents from "appformer-js-showcase-components";
-import { ConsoleHeader, ConsoleDefaultPerspective, SecondPerspective } from "appformer-js-dev-console";
+import { ConsoleHeader, ShowcasePerspective, ConsolePerspective } from "appformer-js-dev-console";
 
 //Registers the AppFormer components and the DevConsole components
-AppFormer.register({ ConsoleHeader, ConsoleDefaultPerspective, ...ShowcaseComponents, SecondPerspective });
+AppFormer.register({ ConsoleHeader, ShowcasePerspective, ...ShowcaseComponents, ConsolePerspective });

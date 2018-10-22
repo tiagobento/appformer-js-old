@@ -1,51 +1,82 @@
 import * as React from "react";
-import { DefaultScreenContainerId, Perspective, Screen } from "../api/Components";
+import * as ReactDOM from "react-dom";
+import { DefaultComponentContainerId, Perspective, Screen } from "../api/Components";
+import { RootContextValue } from "./Root";
+import { ScreenEnvelope } from "./ScreenEnvelope";
+import { JsBridge } from "./JsBridge";
 
 interface Props {
   perspective: Perspective;
+  root: RootContextValue;
+  exposing: (self: () => PerspectiveEnvelope) => void;
+  bridge: JsBridge;
 }
 
-export class PerspectiveEnvelope extends React.Component<Props, {}> {
-  public static AfOpenScreenAttr = "af-open-screen";
+interface State {
+  portaledScreens: Screen[];
+}
 
-  public ref: HTMLDivElement;
+export class PerspectiveEnvelope extends React.Component<Props, State> {
+  public static AfOpenComponentAttr = "af-js-open-component";
+  private ref: HTMLDivElement;
 
   constructor(props: Props) {
     super(props);
-    this.state = { ready: false };
+    this.state = { portaledScreens: [] };
+    this.props.exposing(() => this);
+  }
+
+  public componentDidMount(): void {
+    this.refreshPortaledScreens();
+  }
+
+  public componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any): void {
+    if (this.props.root.openScreens !== prevProps.root.openScreens) {
+      this.refreshPortaledScreens();
+    }
+  }
+
+  private refreshPortaledScreens() {
+    this.setState({ portaledScreens: this.props.root.openScreens });
+  }
+
+  private makePortal(screen: Screen) {
+    const container = this.findContainerFor(screen.af_componentId);
+
+    if (!container) {
+      console.error(`A container for ${screen.af_componentId} should exist at this point for sure.`);
+    } else {
+      container.setAttribute(PerspectiveEnvelope.AfOpenComponentAttr, screen.af_componentId);
+    }
+
+    return (
+      <React.Fragment key={screen.af_componentId}>
+        {container && ReactDOM.createPortal(<ScreenEnvelope bridge={this.props.bridge} screen={screen} />, container!)}
+      </React.Fragment>
+    );
   }
 
   public render() {
     return (
-      <div
-        className={"af-perspective-container"}
-        ref={e => (this.ref = e!)}
-        key={this.props.perspective.af_componentId}
-        id={PerspectiveEnvelope.getSelfContainerElementId(this.props.perspective)}
-      >
+      <div ref={r => (this.ref = r!)} className={"af-perspective-container"}>
         {/*This is where the perspective will be rendered on.*/}
-        {/*See `componentDidMount` and `componentWillUnmount`*/}
         {/*If it is a ReactElement we can embedded it directly*/}
         {this.props.perspective.isReact && this.props.perspective.af_perspectiveRoot()}
+
+        {/*Make portals to container divs*/}
+        {this.state.portaledScreens.map(screen => this.makePortal(screen))}
       </div>
     );
   }
 
-  private static getSelfContainerElementId(perspective: Perspective) {
-    return "self-perspective-" + perspective.af_componentId;
-  }
-
-  public static findContainerFor(screen: Screen, perspective: Perspective) {
-    const ref = document.getElementById(this.getSelfContainerElementId(perspective))!;
-    return this.findScreenContainerInside(screen, ref);
-  }
-
-  private static findScreenContainerInside(screen: Screen, root: HTMLElement) {
-    return searchTree(root, Screen.containerId(screen.af_componentId)) || searchTree(root, DefaultScreenContainerId);
+  public findContainerFor(af_componentId: string) {
+    return (
+      searchTree(this.ref, Screen.containerId(af_componentId)) || searchTree(this.ref, DefaultComponentContainerId)
+    );
   }
 }
 
-function searchTree(root: HTMLElement, id: string) {
+function searchTree(root: HTMLElement, id: string): HTMLElement | undefined {
   let node: any;
 
   const stack = [root];
@@ -62,5 +93,5 @@ function searchTree(root: HTMLElement, id: string) {
     }
   }
 
-  return null;
+  return undefined;
 }

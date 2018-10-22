@@ -6,7 +6,7 @@
 
 import * as React from "react";
 
-export const DefaultScreenContainerId = "default-container-for-screens";
+export const DefaultComponentContainerId = "af-js-default-screen-container";
 
 export interface Subscriptions {
   [channel: string]: (event: any) => void;
@@ -72,6 +72,6 @@ export abstract class Screen {
   public abstract af_componentRoot(): Element;
 
   public static containerId(af_componentId: string) {
-    return `container-for-screen-${af_componentId}`;
+    return `af-js-component--${af_componentId}`;
   }
 }

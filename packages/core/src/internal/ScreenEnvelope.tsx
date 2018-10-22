@@ -1,9 +1,10 @@
 import * as React from "react";
 import { Screen } from "../api/Components";
-import { bridge } from "../api/index";
+import { JsBridge } from "./JsBridge";
 
 interface Props {
   screen: Screen;
+  bridge: JsBridge;
 }
 
 export class ScreenEnvelope extends React.Component<Props, {}> {
@@ -12,7 +13,7 @@ export class ScreenEnvelope extends React.Component<Props, {}> {
   public componentDidMount(): void {
     if (!this.props.screen.isReact) {
       console.info(`...Rendering ${this.props.screen.af_componentId}...`);
-      bridge.render(this.props.screen.af_componentRoot(), this.ref);
+      this.props.bridge.render(this.props.screen.af_componentRoot(), this.ref);
       console.info(`Rendered ${this.props.screen.af_componentId}`);
     }
 
@@ -52,7 +53,7 @@ export class ScreenEnvelope extends React.Component<Props, {}> {
       <span>
         <span>{screen.af_componentTitle}</span>
         &nbsp;&nbsp;
-        <a href="#" onClick={() => bridge.close(screen)}>
+        <a href="#" onClick={() => this.props.bridge.close(screen)}>
           Close
         </a>
       </span>
