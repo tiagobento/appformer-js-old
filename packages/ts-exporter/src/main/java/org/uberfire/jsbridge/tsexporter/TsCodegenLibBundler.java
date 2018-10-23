@@ -21,6 +21,8 @@ import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.Map.Entry;
+import java.util.stream.Stream;
 
 import org.uberfire.jsbridge.tsexporter.config.AppFormerLib;
 import org.uberfire.jsbridge.tsexporter.config.Configuration;
@@ -49,8 +51,8 @@ public class TsCodegenLibBundler {
         final String registryEntries = config.getLibraries().stream()
                 .filter(lib -> lib.getType().equals(LIB))
                 .peek(this::writeLibMainFile)
-                .flatMap(lib -> lib.getComponents().stream().map(componentId -> new SimpleImmutableEntry<>(componentId, getLibMainFileCopyName(lib))))
-                .map(e -> format("\"%s\": \"%s\"", e.getKey(), e.getValue()))
+                .flatMap(this::bundleComponentConfiguration)
+                .map(e -> format("\"%s\": %s", e.getKey(), e.getValue()))
                 .collect(joining(",\n"));
 
         writePublicResource("AppFormerComponentsRegistry.js",
@@ -88,5 +90,23 @@ public class TsCodegenLibBundler {
 
     private String getLibMainFileCopyName(final AppFormerLib lib) {
         return lib.getName() + ".js";
+    }
+
+    private Stream<Entry<String, String>> bundleComponentConfiguration(final AppFormerLib lib) {
+        return lib.getComponents().stream()
+                .map(component -> {
+
+                    final String type = component.getType().name().toUpperCase();
+                    final String source = getLibMainFileCopyName(lib);
+
+                    final String params = component.getParams().entrySet().stream()
+                            .map(e -> format("\"%s\": \"%s\"", e.getKey(), e.getValue()))
+                            .collect(joining(",\n"));
+
+                    final String configStr = format("{\"type\": \"%s\", \"source\": \"%s\", \"params\": { %s } }",
+                                                    type, source, params);
+
+                    return new SimpleImmutableEntry<>(component.getId(), configStr);
+                });
     }
 }

@@ -20,7 +20,6 @@ import java.net.URL;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -37,7 +36,7 @@ public class AppFormerLib {
     private final String associatedMvnModuleName;
     private final Map<String, String> decorators;
     private final String main;
-    private final Set<String> components;
+    private final Set<ComponentConfiguration> components;
 
     public AppFormerLib(final URL url) {
         final String jsonString = readClasspathResource(url);
@@ -51,7 +50,7 @@ public class AppFormerLib {
         associatedMvnModuleName = getMavenModuleNameFromSourceFilePath(url.getFile());
 
         components = stream(json.get("components").getAsJsonArray().spliterator(), false)
-                .map(JsonElement::getAsString)
+                .map(ComponentConfiguration::new)
                 .collect(toSet());
 
         decorators = json.get("decorators").getAsJsonObject()
@@ -81,7 +80,7 @@ public class AppFormerLib {
         return main;
     }
 
-    public Set<String> getComponents() {
+    public Set<ComponentConfiguration> getComponents() {
         return components;
     }
 
