@@ -31,7 +31,7 @@ export class CoreRoot extends React.Component<Props, State> {
     this.props.exposing(() => this);
   }
 
-  public register(component: Component, type: string) {
+  public register(component: Component) {
     this.setState(prevState => {
       return { components: [...prevState.components, component] };
     });

@@ -1,5 +1,4 @@
 import * as React from "react";
-import { ComponentContainer } from "../core";
 import { AppFormer } from "./AppFormer";
 
 interface Props {
@@ -12,7 +11,7 @@ interface State {
   perspective?: string;
 }
 
-interface AppFormerContextValue extends State {
+export interface AppFormerContextValue extends State {
   api?: AppFormer;
 }
 
@@ -32,7 +31,7 @@ export class AppFormerRoot extends React.Component<Props, State> {
     return (
       <div className={"appformer-root"}>
         <AppFormerContext.Provider value={{ ...this.state, api: this.props.appformer }}>
-          <ComponentContainer key={this.state.perspective!} af_componentId={this.state.perspective!} />
+          <div key={this.state.perspective!} af-js-component={this.state.perspective!} />
           {this.props.portals}
         </AppFormerContext.Provider>
       </div>

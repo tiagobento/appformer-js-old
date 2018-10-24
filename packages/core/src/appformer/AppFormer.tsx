@@ -1,8 +1,7 @@
 import * as React from "react";
-import { Element, Component } from "../core/Component";
 import { AppFormerRoot } from "./AppFormerRoot";
-import { Core } from "../core/Core";
 import { Perspective, Screen } from "./Components";
+import { Element, Component, Core } from "../core";
 
 export class AppFormer extends Component {
   private appformerRoot: AppFormerRoot;
@@ -23,9 +22,9 @@ export class AppFormer extends Component {
     return this;
   }
 
-  public register(component: Screen | Perspective, type: string) {
+  public register(component: Screen | Perspective) {
     this.components.set(component.af_componentId, component);
-    this.core.register(component, type);
+    this.core.register(component);
   }
 
   public goTo(af_componentId: string) {
@@ -35,10 +34,10 @@ export class AppFormer extends Component {
   public open(af_componentId: string) {
     const component = this.components.get(af_componentId);
     if (component) {
+      this.core.register(component);
       if (component.type === "perspective") {
         this.goTo(component.af_componentId);
       }
-      this.core.register(component, component.type);
     }
   }
 

@@ -11,9 +11,9 @@ export class Core {
     return this;
   }
 
-  public register(component: Component, type: string) {
+  public register(component: Component) {
     console.info(`Registering ${component.af_componentId}...`);
-    this.coreRoot.register(component, type);
+    this.coreRoot.register(component);
   }
 
   public deregister(af_componentId: string) {

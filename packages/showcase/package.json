@@ -10,7 +10,6 @@
     "@types/react-dom": "^16.0.6",
     "appformer-js": "1.0.0",
     "appformer-js-dev-console": "1.0.0",
-    "appformer-js-showcase-components": "1.0.0",
     "react": "^16.4.1",
     "react-dom": "^16.4.1"
   },

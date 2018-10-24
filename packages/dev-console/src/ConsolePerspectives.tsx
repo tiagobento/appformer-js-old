@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Console } from "./Console";
-import { Element, Perspective, ComponentContainer, AppFormerContext, CoreRootContext } from "appformer-js";
+import { Element, Perspective, AppFormerContext, CoreRootContext } from "appformer-js";
 
 export class ShowcasePerspective extends Perspective {
   constructor() {
@@ -20,7 +20,7 @@ export class ShowcasePerspective extends Perspective {
                 <div className={"title"}>
                   <>{this.TitleBar({ af_componentId: props.af_componentId })}</>
                 </div>
-                <ComponentContainer af_componentId={props.af_componentId} />
+                <div af-js-component={props.af_componentId} />
               </div>
             )
           }
@@ -53,7 +53,7 @@ export class ShowcasePerspective extends Perspective {
     return (
       <div className={"wrapper"}>
         <header>
-          <ComponentContainer af_componentId={"console-header"} />
+          <div af-js-component={"console-header"} />
         </header>
 
         {this.NiceBox({ af_componentId: "A-react-screen" })}

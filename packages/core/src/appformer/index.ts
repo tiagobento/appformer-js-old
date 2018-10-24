@@ -1,11 +1,11 @@
 import { AppFormer } from "./AppFormer";
 import { Screen, Perspective } from "./Components";
-import { Element } from "../core/Component";
+import { Element } from "../core";
 
-export * from "./AppFormer";
+export {AppFormer} from "./AppFormer";
 export * from "./Components";
 export * from "./Shorthands";
-export { AppFormerContext } from "./AppFormerRoot";
+export { AppFormerContext, AppFormerContextValue} from "./AppFormerRoot";
 
 export function init(container: HTMLElement): AppFormer {
   return new AppFormer().init(container, () => {
@@ -20,18 +20,18 @@ if ($wnd.AppFormerMode !== "instance") {
   singleton =
     $wnd.appformerGwtBridge ||
     new AppFormer().init(document.body.children[0] as HTMLElement, () => {
-      console.info("AppFormer *standalone* instance initialized.");
+      console.info("AppFormer _standalone_ instance initialized.");
     });
 
   $wnd.AppFormerInstance = singleton;
 }
 
 export function registerScreen(screen: Screen) {
-  singleton!.register(screen, "screen");
+  singleton!.register(screen);
 }
 
 export function registerPerspective(perspective: Perspective) {
-  singleton!.register(perspective, "perspective");
+  singleton!.register(perspective);
 }
 
 export function goTo(af_componentId: string) {
