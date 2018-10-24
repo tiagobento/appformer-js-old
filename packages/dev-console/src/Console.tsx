@@ -23,7 +23,7 @@ export class Console extends React.Component<{}, State> {
   }
 
   public componentDidMount(): void {
-    setTimeout(() => AppFormer.goTo("A-react-screen"), 0);
+    // setTimeout(() => AppFormer.goTo("A-react-screen"), 0);
   }
 
   public render() {
@@ -35,7 +35,7 @@ export class Console extends React.Component<{}, State> {
 
         <div className={"main"}>
           <DefaultComponentContainer />
-          <div id={"af-js-component--dom-elements-screen"} />
+          <div af-js-component={"dom-elements-screen"} />
         </div>
 
         <aside className="aside">

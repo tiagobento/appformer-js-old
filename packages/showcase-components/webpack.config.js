@@ -6,8 +6,7 @@ const CircularDependencyPlugin = require("circular-dependency-plugin");
 
 module.exports = merge(common, {
   entry: {
-    "showcase-components": "./src/index.ts",
-    "showcase-components-autoregister": "./src/index-autoregister.ts"
+    index: "./src/index.ts"
   },
   externals: {
     "appformer-js": {
@@ -19,7 +18,7 @@ module.exports = merge(common, {
   },
   output: {
     path: path.resolve(__dirname, "dist"),
-    filename: "[name].js",
+    filename: "index.js",
     library: "ShowcaseComponents",
     libraryTarget: "umd",
     umdNamedDefine: true

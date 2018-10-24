@@ -7,31 +7,44 @@ export class ShowcasePerspective extends Perspective {
     super();
     this.isReact = true;
     this.af_componentId = "showcase-perspective";
-    this.af_perspectiveScreens = [
-      "console-header",
-      "A-react-screen",
-      "dom-elements-screen",
-      "string-template-screen",
-      "silly-react-screen"
-    ];
     this.af_isDefaultPerspective = true;
   }
 
-  private spaced(component: any) {
-    return <div style={{ minWidth: "300px", margin: "5px", minHeight: "100%" }}>{component}</div>;
+  private wrapped(component: any) {
+    return (
+      <div style={{ minWidth: "300px", margin: "5px", minHeight: "100%" }}>
+        <div className={"af-screen-container"}>
+          <div className={"title"}>
+            <this.TitleBar />
+          </div>
+          {component}
+        </div>
+      </div>
+    );
   }
 
-  public af_perspectiveRoot(): Element {
+  private TitleBar() {
+    return (
+      <span>
+        <span>Title goes here</span>
+        &nbsp;&nbsp;
+        <a href="#" style={{lineHeight: "1.6", float:"right"}}>Close</a>
+      </span>
+    );
+  }
+
+  public af_componentRoot(): Element {
     return (
       <div className={"wrapper"}>
         <header>
           <ComponentContainer af_componentId={"console-header"} />
         </header>
 
-        {this.spaced(<ComponentContainer af_componentId={"A-react-screen"} />)}
-        {this.spaced(<ComponentContainer af_componentId={"dom-elements-screen"} />)}
-        {this.spaced(<ComponentContainer af_componentId={"string-template-screen"} />)}
-        {this.spaced(<ComponentContainer af_componentId={"silly-react-screen"} />)}
+        {this.wrapped(<ComponentContainer af_componentId={"A-react-screen"} />)}
+        {this.wrapped(<ComponentContainer af_componentId={"dom-elements-screen"} />)}
+        {this.wrapped(<ComponentContainer af_componentId={"A-react-screen"} />)}
+        {this.wrapped(<ComponentContainer af_componentId={"string-template-screen"} />)}
+        {this.wrapped(<ComponentContainer af_componentId={"silly-react-screen"} />)}
       </div>
     );
   }
@@ -42,38 +55,30 @@ export class ConsolePerspective extends Perspective {
     super();
     this.isReact = true;
     this.af_componentId = "console-perspective";
-    this.af_perspectiveScreens = ["console-header", "dom-elements-screen"];
     this.af_isDefaultPerspective = false;
   }
 
-  public af_perspectiveRoot(): Element {
+  public af_componentRoot(): Element {
     return <Console />;
   }
 }
 
 export class NonReactShowcasePerspective extends Perspective {
-    constructor() {
-        super();
-        this.isReact = false;
-        this.af_componentId = "non-react-showcase-perspective";
-        this.af_perspectiveScreens = [
-            "console-header",
-            "string-template-screen",
-            "silly-react-screen"
-        ];
-        this.af_isDefaultPerspective = true;
-    }
+  constructor() {
+    super();
+    this.isReact = false;
+    this.af_componentId = "non-react-showcase-perspective";
+    this.af_isDefaultPerspective = true;
+  }
 
-    public af_perspectiveRoot(): string {
-        return (
-            `\<div class="wrapper">
+  public af_componentRoot(): string {
+    return `\<div>
                 \<header>
-                    <div id="af-js-component--console-header" />
+                    <div af-js-component="console-header"></div>
                 \</header>
 
-                \<div id="af-js-component--string-template-screen" />
-                \<div id="af-js-component--silly-react-screen" />
-            \</div>`
-        );
-    }
+                \<div af-js-component="string-template-screen"></div>
+                \<div af-js-component="silly-react-screen"></div>
+            \</div>`;
+  }
 }

@@ -1,8 +1,7 @@
-export * from "./api";
+export * from "./appformer";
 export * from "./marshalling";
-export * from "./internal";
+export * from "./core";
 export * from "./java-wrappers";
-export * from "./react-components";
 
 // Exposes this module as a global variable
 (window as any).AppFormer = this;

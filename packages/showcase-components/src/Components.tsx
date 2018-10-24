@@ -75,7 +75,6 @@ export class PureDomElementScreen extends Screen {
   public af_componentRoot() {
     const button = document.createElement("button");
     button.textContent = "This is a HTMLButtonElement";
-    button.onclick = e => console.info("HTMLButtonElement was clicked");
 
     const label = document.createElement("label");
     label.textContent = "This is also a Foo Message: ";
@@ -85,6 +84,14 @@ export class PureDomElementScreen extends Screen {
     div.appendChild(document.createElement("br"));
     div.appendChild(label);
     div.appendChild(this.span);
+
+    button.onclick = e => {
+      const container = document.createElement("div");
+      container.setAttribute("af-js-component", "A-react-screen");
+      container.id = new Date().getTime() + "";
+      div.appendChild(container);
+    };
+
     return div;
   }
 }

@@ -8,7 +8,7 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 module.exports = merge(common, {
   mode: "development",
   entry: {
-    showcase: "./src/index.ts"
+    showcase: "./src/index.tsx"
   },
   externals: {
     "appformer-js": {
