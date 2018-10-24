@@ -3,7 +3,7 @@ import { MarshallingContext } from "../MarshallingContext";
 import { ErraiObject } from "../model/ErraiObject";
 import { JavaWrapperUtils } from "../../java-wrappers/JavaWrapperUtils";
 import { ErraiObjectConstants } from "../model/ErraiObjectConstants";
-import { Portable } from "../../internal/model/Portable";
+import { Portable } from "../Portable";
 import { NullableMarshaller } from "./NullableMarshaller";
 import { UnmarshallingContext } from "../UnmarshallingContext";
 import { JavaWrapper } from "../../java-wrappers/JavaWrapper";

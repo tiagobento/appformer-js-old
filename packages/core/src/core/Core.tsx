@@ -4,23 +4,21 @@ import { Element, Component } from "./Component";
 import { CoreRoot } from "./CoreRoot";
 
 export class Core {
-  public root: CoreRoot;
+  public coreRoot: CoreRoot;
 
   public init(app: Component, container: HTMLElement, callback: () => void) {
-    ReactDOM.render(<CoreRoot exposing={ref => (this.root = ref())} core={this} app={app} />, container, callback);
+    ReactDOM.render(<CoreRoot exposing={ref => (this.coreRoot = ref())} core={this} app={app} />, container, callback);
     return this;
   }
 
   public register(component: Component, type: string) {
     console.info(`Registering ${component.af_componentId}...`);
-    this.root.register(component, type);
-  }
-  public goTo() {
-
+    this.coreRoot.register(component, type);
   }
 
-  public translate() {
-
+  public deregister(af_componentId: string) {
+    console.info(`Deregistering ${af_componentId}...`);
+    this.coreRoot.deregister(af_componentId);
   }
 
   public render(component: Element, container: HTMLElement, callback = (): void => undefined) {

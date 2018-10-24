@@ -10,7 +10,6 @@ export class ComponentContainer extends React.Component<Props, {}> {
   }
 
   public render() {
-    //FIXME: Probably give an UUID instead of new Date().getTime()
-    return <div af-js-component={this.props.af_componentId} id={new Date().getTime() + ""} />;
+    return <div af-js-component={this.props.af_componentId}/>;
   }
 }

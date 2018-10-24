@@ -36,6 +36,7 @@ export class Console extends React.Component<{}, State> {
         <div className={"main"}>
           <DefaultComponentContainer />
           <div af-js-component={"dom-elements-screen"} />
+            <div af-js-component={"silly-react-screen"} />
         </div>
 
         <aside className="aside">

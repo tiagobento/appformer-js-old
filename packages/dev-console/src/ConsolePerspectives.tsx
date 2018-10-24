@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Console } from "./Console";
-import { Element, Perspective, ComponentContainer } from "appformer-js";
+import { Element, Perspective, ComponentContainer, AppFormerContext, CoreRootContext } from "appformer-js";
 
 export class ShowcasePerspective extends Perspective {
   constructor() {
@@ -10,26 +10,42 @@ export class ShowcasePerspective extends Perspective {
     this.af_isDefaultPerspective = true;
   }
 
-  private wrapped(component: any) {
+  private NiceBox(props: { af_componentId: string }) {
     return (
       <div style={{ minWidth: "300px", margin: "5px", minHeight: "100%" }}>
-        <div className={"af-screen-container"}>
-          <div className={"title"}>
-            <this.TitleBar />
-          </div>
-          {component}
-        </div>
+        <CoreRootContext.Consumer>
+          {core =>
+            Object.keys(core.components).indexOf(props.af_componentId) !== -1 && (
+              <div key={props.af_componentId} className={"af-screen-container"}>
+                <div className={"title"}>
+                  <>{this.TitleBar({ af_componentId: props.af_componentId })}</>
+                </div>
+                <ComponentContainer af_componentId={props.af_componentId} />
+              </div>
+            )
+          }
+        </CoreRootContext.Consumer>
       </div>
     );
   }
 
-  private TitleBar() {
+  private TitleBar(props: { af_componentId: string }) {
     return (
-      <span>
-        <span>Title goes here</span>
-        &nbsp;&nbsp;
-        <a href="#" style={{lineHeight: "1.6", float:"right"}}>Close</a>
-      </span>
+      <AppFormerContext.Consumer>
+        {appformer => (
+          <span>
+            <span> Title goes here</span>
+            &nbsp;&nbsp;
+            <a
+              href="#"
+              style={{ lineHeight: "1.6", float: "right" }}
+              onClick={() => appformer.api!.close(props.af_componentId)}
+            >
+              Close
+            </a>
+          </span>
+        )}
+      </AppFormerContext.Consumer>
     );
   }
 
@@ -40,11 +56,10 @@ export class ShowcasePerspective extends Perspective {
           <ComponentContainer af_componentId={"console-header"} />
         </header>
 
-        {this.wrapped(<ComponentContainer af_componentId={"A-react-screen"} />)}
-        {this.wrapped(<ComponentContainer af_componentId={"dom-elements-screen"} />)}
-        {this.wrapped(<ComponentContainer af_componentId={"A-react-screen"} />)}
-        {this.wrapped(<ComponentContainer af_componentId={"string-template-screen"} />)}
-        {this.wrapped(<ComponentContainer af_componentId={"silly-react-screen"} />)}
+        {this.NiceBox({ af_componentId: "A-react-screen" })}
+        {this.NiceBox({ af_componentId: "dom-elements-screen" })}
+        {this.NiceBox({ af_componentId: "string-template-screen" })}
+        {this.NiceBox({ af_componentId: "silly-react-screen" })}
       </div>
     );
   }

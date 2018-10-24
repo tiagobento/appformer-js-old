@@ -1,4 +1,4 @@
-import { Portable } from "../internal";
+import { Portable } from "./Portable";
 import { ErraiObject } from "./model/ErraiObject";
 import { ErraiObjectConstants } from "./model/ErraiObjectConstants";
 

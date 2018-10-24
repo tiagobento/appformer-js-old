@@ -16,7 +16,7 @@ import { JavaByteMarshaller } from "./marshallers/JavaByteMarshaller";
 import { JavaDateMarshaller } from "./marshallers/JavaDateMarshaller";
 import { JavaOptionalMarshaller } from "./marshallers/JavaOptionalMarshaller";
 import { JavaArrayListMarshaller, JavaHashSetMarshaller } from "./marshallers/JavaCollectionMarshaller";
-import { Portable } from "../internal";
+import { Portable } from "./Portable";
 
 export class MarshallerProvider {
   private static initialized: boolean = false;

@@ -1,6 +1,6 @@
 import { NumberWrapper } from "../../../java-wrappers/NumberWrapper";
 import { JavaBoolean } from "../../../java-wrappers";
-import { Portable } from "../../../internal";
+import { Portable } from "../../../marshalling/Portable";
 import { ErraiObject } from "../../model/ErraiObject";
 import { MarshallingContext } from "../../MarshallingContext";
 import { MarshallerProvider } from "../../MarshallerProvider";

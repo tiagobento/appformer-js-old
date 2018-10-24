@@ -18,7 +18,7 @@ import {
 } from "../../../java-wrappers";
 import { ErraiObjectConstants } from "../../model/ErraiObjectConstants";
 import { MarshallerProvider } from "../../MarshallerProvider";
-import { Portable } from "../../../internal";
+import { Portable } from "../../Portable";
 import { JavaOptionalMarshaller } from "../JavaOptionalMarshaller";
 import { NumValBasedErraiObject } from "../../model/NumValBasedErraiObject";
 import { ValueBasedErraiObject } from "../../model/ValueBasedErraiObject";

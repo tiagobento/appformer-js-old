@@ -1,4 +1,4 @@
-import { Portable } from "../internal/model/Portable";
+import { Portable } from "./Portable";
 import { MarshallerProvider } from "./MarshallerProvider";
 import { MarshallingContext } from "./MarshallingContext";
 import { UnmarshallingContext } from "./UnmarshallingContext";

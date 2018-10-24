@@ -1,5 +1,5 @@
 import { MarshallingContext } from "./MarshallingContext";
-import { Portable } from "../internal/model/Portable";
+import { Portable } from "./Portable";
 import { UnmarshallingContext } from "./UnmarshallingContext";
 
 // marshall(T) => U

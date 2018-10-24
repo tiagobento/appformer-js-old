@@ -4,6 +4,7 @@ export abstract class Component {
     public af_componentId: string;
     public isReact: boolean = false;
     public hasContext: boolean = false;
+    public type: string;
 
     public abstract af_componentRoot(children?: any): Element;
 }

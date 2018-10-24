@@ -2,11 +2,11 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { Component } from "./Component";
 import { Core } from "./Core";
-import { RootContextValue } from "./CoreRoot";
+import { CoreRootContextValue } from "./CoreRoot";
 
 interface Props {
   component: Component;
-  rootContext: RootContextValue;
+  rootContext: CoreRootContextValue;
   core: Core;
 }
 
@@ -27,13 +27,11 @@ export class ComponentEnvelope extends React.Component<Props, State> {
   }
 
   public componentDidMount(): void {
-    console.info(`...Rendering ${this.props.component.af_componentId}...`);
     if (!this.props.component.isReact) {
       this.props.core.render(this.props.component.af_componentRoot(), this.ref);
     }
-
     this.refreshPortaledComponents();
-    console.info(`Rendered ${this.props.component.af_componentId}`);
+    console.info(`Mounted ${this.props.component.af_componentId}`);
   }
 
   public updateRef(newRef: HTMLElement | null) {
@@ -63,6 +61,7 @@ export class ComponentEnvelope extends React.Component<Props, State> {
         .filter(container => !container.hasAttribute(ComponentEnvelope.AfOpenComponentAttr));
 
       if (addedNodes.length > 0) {
+        console.info("-> Refresh was triggered by the Mutation Observer");
         this.refreshPortaledComponents();
       }
     });
@@ -83,6 +82,8 @@ export class ComponentEnvelope extends React.Component<Props, State> {
     if (this.mutationObserver) {
       this.mutationObserver!.disconnect();
     }
+
+    console.info(`Unmounting ${this.props.component.af_componentId}`);
   }
 
   private refreshPortaledComponents() {
@@ -97,15 +98,14 @@ export class ComponentEnvelope extends React.Component<Props, State> {
     });
   }
 
-  private makePortal(component: Component): JSX.Element[] {
-    const containers = this.findContainers([component.af_componentId]);
-    return containers.map(container => {
-      container.setAttribute(ComponentEnvelope.AfOpenComponentAttr, component.af_componentId);
-      return ReactDOM.createPortal(
-        <ComponentEnvelope rootContext={this.props.rootContext} core={this.props.core} component={component} />,
-        container
-      );
-    });
+  private makePortal(component: Component): JSX.Element {
+    const container = this.findContainers([component.af_componentId])[0];
+    container.setAttribute(ComponentEnvelope.AfOpenComponentAttr, component.af_componentId);
+    return ReactDOM.createPortal(
+      <ComponentEnvelope rootContext={this.props.rootContext} core={this.props.core} component={component} />,
+      container,
+      component.af_componentId
+    );
   }
 
   public findContainers(af_componentIds: string[]) {
@@ -121,17 +121,13 @@ export class ComponentEnvelope extends React.Component<Props, State> {
 
     return (
       <div ref={ref => this.updateRef(ref)} className={"af-js-component"}>
-        {/*If it is a ReactElement we can embedded it directly*/}
         {this.props.component.isReact && this.props.component.af_componentRoot(portals)}
-
-        {/*Make portals to container divs*/}
         {!this.props.component.hasContext && portals}
       </div>
     );
   }
 }
 
-//Do not traverse inside a container divs
 function searchTree(
   root: HTMLElement,
   stopWhen: (elem: HTMLElement) => boolean,

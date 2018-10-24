@@ -4,10 +4,7 @@
 //
 // FIXME: All public API methods need a revision. Their names are *temporary*.
 
-
-import {Component} from "../core";
-
-
+import { Component } from "../core";
 
 export const DefaultComponentContainerId = "af-js-default-screen-container";
 
@@ -21,12 +18,22 @@ export interface Service {
 
 export abstract class Perspective extends Component {
   public af_isDefaultPerspective: boolean;
+
+    constructor() {
+        super();
+        this.type = "perspective";
+    }
 }
 
 export abstract class Screen extends Component {
   public af_componentTitle?: string;
   public af_componentService: Service = {};
   public af_subscriptions: Subscriptions = {}; // FIXME: Maybe this one should be a method?
+
+  constructor() {
+    super();
+    this.type = "screen";
+  }
 
   public af_onStartup(): void {
     // FIXME: When to call?
