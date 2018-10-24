@@ -8,10 +8,9 @@ import { RootElement } from "../api/Components";
 export class JsBridge {
   private root: Root;
 
-  public init(callback: () => void) {
+  public init(container: HTMLElement, callback: () => void) {
     const root = <Root exposing={ref => (this.root = ref())} bridge={this} />;
-    const rootContainer = document.body.children[0] as HTMLElement; // FIXME: Maybe get a Div with a fixed id/class?
-    ReactDOM.render(root, rootContainer, callback);
+    ReactDOM.render(root, container, callback);
     return this;
   }
 
@@ -23,16 +22,20 @@ export class JsBridge {
     this.root.registerPerspective(perspective);
   }
 
-  public goTo(place: string) {
-    this.root.open(place);
+  public goTo(af_componentId: string) {
+    this.root.open(af_componentId);
   }
 
-  public close(place: Screen) {
-    this.root.close(place);
+  public close(af_componentId: Screen) {
+    this.root.close(af_componentId);
   }
 
   public translate(key: string, args: string[]) {
     return `Translated ${key}`;
+  }
+
+  public sendEvent(obj: any) {
+      console.info("Firing event: " + obj);
   }
 
   public rpc(path: string, args: any[]) {

@@ -46,8 +46,11 @@ export class MarshallerProvider {
     this.marshallersByJavaType.set(JavaType.BIG_INTEGER, new JavaBigIntegerMarshaller());
 
     this.marshallersByJavaType.set(JavaType.ARRAY_LIST, new JavaArrayListMarshaller());
+    this.marshallersByJavaType.set(JavaType.UNMODIFIABLE_COLLECTION, new JavaHashSetMarshaller());
+    this.marshallersByJavaType.set(JavaType.UNMODIFIABLE_SET, new JavaHashSetMarshaller());
     this.marshallersByJavaType.set(JavaType.HASH_SET, new JavaHashSetMarshaller());
     this.marshallersByJavaType.set(JavaType.HASH_MAP, new JavaHashMapMarshaller());
+    this.marshallersByJavaType.set(JavaType.UNMODIFIABLE_MAP, new JavaHashMapMarshaller());
 
     this.marshallersByJavaType.set(JavaType.OPTIONAL, new JavaOptionalMarshaller());
 

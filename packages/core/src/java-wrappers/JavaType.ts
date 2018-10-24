@@ -11,6 +11,9 @@ export enum JavaType {
   BIG_DECIMAL = "java.math.BigDecimal",
   BIG_INTEGER = "java.math.BigInteger",
   ARRAY_LIST = "java.util.ArrayList",
+  UNMODIFIABLE_COLLECTION = "java.util.Collections$UnmodifiableCollection",
+  UNMODIFIABLE_SET = "java.util.Collections$UnmodifiableSet",
+  UNMODIFIABLE_MAP = "java.util.Collections$UnmodifiableMap",
   HASH_SET = "java.util.HashSet",
   HASH_MAP = "java.util.HashMap",
   OPTIONAL = "java.util.Optional"

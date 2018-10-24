@@ -12,35 +12,18 @@ export * from "./Part";
 export * from "./Perspective";
 export * from "./Screen";
 
-const jsBridge = new JsBridge();
-
 export const bridge =
-  (window as any).appformerGwtBridge ||
-  jsBridge.init(() => {
+  ((window as any).appformerGwtBridge as JsBridge) ||
+  new JsBridge().init(document.body.children[0] as HTMLElement, () => {
     console.info("Finished mounting AppFormer JS");
   });
 
-export const render =
-  bridge.render ||
-  ((component: RootElement, container: HTMLElement, callback = (): void => undefined) => {
-    // FIXME: Duplicated!! Move it to AppFormerJsBridge
-
-    if (component instanceof HTMLElement) {
-      container.innerHTML = "";
-      container.appendChild(component);
-      callback();
-    } else if (typeof component === "string") {
-      container.innerHTML = component;
-      callback();
-    } else {
-      ReactDOM.render(component as any, container, callback);
-    }
-  });
+export const render = bridge.render;
 
 export const translate = bridge.translate;
 
-export function goTo(place: string) {
-  return bridge.goTo(place);
+export function goTo(af_componentId: string) {
+  return bridge.goTo(af_componentId);
 }
 
 export function rpc(path: string, ...args: any[]): Promise<string> {
@@ -58,11 +41,11 @@ export function register(potentialComponents: any) {
 
       if (Component.prototype instanceof Screen) {
         const component = new Component();
-        console.info(`Registering screen [${Component.prototype.constructor.name}]`);
+        console.info(`Registering screen [${component.af_componentId}]`);
         bridge.registerScreen(component);
       } else if (Component.prototype instanceof Perspective) {
         const component = new Component();
-        console.info(`Registering perspective [${Component.prototype.constructor.name}]`);
+        console.info(`Registering perspective [${component.af_componentId}]`);
         bridge.registerPerspective(component);
       } else {
         console.info(`Registering other kind of component [${Component.prototype.constructor.name}]`);

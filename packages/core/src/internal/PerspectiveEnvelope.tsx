@@ -1,7 +1,6 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { DefaultComponentContainerId } from "../api/Components";
-import { RootContextValue } from "./Root";
 import { ScreenEnvelope } from "./ScreenEnvelope";
 import { JsBridge } from "./JsBridge";
 import { Perspective } from "../api/Perspective";
@@ -9,8 +8,8 @@ import { Screen } from "../api/Screen";
 
 interface Props {
   perspective: Perspective;
-  root: RootContextValue;
-  exposing: (self: () => PerspectiveEnvelope) => void;
+  openScreens: Screen[];
+  exposing: (ref: () => PerspectiveEnvelope) => void;
   bridge: JsBridge;
 }
 
@@ -30,19 +29,22 @@ export class PerspectiveEnvelope extends React.Component<Props, State> {
 
   public componentDidMount(): void {
     if (!this.props.perspective.af_isReact) {
+      console.info(`...Rendering ${this.props.perspective.af_componentId}...`);
       this.props.bridge.render(this.props.perspective.af_perspectiveRoot(), this.ref);
+      console.info(`Rendered ${this.props.perspective.af_componentId}`);
     }
+
     this.refreshPortaledScreens();
   }
 
   public componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any): void {
-    if (this.props.root.openScreens !== prevProps.root.openScreens) {
+    if (this.props.openScreens !== prevProps.openScreens) {
       this.refreshPortaledScreens();
     }
   }
 
   private refreshPortaledScreens() {
-    this.setState({ portaledScreens: this.props.root.openScreens });
+    this.setState({ portaledScreens: this.props.openScreens });
   }
 
   private makePortal(screen: Screen) {
@@ -61,6 +63,12 @@ export class PerspectiveEnvelope extends React.Component<Props, State> {
     );
   }
 
+  public findContainerFor(af_componentId: string) {
+    return (
+      searchTree(this.ref, Screen.containerId(af_componentId)) || searchTree(this.ref, DefaultComponentContainerId)
+    );
+  }
+
   public render() {
     return (
       <div ref={r => (this.ref = r!)} className={"af-perspective-container"}>
@@ -73,14 +81,9 @@ export class PerspectiveEnvelope extends React.Component<Props, State> {
       </div>
     );
   }
-
-  public findContainerFor(af_componentId: string) {
-    return (
-      searchTree(this.ref, Screen.containerId(af_componentId)) || searchTree(this.ref, DefaultComponentContainerId)
-    );
-  }
 }
 
+//Do not traverse inside a container divs
 function searchTree(root: HTMLElement, id: string): HTMLElement | undefined {
   let node: any;
 
