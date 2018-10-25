@@ -53,16 +53,17 @@ export class AppFormer extends Component {
     }
   }
 
-  public goTo(af_componentId: string) {
+  public openPerspective(af_componentId: string) {
     this.appformerRoot.setState({ perspective: af_componentId });
   }
 
-  public open(af_componentId: string) {
+  public goTo(af_componentId: string) {
     const component = this.components.get(af_componentId);
     if (component) {
-      this.core.register(component);
       if (component.type === "perspective") {
-        this.goTo(component.af_componentId);
+        this.openPerspective(component.af_componentId);
+      } else if (component.type === "screen-envelope") {
+        this.core.register(component);
       }
     }
   }

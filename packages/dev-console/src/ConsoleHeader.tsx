@@ -33,7 +33,7 @@ export class ConsoleHeader extends Screen {
   private toggle(c: Component, core: CoreRootContextValue, appformer: AppFormerContextValue) {
     return this.isOpen(c, core, appformer)
       ? appformer.api!.close(c.af_componentId)
-      : appformer.api!.open(c.af_componentId);
+      : appformer.api!.goTo(c.af_componentId);
   }
 
   public af_componentRoot(): Element {
@@ -55,11 +55,7 @@ export class ConsoleHeader extends Screen {
                 <>
                   {Array.from(appformer.api!.components.values())
                     .filter(c => c.type !== "screen-contents")
-                    .map(c => this.ToggleButton({ c: c, core: core, appformer: appformer }))}
-
-                  <h1 style={{ float: "right" }} color={"red"}>
-                    {appformer.perspective}
-                  </h1>
+                    .map(c => this.ToggleButton({ c, core, appformer }))}
                 </>
               )}
             </CoreRootContext.Consumer>

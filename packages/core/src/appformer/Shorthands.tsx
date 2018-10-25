@@ -4,7 +4,7 @@ import { AppFormerContext } from "./AppFormerRoot";
 
 export const Link = (props: { to: string; children: any }) => (
   <AppFormerContext.Consumer>
-    {appformer => <span onClick={() => appformer.api!.open(props.to)}>{props.children}</span>}
+    {appformer => <span onClick={() => appformer.api!.goTo(props.to)}>{props.children}</span>}
   </AppFormerContext.Consumer>
 );
 
