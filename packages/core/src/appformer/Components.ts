@@ -12,28 +12,21 @@ export interface Service {
 
 export abstract class Perspective extends Component {
   public af_isDefaultPerspective: boolean;
-
-  protected constructor() {
-    super();
-    this.type = "perspective";
-  }
+  public type = "perspective";
 }
 
 export abstract class Screen extends Component {
   public af_componentTitle?: string;
   public af_componentService: Service = {};
   public af_subscriptions: Subscriptions = {}; // FIXME: Maybe this one should be a method?
-
-  constructor() {
-    super();
-    this.type = "screen";
-  }
+  public type = "screen";
 
   public af_onStartup(): void {
     // FIXME: When to call?
   }
 
   public af_onOpen(): void {
+      console.info(`af: OPENED: ${this.af_componentId}`);
     // TODO
   }
 
@@ -50,6 +43,7 @@ export abstract class Screen extends Component {
   }
 
   public af_onClose(): void {
+      console.info(`af: CLOSED: ${this.af_componentId}`);
     // TODO
   }
 

@@ -23,11 +23,11 @@ export class Core {
 
   public render(component: Element, container: HTMLElement, callback = (): void => undefined) {
     if (component instanceof HTMLElement) {
-      container.innerHTML = "";
+      container.innerHTML = ""; //FIXME: Doesn't work well on IE.
       container.appendChild(component);
       callback();
     } else if (typeof component === "string") {
-      container.innerHTML = component;
+      container.innerHTML = component; //FIXME: Maybe create a Text node and append it?
       callback();
     }
   }

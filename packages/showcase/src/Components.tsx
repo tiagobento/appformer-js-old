@@ -88,7 +88,6 @@ export class PureDomElementScreen extends Screen {
     button.onclick = e => {
       const container = document.createElement("div");
       container.setAttribute("af-js-component", "A-react-screen");
-      container.id = new Date().getTime() + "";
       div.appendChild(container);
     };
 

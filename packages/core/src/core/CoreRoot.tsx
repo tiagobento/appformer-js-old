@@ -9,8 +9,8 @@ interface Props {
   core: Core;
 }
 
-class State {
-  public components: Component[];
+interface State {
+  components: Component[];
 }
 
 export interface ComponentMap {
@@ -33,18 +33,24 @@ export class CoreRoot extends React.Component<Props, State> {
 
   public register(component: Component) {
     this.setState(prevState => {
+      //TODO: Optimize this search
+      if (prevState.components.filter(c => c.af_componentId === component.af_componentId).length > 0) {
+        return prevState;
+      }
+
       return { components: [...prevState.components, component] };
     });
   }
 
   public deregister(af_componentId: string) {
     this.setState(prevState => {
+      //TODO: Optimize this search
       return { components: prevState.components.filter(c => c.af_componentId !== af_componentId) };
     });
   }
 
   private buildContext() {
-    const merge = (map: any, component: any) => {
+    const merge = (map: ComponentMap, component: Component) => {
       map[component.af_componentId] = component;
       return map;
     };

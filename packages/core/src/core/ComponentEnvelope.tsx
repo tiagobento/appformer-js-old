@@ -10,8 +10,15 @@ interface Props {
   core: Core;
 }
 
+enum Ready {
+  NOPE,
+  ALMOST,
+  YEP
+}
+
 interface State {
   portaledComponents: Component[];
+  ready: Ready;
 }
 
 export class ComponentEnvelope extends React.Component<Props, State> {
@@ -23,7 +30,7 @@ export class ComponentEnvelope extends React.Component<Props, State> {
 
   constructor(props: Props) {
     super(props);
-    this.state = { portaledComponents: [] };
+    this.state = { portaledComponents: [], ready: Ready.NOPE };
   }
 
   public componentDidMount(): void {
@@ -34,7 +41,13 @@ export class ComponentEnvelope extends React.Component<Props, State> {
     console.info(`Mounted ${this.props.component.af_componentId}`);
   }
 
-  public updateRef(newRef: HTMLElement | null) {
+  public updateReactRef(newRef: HTMLElement | null) {
+    if (newRef && newRef.parentElement) {
+      this.ref = newRef.parentElement;
+    }
+  }
+
+  public updateNonReactRef(newRef: HTMLElement | null) {
     if (newRef) {
       this.ref = newRef;
       this.updateMutationObserver();
@@ -47,18 +60,15 @@ export class ComponentEnvelope extends React.Component<Props, State> {
     }
 
     this.mutationObserver = new MutationObserver(mutations => {
-      const containers = this.findContainers(
-        ([] as Node[])
-          .concat(...mutations.map(m => Array.from(m.addedNodes)))
-          .filter(node => node.nodeName === "DIV")
-          .map(node => node as HTMLElement)
-          .filter(elem => elem.hasAttribute(ComponentEnvelope.AfComponentAttr))
-          .map(elem => elem.getAttribute(ComponentEnvelope.AfComponentAttr)!)
-      );
+      const af_componentIds = flatten(mutations.map(m => Array.from(m.addedNodes)))
+        .filter(node => node.nodeName === "DIV")
+        .map(node => node as HTMLElement)
+        .filter(elem => elem.hasAttribute(ComponentEnvelope.AfComponentAttr))
+        .map(elem => elem.getAttribute(ComponentEnvelope.AfComponentAttr)!);
 
-      const addedNodes = ([] as HTMLElement[])
-        .concat(...containers)
-        .filter(container => !container.hasAttribute(ComponentEnvelope.AfOpenComponentAttr));
+      const addedNodes = this.findContainers(af_componentIds).filter(
+        c => !c.hasAttribute(ComponentEnvelope.AfOpenComponentAttr)
+      );
 
       if (addedNodes.length > 0) {
         console.info("-> Refresh was triggered by the Mutation Observer");
@@ -73,6 +83,9 @@ export class ComponentEnvelope extends React.Component<Props, State> {
   }
 
   public componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any): void {
+    if (this.state.ready === Ready.ALMOST) {
+      this.props.component.core_onReady();
+    }
     if (this.props !== prevProps) {
       this.refreshPortaledComponents();
     }
@@ -83,11 +96,13 @@ export class ComponentEnvelope extends React.Component<Props, State> {
       this.mutationObserver!.disconnect();
     }
 
-    console.info(`Unmounting ${this.props.component.af_componentId}`);
+    console.info(`Unmounted ${this.props.component.af_componentId}`);
+    this.props.component.core_onVanished();
   }
 
   private refreshPortaledComponents() {
-    this.setState({
+    this.setState(prevState => ({
+      ready: prevState.ready === Ready.NOPE ? Ready.ALMOST : Ready.YEP,
       portaledComponents: Array.from(
         new Set(
           this.findContainers(Object.keys(this.props.rootContext.components)).map(
@@ -95,44 +110,53 @@ export class ComponentEnvelope extends React.Component<Props, State> {
           )
         )
       )
-    });
+    }));
   }
 
   private makePortal(component: Component): JSX.Element {
     const container = this.findContainers([component.af_componentId])[0];
     container.setAttribute(ComponentEnvelope.AfOpenComponentAttr, component.af_componentId);
-    return ReactDOM.createPortal(
-      <ComponentEnvelope rootContext={this.props.rootContext} core={this.props.core} component={component} />,
-      container,
-      component.af_componentId
+    const envelope = (
+      <ComponentEnvelope rootContext={this.props.rootContext} core={this.props.core} component={component} />
     );
+
+    //FIXME: What about multiple instances of the same component?
+    return ReactDOM.createPortal(envelope, container, component.af_componentId);
   }
 
   public findContainers(af_componentIds: string[]) {
-    return searchTree(
-      this.ref,
-      elem => elem.hasAttribute(ComponentEnvelope.AfComponentAttr),
-      elem => af_componentIds.indexOf(elem.getAttribute(ComponentEnvelope.AfComponentAttr)!) !== -1
-    );
+    return searchTree({
+      root: this.ref,
+      stopWhen: elem => elem.hasAttribute(ComponentEnvelope.AfComponentAttr),
+      accept: elem => af_componentIds.indexOf(elem.getAttribute(ComponentEnvelope.AfComponentAttr)!) !== -1
+    });
   }
 
   public render() {
     const portals = this.state.portaledComponents.map(component => this.makePortal(component));
-
-    return (
-      <div ref={ref => this.updateRef(ref)} className={"af-js-component"}>
-        {this.props.component.isReact && this.props.component.af_componentRoot(portals)}
+    return this.props.component.isReact ? (
+      <>
+        <div ref={ref => this.updateReactRef(ref)} />
+        {this.props.component.af_componentRoot(portals)}
         {!this.props.component.hasContext && portals}
-      </div>
+      </>
+    ) : (
+      <>
+        <div ref={ref => this.updateNonReactRef(ref)} />
+        {portals}
+      </>
     );
   }
 }
 
-function searchTree(
-  root: HTMLElement,
-  stopWhen: (elem: HTMLElement) => boolean,
-  accept: (elem: HTMLElement) => boolean
-): HTMLElement[] {
+const flatten = <T extends any>(arr: T[][]) => ([] as T[]).concat(...arr);
+
+function searchTree(parameters: {
+  root: HTMLElement;
+  stopWhen: (elem: HTMLElement) => boolean;
+  accept: (elem: HTMLElement) => boolean;
+}) {
+  const { root, stopWhen, accept } = parameters;
   let node: any;
 
   const stack = [root];
@@ -142,7 +166,7 @@ function searchTree(
 
   while (stack.length > 0) {
     node = stack.pop()!;
-    if (node instanceof HTMLElement && stopWhen(node)) {
+    if (node !== root && node instanceof HTMLElement && stopWhen(node)) {
       if (accept(node)) {
         ret.add(node);
       }
