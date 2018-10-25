@@ -1,11 +1,9 @@
 import * as React from "react";
-import {AppFormerRoot} from "./AppFormerRoot";
-import {Perspective, Screen} from "./Components";
-import {Element, Component, Core} from "../core";
-import {ScreenEnvelope} from "./ScreenEnvelope";
-import {ScreenContents} from "./ScreenContents";
-
-
+import { AppFormerRoot } from "./AppFormerRoot";
+import { Perspective, Screen } from "./Components";
+import { Element, Component, Core } from "../core";
+import { ScreenEnvelope } from "./ScreenEnvelope";
+import { ScreenContents } from "./ScreenContents";
 
 export class AppFormer extends Component {
   private appformerRoot: AppFormerRoot;
@@ -45,7 +43,14 @@ export class AppFormer extends Component {
   }
 
   public close(af_componentId: string) {
-    this.core.deregister(af_componentId);
+    const component = this.components.get(af_componentId);
+    if (component) {
+      if (component.type === "screen-envelope") {
+        if ((component as ScreenEnvelope).screen.af_onMayClose()) {
+          this.core.deregister(af_componentId);
+        }
+      }
+    }
   }
 
   public goTo(af_componentId: string) {
@@ -66,8 +71,8 @@ export class AppFormer extends Component {
     return `Translated ${tkey} with ${args}`;
   }
 
-  public render(component: Element, container: HTMLElement, callback = (): void => undefined) {
-    this.core.render(component, container, callback);
+  public render(element: Element, container: HTMLElement, callback = (): void => undefined) {
+    this.core.render(element, container, callback);
   }
 
   public fireEvent(obj: any) {

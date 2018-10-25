@@ -21,13 +21,13 @@ export class Core {
     this.coreRoot.deregister(af_componentId);
   }
 
-  public render(component: Element, container: HTMLElement, callback = (): void => undefined) {
-    if (component instanceof HTMLElement) {
+  public render(element: Element, container: HTMLElement, callback = (): void => undefined) {
+    if (element instanceof HTMLElement) {
       container.innerHTML = ""; //FIXME: Doesn't work well on IE.
-      container.appendChild(component);
+      container.appendChild(element);
       callback();
-    } else if (typeof component === "string") {
-      container.innerHTML = component; //FIXME: Maybe create a Text node and append it?
+    } else if (typeof element === "string") {
+      container.innerHTML = element; //FIXME: Maybe create a Text node and append it?
       callback();
     }
   }

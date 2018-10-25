@@ -54,8 +54,8 @@ export function translate(key: string, args: string[]) {
   singleton!.translate(key, args);
 }
 
-export function render(component: Element, container: HTMLElement, callback = (): void => undefined) {
-  singleton!.render(component, container, callback);
+export function render(element: Element, container: HTMLElement, callback = (): void => undefined) {
+  singleton!.render(element, container, callback);
 }
 
 export function fireEvent(obj: any) {

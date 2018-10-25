@@ -10,42 +10,11 @@ export class ShowcasePerspective extends Perspective {
     this.af_isDefaultPerspective = true;
   }
 
-  private NiceBox(props: { af_componentId: string }) {
+  private NiceBox(props: { children: any }) {
     return (
-      <div style={{ minWidth: "300px", margin: "5px", minHeight: "100%" }}>
-        <CoreRootContext.Consumer>
-          {core =>
-            Object.keys(core.components).indexOf(props.af_componentId) !== -1 && (
-              <div key={props.af_componentId} className={"af-screen-container"}>
-                <div className={"title"}>
-                  <>{this.TitleBar({ af_componentId: props.af_componentId })}</>
-                </div>
-                <div af-js-component={props.af_componentId} />
-              </div>
-            )
-          }
-        </CoreRootContext.Consumer>
-      </div>
-    );
-  }
-
-  private TitleBar(props: { af_componentId: string }) {
-    return (
-      <AppFormerContext.Consumer>
-        {appformer => (
-          <span>
-            <span> Title goes here</span>
-            &nbsp;&nbsp;
-            <a
-              href="#"
-              style={{ lineHeight: "1.6", float: "right" }}
-              onClick={() => appformer.api!.close(props.af_componentId)}
-            >
-              Close
-            </a>
-          </span>
-        )}
-      </AppFormerContext.Consumer>
+      <>
+        <div style={{ minWidth: "300px", margin: "5px", minHeight: "100%" }}>{props.children}</div>
+      </>
     );
   }
 
@@ -56,10 +25,18 @@ export class ShowcasePerspective extends Perspective {
           <div af-js-component={"console-header"} />
         </header>
 
-        {this.NiceBox({ af_componentId: "A-react-screen" })}
-        {this.NiceBox({ af_componentId: "dom-elements-screen" })}
-        {this.NiceBox({ af_componentId: "string-template-screen" })}
-        {this.NiceBox({ af_componentId: "silly-react-screen" })}
+        <this.NiceBox>
+          <div af-js-component={"A-react-screen"} />
+        </this.NiceBox>
+        <this.NiceBox>
+          <div af-js-component={"dom-elements-screen"} />
+        </this.NiceBox>
+        <this.NiceBox>
+          <div af-js-component={"string-template-screen"} />
+        </this.NiceBox>
+        <this.NiceBox>
+          <div af-js-component={"silly-react-screen"} />
+        </this.NiceBox>
       </div>
     );
   }
