@@ -6,7 +6,7 @@ export abstract class Component {
   public hasContext: boolean = false;
   public readonly type: string;
 
-  public abstract af_componentRoot(children?: any): Element;
+  public abstract core_componentRoot(children?: any): Element;
 
   public core_onReady() {
     console.info(`core: ${this.af_componentId} is ready.`);

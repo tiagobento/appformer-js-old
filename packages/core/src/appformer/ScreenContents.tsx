@@ -22,7 +22,7 @@ export class ScreenContents extends Component {
     this.screen.af_onClose();
   }
 
-  public af_componentRoot(children?: any): Element {
+  public core_componentRoot(children?: any): Element {
     return this.screen.af_componentRoot(children);
   }
 }

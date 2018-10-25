@@ -35,7 +35,7 @@ export class ComponentEnvelope extends React.Component<Props, State> {
 
   public componentDidMount(): void {
     if (!this.props.component.isReact) {
-      this.props.core.render(this.props.component.af_componentRoot(), this.ref);
+      this.props.core.render(this.props.component.core_componentRoot(), this.ref);
     }
     this.refreshPortaledComponents();
     console.info(`Mounted ${this.props.component.af_componentId}`);
@@ -44,6 +44,7 @@ export class ComponentEnvelope extends React.Component<Props, State> {
   public updateReactRef(newRef: HTMLElement | null) {
     if (newRef && newRef.parentElement) {
       this.ref = newRef.parentElement;
+      this.updateMutationObserver();
     }
   }
 
@@ -83,11 +84,10 @@ export class ComponentEnvelope extends React.Component<Props, State> {
   }
 
   public componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any): void {
-    if (this.state.ready === Ready.ALMOST) {
-      this.props.component.core_onReady();
-    }
     if (this.props !== prevProps) {
       this.refreshPortaledComponents();
+    } else if (this.state.ready === Ready.ALMOST) {
+      this.props.component.core_onReady();
     }
   }
 
@@ -137,8 +137,8 @@ export class ComponentEnvelope extends React.Component<Props, State> {
     return this.props.component.isReact ? (
       <>
         <div ref={ref => this.updateReactRef(ref)} />
-        {this.props.component.af_componentRoot(portals)}
         {!this.props.component.hasContext && portals}
+        {this.props.component.core_componentRoot(portals)}
       </>
     ) : (
       <>

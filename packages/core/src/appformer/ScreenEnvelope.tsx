@@ -13,7 +13,7 @@ export class ScreenEnvelope extends Component {
     this.screen = screen;
   }
 
-  public af_componentRoot(): Element {
+  public core_componentRoot(): Element {
     return <ScreenEnvelopeReactComponent screen={this.screen} />;
   }
 }

@@ -1,8 +1,6 @@
 import * as React from "react";
 import { DemoReactComponent } from "./DemoReactComponent";
-import { JavaInteger, Screen } from "appformer-js";
-
-export class InoffensiveNonScreenClass {}
+import { Screen } from "appformer-js";
 
 export class ReactComponentScreen extends Screen {
   public onFoo: (e: any) => void;
@@ -14,8 +12,6 @@ export class ReactComponentScreen extends Screen {
     this.af_componentTitle = "React Component";
     this.af_subscriptions = {};
     this.af_componentService = {};
-
-    console.info("Testing builtin type: " + new JavaInteger("42").get());
   }
 
   public af_onStartup() {

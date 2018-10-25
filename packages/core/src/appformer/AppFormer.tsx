@@ -78,7 +78,7 @@ export class AppFormer extends Component {
     Promise.reject("Sorry, RPC mocks are not available yet :(");
   }
 
-  public af_componentRoot(portals?: any): Element {
+  public core_componentRoot(portals?: any): Element {
     return <AppFormerRoot appformer={this} exposing={ref => (this.appformerRoot = ref())} portals={portals} />;
   }
 }
