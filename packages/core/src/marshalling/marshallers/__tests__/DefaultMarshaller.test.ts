@@ -19,7 +19,7 @@ import { DefaultMarshaller } from "../DefaultMarshaller";
 import { MarshallingContext } from "../../MarshallingContext";
 import { ErraiObjectConstants } from "../../model/ErraiObjectConstants";
 import { MarshallerProvider } from "../../MarshallerProvider";
-import { Portable } from "../../../internal";
+import { Portable } from "../../Portable";
 import { NumValBasedErraiObject } from "../../model/NumValBasedErraiObject";
 import { ValueBasedErraiObject } from "../../model/ValueBasedErraiObject";
 import { JavaType } from "../../../java-wrappers/JavaType";
