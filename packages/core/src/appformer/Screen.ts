@@ -1,15 +1,15 @@
-import { RootElement, Service, Subscriptions } from "./Components";
-import { Perspective } from "./Perspective";
+import { Service, Subscriptions } from "./Components";
+import { Component, Element } from "../core";
 
-export abstract class Screen {
-  private readonly _af_componentId: string;
-  private _af_isReact: boolean = false;
+export abstract class Screen extends Component {
+  public af_componentId: string;
   private _af_componentTitle?: string = undefined;
   private _af_componentService: Service = {};
   private _af_subscriptions: Subscriptions = {}; // FIXME: Maybe this one should be a method?
 
   protected constructor(componentId: string) {
-    this._af_componentId = componentId;
+    super({ type: "screen", core_componentId: componentId });
+    this.af_componentId = componentId;
   }
 
   public af_onStartup(): void {
@@ -17,7 +17,7 @@ export abstract class Screen {
   }
 
   public af_onOpen(): void {
-    // TODO
+    console.info(`af: OPENED: ${this.core_componentId}`);
   }
 
   public af_onFocus(): void {
@@ -33,30 +33,18 @@ export abstract class Screen {
   }
 
   public af_onClose(): void {
-    // TODO
+    console.info(`af: CLOSED: ${this.core_componentId}`);
   }
 
   public af_onShutdown(): void {
     // FIXME: When to call?
   }
 
-  public abstract af_componentRoot(): RootElement;
-
-  public static containerId(af_componentId: string) {
-    return `af-js-component--${af_componentId}`;
+  public core_componentRoot(children?: any): Element {
+    return this.af_componentRoot(children);
   }
 
-  get af_componentId(): string {
-    return this._af_componentId;
-  }
-
-  get af_isReact(): boolean {
-    return this._af_isReact;
-  }
-
-  set af_isReact(value: boolean) {
-    this._af_isReact = value;
-  }
+  public abstract af_componentRoot(children?: any): Element;
 
   get af_componentTitle(): string | undefined {
     return this._af_componentTitle;

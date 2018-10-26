@@ -138,7 +138,7 @@ public class RpcCallerTsMethod {
                 ":" +
                 executableElement.getParameters().stream()
                         .map(Element::asType)
-                        .map(s -> Optional.ofNullable(types.asElement(s)))
+                        .map(type -> Optional.ofNullable(types.erasure(type)))
                         .filter(Optional::isPresent).map(Optional::get)
                         .map(element -> element.toString() + ":") //FIXME: This is probably not 100% right
                         .collect(joining("")) +

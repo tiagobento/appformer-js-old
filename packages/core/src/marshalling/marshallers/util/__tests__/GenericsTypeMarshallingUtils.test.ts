@@ -27,7 +27,7 @@ import { JavaLongMarshaller } from "../../JavaLongMarshaller";
 import { JavaStringMarshaller } from "../../JavaStringMarshaller";
 import { JavaDateMarshaller } from "../../JavaDateMarshaller";
 import { DefaultMarshaller } from "../../DefaultMarshaller";
-import { Portable } from "../../../../internal";
+import { Portable } from "../../../Portable";
 import { JavaOptionalMarshaller } from "../../JavaOptionalMarshaller";
 import { NumValBasedErraiObject } from "../../../model/NumValBasedErraiObject";
 import { JavaType } from "../../../../java-wrappers/JavaType";

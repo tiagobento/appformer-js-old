@@ -1,7 +1,7 @@
 import { JavaCollection } from "../../java-wrappers/JavaCollection";
 import { ErraiObject } from "../model/ErraiObject";
 import { MarshallingContext } from "../MarshallingContext";
-import { Portable } from "../../internal/model/Portable";
+import { Portable } from "../Portable";
 import { NullableMarshaller } from "./NullableMarshaller";
 import { GenericsTypeMarshallingUtils } from "./util/GenericsTypeMarshallingUtils";
 import { UnmarshallingContext } from "../UnmarshallingContext";

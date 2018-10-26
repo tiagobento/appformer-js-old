@@ -20,7 +20,7 @@ import { MarshallingContext } from "../../MarshallingContext";
 import { ErraiObjectConstants } from "../../model/ErraiObjectConstants";
 import { MarshallerProvider } from "../../MarshallerProvider";
 import { JavaBigIntegerMarshaller } from "../JavaBigIntegerMarshaller";
-import { Portable } from "../../../internal";
+import { Portable } from "../../Portable";
 import { NumValBasedErraiObject } from "../../model/NumValBasedErraiObject";
 import { NumberUtils } from "../../../util/NumberUtils";
 import { UnmarshallingContext } from "../../UnmarshallingContext";

@@ -1,8 +1,13 @@
-export * from "./api";
+import {initSingleton} from "./appformer";
+
+
+
+export * from "./appformer";
 export * from "./marshalling";
-export * from "./internal";
+export * from "./core";
+export * from "./appformer";
 export * from "./java-wrappers";
-export * from "./react-components";
 
 // Exposes this module as a global variable
 (window as any).AppFormer = this;
+initSingleton();

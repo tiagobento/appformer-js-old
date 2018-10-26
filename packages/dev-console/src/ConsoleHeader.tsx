@@ -1,53 +1,80 @@
 import * as React from "react";
-import * as AppFormer from "appformer-js";
+import {
+  Screen,
+  Element,
+  Component,
+  CoreRootContextValue,
+  AppFormerContext,
+  CoreRootContext,
+  AppFormerContextValue,
+} from "appformer-js";
 
-export class ConsoleHeader extends AppFormer.Screen {
+export class ConsoleHeader extends Screen {
   constructor() {
     super("console-header");
     this.af_isReact = true;
     this.af_componentTitle = undefined;
   }
 
-  private isOpen(screen: AppFormer.Screen, rootContext: AppFormer.RootContextValue) {
-      return rootContext.openScreens.indexOf(screen) !== -1;
+  public af_onMayClose(): boolean {
+    return false;
   }
 
-  public af_componentRoot(): AppFormer.RootElement {
+  private isOpen(component: Component, core: CoreRootContextValue, appformer: AppFormerContextValue): any {
+    if (component.type === "perspective") {
+      return appformer.perspective === component.core_componentId;
+    } else {
+      return Object.keys(core.components).indexOf(component.core_componentId) !== -1;
+    }
+  }
+
+  private toggle(c: Component, core: CoreRootContextValue, appformer: AppFormerContextValue) {
+    return this.isOpen(c, core, appformer)
+      ? appformer.api!.close(c.core_componentId)
+      : appformer.api!.goTo(c.core_componentId);
+  }
+
+  public af_componentRoot(): Element {
     return (
-      <AppFormer.RootContext.Consumer>
-        {rootContext => (
-          <div
-            style={{
-              height: "50px",
-              backgroundColor: "#333",
-              display: "flex",
-              alignItems: "center",
-              whiteSpace: "nowrap",
-              padding: "0 10px 0 10px"
-            }}
-          >
-            <div>
-              <span>
-                {rootContext.perspectives.map(p => (
-                  <AppFormer.Link to={p.af_componentId} key={p.af_componentId}>
-                    <button style={{ opacity: p === rootContext.currentPerspective ? 1 : 0.5 }}>{p.af_componentId}</button>
-                  </AppFormer.Link>
-                ))}
-              </span>
+      <div
+        style={{
+          height: "50px",
+          backgroundColor: "#333",
+          display: "flex",
+          alignItems: "center",
+          whiteSpace: "nowrap",
+          padding: "0 10px 0 10px"
+        }}
+      >
+        <AppFormerContext.Consumer>
+          {appformer => (
+            <CoreRootContext.Consumer>
+              {core => (
+                <>
+                  {Array.from(appformer.api!.components.values())
+                    .filter(c => c.type !== "screen-contents")
+                    .map(c => this.ToggleButton({ c, core, appformer }))}
+                </>
+              )}
+            </CoreRootContext.Consumer>
+          )}
+        </AppFormerContext.Consumer>
+      </div>
+    );
+  }
 
-              <span style={{ color: "white" }}>&nbsp;||&nbsp;</span>
-
-              <span>
-                {rootContext.screens.map(s => (
-                  <AppFormer.Link to={s.af_componentId} key={s.af_componentId}>
-                    <button style={{ opacity: this.isOpen(s, rootContext) ? 1 : 0.5 }}>{s.af_componentId}</button>
-                  </AppFormer.Link>
-                ))}
-              </span>
-            </div>
-          </div>
-        )}
-      </AppFormer.RootContext.Consumer>
+  private ToggleButton(props: { c: Component; core: CoreRootContextValue; appformer: AppFormerContextValue }) {
+    return (
+      <button
+        style={{
+          fontSize: "0.7em",
+          opacity: this.isOpen(props.c, props.core, props.appformer) ? 1 : 0.5
+        }}
+        onClick={() => this.toggle(props.c, props.core, props.appformer)}
+        key={props.c.core_componentId}
+      >
+        {props.c.core_componentId}
+      </button>
     );
   }
 }

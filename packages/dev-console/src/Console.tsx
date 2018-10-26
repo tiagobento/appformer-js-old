@@ -1,6 +1,5 @@
 import * as React from "react";
-import * as AppFormer from "appformer-js";
-import { DefaultComponentContainer, ComponentContainer } from "appformer-js";
+import { DefaultComponentContainer } from "appformer-js";
 import { ConsoleDock } from "./ConsoleDock";
 import { EventsSimulationConsole } from "./EventsSimulationConsole";
 
@@ -23,19 +22,20 @@ export class Console extends React.Component<{}, State> {
   }
 
   public componentDidMount(): void {
-    setTimeout(() => AppFormer.goTo("A-react-screen"), 0);
+    // setTimeout(() => AppFormer.goTo("A-react-screen"), 0);
   }
 
   public render() {
     return (
       <div className={"wrapper"}>
         <header>
-          <ComponentContainer af_componentId={"console-header"} />
+          <div af-js-component={"console-header"} />
         </header>
 
         <div className={"main"}>
           <DefaultComponentContainer />
-          <div id={"af-js-component--dom-elements-screen"} />
+          <div af-js-component={"dom-elements-screen"} />
+          <div af-js-component={"silly-react-screen"} />
         </div>
 
         <aside className="aside">

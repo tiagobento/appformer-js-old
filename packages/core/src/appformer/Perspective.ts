@@ -1,12 +1,12 @@
 import { Screen } from "./Screen";
-import { Menu, RootElement, Toolbar } from "./Components";
+import { Menu, Toolbar } from "./Components";
 import { Panel, PanelType } from "./Panel";
 import { DisplayInfo } from "./DisplayInfo";
 import { Part } from "./Part";
+import { Component, Element } from "../core";
 
-export abstract class Perspective {
-  private readonly _af_componentId: string;
-  private _af_isReact: boolean = false;
+export abstract class Perspective extends Component {
+  public af_componentId: string;
   private _af_perspectiveScreens: string[] = [];
   private _af_isDefault: boolean = false;
   private _af_isTransient: boolean = true;
@@ -20,10 +20,15 @@ export abstract class Perspective {
   private _af_panels: Panel[] = [];
 
   protected constructor(componentId: string) {
-    this._af_componentId = componentId;
+    super({ type: "perspective", core_componentId: componentId });
+    this.af_componentId = componentId;
   }
 
-  public abstract af_perspectiveRoot(): RootElement;
+  public core_componentRoot(children?: any): Element {
+    return this.af_componentRoot(children);
+  }
+
+  public abstract af_componentRoot(children?: any): Element;
 
   public af_onStartup(): void {
     // TODO
@@ -39,23 +44,6 @@ export abstract class Perspective {
 
   public af_onShutdown(): void {
     // TODO
-  }
-
-  public has(screen: Screen | string) {
-    const id = typeof screen === "string" ? screen : screen.af_componentId;
-    return this.af_perspectiveScreens.indexOf(id) > -1;
-  }
-
-  get af_componentId(): string {
-    return this._af_componentId;
-  }
-
-  get af_isReact(): boolean {
-    return this._af_isReact;
-  }
-
-  set af_isReact(value: boolean) {
-    this._af_isReact = value;
   }
 
   get af_perspectiveScreens(): string[] {

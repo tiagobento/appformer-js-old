@@ -1,5 +1,5 @@
 import { UnmarshallingContext } from "../UnmarshallingContext";
-import { Portable } from "../../internal";
+import { Portable } from "../Portable";
 import { ErraiObjectConstants } from "../model/ErraiObjectConstants";
 
 describe("cacheObject", () => {

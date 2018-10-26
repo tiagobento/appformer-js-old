@@ -1,8 +1,6 @@
 import * as React from "react";
 import { DemoReactComponent } from "./DemoReactComponent";
-import { JavaInteger, Screen } from "appformer-js";
-
-export class InoffensiveNonScreenClass {}
+import { Screen } from "appformer-js";
 
 export class ReactComponentScreen extends Screen {
   public onFoo: (e: any) => void;
@@ -13,8 +11,6 @@ export class ReactComponentScreen extends Screen {
     this.af_componentTitle = "React Component";
     this.af_subscriptions = {};
     this.af_componentService = {};
-
-    console.info("Testing builtin type: " + new JavaInteger("42").get());
   }
 
   public af_onStartup() {
@@ -73,7 +69,6 @@ export class PureDomElementScreen extends Screen {
   public af_componentRoot() {
     const button = document.createElement("button");
     button.textContent = "This is a HTMLButtonElement";
-    button.onclick = e => console.info("HTMLButtonElement was clicked");
 
     const label = document.createElement("label");
     label.textContent = "This is also a Foo Message: ";
@@ -83,6 +78,13 @@ export class PureDomElementScreen extends Screen {
     div.appendChild(document.createElement("br"));
     div.appendChild(label);
     div.appendChild(this.span);
+
+    button.onclick = e => {
+      const container = document.createElement("div");
+      container.setAttribute("af-js-component", "A-react-screen");
+      div.appendChild(container);
+    };
+
     return div;
   }
 }
