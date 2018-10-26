@@ -22,16 +22,16 @@ export class ConsoleHeader extends Screen {
 
   private isOpen(component: Component, core: CoreRootContextValue, appformer: AppFormerContextValue): any {
     if (component.type === "perspective") {
-      return appformer.perspective === component.af_componentId;
+      return appformer.perspective === component.core_componentId;
     } else {
-      return Object.keys(core.components).indexOf(component.af_componentId) !== -1;
+      return Object.keys(core.components).indexOf(component.core_componentId) !== -1;
     }
   }
 
   private toggle(c: Component, core: CoreRootContextValue, appformer: AppFormerContextValue) {
     return this.isOpen(c, core, appformer)
-      ? appformer.api!.close(c.af_componentId)
-      : appformer.api!.goTo(c.af_componentId);
+      ? appformer.api!.close(c.core_componentId)
+      : appformer.api!.goTo(c.core_componentId);
   }
 
   public af_componentRoot(): Element {
@@ -71,9 +71,9 @@ export class ConsoleHeader extends Screen {
           opacity: this.isOpen(props.c, props.core, props.appformer) ? 1 : 0.5
         }}
         onClick={() => this.toggle(props.c, props.core, props.appformer)}
-        key={props.c.af_componentId}
+        key={props.c.core_componentId}
       >
-        {props.c.af_componentId}
+        {props.c.core_componentId}
       </button>
     );
   }

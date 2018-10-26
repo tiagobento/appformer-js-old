@@ -38,7 +38,7 @@ export class ComponentEnvelope extends React.Component<Props, State> {
       this.props.core.render(this.props.component.core_componentRoot(), this.ref);
     }
     this.refreshPortaledComponents();
-    console.info(`Mounted ${this.props.component.af_componentId}`);
+    console.info(`Mounted ${this.props.component.core_componentId}`);
   }
 
   public updateReactRef(newRef: HTMLElement | null) {
@@ -96,7 +96,7 @@ export class ComponentEnvelope extends React.Component<Props, State> {
       this.mutationObserver!.disconnect();
     }
 
-    console.info(`Unmounted ${this.props.component.af_componentId}`);
+    console.info(`Unmounted ${this.props.component.core_componentId}`);
     this.props.component.core_onVanished();
   }
 
@@ -114,14 +114,14 @@ export class ComponentEnvelope extends React.Component<Props, State> {
   }
 
   private makePortal(component: Component): JSX.Element {
-    const container = this.findContainers([component.af_componentId])[0];
-    container.setAttribute(ComponentEnvelope.AfOpenComponentAttr, component.af_componentId);
+    const container = this.findContainers([component.core_componentId])[0];
+    container.setAttribute(ComponentEnvelope.AfOpenComponentAttr, component.core_componentId);
     const envelope = (
       <ComponentEnvelope rootContext={this.props.rootContext} core={this.props.core} component={component} />
     );
 
     //FIXME: What about multiple instances of the same component?
-    return ReactDOM.createPortal(envelope, container, component.af_componentId);
+    return ReactDOM.createPortal(envelope, container, component.core_componentId);
   }
 
   public findContainers(af_componentIds: string[]) {

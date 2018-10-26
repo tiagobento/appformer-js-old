@@ -12,7 +12,7 @@ export class Core {
   }
 
   public register(component: Component) {
-    console.info(`Registering ${component.af_componentId}...`);
+    console.info(`Registering ${component.core_componentId}...`);
     this.coreRoot.register(component);
   }
 

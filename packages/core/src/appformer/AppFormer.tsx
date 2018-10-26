@@ -12,7 +12,7 @@ export class AppFormer extends Component {
   public components: Map<string, Component>;
 
   constructor() {
-    super({ type: "appformer", af_componentId: "appformer" });
+    super({ type: "appformer", core_componentId: "appformer" });
     this.af_isReact = true;
     this.af_hasContext = true;
     this.components = new Map();
@@ -28,8 +28,8 @@ export class AppFormer extends Component {
     const envelope = new ScreenEnvelope(screen);
     const contents = new ScreenContents(screen);
 
-    this.components.set(envelope.af_componentId, envelope);
-    this.components.set(contents.af_componentId, contents);
+    this.components.set(envelope.core_componentId, envelope);
+    this.components.set(contents.core_componentId, contents);
 
     this.core.register(envelope);
     this.core.register(contents);
@@ -38,7 +38,7 @@ export class AppFormer extends Component {
   }
 
   public registerPerspective(perspective: Perspective) {
-    this.components.set(perspective.af_componentId, perspective);
+    this.components.set(perspective.core_componentId, perspective);
     this.core.register(perspective);
   }
 
@@ -61,7 +61,7 @@ export class AppFormer extends Component {
     const component = this.components.get(af_componentId);
     if (component) {
       if (component.type === "perspective") {
-        this.openPerspective(component.af_componentId);
+        this.openPerspective(component.core_componentId);
       } else if (component.type === "screen-envelope") {
         this.core.register(component);
       }

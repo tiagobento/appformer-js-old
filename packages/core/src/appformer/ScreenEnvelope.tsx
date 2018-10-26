@@ -7,7 +7,7 @@ export class ScreenEnvelope extends Component {
   public readonly screen: Screen;
 
   constructor(screen: Screen) {
-    super({ type: "screen-envelope", af_componentId: screen.af_componentId });
+    super({ type: "screen-envelope", core_componentId: screen.af_componentId });
     this.af_isReact = true;
     this.screen = screen;
   }

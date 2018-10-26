@@ -34,7 +34,7 @@ export class CoreRoot extends React.Component<Props, State> {
   public register(component: Component) {
     this.setState(prevState => {
       //TODO: Optimize this search
-      if (prevState.components.filter(c => c.af_componentId === component.af_componentId).length > 0) {
+      if (prevState.components.filter(c => c.core_componentId === component.core_componentId).length > 0) {
         return prevState;
       }
 
@@ -45,13 +45,13 @@ export class CoreRoot extends React.Component<Props, State> {
   public deregister(af_componentId: string) {
     this.setState(prevState => {
       //TODO: Optimize this search
-      return { components: prevState.components.filter(c => c.af_componentId !== af_componentId) };
+      return { components: prevState.components.filter(c => c.core_componentId !== af_componentId) };
     });
   }
 
   private buildContext() {
     const merge = (map: ComponentMap, component: Component) => {
-      map[component.af_componentId] = component;
+      map[component.core_componentId] = component;
       return map;
     };
     return { components: this.state.components.reduce(merge, {} as ComponentMap) };

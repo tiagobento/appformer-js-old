@@ -6,7 +6,7 @@ export class ScreenContents extends Component {
   private readonly screen: Screen;
 
   constructor(screen: Screen) {
-    super({ type: "screen-contents", af_componentId: screen.af_componentId + "-contents" });
+    super({ type: "screen-contents", core_componentId: screen.af_componentId + "-contents" });
     this.screen = screen;
     this.af_isReact = screen.af_isReact;
     this.af_hasContext = screen.af_hasContext;

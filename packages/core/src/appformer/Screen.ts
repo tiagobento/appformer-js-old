@@ -2,13 +2,14 @@ import { Service, Subscriptions } from "./Components";
 import { Component, Element } from "../core";
 
 export abstract class Screen extends Component {
-  public readonly type = "screen";
+  public af_componentId: string;
   private _af_componentTitle?: string = undefined;
   private _af_componentService: Service = {};
   private _af_subscriptions: Subscriptions = {}; // FIXME: Maybe this one should be a method?
 
   protected constructor(componentId: string) {
-    super({ type: "screen", af_componentId: componentId });
+    super({ type: "screen", core_componentId: componentId });
+    this.af_componentId = componentId;
   }
 
   public af_onStartup(): void {
@@ -16,7 +17,7 @@ export abstract class Screen extends Component {
   }
 
   public af_onOpen(): void {
-    console.info(`af: OPENED: ${this.af_componentId}`);
+    console.info(`af: OPENED: ${this.core_componentId}`);
   }
 
   public af_onFocus(): void {
@@ -32,7 +33,7 @@ export abstract class Screen extends Component {
   }
 
   public af_onClose(): void {
-    console.info(`af: CLOSED: ${this.af_componentId}`);
+    console.info(`af: CLOSED: ${this.core_componentId}`);
   }
 
   public af_onShutdown(): void {
@@ -44,10 +45,6 @@ export abstract class Screen extends Component {
   }
 
   public abstract af_componentRoot(children?: any): Element;
-
-  public static containerId(af_componentId: string) {
-    return `af-js-component--${af_componentId}`;
-  }
 
   get af_componentTitle(): string | undefined {
     return this._af_componentTitle;

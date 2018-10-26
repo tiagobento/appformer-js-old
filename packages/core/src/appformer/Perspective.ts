@@ -6,6 +6,7 @@ import { Part } from "./Part";
 import { Component, Element } from "../core";
 
 export abstract class Perspective extends Component {
+  public af_componentId: string;
   private _af_perspectiveScreens: string[] = [];
   private _af_isDefault: boolean = false;
   private _af_isTransient: boolean = true;
@@ -19,7 +20,8 @@ export abstract class Perspective extends Component {
   private _af_panels: Panel[] = [];
 
   protected constructor(componentId: string) {
-    super({ type: "perspective", af_componentId: componentId });
+    super({ type: "perspective", core_componentId: componentId });
+    this.af_componentId = componentId;
   }
 
   public core_componentRoot(children?: any): Element {
@@ -42,11 +44,6 @@ export abstract class Perspective extends Component {
 
   public af_onShutdown(): void {
     // TODO
-  }
-
-  public has(screen: Screen | string) {
-    const id = typeof screen === "string" ? screen : screen.af_componentId;
-    return this.af_perspectiveScreens.indexOf(id) > -1;
   }
 
   get af_perspectiveScreens(): string[] {
