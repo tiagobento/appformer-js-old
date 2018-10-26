@@ -21,7 +21,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 import javax.lang.model.element.Element;
@@ -29,15 +28,17 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
+import org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation.Kind;
 import org.uberfire.jsbridge.tsexporter.model.PojoTsClass;
 import org.uberfire.jsbridge.tsexporter.util.Utils;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;
+import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 import static java.util.stream.Stream.concat;
-import static org.uberfire.jsbridge.tsexporter.util.Utils.*;
+import static org.uberfire.jsbridge.tsexporter.util.Utils.diff;
 
 public class DependencyGraph {
 
@@ -73,31 +74,34 @@ public class DependencyGraph {
     }
 
     public Set<Vertex> findAllDependencies(final Set<? extends Element> elements,
-                                           final DependencyRelation.Kind... kinds) {
+                                           final Kind... kinds) {
 
-        return findAllRelations(elements, v -> v.dependencies, kinds);
+        return traverse(elements,
+                        singletonMap(v -> v.dependencies, getEffectiveKinds(kinds)),
+                        new HashSet<>());
     }
 
     public Set<Vertex> findAllDependents(final Set<? extends Element> elements,
-                                         final DependencyRelation.Kind... kinds) {
+                                         final Kind... kinds) {
 
-        return findAllRelations(elements, v -> v.dependents, kinds);
+        return traverse(elements,
+                        singletonMap(v -> v.dependents, getEffectiveKinds(kinds)),
+                        new HashSet<>());
     }
 
-    private Set<Vertex> findAllRelations(final Set<? extends Element> elements,
-                                         final Function<Vertex, Map<Vertex, Set<DependencyRelation.Kind>>> relations,
-                                         final DependencyRelation.Kind... kinds) {
-
-        return findAllRelations(elements,
-                                relations,
-                                new HashSet<>(asList(kinds.length == 0 ? DependencyRelation.Kind.values() : kinds)),
-                                new HashSet<>());
+    private HashSet<Kind> getEffectiveKinds(Kind[] kinds) {
+        return new HashSet<>(asList(kinds.length == 0 ? Kind.values() : kinds));
     }
 
-    private Set<Vertex> findAllRelations(final Set<? extends Element> elements,
-                                         final Function<Vertex, Map<Vertex, Set<DependencyRelation.Kind>>> relations,
-                                         final Set<DependencyRelation.Kind> kinds,
-                                         final Set<Vertex> visited) {
+    public Set<Vertex> traverse(final Set<? extends Element> elements,
+                                final Map<DependencyFinder, Set<Kind>> traversalConfiguration) {
+
+        return traverse(elements, traversalConfiguration, new HashSet<>());
+    }
+
+    private Set<Vertex> traverse(final Set<? extends Element> elements,
+                                 final Map<DependencyFinder, Set<Kind>> traversalConfiguration,
+                                 final Set<Vertex> visited) {
 
         final Set<Vertex> startingPoints = elements == null ? emptySet() : elements.stream()
                 .filter(this::canBePartOfTheGraph)
@@ -110,26 +114,32 @@ public class DependencyGraph {
         visited.addAll(toBeVisited);
 
         final Stream<Vertex> traversal = toBeVisited.stream()
-                .map(vertex -> findRelevantRelations(relations.apply(vertex), kinds))
-                .flatMap(trav -> findAllRelations(trav, relations, kinds, visited).stream());
+                .map(vertex -> findRelevant(vertex, traversalConfiguration))
+                .flatMap(trav -> traverse(trav, traversalConfiguration, visited).stream());
 
         return concat(startingPoints.stream(), traversal).collect(toSet());
     }
 
-    private Set<TypeElement> findRelevantRelations(final Map<Vertex, Set<DependencyRelation.Kind>> relations,
-                                                   final Set<DependencyRelation.Kind> kinds) {
+    private Set<TypeElement> findRelevant(final Vertex vertex,
+                                          final Map<DependencyFinder, Set<Kind>> map) {
 
-        return relations.entrySet().stream()
-                .filter(relation -> relation.getValue().stream().anyMatch(kinds::contains))
-                .map(relation -> relation.getKey().asElement())
+        return map.entrySet().stream()
+                .flatMap(c -> c.getKey().apply(vertex).entrySet().stream()
+                        .filter(relation -> relation.getValue().stream().anyMatch(c.getValue()::contains))
+                        .map(relation -> relation.getKey().asElement()))
                 .collect(toSet());
+    }
+
+    public interface DependencyFinder {
+
+        Map<Vertex, Set<Kind>> apply(Vertex a);
     }
 
     public class Vertex {
 
         private final PojoTsClass pojoClass;
-        final Map<Vertex, Set<DependencyRelation.Kind>> dependencies;
-        final Map<Vertex, Set<DependencyRelation.Kind>> dependents;
+        public final Map<Vertex, Set<Kind>> dependencies;
+        public final Map<Vertex, Set<Kind>> dependents;
 
         private Vertex(final TypeElement typeElement) {
             this.pojoClass = new PojoTsClass((DeclaredType) typeElement.asType(), decoratorStore);
@@ -138,7 +148,7 @@ public class DependencyGraph {
         }
 
         private Vertex init() {
-            final Map<Vertex, Set<DependencyRelation.Kind>> dependencies = pojoClass.getDependencies().stream()
+            final Map<Vertex, Set<Kind>> dependencies = pojoClass.getDependencies().stream()
                     .collect(toMap(relation -> DependencyGraph.this.add(relation.getImportEntry().asElement()),
                                    DependencyRelation::getKinds,
                                    Utils::mergeSets));

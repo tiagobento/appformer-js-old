@@ -16,7 +16,10 @@
 
 package org.uberfire.jsbridge.tsexporter.model;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -29,6 +32,8 @@ import com.sun.tools.javac.code.Symbol;
 import org.uberfire.jsbridge.tsexporter.Main;
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
 import org.uberfire.jsbridge.tsexporter.dependency.DependencyGraph;
+import org.uberfire.jsbridge.tsexporter.dependency.DependencyGraph.DependencyFinder;
+import org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation;
 import org.uberfire.jsbridge.tsexporter.dependency.ImportEntriesStore;
 import org.uberfire.jsbridge.tsexporter.dependency.ImportEntry;
 import org.uberfire.jsbridge.tsexporter.meta.JavaType;
@@ -36,6 +41,7 @@ import org.uberfire.jsbridge.tsexporter.meta.Translatable;
 import org.uberfire.jsbridge.tsexporter.meta.TranslatableJavaNumberWithDefaultInstantiation;
 
 import static java.lang.String.format;
+import static java.util.Collections.singleton;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
@@ -153,23 +159,18 @@ public class RpcCallerTsMethod {
 
     private String factoriesOracle() {
 
-        final Set<Element> aggregatedTypesOfReturnType = translatedReturnType().getAggregatedImportEntries().stream()
+        final Set<? extends Element> aggregatedTypesOfReturnType = translatedReturnType().getAggregatedImportEntries().stream()
                 .map(ImportEntry::asElement)
                 .collect(toSet());
 
-        final Set<Element> childrenOfReturnType = dependencyGraph.findAllDependents(aggregatedTypesOfReturnType, HIERARCHY).stream()
-                .map(DependencyGraph.Vertex::asElement)
-                .collect(toSet());
+        final Map<DependencyFinder, Set<DependencyRelation.Kind>> traversalConfiguration = new HashMap<>();
+        traversalConfiguration.put(vertex -> vertex.dependencies, singleton(FIELD));
+        traversalConfiguration.put(vertex -> vertex.dependents, singleton(HIERARCHY));
 
-        final Set<Element> allDependenciesElements = dependencyGraph.findAllDependencies(childrenOfReturnType, FIELD).stream()
-                .map(DependencyGraph.Vertex::asElement)
-                .collect(toSet());
-
-        return dependencyGraph.findAllDependents(allDependenciesElements, HIERARCHY).stream()
+        return new HashSet<>(dependencyGraph.traverse(aggregatedTypesOfReturnType, traversalConfiguration)).stream()
                 .map(DependencyGraph.Vertex::getPojoClass)
                 .sorted(comparing(TsClass::getRelativePath))
                 .filter(this::isConcreteClass)
-                .filter(dependent -> allDependenciesElements.stream().anyMatch(element -> isSubtype(dependent, element)))
                 .distinct()
                 .map(this::toFactoriesOracleEntry)
                 .collect(joining(",\n"));
