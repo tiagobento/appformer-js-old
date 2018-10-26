@@ -80,8 +80,8 @@ export class AppFormer extends Component {
     console.info("Firing event: " + obj);
   }
 
-  public rpc(path: string, args: any[]) {
-    Promise.reject("Sorry, RPC mocks are not available yet :(");
+  public rpc(path: string, args: any[]) : Promise<string> {
+    return Promise.reject("Sorry, RPC mocks are not available yet :(");
   }
 
   public core_componentRoot(portals?: any): Element {

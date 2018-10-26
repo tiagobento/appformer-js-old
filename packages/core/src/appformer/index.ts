@@ -55,7 +55,7 @@ export function close(af_componentId: string) {
 }
 
 export function translate(key: string, args: string[]) {
-  singleton!.translate(key, args);
+  return singleton!.translate(key, args);
 }
 
 export function render(element: Element, container: HTMLElement, callback = (): void => undefined) {
