@@ -3,8 +3,8 @@ import { AppFormerRoot } from "./AppFormerRoot";
 import { Element, Component, Core } from "../core";
 import { ScreenEnvelope } from "./ScreenEnvelope";
 import { ScreenContents } from "./ScreenContents";
-import {Perspective} from "./Perspective";
-import {Screen} from "./Screen";
+import { Perspective } from "./Perspective";
+import { Screen } from "./Screen";
 
 export class AppFormer extends Component {
   private appformerRoot: AppFormerRoot;
@@ -12,10 +12,9 @@ export class AppFormer extends Component {
   public components: Map<string, Component>;
 
   constructor() {
-    super();
+    super({ type: "appformer", af_componentId: "appformer" });
     this.af_isReact = true;
     this.af_hasContext = true;
-    this.af_componentId = "appformer";
     this.components = new Map();
     this.core = new Core();
   }

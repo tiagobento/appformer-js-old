@@ -3,15 +3,12 @@ import { Component, Element } from "../core";
 
 export abstract class Screen extends Component {
   public readonly type = "screen";
-  private readonly _af_componentId: string;
-  private _af_isReact: boolean = false;
   private _af_componentTitle?: string = undefined;
   private _af_componentService: Service = {};
   private _af_subscriptions: Subscriptions = {}; // FIXME: Maybe this one should be a method?
 
   protected constructor(componentId: string) {
-    super();
-    this._af_componentId = componentId;
+    super({ type: "screen", af_componentId: componentId });
   }
 
   public af_onStartup(): void {
@@ -20,7 +17,6 @@ export abstract class Screen extends Component {
 
   public af_onOpen(): void {
     console.info(`af: OPENED: ${this.af_componentId}`);
-    // TODO
   }
 
   public af_onFocus(): void {
@@ -37,7 +33,6 @@ export abstract class Screen extends Component {
 
   public af_onClose(): void {
     console.info(`af: CLOSED: ${this.af_componentId}`);
-    // TODO
   }
 
   public af_onShutdown(): void {
@@ -52,18 +47,6 @@ export abstract class Screen extends Component {
 
   public static containerId(af_componentId: string) {
     return `af-js-component--${af_componentId}`;
-  }
-
-  get af_componentId(): string {
-    return this._af_componentId;
-  }
-
-  get af_isReact(): boolean {
-    return this._af_isReact;
-  }
-
-  set af_isReact(value: boolean) {
-    this._af_isReact = value;
   }
 
   get af_componentTitle(): string | undefined {
