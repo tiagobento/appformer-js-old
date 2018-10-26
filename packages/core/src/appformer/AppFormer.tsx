@@ -1,9 +1,10 @@
 import * as React from "react";
 import { AppFormerRoot } from "./AppFormerRoot";
-import { Perspective, Screen } from "./Components";
 import { Element, Component, Core } from "../core";
 import { ScreenEnvelope } from "./ScreenEnvelope";
 import { ScreenContents } from "./ScreenContents";
+import {Perspective} from "./Perspective";
+import {Screen} from "./Screen";
 
 export class AppFormer extends Component {
   private appformerRoot: AppFormerRoot;
@@ -12,8 +13,8 @@ export class AppFormer extends Component {
 
   constructor() {
     super();
-    this.isReact = true;
-    this.hasContext = true;
+    this.af_isReact = true;
+    this.af_hasContext = true;
     this.af_componentId = "appformer";
     this.components = new Map();
     this.core = new Core();

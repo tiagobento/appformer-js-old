@@ -34,7 +34,7 @@ export class ComponentEnvelope extends React.Component<Props, State> {
   }
 
   public componentDidMount(): void {
-    if (!this.props.component.isReact) {
+    if (!this.props.component.af_isReact) {
       this.props.core.render(this.props.component.core_componentRoot(), this.ref);
     }
     this.refreshPortaledComponents();
@@ -134,10 +134,10 @@ export class ComponentEnvelope extends React.Component<Props, State> {
 
   public render() {
     const portals = this.state.portaledComponents.map(component => this.makePortal(component));
-    return this.props.component.isReact ? (
+    return this.props.component.af_isReact ? (
       <>
         <div ref={ref => this.updateReactRef(ref)} />
-        {!this.props.component.hasContext && portals}
+        {!this.props.component.af_hasContext && portals}
         {this.props.component.core_componentRoot(portals)}
       </>
     ) : (

@@ -2,8 +2,8 @@ import * as React from "react";
 
 export abstract class Component {
   public af_componentId: string;
-  public isReact: boolean = false;
-  public hasContext: boolean = false;
+  public af_isReact: boolean = false;
+  public af_hasContext: boolean = false;
   public readonly type: string;
 
   public abstract core_componentRoot(children?: any): Element;

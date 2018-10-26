@@ -7,14 +7,12 @@ import {
   AppFormerContext,
   CoreRootContext,
   AppFormerContextValue,
-  AppFormer
 } from "appformer-js";
 
 export class ConsoleHeader extends Screen {
   constructor() {
-    super();
-    this.isReact = true;
-    this.af_componentId = "console-header";
+    super("console-header");
+    this.af_isReact = true;
     this.af_componentTitle = undefined;
   }
 

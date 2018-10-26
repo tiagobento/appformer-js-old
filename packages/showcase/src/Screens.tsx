@@ -6,9 +6,8 @@ export class ReactComponentScreen extends Screen {
   public onFoo: (e: any) => void;
 
   constructor() {
-    super();
-    this.isReact = true;
-    this.af_componentId = "A-react-screen";
+    super("A-react-screen");
+    this.af_isReact = true;
     this.af_componentTitle = "React Component";
     this.af_subscriptions = {};
     this.af_componentService = {};
@@ -57,8 +56,7 @@ export class PureDomElementScreen extends Screen {
   public span: HTMLElement;
 
   constructor() {
-    super();
-    this.af_componentId = "dom-elements-screen";
+    super("dom-elements-screen");
     this.af_componentTitle = "DOM Elements Component";
     this.span = document.createElement("span");
     this.af_componentService = {};
@@ -93,8 +91,7 @@ export class PureDomElementScreen extends Screen {
 
 export class StringElementScreen extends Screen {
   constructor() {
-    super();
-    this.af_componentId = "string-template-screen";
+    super("string-template-screen");
     this.af_componentTitle = "Pure HTML String Component";
   }
 
@@ -109,9 +106,8 @@ export class StringElementScreen extends Screen {
 
 export class SillyReactScreen extends Screen {
   constructor() {
-    super();
-    this.isReact = true;
-    this.af_componentId = "silly-react-screen";
+    super("silly-react-screen");
+    this.af_isReact = true;
     this.af_componentTitle = "Silly React Component";
   }
 

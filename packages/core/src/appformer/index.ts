@@ -1,10 +1,16 @@
 import { AppFormer } from "./AppFormer";
-import { Screen, Perspective } from "./Components";
+import {Screen} from "./Screen";
+import {Perspective} from "./Perspective";
 import { Element } from "../core";
 
 export { AppFormer } from "./AppFormer";
 export * from "./Components";
 export * from "./Shorthands";
+export * from "./Screen";
+export * from "./Perspective";
+export * from "./DisplayInfo";
+export * from "./Panel";
+export * from "./Part";
 export { AppFormerContext, AppFormerContextValue } from "./AppFormerRoot";
 
 let singleton: AppFormer | undefined;
@@ -37,8 +43,6 @@ export function register(component: Screen | Perspective) {
     singleton!.registerScreen(component as Screen);
   } else if (component.type === "perspective") {
     singleton!.registerPerspective(component as Perspective);
-  } else {
-    console.error(`Unexpected component type [${component.type}]`);
   }
 }
 

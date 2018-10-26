@@ -1,6 +1,6 @@
 import { Component } from "../core";
 import { Element } from "../core";
-import { Screen } from "./Components";
+import {Screen} from "./Screen";
 
 export class ScreenContents extends Component {
   public readonly type = "screen-contents";
@@ -9,8 +9,8 @@ export class ScreenContents extends Component {
   constructor(screen: Screen) {
     super();
     this.screen = screen;
-    this.isReact = screen.isReact;
-    this.hasContext = screen.hasContext;
+    this.af_isReact = screen.af_isReact;
+    this.af_hasContext = screen.af_hasContext;
     this.af_componentId = screen.af_componentId + "-contents";
   }
 

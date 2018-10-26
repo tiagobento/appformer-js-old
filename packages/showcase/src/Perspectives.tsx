@@ -3,10 +3,9 @@ import { Perspective, Element } from "appformer-js";
 
 export class ShowcasePerspective extends Perspective {
   constructor() {
-    super();
-    this.isReact = true;
-    this.af_componentId = "showcase-perspective";
-    this.af_isDefaultPerspective = true;
+    super("showcase-perspective");
+    this.af_isReact = true;
+    this.af_isDefault = true;
   }
 
   private NiceBox(props: { children: any }) {
@@ -41,17 +40,15 @@ export class ShowcasePerspective extends Perspective {
   }
 }
 
-
 export class NonReactShowcasePerspective extends Perspective {
-    constructor() {
-        super();
-        this.isReact = false;
-        this.af_componentId = "non-react-showcase-perspective";
-        this.af_isDefaultPerspective = true;
-    }
+  constructor() {
+    super("non-react-showcase-perspective");
+    this.af_isReact = false;
+    this.af_isDefault = true;
+  }
 
-    public af_componentRoot(): string {
-        return `\<div>
+  public af_componentRoot(): string {
+    return `\<div>
                 \<header>
                     <div af-js-component="console-header"></div>
                 \</header>
@@ -59,5 +56,5 @@ export class NonReactShowcasePerspective extends Perspective {
                 \<div af-js-component="string-template-screen"></div>
                 \<div af-js-component="silly-react-screen"></div>
             \</div>`;
-    }
+  }
 }

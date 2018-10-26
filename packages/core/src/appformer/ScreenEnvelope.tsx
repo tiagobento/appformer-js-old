@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Screen } from "./Components";
+import {Screen} from "./Screen";
 import { AppFormerContext } from "./AppFormerRoot";
 import { Element, Component } from "../core";
 
@@ -9,7 +9,7 @@ export class ScreenEnvelope extends Component {
 
   constructor(screen: Screen) {
     super();
-    this.isReact = true;
+    this.af_isReact = true;
     this.af_componentId = screen.af_componentId;
     this.screen = screen;
   }
