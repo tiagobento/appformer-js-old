@@ -31,21 +31,19 @@ export class CoreRoot extends React.Component<Props, State> {
     this.props.exposing(() => this);
   }
 
-  public register(component: Component) {
+  public register(...components: Component[]) {
+    //TODO: Optimize this search
     this.setState(prevState => {
-      //TODO: Optimize this search
-      if (prevState.components.filter(c => c.core_componentId === component.core_componentId).length > 0) {
-        return prevState;
-      }
-
-      return { components: [...prevState.components, component] };
+      const existingIds = prevState.components.map(c => c.core_componentId);
+      const newComponents = components.filter(c => existingIds.indexOf(c.core_componentId) === -1);
+      return { components: [...prevState.components, ...newComponents] };
     });
   }
 
-  public deregister(af_componentId: string) {
+  public deregister(...ids: string[]) {
+    //TODO: Optimize this search
     this.setState(prevState => {
-      //TODO: Optimize this search
-      return { components: prevState.components.filter(c => c.core_componentId !== af_componentId) };
+      return { components: prevState.components.filter(c => ids.indexOf(c.core_componentId) === -1) };
     });
   }
 
@@ -62,7 +60,7 @@ export class CoreRoot extends React.Component<Props, State> {
     return (
       <CoreContext.Provider value={this.props.core}>
         <CoreRootContext.Provider value={rootContext}>
-          <ComponentEnvelope core={this.props.core} rootContext={rootContext} component={this.props.app} />
+          <ComponentEnvelope core={this.props.core} coreContext={rootContext} component={this.props.app} />
         </CoreRootContext.Provider>
       </CoreContext.Provider>
     );

@@ -6,7 +6,7 @@ import {
   CoreRootContextValue,
   AppFormerContext,
   CoreRootContext,
-  AppFormerContextValue,
+  AppFormerContextValue
 } from "appformer-js";
 
 export class ConsoleHeader extends Screen {
@@ -18,20 +18,6 @@ export class ConsoleHeader extends Screen {
 
   public af_onMayClose(): boolean {
     return false;
-  }
-
-  private isOpen(component: Component, core: CoreRootContextValue, appformer: AppFormerContextValue): any {
-    if (component.type === "perspective") {
-      return appformer.perspective === component.core_componentId;
-    } else {
-      return Object.keys(core.components).indexOf(component.core_componentId) !== -1;
-    }
-  }
-
-  private toggle(c: Component, core: CoreRootContextValue, appformer: AppFormerContextValue) {
-    return this.isOpen(c, core, appformer)
-      ? appformer.api!.close(c.core_componentId)
-      : appformer.api!.goTo(c.core_componentId);
   }
 
   public af_componentRoot(): Element {
@@ -49,31 +35,50 @@ export class ConsoleHeader extends Screen {
         <AppFormerContext.Consumer>
           {appformer => (
             <CoreRootContext.Consumer>
-              {core => (
-                <>
-                  {Array.from(appformer.api!.components.values())
-                    .filter(c => c.type !== "screen-contents")
-                    .map(c => this.ToggleButton({ c, core, appformer }))}
-                </>
-              )}
+              {core =>
+                Array.from(appformer.api!.components.values())
+                  .filter(component => component.type !== "screen-contents")
+                  .map(component => (
+                    <ToggleButton
+                      key={component.core_componentId}
+                      component={component}
+                      core={core}
+                      appformer={appformer}
+                    />
+                  ))
+              }
             </CoreRootContext.Consumer>
           )}
         </AppFormerContext.Consumer>
       </div>
     );
   }
+}
 
-  private ToggleButton(props: { c: Component; core: CoreRootContextValue; appformer: AppFormerContextValue }) {
+class ToggleButton extends React.Component<{
+  component: Component;
+  core: CoreRootContextValue;
+  appformer: AppFormerContextValue;
+}> {
+  private isOpen(): boolean {
+    if (this.props.component.type === "perspective") {
+      return this.props.appformer.perspective === this.props.component.core_componentId;
+    } else {
+      return Boolean(this.props.core.components[this.props.component.core_componentId]);
+    }
+  }
+
+  private toggle() {
+    return this.isOpen()
+      ? this.props.appformer.api!.close(this.props.component.core_componentId)
+      : this.props.appformer.api!.goTo(this.props.component.core_componentId);
+  }
+
+  public render() {
+    const opacity = this.isOpen() ? 1 : 0.5;
     return (
-      <button
-        style={{
-          fontSize: "0.7em",
-          opacity: this.isOpen(props.c, props.core, props.appformer) ? 1 : 0.5
-        }}
-        onClick={() => this.toggle(props.c, props.core, props.appformer)}
-        key={props.c.core_componentId}
-      >
-        {props.c.core_componentId}
+      <button style={{ fontSize: "0.7em", opacity }} onClick={() => this.toggle()}>
+        {this.props.component.core_componentId}
       </button>
     );
   }

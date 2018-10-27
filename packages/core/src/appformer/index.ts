@@ -1,6 +1,6 @@
 import { AppFormer } from "./AppFormer";
-import {Screen} from "./Screen";
-import {Perspective} from "./Perspective";
+import { Screen } from "./Screen";
+import { Perspective } from "./Perspective";
 import { Element } from "../core";
 
 export { AppFormer } from "./AppFormer";

@@ -6,7 +6,7 @@ import { CoreRootContextValue } from "./CoreRoot";
 
 interface Props {
   component: Component;
-  rootContext: CoreRootContextValue;
+  coreContext: CoreRootContextValue;
   core: Core;
 }
 
@@ -17,7 +17,7 @@ enum Ready {
 }
 
 interface State {
-  portaledComponents: Component[];
+  portals: Component[];
   ready: Ready;
 }
 
@@ -30,20 +30,22 @@ export class ComponentEnvelope extends React.Component<Props, State> {
 
   constructor(props: Props) {
     super(props);
-    this.state = { portaledComponents: [], ready: Ready.NOPE };
+    this.state = { portals: [], ready: Ready.NOPE };
   }
 
   public componentDidMount(): void {
     if (!this.props.component.af_isReact) {
       this.props.core.render(this.props.component.core_componentRoot(), this.ref);
     }
-    this.refreshPortaledComponents();
+
+    this.refreshPortals();
     console.info(`Mounted ${this.props.component.core_componentId}`);
   }
 
   public updateReactRef(newRef: HTMLElement | null) {
     if (newRef && newRef.parentElement) {
       this.ref = newRef.parentElement;
+      (this.props.component._container as any) = this.ref;
       this.updateMutationObserver();
     }
   }
@@ -51,6 +53,7 @@ export class ComponentEnvelope extends React.Component<Props, State> {
   public updateNonReactRef(newRef: HTMLElement | null) {
     if (newRef) {
       this.ref = newRef;
+      (this.props.component._container as any) = this.ref;
       this.updateMutationObserver();
     }
   }
@@ -67,13 +70,13 @@ export class ComponentEnvelope extends React.Component<Props, State> {
         .filter(elem => elem.hasAttribute(ComponentEnvelope.AfComponentAttr))
         .map(elem => elem.getAttribute(ComponentEnvelope.AfComponentAttr)!);
 
-      const addedNodes = this.findContainers(af_componentIds).filter(
+      const addedNodes = this.findContainers(af_componentIds).accepted.filter(
         c => !c.hasAttribute(ComponentEnvelope.AfOpenComponentAttr)
       );
 
       if (addedNodes.length > 0) {
         console.info("-> Refresh was triggered by the Mutation Observer");
-        this.refreshPortaledComponents();
+        this.refreshPortals();
       }
     });
 
@@ -84,8 +87,10 @@ export class ComponentEnvelope extends React.Component<Props, State> {
   }
 
   public componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any): void {
-    if (this.props !== prevProps) {
-      this.refreshPortaledComponents();
+    // Components might've been added and/or removed from CoreContext,
+    // so we need to refresh the portals.
+    if (this.props.coreContext.components !== prevProps.coreContext.components) {
+      this.refreshPortals();
     } else if (this.state.ready === Ready.ALMOST) {
       this.props.component.core_onReady();
     }
@@ -96,28 +101,33 @@ export class ComponentEnvelope extends React.Component<Props, State> {
       this.mutationObserver!.disconnect();
     }
 
+    this.ref.removeAttribute(ComponentEnvelope.AfOpenComponentAttr);
     console.info(`Unmounted ${this.props.component.core_componentId}`);
     this.props.component.core_onVanished();
   }
 
-  private refreshPortaledComponents() {
+  private refreshPortals() {
+    const { visited, accepted } = this.findContainers(Object.keys(this.props.coreContext.components));
+
+    (this.props.component._components as any) = visited.map(
+      component => component.getAttribute(ComponentEnvelope.AfComponentAttr)!
+    );
+
+    const components = accepted.map(
+      component => this.props.coreContext.components[component.getAttribute(ComponentEnvelope.AfComponentAttr)!]
+    );
+
     this.setState(prevState => ({
       ready: prevState.ready === Ready.NOPE ? Ready.ALMOST : Ready.YEP,
-      portaledComponents: Array.from(
-        new Set(
-          this.findContainers(Object.keys(this.props.rootContext.components)).map(
-            c => this.props.rootContext.components[c.getAttribute(ComponentEnvelope.AfComponentAttr)!]
-          )
-        )
-      )
+      portals: Array.from(new Set(components))
     }));
   }
 
   private makePortal(component: Component): JSX.Element {
-    const container = this.findContainers([component.core_componentId])[0];
+    const container = this.findContainers([component.core_componentId]).accepted[0];
     container.setAttribute(ComponentEnvelope.AfOpenComponentAttr, component.core_componentId);
     const envelope = (
-      <ComponentEnvelope rootContext={this.props.rootContext} core={this.props.core} component={component} />
+      <ComponentEnvelope coreContext={this.props.coreContext} core={this.props.core} component={component} />
     );
 
     //FIXME: What about multiple instances of the same component?
@@ -133,7 +143,7 @@ export class ComponentEnvelope extends React.Component<Props, State> {
   }
 
   public render() {
-    const portals = this.state.portaledComponents.map(component => this.makePortal(component));
+    const portals = this.state.portals.map(component => this.makePortal(component));
     return this.props.component.af_isReact ? (
       <>
         <div ref={ref => this.updateReactRef(ref)} />
@@ -162,14 +172,16 @@ function searchTree(parameters: {
   const stack = [root];
   stack.push(root);
 
-  const ret = new Set();
+  const accepted = new Set();
+  const visited = new Set();
 
   while (stack.length > 0) {
     node = stack.pop()!;
     if (node !== root && node instanceof HTMLElement && stopWhen(node)) {
       if (accept(node)) {
-        ret.add(node);
+        accepted.add(node);
       }
+      visited.add(node);
     } else if (node.children && node.children.length) {
       for (const child of node.children) {
         stack.push(child);
@@ -177,5 +189,8 @@ function searchTree(parameters: {
     }
   }
 
-  return Array.from(ret);
+  return {
+    visited: Array.from(visited),
+    accepted: Array.from(accepted)
+  };
 }

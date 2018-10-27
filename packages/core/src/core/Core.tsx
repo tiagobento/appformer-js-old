@@ -11,14 +11,14 @@ export class Core {
     return this;
   }
 
-  public register(component: Component) {
-    console.info(`Registering ${component.core_componentId}...`);
-    this.coreRoot.register(component);
+  public register(...components: Component[]) {
+    console.info(`Registering ${components.map(c => c.core_componentId).join(", ")}...`);
+    this.coreRoot.register(...components);
   }
 
-  public deregister(af_componentId: string) {
-    console.info(`Deregistering ${af_componentId}...`);
-    this.coreRoot.deregister(af_componentId);
+  public deregister(...ids: string[]) {
+    console.info(`Registering ${ids.join(", ")}...`);
+    this.coreRoot.deregister(...ids);
   }
 
   public render(element: Element, container: HTMLElement, callback = (): void => undefined) {

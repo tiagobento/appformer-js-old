@@ -53,18 +53,16 @@ export class AppFormer extends Component {
     }
   }
 
-  public openPerspective(af_componentId: string) {
-    this.appformerRoot.setState({ perspective: af_componentId });
-  }
-
   public goTo(af_componentId: string) {
     const component = this.components.get(af_componentId);
-    if (component) {
-      if (component.type === "perspective") {
-        this.openPerspective(component.core_componentId);
-      } else if (component.type === "screen-envelope") {
-        this.core.register(component);
-      }
+    if (!component) {
+      return;
+    }
+
+    if (component.type === "perspective") {
+      this.appformerRoot.setState({ perspective: component.core_componentId });
+    } else if (component.type === "screen-envelope") {
+      this.core.register(component);
     }
   }
 
@@ -80,7 +78,7 @@ export class AppFormer extends Component {
     console.info("Firing event: " + obj);
   }
 
-  public rpc(path: string, args: any[]) : Promise<string> {
+  public rpc(path: string, args: any[]): Promise<string> {
     return Promise.reject("Sorry, RPC mocks are not available yet :(");
   }
 

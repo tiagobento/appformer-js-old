@@ -3,6 +3,8 @@ import * as React from "react";
 export abstract class Component {
   public readonly core_componentId: string;
   public readonly type: string;
+  public readonly _container: HTMLElement;
+  public readonly _components: string[] = [];
 
   public af_isReact: boolean = false;
   public af_hasContext: boolean = false;
