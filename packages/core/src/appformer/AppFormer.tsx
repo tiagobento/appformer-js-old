@@ -5,6 +5,9 @@ import { ScreenEnvelope } from "./ScreenEnvelope";
 import { ScreenContents } from "./ScreenContents";
 import { Perspective } from "./Perspective";
 import { Screen } from "./Screen";
+import { PerspectiveContents } from "./PerspectiveContents";
+import { PerspectiveEnvelope } from "./PerspectiveEnvelope";
+import { ComponentTypes } from "./ComponentTypes";
 
 export class AppFormer extends Component {
   private appformerRoot: AppFormerRoot;
@@ -12,11 +15,21 @@ export class AppFormer extends Component {
   public components: Map<string, Component>;
 
   constructor() {
-    super({ type: "appformer", core_componentId: "appformer" });
+    super({ type: ComponentTypes.APPFORMER, core_componentId: "appformer" });
     this.af_isReact = true;
     this.af_hasContext = true;
     this.components = new Map();
     this.core = new Core();
+  }
+
+  public core_onVanished(): void {
+    Array.from(this.components.values()).forEach(component => {
+      if (component.type === ComponentTypes.PERSPECTIVE_ENVELOPE) {
+        (component as PerspectiveEnvelope).perspective.af_onShutdown();
+      } else if (component.type === ComponentTypes.SCREEN_ENVELOPE) {
+        (component as ScreenEnvelope).screen.af_onShutdown();
+      }
+    });
   }
 
   public init(container: HTMLElement, callback: () => void) {
@@ -38,14 +51,22 @@ export class AppFormer extends Component {
   }
 
   public registerPerspective(perspective: Perspective) {
-    this.components.set(perspective.core_componentId, perspective);
-    this.core.register(perspective);
+    const envelope = new PerspectiveEnvelope(perspective);
+    const contents = new PerspectiveContents(perspective, this);
+
+    this.components.set(envelope.core_componentId, envelope);
+    this.components.set(contents.core_componentId, contents);
+
+    this.core.register(envelope);
+    this.core.register(contents);
+
+    perspective.af_onStartup();
   }
 
   public close(af_componentId: string) {
     const component = this.components.get(af_componentId);
     if (component) {
-      if (component.type === "screen-envelope") {
+      if (component.type === ComponentTypes.SCREEN_ENVELOPE) {
         if ((component as ScreenEnvelope).screen.af_onMayClose()) {
           this.core.deregister(af_componentId);
         }
@@ -59,9 +80,9 @@ export class AppFormer extends Component {
       return;
     }
 
-    if (component.type === "perspective") {
+    if (component.type === ComponentTypes.PERSPECTIVE_ENVELOPE) {
       this.appformerRoot.setState({ perspective: component.core_componentId });
-    } else if (component.type === "screen-envelope") {
+    } else if (component.type === ComponentTypes.SCREEN_ENVELOPE) {
       this.core.register(component);
     }
   }

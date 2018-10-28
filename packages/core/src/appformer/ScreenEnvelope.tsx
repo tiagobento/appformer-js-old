@@ -2,12 +2,13 @@ import * as React from "react";
 import { Screen } from "./Screen";
 import { AppFormerContext } from "./AppFormerRoot";
 import { Element, Component } from "../core";
+import { ComponentTypes } from "./ComponentTypes";
 
 export class ScreenEnvelope extends Component {
   public readonly screen: Screen;
 
   constructor(screen: Screen) {
-    super({ type: "screen-envelope", core_componentId: screen.af_componentId });
+    super({ type: ComponentTypes.SCREEN_ENVELOPE, core_componentId: screen.af_componentId });
     this.af_isReact = true;
     this.screen = screen;
   }
@@ -18,10 +19,6 @@ export class ScreenEnvelope extends Component {
 }
 
 class ScreenEnvelopeReactComponent extends React.Component<{ screen: Screen }, {}> {
-  constructor(props: { screen: Screen }) {
-    super(props);
-  }
-
   public render() {
     return (
       <div className={"af-screen-container"}>

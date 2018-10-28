@@ -7,6 +7,7 @@ export { AppFormer } from "./AppFormer";
 export * from "./Components";
 export * from "./Shorthands";
 export * from "./Screen";
+export * from "./ComponentTypes";
 export * from "./Perspective";
 export * from "./DisplayInfo";
 export * from "./Panel";

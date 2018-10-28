@@ -13,19 +13,19 @@ export abstract class Screen extends Component {
   }
 
   public af_onStartup(): void {
-    // FIXME: When to call?
+    //
   }
 
   public af_onOpen(): void {
-    console.info(`af: OPENED: ${this.core_componentId}`);
+    //
   }
 
   public af_onFocus(): void {
-    // TODO
+    //
   }
 
   public af_onLostFocus(): void {
-    // TODO
+    //
   }
 
   public af_onMayClose(): boolean {
@@ -33,11 +33,11 @@ export abstract class Screen extends Component {
   }
 
   public af_onClose(): void {
-    console.info(`af: CLOSED: ${this.core_componentId}`);
+    //
   }
 
   public af_onShutdown(): void {
-    // FIXME: When to call?
+    //
   }
 
   public core_componentRoot(children?: any): Element {

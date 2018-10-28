@@ -75,7 +75,7 @@ export class ComponentEnvelope extends React.Component<Props, State> {
       );
 
       if (addedNodes.length > 0) {
-        console.info("-> Refresh was triggered by the Mutation Observer");
+        console.info("-> Refresh was triggered by the Mutation Observer " + this.props.component.core_componentId);
         this.refreshPortals();
       }
     });

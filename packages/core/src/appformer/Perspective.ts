@@ -2,7 +2,6 @@ import { Menu, Toolbar } from "./Components";
 import { Panel, PanelType } from "./Panel";
 import { DisplayInfo } from "./DisplayInfo";
 import { Part } from "./Part";
-import { goTo } from "./index";
 import { Component, Element } from "../core";
 
 export abstract class Perspective extends Component {
@@ -28,30 +27,22 @@ export abstract class Perspective extends Component {
     return this.af_componentRoot(children);
   }
 
-  //FIXME: 1. This is only a test, remove it and create an Envelope just like it's done for Screens
-  //FIXME: 2. This currently does not work with multiple instances of AppFormer
-  //FIXME: 3. Execute goTo for all _components at once. This will speed up React's reconciliation
-  //FIXME:    by changing the state only once.
-  public core_onReady(): void {
-    this._components.forEach(id => goTo(id));
-  }
-
   public abstract af_componentRoot(children?: any): Element;
 
   public af_onStartup(): void {
-    // TODO
+    //
   }
 
   public af_onOpen(): void {
-    // TODO
+    //
   }
 
   public af_onClose(): void {
-    // TODO
+    //
   }
 
   public af_onShutdown(): void {
-    // TODO
+    //
   }
 
   get af_perspectiveScreens(): string[] {

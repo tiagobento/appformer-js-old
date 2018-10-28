@@ -6,7 +6,8 @@ import {
   CoreRootContextValue,
   AppFormerContext,
   CoreRootContext,
-  AppFormerContextValue
+  AppFormerContextValue,
+  ComponentTypes
 } from "appformer-js";
 
 export class ConsoleHeader extends Screen {
@@ -37,7 +38,11 @@ export class ConsoleHeader extends Screen {
             <CoreRootContext.Consumer>
               {core =>
                 Array.from(appformer.api!.components.values())
-                  .filter(component => component.type !== "screen-contents")
+                  .filter(
+                    component =>
+                      component.type === ComponentTypes.PERSPECTIVE_ENVELOPE ||
+                      component.type === ComponentTypes.SCREEN_CONTENTS
+                  )
                   .map(component => (
                     <ToggleButton
                       key={component.core_componentId}
@@ -61,7 +66,7 @@ class ToggleButton extends React.Component<{
   appformer: AppFormerContextValue;
 }> {
   private isOpen(): boolean {
-    if (this.props.component.type === "perspective") {
+    if (this.props.component.type === ComponentTypes.PERSPECTIVE_ENVELOPE) {
       return this.props.appformer.perspective === this.props.component.core_componentId;
     } else {
       return Boolean(this.props.core.components[this.props.component.core_componentId]);

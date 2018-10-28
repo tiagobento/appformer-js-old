@@ -10,9 +10,7 @@ export const Link = (props: { to: string; children: any }) => (
 
 export const __i18n = (props: { tkey: string; args: string[] }) => (
   <AppFormerContext.Consumer>
-    {appformer => (
-      <React.Fragment>{appformer.api!.translate(props.tkey, props.args)}</React.Fragment>
-    )}
+    {appformer => <React.Fragment>{appformer.api!.translate(props.tkey, props.args)}</React.Fragment>}
   </AppFormerContext.Consumer>
 );
 
