@@ -4,6 +4,13 @@ import { Component } from "./Component";
 import { Core } from "./Core";
 import { CoreRootContextValue } from "./CoreRoot";
 
+interface DOMSearch {
+  visited: HTMLElement[];
+  accepted: HTMLElement[];
+  visitedIds: string[];
+  acceptedIds: string[];
+}
+
 interface Props {
   component: Component;
   coreContext: CoreRootContextValue;
@@ -70,20 +77,28 @@ export class ComponentEnvelope extends React.Component<Props, State> {
   }
 
   private onMutation(mutations: MutationRecord[]) {
-    const addedIds = flatten(mutations.map(m => Array.from(m.addedNodes)))
+    const start = new Date().getTime();
+    const addedContainers = flatten(mutations.map(m => Array.from(m.addedNodes)))
       .filter(node => node.nodeName === "DIV")
       .map(node => node as HTMLElement)
       .filter(elem => Boolean(this.getAfComponentAttr(elem)))
-      .map(elem => this.getAfComponentAttr(elem)!);
+      .filter(elem => this.isSubComponentContainer(elem))
+      .map(elem => this.containers.get(this.getAfComponentAttr(elem)!))
+      .filter(elem => !elem || !elem.hasAttribute(ComponentEnvelope.AfOpenComponentAttr));
 
-    const addedContainers = this.findContainers(addedIds).accepted.filter(
-      elem => !elem.hasAttribute(ComponentEnvelope.AfOpenComponentAttr)
-    );
-
+    console.info(`Mutation [${new Date().getTime() - start}ms] on "${this.props.component.core_componentId}"`);
     if (addedContainers.length > 0) {
-      console.info(`-> Refresh was triggered by the Mutation Observer ${this.props.component.core_componentId}`);
+      console.info(`-> Refresh was triggered by the Mutation Observer on "${this.props.component.core_componentId}"`);
       this.refreshPortals();
     }
+  }
+
+  private isSubComponentContainer(container: HTMLElement) {
+    return searchParents({
+      element: container,
+      stop: elem => elem === this.ref || Boolean(this.getAfComponentAttr(elem)),
+      accept: elem => elem === this.ref
+    });
   }
 
   private disconnectedMutationObserver() {
@@ -93,14 +108,19 @@ export class ComponentEnvelope extends React.Component<Props, State> {
   }
 
   private refreshPortals() {
-    const { acceptedIds, visitedIds, accepted } = this.findContainers(Object.keys(this.props.coreContext.components));
+    const start = new Date().getTime();
+    const search = this.findContainers(Object.keys(this.props.coreContext.components));
+    console.info(`Search [${new Date().getTime() - start}ms] on "${this.props.component.core_componentId}"`);
 
-    (this.props.component._components as any) = visitedIds;
-    this.containers = new Map(accepted.map<[string, HTMLElement]>(elem => [this.getAfComponentAttr(elem)!, elem]));
+    (this.props.component._components as any) = search.visitedIds;
+
+    this.containers = new Map(
+      search.accepted.map<[string, HTMLElement]>(elem => [this.getAfComponentAttr(elem)!, elem])
+    );
 
     this.setState(prevState => ({
       ready: prevState.ready === Ready.NOPE ? Ready.ALMOST : Ready.YEP,
-      portals: acceptedIds.map(id => this.props.coreContext.components[id])
+      portals: search.acceptedIds.map(id => this.props.coreContext.components[id])
     }));
   }
 
@@ -119,8 +139,8 @@ export class ComponentEnvelope extends React.Component<Props, State> {
     return ReactDOM.createPortal(envelope, container, component.core_componentId);
   }
 
-  public findContainers(af_componentIds: string[]) {
-    const search = searchTree({
+  public findContainers(af_componentIds: string[]): DOMSearch {
+    const search = searchChildren({
       root: this.ref,
       stopWhen: elem => Boolean(this.getAfComponentAttr(elem)),
       accept: elem => af_componentIds.indexOf(this.getAfComponentAttr(elem)!) !== -1
@@ -141,6 +161,7 @@ export class ComponentEnvelope extends React.Component<Props, State> {
     this.refreshPortals();
     console.info(`Mounted ${this.props.component.core_componentId}`);
   }
+
   public componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any): void {
     // Components might've been added and/or removed from CoreContext,
     // so we need to refresh the portals.
@@ -177,12 +198,27 @@ export class ComponentEnvelope extends React.Component<Props, State> {
 
 const flatten = <T extends any>(arr: T[][]) => ([] as T[]).concat(...arr);
 
-function searchTree(parameters: {
+function searchParents(args: {
+  accept: (elem: HTMLElement) => boolean;
+  stop: (elem: HTMLElement) => boolean;
+  element: HTMLElement;
+}) {
+  let parent = args.element.parentElement;
+  while (parent) {
+    if (args.stop(parent)) {
+      return args.accept(parent);
+    }
+    parent = parent.parentElement;
+  }
+  return false;
+}
+
+function searchChildren(args: {
   root: HTMLElement;
   stopWhen: (elem: HTMLElement) => boolean;
   accept: (elem: HTMLElement) => boolean;
 }) {
-  const { root, stopWhen, accept } = parameters;
+  const { root, stopWhen, accept } = args;
   let node: any;
 
   const stack = [root];
