@@ -5,8 +5,7 @@ import { ScreenEnvelope } from "./ScreenEnvelope";
 import { ScreenContents } from "./ScreenContents";
 import { Perspective } from "./Perspective";
 import { Screen } from "./Screen";
-import { PerspectiveContents } from "./PerspectiveContents";
-import { PerspectiveEnvelope } from "./PerspectiveEnvelope";
+import { PerspectiveCoreComponent } from "./PerspectiveCoreComponent";
 import { ComponentTypes } from "./ComponentTypes";
 
 export class AppFormer extends Component {
@@ -24,8 +23,8 @@ export class AppFormer extends Component {
 
   public core_onVanished(): void {
     Array.from(this.components.values()).forEach(component => {
-      if (component.type === ComponentTypes.PERSPECTIVE_ENVELOPE) {
-        (component as PerspectiveEnvelope).perspective.af_onShutdown();
+      if (component.type === ComponentTypes.PERSPECTIVE) {
+        (component as PerspectiveCoreComponent).perspective.af_onShutdown();
       } else if (component.type === ComponentTypes.SCREEN_ENVELOPE) {
         (component as ScreenEnvelope).screen.af_onShutdown();
       }
@@ -51,13 +50,8 @@ export class AppFormer extends Component {
   }
 
   public registerPerspective(perspective: Perspective) {
-    const envelope = new PerspectiveEnvelope(perspective);
-    const contents = new PerspectiveContents(perspective, this);
-
-    this.components.set(envelope.core_componentId, envelope);
+    const contents = new PerspectiveCoreComponent(perspective, this);
     this.components.set(contents.core_componentId, contents);
-
-    this.core.register(envelope);
     this.core.register(contents);
 
     perspective.af_onStartup();
@@ -80,7 +74,7 @@ export class AppFormer extends Component {
       return;
     }
 
-    if (component.type === ComponentTypes.PERSPECTIVE_ENVELOPE) {
+    if (component.type === ComponentTypes.PERSPECTIVE) {
       this.appformerRoot.setState({ perspective: component.core_componentId });
     } else if (component.type === ComponentTypes.SCREEN_ENVELOPE) {
       this.core.register(component);

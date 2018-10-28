@@ -4,12 +4,12 @@ import { Perspective } from "./Perspective";
 import { AppFormer } from "./AppFormer";
 import { ComponentTypes } from "./ComponentTypes";
 
-export class PerspectiveContents extends Component {
-  private readonly perspective: Perspective;
+export class PerspectiveCoreComponent extends Component {
+  public readonly perspective: Perspective;
   private readonly appformer: AppFormer;
 
   constructor(perspective: Perspective, appformer: AppFormer) {
-    super({ type: ComponentTypes.PERSPECTIVE_CONTENTS, core_componentId: perspective.af_componentId + "-contents" });
+    super({ type: ComponentTypes.PERSPECTIVE, core_componentId: perspective.af_componentId});
     this.perspective = perspective;
     this.appformer = appformer;
     this.af_isReact = perspective.af_isReact;

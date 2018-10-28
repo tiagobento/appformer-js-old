@@ -40,7 +40,7 @@ export class ConsoleHeader extends Screen {
                 Array.from(appformer.api!.components.values())
                   .filter(
                     component =>
-                      component.type === ComponentTypes.PERSPECTIVE_ENVELOPE ||
+                      component.type === ComponentTypes.PERSPECTIVE ||
                       component.type === ComponentTypes.SCREEN_ENVELOPE
                   )
                   .map(component => (
@@ -66,7 +66,7 @@ class ToggleButton extends React.Component<{
   appformer: AppFormerContextValue;
 }> {
   private isOpen(): boolean {
-    if (this.props.component.type === ComponentTypes.PERSPECTIVE_ENVELOPE) {
+    if (this.props.component.type === ComponentTypes.PERSPECTIVE) {
       return this.props.appformer.perspective === this.props.component.core_componentId;
     } else {
       return Boolean(this.props.core.components[this.props.component.core_componentId]);

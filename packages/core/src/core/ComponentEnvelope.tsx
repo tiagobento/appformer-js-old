@@ -26,11 +26,111 @@ export class ComponentEnvelope extends React.Component<Props, State> {
   public static AfComponentAttr = "af-js-component";
 
   private ref: HTMLElement;
+  private containers: Map<string, HTMLElement>;
   private mutationObserver?: MutationObserver;
 
   constructor(props: Props) {
     super(props);
     this.state = { portals: [], ready: Ready.NOPE };
+  }
+
+  private updateReactRef(newRef: HTMLElement | null) {
+    if (newRef && newRef.parentElement) {
+      this.updateRef(newRef.parentElement);
+    }
+  }
+
+  private updateNonReactRef(newRef: HTMLElement | null) {
+    if (newRef) {
+      this.updateRef(newRef);
+    }
+  }
+
+  private updateRef(newRef: HTMLElement) {
+    this.ref = newRef;
+    this.updateComponentContainerRef();
+    this.updateMutationObserver();
+  }
+
+  private updateComponentContainerRef() {
+    (this.props.component._container as any) = this.ref;
+  }
+
+  private updateMutationObserver() {
+    this.disconnectedMutationObserver();
+
+    this.mutationObserver = new MutationObserver(mutations => {
+      this.onMutation(mutations);
+    });
+
+    this.mutationObserver!.observe(this.ref, {
+      childList: true,
+      subtree: true
+    });
+  }
+
+  private onMutation(mutations: MutationRecord[]) {
+    const addedIds = flatten(mutations.map(m => Array.from(m.addedNodes)))
+      .filter(node => node.nodeName === "DIV")
+      .map(node => node as HTMLElement)
+      .filter(elem => Boolean(this.getAfComponentAttr(elem)))
+      .map(elem => this.getAfComponentAttr(elem)!);
+
+    const addedContainers = this.findContainers(addedIds).accepted.filter(
+      elem => !elem.hasAttribute(ComponentEnvelope.AfOpenComponentAttr)
+    );
+
+    if (addedContainers.length > 0) {
+      console.info(`-> Refresh was triggered by the Mutation Observer ${this.props.component.core_componentId}`);
+      this.refreshPortals();
+    }
+  }
+
+  private disconnectedMutationObserver() {
+    if (this.mutationObserver) {
+      this.mutationObserver!.disconnect();
+    }
+  }
+
+  private refreshPortals() {
+    const { acceptedIds, visitedIds, accepted } = this.findContainers(Object.keys(this.props.coreContext.components));
+
+    (this.props.component._components as any) = visitedIds;
+    this.containers = new Map(accepted.map<[string, HTMLElement]>(elem => [this.getAfComponentAttr(elem)!, elem]));
+
+    this.setState(prevState => ({
+      ready: prevState.ready === Ready.NOPE ? Ready.ALMOST : Ready.YEP,
+      portals: acceptedIds.map(id => this.props.coreContext.components[id])
+    }));
+  }
+
+  private getAfComponentAttr(container: HTMLElement) {
+    return container.getAttribute(ComponentEnvelope.AfComponentAttr);
+  }
+
+  private makePortal(component: Component): JSX.Element {
+    const container = this.containers.get(component.core_componentId)!;
+    container.setAttribute(ComponentEnvelope.AfOpenComponentAttr, component.core_componentId);
+    const envelope = (
+      <ComponentEnvelope coreContext={this.props.coreContext} core={this.props.core} component={component} />
+    );
+
+    //FIXME: What about multiple instances of the same component?
+    return ReactDOM.createPortal(envelope, container, component.core_componentId);
+  }
+
+  public findContainers(af_componentIds: string[]) {
+    const search = searchTree({
+      root: this.ref,
+      stopWhen: elem => Boolean(this.getAfComponentAttr(elem)),
+      accept: elem => af_componentIds.indexOf(this.getAfComponentAttr(elem)!) !== -1
+    });
+
+    return {
+      ...search,
+      visitedIds: Array.from(new Set(search.visited.map(elem => this.getAfComponentAttr(elem)!))),
+      acceptedIds: Array.from(new Set(search.accepted.map(elem => this.getAfComponentAttr(elem)!)))
+    };
   }
 
   public componentDidMount(): void {
@@ -41,51 +141,6 @@ export class ComponentEnvelope extends React.Component<Props, State> {
     this.refreshPortals();
     console.info(`Mounted ${this.props.component.core_componentId}`);
   }
-
-  public updateReactRef(newRef: HTMLElement | null) {
-    if (newRef && newRef.parentElement) {
-      this.ref = newRef.parentElement;
-      (this.props.component._container as any) = this.ref;
-      this.updateMutationObserver();
-    }
-  }
-
-  public updateNonReactRef(newRef: HTMLElement | null) {
-    if (newRef) {
-      this.ref = newRef;
-      (this.props.component._container as any) = this.ref;
-      this.updateMutationObserver();
-    }
-  }
-
-  private updateMutationObserver() {
-    if (this.mutationObserver) {
-      this.mutationObserver.disconnect();
-    }
-
-    this.mutationObserver = new MutationObserver(mutations => {
-      const af_componentIds = flatten(mutations.map(m => Array.from(m.addedNodes)))
-        .filter(node => node.nodeName === "DIV")
-        .map(node => node as HTMLElement)
-        .filter(elem => elem.hasAttribute(ComponentEnvelope.AfComponentAttr))
-        .map(elem => elem.getAttribute(ComponentEnvelope.AfComponentAttr)!);
-
-      const addedNodes = this.findContainers(af_componentIds).accepted.filter(
-        c => !c.hasAttribute(ComponentEnvelope.AfOpenComponentAttr)
-      );
-
-      if (addedNodes.length > 0) {
-        console.info("-> Refresh was triggered by the Mutation Observer " + this.props.component.core_componentId);
-        this.refreshPortals();
-      }
-    });
-
-    this.mutationObserver!.observe(this.ref, {
-      childList: true,
-      subtree: true
-    });
-  }
-
   public componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any): void {
     // Components might've been added and/or removed from CoreContext,
     // so we need to refresh the portals.
@@ -97,49 +152,10 @@ export class ComponentEnvelope extends React.Component<Props, State> {
   }
 
   public componentWillUnmount(): void {
-    if (this.mutationObserver) {
-      this.mutationObserver!.disconnect();
-    }
-
+    this.disconnectedMutationObserver();
     this.ref.removeAttribute(ComponentEnvelope.AfOpenComponentAttr);
     console.info(`Unmounted ${this.props.component.core_componentId}`);
     this.props.component.core_onVanished();
-  }
-
-  private refreshPortals() {
-    const { visited, accepted } = this.findContainers(Object.keys(this.props.coreContext.components));
-
-    (this.props.component._components as any) = visited.map(
-      component => component.getAttribute(ComponentEnvelope.AfComponentAttr)!
-    );
-
-    const components = accepted.map(
-      component => this.props.coreContext.components[component.getAttribute(ComponentEnvelope.AfComponentAttr)!]
-    );
-
-    this.setState(prevState => ({
-      ready: prevState.ready === Ready.NOPE ? Ready.ALMOST : Ready.YEP,
-      portals: Array.from(new Set(components))
-    }));
-  }
-
-  private makePortal(component: Component): JSX.Element {
-    const container = this.findContainers([component.core_componentId]).accepted[0];
-    container.setAttribute(ComponentEnvelope.AfOpenComponentAttr, component.core_componentId);
-    const envelope = (
-      <ComponentEnvelope coreContext={this.props.coreContext} core={this.props.core} component={component} />
-    );
-
-    //FIXME: What about multiple instances of the same component?
-    return ReactDOM.createPortal(envelope, container, component.core_componentId);
-  }
-
-  public findContainers(af_componentIds: string[]) {
-    return searchTree({
-      root: this.ref,
-      stopWhen: elem => elem.hasAttribute(ComponentEnvelope.AfComponentAttr),
-      accept: elem => af_componentIds.indexOf(elem.getAttribute(ComponentEnvelope.AfComponentAttr)!) !== -1
-    });
   }
 
   public render() {
