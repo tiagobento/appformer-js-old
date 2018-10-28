@@ -41,7 +41,7 @@ export class ConsoleHeader extends Screen {
                   .filter(
                     component =>
                       component.type === ComponentTypes.PERSPECTIVE_ENVELOPE ||
-                      component.type === ComponentTypes.SCREEN_CONTENTS
+                      component.type === ComponentTypes.SCREEN_ENVELOPE
                   )
                   .map(component => (
                     <ToggleButton
