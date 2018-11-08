@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Screen, Subscriptions } from "appformer-js";
+import { Screen } from "appformer-js";
 
 interface Props {
   screens: Screen[];
@@ -29,37 +29,14 @@ export class EventsSimulationConsole extends React.Component<Props, State> {
   }
 
   public subscriptions(props = this.props) {
-    // FIXME: There's probably a much better way to do that without increasing the stack size too much.
-
-    const all: Subscriptions = {};
-
-    props.screens
-      .filter(s => s.af_subscriptions)
-      .map(s => s.af_subscriptions)
-      .forEach(subscription => {
-        for (const channel in subscription) {
-          if (subscription.hasOwnProperty(channel)) {
-            if (!all[channel]) {
-              all[channel] = subscription[channel];
-            } else {
-              const prev = all[channel];
-              all[channel] = (event: any) => {
-                prev(event);
-                subscription[channel](event);
-              };
-            }
-          }
-        }
-      });
-
-    return all;
+    return new Map();
   }
 
   private sendEvent() {
     if (this.state.channel) {
       try {
         const parse = JSON.parse(this.state.event);
-        this.subscriptions()[this.state.channel!](parse);
+        this.subscriptions().get(this.state.channel!)(parse);
       } catch (e) {
         console.info(`Invalid event [${this.state.event}]`);
       }

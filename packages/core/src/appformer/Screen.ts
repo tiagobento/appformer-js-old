@@ -1,11 +1,11 @@
-import { Service, Subscriptions } from "./Components";
+import { Service } from "./Components";
 import { Component, Element } from "../core";
 
 export abstract class Screen extends Component {
   public af_componentId: string;
   private _af_componentTitle?: string = undefined;
   private _af_componentService: Service = {};
-  private _af_subscriptions: Subscriptions = {}; // FIXME: Maybe this one should be a method?
+  public af_subscriptions: Map<string, ((event: any) => void)> = new Map();
 
   protected constructor(componentId: string) {
     super({ type: "screen", core_componentId: componentId });
@@ -60,13 +60,5 @@ export abstract class Screen extends Component {
 
   set af_componentService(value: Service) {
     this._af_componentService = value;
-  }
-
-  get af_subscriptions(): Subscriptions {
-    return this._af_subscriptions;
-  }
-
-  set af_subscriptions(value: Subscriptions) {
-    this._af_subscriptions = value;
   }
 }

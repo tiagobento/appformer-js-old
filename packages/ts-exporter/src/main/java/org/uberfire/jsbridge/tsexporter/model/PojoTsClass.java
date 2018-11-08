@@ -44,6 +44,7 @@ import static javax.lang.model.element.Modifier.STATIC;
 import static org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore.NO_DECORATORS;
 import static org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation.Kind.FIELD;
 import static org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation.Kind.HIERARCHY;
+import static org.uberfire.jsbridge.tsexporter.meta.Translatable.SourceUsage.IMPORT_STATEMENT;
 import static org.uberfire.jsbridge.tsexporter.meta.Translatable.SourceUsage.TYPE_ARGUMENT_DECLARATION;
 import static org.uberfire.jsbridge.tsexporter.meta.Translatable.SourceUsage.TYPE_ARGUMENT_USE;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.formatRightToLeft;
@@ -111,7 +112,7 @@ public class PojoTsClass implements TsClass {
                       "",
                       "export %s class %s %s {",
                       "",
-                      "  protected readonly _fqcn: string = '%s';",
+                      "  protected readonly _fqcn: string = %s.__fqcn();",
                       "",
                       "%s",
                       "",
@@ -119,21 +120,31 @@ public class PojoTsClass implements TsClass {
                       "    %s",
                       "    Object.assign(this, self);",
                       "  }",
+                      "",
+                      "  public static __fqcn() : string { ",
+                      "    return '%s'; ",
+                      "  } ",
+                      "",
                       "}"),
 
                 this::imports,
                 this::abstractOrNot,
                 this::getSimpleName,
                 this::classHierarchy,
-                this::fqcn,
+                this::getSimpleNameErasure,
                 this::fields,
                 this::extractConstructorArgs,
-                this::superConstructorCall
+                this::superConstructorCall,
+                this::fqcn
         );
     }
 
     private String getSimpleName() {
         return translatableSelf.get().toTypeScript(TYPE_ARGUMENT_DECLARATION);
+    }
+
+    private String getSimpleNameErasure() {
+        return translatableSelf.get().toTypeScript(IMPORT_STATEMENT);
     }
 
     private String imports() {

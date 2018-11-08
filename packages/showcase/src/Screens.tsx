@@ -9,7 +9,7 @@ export class ReactComponentScreen extends Screen {
     super("A-react-screen");
     this.af_isReact = true;
     this.af_componentTitle = "React Component";
-    this.af_subscriptions = {};
+    this.af_subscriptions = new Map();
     this.af_componentService = {};
   }
 
