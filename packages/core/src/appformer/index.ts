@@ -2,6 +2,7 @@ import { AppFormer } from "./AppFormer";
 import { Screen } from "./Screen";
 import { Perspective } from "./Perspective";
 import { Element } from "../core";
+import { findChildContainers} from "../core/ComponentEnvelope";
 
 export { AppFormer } from "./AppFormer";
 export * from "./Components";
@@ -9,6 +10,7 @@ export * from "./Shorthands";
 export * from "./Screen";
 export * from "./ComponentTypes";
 export * from "./Perspective";
+export * from "./CompassLayoutPerspective";
 export * from "./DisplayInfo";
 export * from "./Panel";
 export * from "./Part";
@@ -70,3 +72,7 @@ export function fireEvent(obj: any) {
 export function rpc(path: string, args: any[]) {
   return singleton!.rpc(path, args);
 }
+
+(window as any)._AppFormerUtils = {
+  findChildContainers
+};

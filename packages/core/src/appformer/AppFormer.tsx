@@ -1,12 +1,13 @@
 import * as React from "react";
 import { AppFormerRoot } from "./AppFormerRoot";
-import { Element, Component, Core } from "../core";
+import { Component, Core, Element } from "../core";
 import { ScreenEnvelope } from "./ScreenEnvelope";
 import { ScreenContents } from "./ScreenContents";
 import { Perspective } from "./Perspective";
 import { Screen } from "./Screen";
 import { PerspectiveCoreComponent } from "./PerspectiveCoreComponent";
 import { ComponentTypes } from "./ComponentTypes";
+import { CompassLayoutPerspective } from "./CompassLayoutPerspective";
 
 export class AppFormer extends Component {
   private appformerRoot: AppFormerRoot;
@@ -50,6 +51,11 @@ export class AppFormer extends Component {
   }
 
   public registerPerspective(perspective: Perspective) {
+    if (perspective instanceof CompassLayoutPerspective) {
+      console.warn("Sorry, compass layout perspectives are not supported yet :(");
+      return;
+    }
+
     const contents = new PerspectiveCoreComponent(perspective, this);
     this.components.set(contents.core_componentId, contents);
     this.core.register(contents);

@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Perspective, Element } from "appformer-js";
+import { Element, Perspective } from "appformer-js";
 
 export class ShowcasePerspective extends Perspective {
   constructor() {

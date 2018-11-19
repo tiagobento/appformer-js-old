@@ -1,7 +1,3 @@
-import { Menu, Toolbar } from "./Components";
-import { Panel, PanelType } from "./Panel";
-import { DisplayInfo } from "./DisplayInfo";
-import { Part } from "./Part";
 import { Component, Element } from "../core";
 
 export abstract class Perspective extends Component {
@@ -9,14 +5,7 @@ export abstract class Perspective extends Component {
   private _af_perspectiveScreens: string[] = [];
   private _af_isDefault: boolean = false;
   private _af_isTransient: boolean = true;
-  private _af_menus?: Menu[] = undefined;
-  private _af_toolbar?: Toolbar = undefined;
-
-  private _af_defaultPanelType: PanelType = PanelType.MULTI_LIST;
-  private _af_displayInfo: DisplayInfo = new DisplayInfo();
-
-  private _af_parts: Part[] = [];
-  private _af_panels: Panel[] = [];
+  private _af_isTemplated: boolean = true;
 
   protected constructor(componentId: string) {
     super({ type: "perspective", core_componentId: componentId });
@@ -69,51 +58,11 @@ export abstract class Perspective extends Component {
     this._af_isTransient = value;
   }
 
-  get af_menus(): Menu[] | undefined {
-    return this._af_menus;
+  get af_isTemplated(): boolean {
+    return this._af_isTemplated;
   }
 
-  set af_menus(value: Menu[] | undefined) {
-    this._af_menus = value;
-  }
-
-  get af_toolbar(): Toolbar | undefined {
-    return this._af_toolbar;
-  }
-
-  set af_toolbar(value: Toolbar | undefined) {
-    this._af_toolbar = value;
-  }
-
-  get af_defaultPanelType(): PanelType {
-    return this._af_defaultPanelType;
-  }
-
-  set af_defaultPanelType(value: PanelType) {
-    this._af_defaultPanelType = value;
-  }
-
-  get af_displayInfo(): DisplayInfo {
-    return this._af_displayInfo;
-  }
-
-  set af_displayInfo(value: DisplayInfo) {
-    this._af_displayInfo = value;
-  }
-
-  get af_parts(): Part[] {
-    return this._af_parts;
-  }
-
-  set af_parts(value: Part[]) {
-    this._af_parts = value;
-  }
-
-  get af_panels(): Panel[] {
-    return this._af_panels;
-  }
-
-  set af_panels(value: Panel[]) {
-    this._af_panels = value;
+  set af_isTemplated(value: boolean) {
+    this._af_isTemplated = value;
   }
 }

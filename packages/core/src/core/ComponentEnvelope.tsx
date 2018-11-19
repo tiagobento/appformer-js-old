@@ -81,9 +81,9 @@ export class ComponentEnvelope extends React.Component<Props, State> {
     const addedContainers = flatten(mutations.map(m => Array.from(m.addedNodes)))
       .filter(node => node.nodeName === "DIV")
       .map(node => node as HTMLElement)
-      .filter(elem => Boolean(this.getAfComponentAttr(elem)))
+      .filter(elem => Boolean(getAfComponentAttr(elem)))
       .filter(elem => this.isSubComponentContainer(elem))
-      .map(elem => this.containers.get(this.getAfComponentAttr(elem)!))
+      .map(elem => this.containers.get(getAfComponentAttr(elem)!))
       .filter(elem => !elem || !elem.hasAttribute(ComponentEnvelope.AfOpenComponentAttr));
 
     console.info(`Mutation [${new Date().getTime() - start}ms] on "${this.props.component.core_componentId}"`);
@@ -96,7 +96,7 @@ export class ComponentEnvelope extends React.Component<Props, State> {
   private isSubComponentContainer(container: HTMLElement) {
     return searchParents({
       element: container,
-      stop: elem => elem === this.ref || Boolean(this.getAfComponentAttr(elem)),
+      stop: elem => elem === this.ref || Boolean(getAfComponentAttr(elem)),
       accept: elem => elem === this.ref
     });
   }
@@ -115,17 +115,13 @@ export class ComponentEnvelope extends React.Component<Props, State> {
     (this.props.component._components as any) = search.visitedIds;
 
     this.containers = new Map(
-      search.accepted.map<[string, HTMLElement]>(elem => [this.getAfComponentAttr(elem)!, elem])
+      search.accepted.map<[string, HTMLElement]>(elem => [getAfComponentAttr(elem)!, elem])
     );
 
     this.setState(prevState => ({
       ready: prevState.ready === Ready.NOPE ? Ready.ALMOST : Ready.YEP,
       portals: search.acceptedIds.map(id => this.props.coreContext.components[id])
     }));
-  }
-
-  private getAfComponentAttr(container: HTMLElement) {
-    return container.getAttribute(ComponentEnvelope.AfComponentAttr);
   }
 
   private makePortal(component: Component): JSX.Element {
@@ -142,14 +138,14 @@ export class ComponentEnvelope extends React.Component<Props, State> {
   public findContainers(af_componentIds: string[]): DOMSearch {
     const search = searchChildren({
       root: this.ref,
-      stopWhen: elem => Boolean(this.getAfComponentAttr(elem)),
-      accept: elem => af_componentIds.indexOf(this.getAfComponentAttr(elem)!) !== -1
+      stopWhen: elem => Boolean(getAfComponentAttr(elem)),
+      accept: elem => af_componentIds.indexOf(getAfComponentAttr(elem)!) !== -1
     });
 
     return {
       ...search,
-      visitedIds: Array.from(new Set(search.visited.map(elem => this.getAfComponentAttr(elem)!))),
-      acceptedIds: Array.from(new Set(search.accepted.map(elem => this.getAfComponentAttr(elem)!)))
+      visitedIds: Array.from(new Set(search.visited.map(elem => getAfComponentAttr(elem)!))),
+      acceptedIds: Array.from(new Set(search.accepted.map(elem => getAfComponentAttr(elem)!)))
     };
   }
 
@@ -194,9 +190,20 @@ export class ComponentEnvelope extends React.Component<Props, State> {
       </>
     );
   }
+
 }
 
 const flatten = <T extends any>(arr: T[][]) => ([] as T[]).concat(...arr);
+
+export function findChildContainers(container: HTMLElement): HTMLElement[] {
+  const searchResult = searchChildren({
+    root: container,
+    stopWhen: (elem: any) => Boolean(getAfComponentAttr(elem)),
+    accept: (elem: any) => Boolean(getAfComponentAttr(elem))
+  });
+
+  return searchResult.accepted;
+}
 
 function searchParents(args: {
   accept: (elem: HTMLElement) => boolean;
@@ -245,4 +252,8 @@ function searchChildren(args: {
     visited: Array.from(visited),
     accepted: Array.from(accepted)
   };
+}
+
+function getAfComponentAttr(container: HTMLElement) {
+  return container.getAttribute(ComponentEnvelope.AfComponentAttr);
 }

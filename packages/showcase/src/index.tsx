@@ -2,7 +2,7 @@ import * as React from "react";
 import * as AppFormer from "appformer-js";
 import * as DevConsole from "appformer-js-dev-console";
 import * as ShowcaseComponents from "./Screens";
-import {ShowcasePerspective, NonReactShowcasePerspective} from "./Perspectives";
+import { ShowcasePerspective, NonReactShowcasePerspective } from "./Perspectives";
 
 AppFormer.register(new ShowcaseComponents.StringElementScreen());
 AppFormer.register(new ShowcaseComponents.PureDomElementScreen());
