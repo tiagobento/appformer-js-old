@@ -1,17 +1,17 @@
 import * as React from "react";
 import { AppFormerRoot } from "./AppFormerRoot";
-import { Element, Component, Core } from "../core";
-import { ScreenEnvelope } from "./ScreenEnvelope";
-import { ScreenContents } from "./ScreenContents";
+import { Element, Component as CoreComponent, Core } from "../core";
+import { ScreenCoreComponent } from "./ScreenCoreComponent";
 import { Perspective } from "./Perspective";
-import { Screen } from "./Screen";
 import { PerspectiveCoreComponent } from "./PerspectiveCoreComponent";
 import { ComponentTypes } from "./ComponentTypes";
+import { Component } from "./Component";
+import { Screen } from "./Screen";
 
-export class AppFormer extends Component {
+export class AppFormer extends CoreComponent {
   private appformerRoot: AppFormerRoot;
   public core: Core;
-  public components: Map<string, Component>;
+  public components: Map<string, CoreComponent>;
 
   constructor() {
     super({ type: ComponentTypes.APPFORMER, core_componentId: "appformer" });
@@ -25,8 +25,8 @@ export class AppFormer extends Component {
     Array.from(this.components.values()).forEach(component => {
       if (component.type === ComponentTypes.PERSPECTIVE) {
         (component as PerspectiveCoreComponent).perspective.af_onShutdown();
-      } else if (component.type === ComponentTypes.SCREEN_ENVELOPE) {
-        (component as ScreenEnvelope).screen.af_onShutdown();
+      } else if (component.type === ComponentTypes.SCREEN) {
+        (component as ScreenCoreComponent).screen.af_onShutdown();
       }
     });
   }
@@ -37,38 +37,40 @@ export class AppFormer extends Component {
   }
 
   public registerScreen(screen: Screen) {
-    const envelope = new ScreenEnvelope(screen);
-    const contents = new ScreenContents(screen);
-
-    this.components.set(envelope.core_componentId, envelope);
-    this.components.set(contents.core_componentId, contents);
-
-    this.core.register(envelope);
-    this.core.register(contents);
-
-    screen.af_onStartup();
+    this.register(screen);
   }
 
   public registerPerspective(perspective: Perspective) {
-    const contents = new PerspectiveCoreComponent(perspective, this);
+    this.register(perspective);
+  }
+
+  public register(component: Component) {
+    let contents;
+    if (component.type === ComponentTypes.PERSPECTIVE) {
+      contents = new PerspectiveCoreComponent(component as Perspective, this);
+    } else if (component.type === ComponentTypes.SCREEN) {
+      contents = new ScreenCoreComponent(component as Screen);
+    } else {
+      throw new Error("Invalid type");
+    }
+
     this.components.set(contents.core_componentId, contents);
     this.core.register(contents);
-
-    perspective.af_onStartup();
+    component.af_onStartup();
   }
 
   public close(af_componentId: string) {
     const component = this.components.get(af_componentId);
     if (component) {
-      if (component.type === ComponentTypes.SCREEN_ENVELOPE) {
-        if ((component as ScreenEnvelope).screen.af_onMayClose()) {
+      if (component.type === ComponentTypes.SCREEN) {
+        if ((component as ScreenCoreComponent).screen.af_onMayClose()) {
           this.core.deregister(af_componentId);
         }
       }
     }
   }
 
-  public goTo(af_componentId: string) {
+  public goTo(af_componentId: string, args?: any) {
     const component = this.components.get(af_componentId);
     if (!component) {
       return;
@@ -76,7 +78,7 @@ export class AppFormer extends Component {
 
     if (component.type === ComponentTypes.PERSPECTIVE) {
       this.appformerRoot.setState({ perspective: component.core_componentId });
-    } else if (component.type === ComponentTypes.SCREEN_ENVELOPE) {
+    } else if (component.type === ComponentTypes.SCREEN) {
       this.core.register(component);
     }
   }

@@ -1,9 +1,10 @@
 import { AppFormer } from "./AppFormer";
-import { Screen } from "./Screen";
-import { Perspective } from "./Perspective";
 import { Element } from "../core";
+import { Component } from "./Component";
+import { Perspective } from "./Perspective";
+import { Screen } from "./Screen";
 
-export { AppFormer } from "./AppFormer";
+export * from "./AppFormer";
 export * from "./Components";
 export * from "./Shorthands";
 export * from "./Screen";
@@ -39,7 +40,7 @@ export function init(container: HTMLElement): AppFormer {
 //
 //Singleton API
 
-export function register(component: Screen | Perspective) {
+export function register(component: Component) {
   if (component.type === "screen") {
     singleton!.registerScreen(component as Screen);
   } else if (component.type === "perspective") {
