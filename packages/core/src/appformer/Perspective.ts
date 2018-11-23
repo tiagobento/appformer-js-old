@@ -2,6 +2,7 @@ import { Component, Element } from "../core";
 
 export abstract class Perspective extends Component {
   public af_componentId: string;
+  private _af_name: string;
   private _af_perspectiveScreens: string[] = [];
   private _af_isDefault: boolean = false;
   private _af_isTransient: boolean = true;
@@ -32,6 +33,14 @@ export abstract class Perspective extends Component {
 
   public af_onShutdown(): void {
     //
+  }
+
+  get af_name(): string {
+    return this._af_name;
+  }
+
+  set af_name(value: string) {
+    this._af_name = value;
   }
 
   get af_perspectiveScreens(): string[] {
