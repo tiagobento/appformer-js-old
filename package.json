@@ -34,7 +34,7 @@
     "build:all": "yarn run build:ts && yarn run build:mvn",
     "build:ts": "npx lerna exec --concurrency `nproc || sysctl -n hw.ncpu` -- yarn run build:prod",
     "build:mvn": "npx lerna run build:mvn --stream --concurrency `nproc || sysctl -n hw.ncpu`",
-    "republish-local": "npx lerna exec --stream --scope appformer-js -- 'npm unpublish --force -reg http://localhost:4873 && npm publish -reg http://localhost:4873'",
+    "republish-local": "npx lerna exec --stream --scope appformer-js --scope appformer-js-editors -- 'npm unpublish --force -reg http://localhost:4873 && npm publish -reg http://localhost:4873'",
     "showcase": "npx lerna run showcase"
   },
   "babel": {

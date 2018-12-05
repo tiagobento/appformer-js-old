@@ -20,55 +20,49 @@ import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.AbstractMap.SimpleImmutableEntry;
-import java.util.Map.Entry;
-import java.util.stream.Stream;
 
+import org.uberfire.jsbridge.tsexporter.config.AppFormerComponentsRegistry;
 import org.uberfire.jsbridge.tsexporter.config.AppFormerLib;
 import org.uberfire.jsbridge.tsexporter.config.Configuration;
 import org.uberfire.jsbridge.tsexporter.model.NpmPackage;
 import org.uberfire.jsbridge.tsexporter.model.NpmPackageForAppFormerLibs;
 
-import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 import static javax.tools.StandardLocation.CLASS_OUTPUT;
 import static org.uberfire.jsbridge.tsexporter.config.AppFormerLib.Type.LIB;
 
 public class TsCodegenLibBundler {
 
-    private final Configuration config;
+    private final Configuration configuration;
     private final TsCodegenWriter writer;
 
-    public TsCodegenLibBundler(final Configuration config,
+    public TsCodegenLibBundler(final Configuration configuration,
                                final TsCodegenWriter writer) {
 
-        this.config = config;
+        this.configuration = configuration;
         this.writer = writer;
     }
 
     public void bundle() {
 
-        final String registryEntries = config.getLibraries().stream()
+        configuration.getLibraries().stream()
                 .filter(lib -> lib.getType().equals(LIB))
-                .peek(this::writeLibMainFile)
-                .flatMap(this::bundleComponentConfiguration)
-                .map(e -> format("\"%s\": %s", e.getKey(), e.getValue()))
-                .collect(joining(",\n"));
+                .forEach(this::writeLibMainFile);
 
         writePublicResource("AppFormerComponentsRegistry.js",
-                            format("window.AppFormerComponentsRegistry = { %s }", registryEntries));
+                            new AppFormerComponentsRegistry(configuration).toSource());
     }
 
-    private void writeLibMainFile(final AppFormerLib lib) {
-        final String fileName = getLibMainFileCopyName(lib);
+    private void writeLibMainFile(final AppFormerLib appformerLib) {
+        final String fileName = getAppFormerLibMainFileCopyName(appformerLib);
 
         final NpmPackage npmPackage = new NpmPackageForAppFormerLibs(
-                lib.getName(),
+                appformerLib.getName(),
                 writer.getVersion(),
                 NpmPackage.Type.LIB);
 
         final String baseDir = writer.getNpmPackageBaseDir(npmPackage, null);
-        final Path srcFilePath = writer.buildPath(baseDir, lib.getMain());
+        final Path srcFilePath = writer.buildPath(baseDir, appformerLib.getMain());
 
         try {
             final String contents = Files.lines(srcFilePath).collect(joining("\n"));
@@ -88,25 +82,7 @@ public class TsCodegenLibBundler {
         }
     }
 
-    private String getLibMainFileCopyName(final AppFormerLib lib) {
-        return lib.getName() + ".js";
-    }
-
-    private Stream<Entry<String, String>> bundleComponentConfiguration(final AppFormerLib lib) {
-        return lib.getComponents().stream()
-                .map(component -> {
-
-                    final String type = component.getType().name().toUpperCase();
-                    final String source = getLibMainFileCopyName(lib);
-
-                    final String params = component.getParams().entrySet().stream()
-                            .map(e -> format("\"%s\": \"%s\"", e.getKey(), e.getValue()))
-                            .collect(joining(",\n"));
-
-                    final String configStr = format("{\"type\": \"%s\", \"source\": \"%s\", \"params\": { %s } }",
-                                                    type, source, params);
-
-                    return new SimpleImmutableEntry<>(component.getId(), configStr);
-                });
+    public static String getAppFormerLibMainFileCopyName(final AppFormerLib appformerLib) {
+        return appformerLib.getName() + ".js";
     }
 }

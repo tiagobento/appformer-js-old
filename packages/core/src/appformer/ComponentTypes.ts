@@ -1,6 +1,6 @@
 export enum ComponentTypes {
-  SCREEN_ENVELOPE = "screen-envelope",
-  SCREEN_CONTENTS = "screen-contents",
+  SCREEN = "screen",
   PERSPECTIVE = "perspective",
-  APPFORMER = "appformer"
+  APPFORMER = "appformer",
+  EDITOR = "editor"
 }

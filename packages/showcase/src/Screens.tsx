@@ -1,6 +1,6 @@
 import * as React from "react";
 import { DemoReactComponent } from "./DemoReactComponent";
-import { Screen } from "appformer-js";
+import { Screen, AppFormerContext, Element } from "appformer-js";
 
 export class ReactComponentScreen extends Screen {
   public onFoo: (e: any) => void;
@@ -37,17 +37,19 @@ export class ReactComponentScreen extends Screen {
     console.info(`Shut down ${this.af_componentId}`);
   }
 
-  public af_componentRoot() {
+  public af_componentRoot(): Element {
     return (
-      <div>
-        <br />
-        <button className={"btn btn-primary btn-sm"} onClick={() => console.info("Button was clicked.")}>
-          Click me to make server send an event...
-        </button>
-        <br />
+      <NiceScreenWrapper screen={this}>
+        <div>
+          <br />
+          <button className={"btn btn-primary btn-sm"} onClick={() => console.info("Button was clicked.")}>
+            Click me to make server send an event...
+          </button>
+          <br />
 
-        <DemoReactComponent number={this.af_componentId} onFoo={(x: any) => (this.onFoo = x)} />
-      </div>
+          <DemoReactComponent number={this.af_componentId} onFoo={(x: any) => (this.onFoo = x)} />
+        </div>
+      </NiceScreenWrapper>
     );
   }
 }
@@ -111,7 +113,45 @@ export class SillyReactScreen extends Screen {
     this.af_componentTitle = "Silly React Component";
   }
 
-  public af_componentRoot() {
-    return <h1>{`This is just an <h1>`}</h1>;
+  public af_componentRoot(): Element {
+    return (
+      <NiceScreenWrapper screen={this}>
+        <h1>{`This is just an <h1>`}</h1>
+      </NiceScreenWrapper>
+    );
+  }
+}
+
+class NiceScreenWrapper extends React.Component<{ screen: Screen }, {}> {
+  public render() {
+    return (
+      <div className={"af-screen-container"}>
+        {this.props.screen.af_componentTitle && (
+          <>
+            <div className={"title"}>{this.closeButton()}</div>
+          </>
+        )}
+        {this.props.children}
+      </div>
+    );
+  }
+
+  private closeButton() {
+    return (
+      <AppFormerContext.Consumer>
+        {appformer => (
+          <span>
+            <span>{this.props.screen.af_componentTitle}</span>
+            <a
+              href="#"
+              style={{ lineHeight: "1.6", float: "right" }}
+              onClick={() => appformer.api!.close(this.props.screen.af_componentId)}
+            >
+              Close
+            </a>
+          </span>
+        )}
+      </AppFormerContext.Consumer>
+    );
   }
 }
