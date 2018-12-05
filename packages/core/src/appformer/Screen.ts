@@ -3,8 +3,8 @@ import { Component, Element } from "../core";
 
 export abstract class Screen extends Component {
   public af_componentId: string;
-  private _af_componentTitle?: string = undefined;
-  private _af_componentService: Service = {};
+  public af_componentTitle?: string = undefined;
+  public af_componentService: Service = {};
   public af_subscriptions: Map<string, ((event: any) => void)> = new Map();
 
   protected constructor(componentId: string) {
@@ -45,20 +45,4 @@ export abstract class Screen extends Component {
   }
 
   public abstract af_componentRoot(children?: any): Element;
-
-  get af_componentTitle(): string | undefined {
-    return this._af_componentTitle;
-  }
-
-  set af_componentTitle(value: string | undefined) {
-    this._af_componentTitle = value;
-  }
-
-  get af_componentService(): Service {
-    return this._af_componentService;
-  }
-
-  set af_componentService(value: Service) {
-    this._af_componentService = value;
-  }
 }
