@@ -47,7 +47,6 @@ export class AppFormer extends CoreComponent {
       return;
     }
 
-    const contents = new PerspectiveCoreComponent(perspective, this);
     this.register(perspective);
   }
 
