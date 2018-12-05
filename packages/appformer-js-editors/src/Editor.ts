@@ -19,7 +19,7 @@ export enum LockingStrategy {
 
 export abstract class Editor extends Screen {
   public af_priority: number = 0;
-  public af_supportedTypes: ResourceType[] = [];
+  public af_resourceTypes: string[] = [];
 
   public af_lockingStrategy: LockingStrategy = LockingStrategy.FRAMEWORK_PESSIMISTIC;
   public af_isDynamic: boolean = false;
