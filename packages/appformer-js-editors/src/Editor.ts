@@ -1,5 +1,7 @@
 import { Screen } from "appformer-js";
 import { Path } from "@kiegroup-ts-generated/uberfire-api";
+import { ObservablePath } from "@kiegroup-ts-generated/uberfire-api";
+import { PlaceRequest } from "@kiegroup-ts-generated/uberfire-api";
 
 export abstract class ResourceType {
   public shortName: string;
@@ -25,8 +27,9 @@ export abstract class Editor extends Screen {
   public af_isDynamic: boolean = false;
   public af_owningPerspective?: string = undefined;
 
-  public af_save() : void {
-      //
-  }
+  public abstract af_onEditorStartup(path: ObservablePath, place: PlaceRequest): void;
 
+  public af_onSave(): void {
+    //
+  }
 }
