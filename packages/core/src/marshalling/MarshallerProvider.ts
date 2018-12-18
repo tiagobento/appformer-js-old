@@ -17,6 +17,7 @@ import { JavaDateMarshaller } from "./marshallers/JavaDateMarshaller";
 import { JavaOptionalMarshaller } from "./marshallers/JavaOptionalMarshaller";
 import { JavaArrayListMarshaller, JavaHashSetMarshaller } from "./marshallers/JavaCollectionMarshaller";
 import { Portable } from "./Portable";
+import { JavaEnumMarshaller } from "./marshallers/JavaEnumMarshaller";
 
 export class MarshallerProvider {
   private static initialized: boolean = false;
@@ -53,6 +54,7 @@ export class MarshallerProvider {
     this.marshallersByJavaType.set(JavaType.UNMODIFIABLE_MAP, new JavaHashMapMarshaller());
 
     this.marshallersByJavaType.set(JavaType.OPTIONAL, new JavaOptionalMarshaller());
+    this.marshallersByJavaType.set(JavaType.ENUM, new JavaEnumMarshaller());
 
     this.initialized = true;
   }
@@ -90,6 +92,10 @@ export class MarshallerProvider {
     }
 
     return marshaller;
+  }
+
+  public static getForEnum(): Marshaller<any, any, any, any> {
+    return this.getForFqcn(JavaType.ENUM);
   }
 
   private static assertInitialization() {

@@ -34,7 +34,6 @@ export class DefaultMarshaller<T extends Portable<T>> extends NullableMarshaller
     // Input has fqcn, so, it represents a Java type. We need to check if it
     // is a primitive Java type or not, because this marshaller handles only
     // custom types (i.e. Portable).
-
     if (JavaWrapperUtils.isJavaType(rootFqcn)) {
       const marshaller = MarshallerProvider.getForObject(input);
       const marshalledObject = marshaller.marshall(input, ctx);
@@ -43,10 +42,13 @@ export class DefaultMarshaller<T extends Portable<T>> extends NullableMarshaller
       return marshalledObject;
     }
 
+    if (JavaWrapperUtils.isEnum(input)) {
+      return MarshallerProvider.getForEnum().marshall(input, ctx);
+    }
+
     const _this = this.marshallCustomObject(input, ctx, rootFqcn);
 
     ctx.cacheObject(input, _this);
-
     return _this;
   }
 
@@ -66,6 +68,10 @@ export class DefaultMarshaller<T extends Portable<T>> extends NullableMarshaller
       // this input is not a custom object, otherwise, we would be able to find a factory function.
       // try to unmarshall it as a java type (that we know how to build)
       return DefaultMarshaller.unmarshallJavaType(rootFqcn, input, ctx);
+    }
+
+    if (this.isEnumObject(input as any)) {
+      return MarshallerProvider.getForEnum().unmarshall(input, ctx);
     }
 
     const targetObj = this.unmarshallCustomObject(targetFactory, input, ctx);
@@ -124,6 +130,10 @@ export class DefaultMarshaller<T extends Portable<T>> extends NullableMarshaller
     });
 
     return targetObj;
+  }
+
+  private isEnumObject(input: ErraiObject): boolean {
+    return input[ErraiObjectConstants.ENUM_STRING_VALUE] !== undefined;
   }
 
   private static marshallWrappableType(input: any, ctx: MarshallingContext): any {

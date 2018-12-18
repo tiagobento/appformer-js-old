@@ -285,3 +285,19 @@ describe("consistency validations", () => {
       .forEach(javaType => expect(marshallers.get(javaType)).toBeDefined());
   });
 });
+
+describe("getForEnum", () => {
+  beforeEach(() => {
+    MarshallerProvider.initialize();
+  });
+
+  afterEach(() => {
+    // force reinitialization
+    (MarshallerProvider as any).initialized = false;
+  });
+
+  test("should return exactly the same enum marshaller object", () => {
+    const enumMarshaller = (MarshallerProvider as any).marshallersByJavaType.get(JavaType.ENUM);
+    expect(MarshallerProvider.getForEnum()).toStrictEqual(enumMarshaller);
+  });
+});

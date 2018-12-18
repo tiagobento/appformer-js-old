@@ -4,5 +4,6 @@ export enum ErraiObjectConstants {
   NUM_VAL = "^NumVal",
   VALUE = "^Value",
   JSON = "^${$JSON$}$::",
-  NULL = "^NullVal"
+  NULL = "^NullVal",
+  ENUM_STRING_VALUE = "^EnumStringValue"
 }

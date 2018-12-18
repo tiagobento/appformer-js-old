@@ -6,6 +6,7 @@ import {
   JavaByte,
   JavaDate,
   JavaDouble,
+  JavaEnum,
   JavaFloat,
   JavaHashMap,
   JavaHashSet,
@@ -25,6 +26,7 @@ import { ValueBasedErraiObject } from "../../model/ValueBasedErraiObject";
 import { JavaType } from "../../../java-wrappers/JavaType";
 import { NumberUtils } from "../../../util/NumberUtils";
 import { UnmarshallingContext } from "../../UnmarshallingContext";
+import { EnumStringValueBasedErraiObject } from "../../model/EnumStringValueBasedErraiObject";
 
 beforeEach(() => {
   MarshallerProvider.initialize();
@@ -34,6 +36,7 @@ describe("marshall", () => {
   const objectId = ErraiObjectConstants.OBJECT_ID;
   const encodedType = ErraiObjectConstants.ENCODED_TYPE;
   const value = ErraiObjectConstants.VALUE;
+  const enumStringValue = ErraiObjectConstants.ENUM_STRING_VALUE;
 
   describe("pojo marshalling", () => {
     test("custom pojo, should return serialize it normally", () => {
@@ -42,7 +45,8 @@ describe("marshall", () => {
         sendSpam: false,
         age: new JavaInteger("10"),
         address: new Address({
-          line1: "address line 1"
+          line1: "address line 1",
+          type: AddressType.WORK
         }),
         bestFriend: new User({
           name: "my name 2",
@@ -64,7 +68,8 @@ describe("marshall", () => {
         address: {
           [encodedType]: "com.app.my.Address",
           [objectId]: expect.stringMatching(NumberUtils.nonNegativeIntegerRegex),
-          line1: "address line 1"
+          line1: "address line 1",
+          type: new EnumStringValueBasedErraiObject("com.app.my.AddressType", AddressType.WORK.name).asErraiObject()
         },
         bestFriend: {
           [encodedType]: "com.app.my.Pojo",
@@ -75,7 +80,8 @@ describe("marshall", () => {
           address: {
             [encodedType]: "com.app.my.Address",
             [objectId]: expect.stringMatching(NumberUtils.nonNegativeIntegerRegex),
-            line1: "address 2 line 1"
+            line1: "address 2 line 1",
+            type: null
           },
           bestFriend: null
         }
@@ -203,6 +209,23 @@ describe("marshall", () => {
             k2: "v2"
           }
         }
+      });
+    });
+
+    test("custom pojo with enum type, should serialize it normally", () => {
+      const input = {
+        _fqcn: "com.app.my.Pojo",
+        str: "foo",
+        enum: AddressType.HOME
+      };
+
+      const output = new DefaultMarshaller().marshall(input, new MarshallingContext());
+
+      expect(output).toStrictEqual({
+        [encodedType]: "com.app.my.Pojo",
+        [objectId]: expect.stringMatching(NumberUtils.nonNegativeIntegerRegex),
+        str: "foo",
+        enum: new EnumStringValueBasedErraiObject("com.app.my.AddressType", AddressType.HOME.name).asErraiObject()
       });
     });
   });
@@ -733,6 +756,43 @@ describe("marshall", () => {
       // do not cache repeated object
       expect(context.getCached(repeatedValue)).toBeUndefined();
     });
+
+    test("custom pojo with repeated JavaEnum objects, should not cache it", () => {
+      const repeatedValue = AddressType.WORK;
+
+      const input = new Node({
+        data: repeatedValue,
+        left: new Node({ data: AddressType.HOME }),
+        right: new Node({ data: repeatedValue })
+      });
+
+      // === test
+      const context = new MarshallingContext();
+      const output = new DefaultMarshaller().marshall(input, context);
+
+      // === assertions
+
+      const rootObjId = output![objectId];
+      const rootDataObjId = (output as any).data[objectId];
+      expect((output as any).data[enumStringValue]).toStrictEqual(AddressType.WORK.name);
+
+      const leftObjId = (output as any).left[objectId];
+      const leftDataObjId = (output as any).left.data[objectId];
+      expect((output as any).left.data[enumStringValue]).toEqual(AddressType.HOME.name);
+
+      const rightObjId = (output as any).right[objectId];
+      const rightDataObjId = (output as any).right.data[objectId];
+      expect((output as any).right.data[enumStringValue]).toEqual(AddressType.WORK.name);
+
+      // every Node object has an unique id
+      expect(new Set([rootObjId, leftObjId, rightObjId])).toStrictEqual(new Set([rootObjId, leftObjId, rightObjId]));
+
+      // every enum field doesn't have an object id defined
+      [rootDataObjId, rightDataObjId, leftDataObjId].forEach(id => expect(id).toBeUndefined());
+
+      // do not cache repeated object
+      expect(context.getCached(repeatedValue)).toBeUndefined();
+    });
   });
 
   describe("non-pojo root types", () => {
@@ -830,6 +890,16 @@ describe("marshall", () => {
       const output = new DefaultMarshaller().marshall(input, new MarshallingContext());
 
       expect(output).toStrictEqual(new ValueBasedErraiObject(JavaType.OPTIONAL, "str").asErraiObject());
+    });
+
+    test("root JavaEnum object, should serialize it normally", () => {
+      const input = AddressType.WORK;
+
+      const output = new DefaultMarshaller().marshall(input, new MarshallingContext());
+
+      expect(output).toStrictEqual(
+        new EnumStringValueBasedErraiObject(AddressType.__fqcn(), AddressType.WORK.name).asErraiObject()
+      );
     });
 
     test("root string object, should serialize it to string raw value", () => {
@@ -1059,6 +1129,33 @@ describe("unmarshall", () => {
       expect(output).toEqual(new JavaOptional("1"));
     });
 
+    test("root JavaEnum object, should serialize it normally", () => {
+      const marshaller = new DefaultMarshaller();
+
+      const input = AddressType.WORK;
+      const marshalledInput = marshaller.marshall(input, new MarshallingContext())!;
+
+      const factory = new Map([
+        [
+          "com.app.my.AddressType",
+          ((name: string) => {
+            switch (name) {
+              case "HOME":
+                return AddressType.HOME;
+              case "WORK":
+                return AddressType.WORK;
+              default:
+                throw new Error(`Unknown value ${name} for enum AddressType!`);
+            }
+          }) as any
+        ]
+      ]);
+
+      const output = marshaller.unmarshall(marshalledInput, new UnmarshallingContext(factory));
+
+      expect(output).toStrictEqual(AddressType.WORK);
+    });
+
     test("root string object, should unmarshall it to native string", () => {
       const marshaller = new DefaultMarshaller();
 
@@ -1172,7 +1269,20 @@ describe("unmarshall", () => {
     test("with custom pojo, should unmarshall correctly", () => {
       const oracle = new Map([
         ["com.app.my.Pojo", () => new User({ age: new JavaInteger("0") }) as any],
-        ["com.app.my.Address", () => new Address({} as any) as any]
+        ["com.app.my.Address", () => new Address({} as any) as any],
+        [
+          "com.app.my.AddressType",
+          ((name: string) => {
+            switch (name) {
+              case "HOME":
+                return AddressType.HOME;
+              case "WORK":
+                return AddressType.WORK;
+              default:
+                throw new Error(`Unknown value ${name} for enum AddressType!`);
+            }
+          }) as any
+        ]
       ]);
 
       const marshaller = new DefaultMarshaller();
@@ -1182,7 +1292,8 @@ describe("unmarshall", () => {
         sendSpam: false,
         age: new JavaInteger("10"),
         address: new Address({
-          line1: "address line 1"
+          line1: "address line 1",
+          type: AddressType.HOME
         }),
         bestFriend: new User({
           name: "my name 2",
@@ -1533,6 +1644,37 @@ describe("unmarshall", () => {
       expect(output.field1!).not.toBe(output.field2!);
     });
 
+    test("custom pojo with repeated JavaEnum objects, should not cache it and don't reuse data", () => {
+      const marshaller = new DefaultMarshaller();
+      const unmarshallContext = new UnmarshallingContext(
+        new Map([
+          ["com.app.my.RepeatedFieldsPojo", () => new RepeatedFieldsPojo({}) as any],
+          [
+            "com.app.my.AddressType",
+            ((name: string) => {
+              switch (name) {
+                case "HOME":
+                  return AddressType.HOME;
+                case "WORK":
+                  return AddressType.WORK;
+                default:
+                  throw new Error(`Unknown value ${name} for enum AddressType!`);
+              }
+            }) as any
+          ]
+        ])
+      );
+
+      const repeatedObject = AddressType.HOME;
+      const input = new RepeatedFieldsPojo({ field1: repeatedObject, field2: repeatedObject });
+      const marshalledInput = marshaller.marshall(input, new MarshallingContext())!;
+
+      const output = marshaller.unmarshall(marshalledInput, unmarshallContext) as RepeatedFieldsPojo<AddressType>;
+
+      expect(output).toEqual(input);
+      expect(output.field1!).toBe(output.field2!);
+    });
+
     test("custom pojo with repeated array objects, should cache the object and reuse data", () => {
       const marshaller = new DefaultMarshaller();
       const unmarshallContext = new UnmarshallingContext(
@@ -1620,9 +1762,24 @@ class Address implements Portable<Address> {
   private readonly _fqcn = "com.app.my.Address";
 
   public line1?: string = undefined;
-
-  constructor(self: { line1?: string }) {
+  public type?: AddressType = undefined;
+  constructor(self: { line1?: string; type?: AddressType }) {
     Object.assign(this, self);
+  }
+}
+
+class AddressType extends JavaEnum<AddressType> {
+  public static readonly HOME: AddressType = new AddressType("HOME");
+  public static readonly WORK: AddressType = new AddressType("WORK");
+
+  protected readonly _fqcn: string = AddressType.__fqcn();
+
+  public static __fqcn(): string {
+    return "com.app.my.AddressType";
+  }
+
+  public static values() {
+    return [AddressType.HOME, AddressType.WORK];
   }
 }
 

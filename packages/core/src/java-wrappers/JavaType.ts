@@ -16,5 +16,6 @@ export enum JavaType {
   UNMODIFIABLE_MAP = "java.util.Collections$UnmodifiableMap",
   HASH_SET = "java.util.HashSet",
   HASH_MAP = "java.util.HashMap",
-  OPTIONAL = "java.util.Optional"
+  OPTIONAL = "java.util.Optional",
+  ENUM = "java.lang.Enum"
 }

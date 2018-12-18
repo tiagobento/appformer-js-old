@@ -7,6 +7,7 @@ import { JavaHashMap } from "./JavaHashMap";
 import { JavaBoolean } from "./JavaBoolean";
 import { JavaString } from "./JavaString";
 import { JavaDate } from "./JavaDate";
+import { JavaEnum } from "./JavaEnum";
 
 export class JavaWrapperUtils {
   private static wrappingFuncForType: Map<(obj: any) => boolean, (obj: any) => JavaWrapper<any>> = new Map([
@@ -38,6 +39,10 @@ export class JavaWrapperUtils {
       }
     }
     return false;
+  }
+
+  public static isEnum(obj: any): boolean {
+    return obj instanceof JavaEnum;
   }
 
   private static getWrappingFunction(obj: any): ((obj: any) => JavaWrapper<any>) | undefined {

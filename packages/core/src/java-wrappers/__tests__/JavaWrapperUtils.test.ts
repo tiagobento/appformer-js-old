@@ -6,6 +6,7 @@ import { JavaBoolean } from "../JavaBoolean";
 import { JavaString } from "../JavaString";
 import { JavaDate } from "../JavaDate";
 import { JavaType } from "../JavaType";
+import { JavaEnum } from "../JavaEnum";
 
 describe("needsWrapping", () => {
   test("with array object, should return true", () => {
@@ -43,6 +44,11 @@ describe("needsWrapping", () => {
       foo: "bar1",
       foo2: "bar2"
     };
+    expect(JavaWrapperUtils.needsWrapping(input)).toBeFalsy();
+  });
+
+  test("with enum type, should return false", () => {
+    const input = FooEnum.FOO;
     expect(JavaWrapperUtils.needsWrapping(input)).toBeFalsy();
   });
 });
@@ -88,6 +94,11 @@ describe("wrapIfNeeded", () => {
       foo: "bar1",
       foo2: "bar2"
     };
+    expect(JavaWrapperUtils.wrapIfNeeded(input)).toStrictEqual(input);
+  });
+
+  test("with enum value, should return same value", () => {
+    const input = FooEnum.BAR;
     expect(JavaWrapperUtils.wrapIfNeeded(input)).toStrictEqual(input);
   });
 });
@@ -156,4 +167,37 @@ describe("isJavaType", () => {
   test("with Java Optional's fqcn, should return true", () => {
     expect(JavaWrapperUtils.isJavaType(JavaType.OPTIONAL)).toBeTruthy();
   });
+
+  test("with Java Enum's fqcn, should return true", () => {
+    expect(JavaWrapperUtils.isJavaType(JavaType.ENUM)).toBeTruthy();
+  });
 });
+
+describe("isEnum", () => {
+  test("with Enum input, should return true", () => {
+    const input = FooEnum.BAR;
+    expect(JavaWrapperUtils.isEnum(input)).toBeTruthy();
+  });
+
+  test("with non enum input, should return false", () => {
+    const input = {
+      foo: "bar"
+    };
+    expect(JavaWrapperUtils.isEnum(input)).toBeFalsy();
+  });
+});
+
+class FooEnum extends JavaEnum<FooEnum> {
+  public static readonly FOO: FooEnum = new FooEnum("FOO");
+  public static readonly BAR: FooEnum = new FooEnum("BAR");
+
+  protected readonly _fqcn: string = FooEnum.__fqcn();
+
+  public static __fqcn(): string {
+    return "com.app.my.AddressType";
+  }
+
+  public static values() {
+    return [FooEnum.FOO, FooEnum.BAR];
+  }
+}

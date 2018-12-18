@@ -17,3 +17,4 @@ export * from "./JavaOptional";
 export * from "./JavaTreeMap";
 export * from "./JavaTreeSet";
 export * from "./JavaLinkedList";
+export * from "./JavaEnum";
