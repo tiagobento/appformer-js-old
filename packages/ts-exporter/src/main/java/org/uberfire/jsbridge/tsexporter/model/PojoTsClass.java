@@ -21,11 +21,11 @@ import java.util.List;
 import java.util.Set;
 
 import javax.lang.model.element.Element;
+import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 
 import com.sun.tools.javac.code.Symbol;
-import org.uberfire.jsbridge.tsexporter.Main;
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
 import org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation;
 import org.uberfire.jsbridge.tsexporter.dependency.ImportEntriesStore;
@@ -40,13 +40,14 @@ import static javax.lang.model.element.ElementKind.ENUM;
 import static javax.lang.model.element.ElementKind.ENUM_CONSTANT;
 import static javax.lang.model.element.ElementKind.INTERFACE;
 import static javax.lang.model.element.Modifier.ABSTRACT;
-import static javax.lang.model.element.Modifier.STATIC;
 import static org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore.NO_DECORATORS;
 import static org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation.Kind.FIELD;
 import static org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation.Kind.HIERARCHY;
 import static org.uberfire.jsbridge.tsexporter.meta.Translatable.SourceUsage.IMPORT_STATEMENT;
 import static org.uberfire.jsbridge.tsexporter.meta.Translatable.SourceUsage.TYPE_ARGUMENT_DECLARATION;
 import static org.uberfire.jsbridge.tsexporter.meta.Translatable.SourceUsage.TYPE_ARGUMENT_USE;
+import static org.uberfire.jsbridge.tsexporter.util.ElementUtils.getAllNonStaticFields;
+import static org.uberfire.jsbridge.tsexporter.util.ElementUtils.nonStaticFieldsIn;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.formatRightToLeft;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
 
@@ -81,14 +82,33 @@ public class PojoTsClass implements TsClass {
         });
     }
 
-    //FIXME: Enum extending interfaces?
     private String toEnum() {
         return formatRightToLeft(
                 lines("",
-                      "export enum %s { %s }"),
-
+                      "import { JavaEnum } from 'appformer-js';",
+                      "",
+                      "export class %s extends JavaEnum<%s> { ",
+                      "",
+                      "  %s",
+                      "",
+                      "  protected readonly _fqcn: string = %s.__fqcn();",
+                      "",
+                      "  public static __fqcn(): string {",
+                      "    return '%s';",
+                      "  }",
+                      "",
+                      "  public static values() {",
+                      "    return [%s];",
+                      "  }",
+                      "}"
+                ),
                 this::getSimpleName,
-                this::enumFields);
+                this::getSimpleName,
+                this::enumFieldsDeclaration,
+                this::getSimpleNameErasure,
+                this::fqcn,
+                this::enumFieldsList
+        );
     }
 
     private String toInterface() {
@@ -155,25 +175,30 @@ public class PojoTsClass implements TsClass {
         return ((Symbol) asElement()).flatName().toString();
     }
 
-    private String enumFields() {
+    private String enumFieldsDeclaration() {
         return asElement().getEnclosedElements().stream()
                 .filter(s -> s.getKind().equals(ENUM_CONSTANT))
-                .map(Element::getSimpleName)
+                .map(this::toEnumFieldSource)
+                .collect(joining("\n  "));
+    }
+
+    private String toEnumFieldSource(final Element field) {
+        final Name enumFieldName = field.getSimpleName();
+        return format("public static readonly %s:%s = new %s(\"%s\");",
+                      enumFieldName, this.getSimpleName(), this.getSimpleName(), enumFieldName);
+    }
+
+    private String enumFieldsList() {
+        return asElement().getEnclosedElements().stream()
+                .filter(s -> s.getKind().equals(ENUM_CONSTANT))
+                .map(f -> format("%s.%s", this.getSimpleName(), f.getSimpleName()))
                 .collect(joining(", "));
     }
 
     private String fields() {
-        return fieldsIn(asElement().getEnclosedElements()).stream()
+        return nonStaticFieldsIn(asElement().getEnclosedElements()).stream()
                 .map(this::toFieldSource)
                 .collect(joining("\n"));
-    }
-
-    private List<Element> fieldsIn(final List<? extends Element> elements) {
-        return elements.stream()
-                .filter(e -> e.getKind().isField())
-                .filter(e -> !e.getModifiers().contains(STATIC))
-                .filter(e -> !e.asType().toString().contains("java.util.function"))
-                .collect(toList());
     }
 
     private String toFieldSource(final Element fieldElement) {
@@ -188,14 +213,22 @@ public class PojoTsClass implements TsClass {
     }
 
     private String superConstructorCall() {
-        final String superConstructorArgs = fieldsIn(Main.elements.getAllMembers(asElement())).stream()
-                .filter(field -> !field.getEnclosingElement().equals(asElement()))
-                .map(field -> format("%s: self.%s", field.getSimpleName(), field.getSimpleName()))
+        return superConstructorCall(asElement());
+    }
+
+    private String superConstructorCall(final TypeElement typeElement) {
+
+        if (!superclass().canBeSubclassed() || typeElement.getSuperclass().toString().equals("java.lang.Object")) {
+            return "";
+        }
+
+        final TypeElement superElement = (TypeElement) ((DeclaredType) typeElement.getSuperclass()).asElement();
+        final String superConstructorArgs = extractConstructorArgsStartingFrom(superElement)
+                .stream()
+                .map(f -> format("%s: self.%s", f.getSimpleName(), f.getSimpleName()))
                 .collect(joining(", "));
 
-        return superclass().canBeSubclassed()
-                ? format("super({ %s });", superConstructorArgs)
-                : "";
+        return format("super({ %s });", superConstructorArgs);
     }
 
     private String classHierarchy() {
@@ -237,20 +270,30 @@ public class PojoTsClass implements TsClass {
     }
 
     private String extractConstructorArgs() {
-        final Set<String> fieldNames = new HashSet<>();
-        return fieldsIn(Main.elements.getAllMembers(asElement())).stream()
-                .peek(field -> {
-                    if (!fieldNames.add(field.getSimpleName().toString())) {
-                        throw new RuntimeException(format("Class %s has a field with the same name as one of its parent classes", getSimpleName()));
-                    }
-                })
-                .map(field -> {
-                    final JavaType fieldType = new JavaType(field.asType(), declaredType);
-                    return format("%s?: %s",
-                                  field.getSimpleName(),
-                                  importEntriesStore.with(FIELD, fieldType.translate(decoratorStore)).toTypeScript(TYPE_ARGUMENT_USE));
-                })
+        return extractConstructorArgsStartingFrom(asElement())
+                .stream()
+                .map(this::formatConstructorArg)
                 .collect(joining(", "));
+    }
+
+    private String formatConstructorArg(final Element element) {
+        final Translatable translatableType = new JavaType(element.asType(), declaredType).translate(decoratorStore);
+        final String formattedType = importEntriesStore.with(FIELD, translatableType).toTypeScript(TYPE_ARGUMENT_USE);
+
+        return format("%s?: %s", element.getSimpleName(), formattedType);
+    }
+
+    private List<Element> extractConstructorArgsStartingFrom(final TypeElement typeElement) {
+
+        final List<Element> allElements = getAllNonStaticFields(typeElement);
+
+        final Set<Element> elementsUnion = new HashSet<>();
+        if (!allElements.stream().allMatch(elementsUnion::add)) {
+            throw new RuntimeException(format("Class %s has a field with the same name as one of its parent classes",
+                                              getSimpleName()));
+        }
+
+        return allElements;
     }
 
     @Override

@@ -32,14 +32,14 @@ public class PojoTsClassTestClasses {
     }
 
     static class A {
-        String test;
+        private String test;
     }
 
     public class B extends A {
 
         A a;
         B b;
-        Integer c;
+        private Integer c;
         TreeSet<String> d;
         LinkedList<String> e;
         TreeMap<String, String> f;
@@ -60,7 +60,7 @@ public class PojoTsClassTestClasses {
                            "",
                            "export  class B extends org_uberfire_jsbridge_tsexporter_model_PojoTsClassTestClasses_A implements Portable<B> {",
                            "",
-                           "  protected readonly _fqcn: string = 'org.uberfire.jsbridge.tsexporter.model.PojoTsClassTestClasses.B';",
+                           "  protected readonly _fqcn: string = B.__fqcn();",
                            "",
                            "public readonly a?: org_uberfire_jsbridge_tsexporter_model_PojoTsClassTestClasses_A = undefined;",
                            "public readonly b?: B = undefined;",
@@ -74,6 +74,11 @@ public class PojoTsClassTestClasses {
                            "    super({ test: self.test });",
                            "    Object.assign(this, self);",
                            "  }",
+                           "",
+                           "  public static __fqcn() : string { ",
+                           "    return 'org.uberfire.jsbridge.tsexporter.model.PojoTsClassTestClasses$B'; ",
+                           "  } ",
+                           "",
                            "}"),
                      pojoTsClass.toSource());
     }
@@ -81,7 +86,7 @@ public class PojoTsClassTestClasses {
     public class C extends A {
 
         A a;
-        C c;
+        private C c;
         Set<A> setA;
     }
 
@@ -100,7 +105,7 @@ public class PojoTsClassTestClasses {
                            "",
                            "export  class C extends org_uberfire_jsbridge_tsexporter_model_PojoTsClassTestClasses_A implements Portable<C> {",
                            "",
-                           "  protected readonly _fqcn: string = 'org.uberfire.jsbridge.tsexporter.model.PojoTsClassTestClasses.C';",
+                           "  protected readonly _fqcn: string = C.__fqcn();",
                            "",
                            "public readonly a?: decorators_simple_ADEC = undefined;",
                            "public readonly c?: decorators_simple_CDEC = undefined;",
@@ -110,6 +115,11 @@ public class PojoTsClassTestClasses {
                            "    super({ test: self.test });",
                            "    Object.assign(this, self);",
                            "  }",
+                           "",
+                           "  public static __fqcn() : string { ",
+                           "    return 'org.uberfire.jsbridge.tsexporter.model.PojoTsClassTestClasses$C'; ",
+                           "  } ",
+                           "",
                            "}"),
                      pojoTsClass.toSource());
     }

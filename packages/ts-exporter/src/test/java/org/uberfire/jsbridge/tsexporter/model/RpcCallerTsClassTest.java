@@ -7,7 +7,6 @@ import java.util.stream.Stream;
 import com.google.testing.compile.CompilationRule;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
@@ -58,7 +57,6 @@ public class RpcCallerTsClassTest {
     }
 
     @Test
-    @Ignore
     public void testDecorators() {
 
         final DependencyGraph dependencyGraph = new DependencyGraph(Stream.of(element(FooImpl2.class)),
@@ -85,10 +83,10 @@ public class RpcCallerTsClassTest {
                       "public someMethod(args: {  }) {",
                       "  return rpc(\"org.uberfire.jsbridge.tsexporter.model.RpcCallerTsClassTest.SomeInterface|someMethod:\", [])",
                       "         .then((json: string) => {",
-                      "           return unmarshall(json, {",
-                      "\"org.uberfire.jsbridge.tsexporter.model.RpcCallerTsClassTest.FooImpl1\": (x: any) => new decorators_pojo_impl_FooImpl1DEC<any>(x),",
-                      "\"org.uberfire.jsbridge.tsexporter.model.RpcCallerTsClassTest.FooImpl2\": (x: any) => new decorators_pojo_impl_FooImpl2DEC(x)",
-                      "           }) as decorators_pojo_FooDEC<string>;",
+                      "           return unmarshall(json, new Map([",
+                      "[\"org.uberfire.jsbridge.tsexporter.model.RpcCallerTsClassTest$FooImpl1\", () => new decorators_pojo_impl_FooImpl1DEC<any>({  }) as any],",
+                      "[\"org.uberfire.jsbridge.tsexporter.model.RpcCallerTsClassTest$FooImpl2\", () => new decorators_pojo_impl_FooImpl2DEC({  }) as any]",
+                      "           ])) as decorators_pojo_FooDEC<string>;",
                       "         });",
                       "}",
                       "",
@@ -108,7 +106,6 @@ public class RpcCallerTsClassTest {
     }
 
     @Test
-    @Ignore
     public void testDecoratorsIndirectly() {
 
         final DependencyGraph dependencyGraph = new DependencyGraph(Stream.of(element(FooImpl3.class)),
@@ -135,11 +132,65 @@ public class RpcCallerTsClassTest {
                       "public someMethod(args: {  }) {",
                       "  return rpc(\"org.uberfire.jsbridge.tsexporter.model.RpcCallerTsClassTest.SomeOtherInterface|someMethod:\", [])",
                       "         .then((json: string) => {",
-                      "           return unmarshall(json, {",
-                      "\"org.uberfire.jsbridge.tsexporter.model.RpcCallerTsClassTest.FooImpl1\": (x: any) => new decorators_pojo_impl_FooImpl1DEC<any>(x),",
-                      "\"org.uberfire.jsbridge.tsexporter.model.RpcCallerTsClassTest.FooImpl2\": (x: any) => new decorators_pojo_impl_FooImpl2DEC(x),",
-                      "\"org.uberfire.jsbridge.tsexporter.model.RpcCallerTsClassTest.FooImpl3\": (x: any) => new org_uberfire_jsbridge_tsexporter_model_RpcCallerTsClassTest_FooImpl3(x)",
-                      "           }) as Array<org_uberfire_jsbridge_tsexporter_model_RpcCallerTsClassTest_FooImpl3>;",
+                      "           return unmarshall(json, new Map([",
+                      "[\"org.uberfire.jsbridge.tsexporter.model.RpcCallerTsClassTest$FooImpl1\", () => new decorators_pojo_impl_FooImpl1DEC<any>({  }) as any],",
+                      "[\"org.uberfire.jsbridge.tsexporter.model.RpcCallerTsClassTest$FooImpl2\", () => new decorators_pojo_impl_FooImpl2DEC({  }) as any],",
+                      "[\"org.uberfire.jsbridge.tsexporter.model.RpcCallerTsClassTest$FooImpl3\", () => new org_uberfire_jsbridge_tsexporter_model_RpcCallerTsClassTest_FooImpl3({  }) as any]",
+                      "           ])) as Array<org_uberfire_jsbridge_tsexporter_model_RpcCallerTsClassTest_FooImpl3>;",
+                      "         });",
+                      "}",
+                      "",
+                      "}"),
+                tsClass.toSource());
+    }
+
+    enum BarType {
+        BAR1,
+        BAR2,
+        BAR3
+    }
+
+    class FooImpl4 {
+
+        FooImpl1 fooImpl1;
+        BarType barType;
+    }
+
+    interface SomeOtherInterfaceOnceAgain {
+
+        List<FooImpl4> someMethod();
+    }
+
+    @Test
+    public void testEnumFactory() {
+
+        final DependencyGraph dependencyGraph = new DependencyGraph(Stream.of(element(FooImpl3.class)),
+                                                                    NO_DECORATORS);
+
+        final RpcCallerTsClass tsClass = new RpcCallerTsClass(
+                element(SomeOtherInterfaceOnceAgain.class),
+                dependencyGraph,
+                NO_DECORATORS);
+
+        assertEquals(
+                lines("",
+                      "import { rpc, marshall, unmarshall } from 'appformer-js';",
+                      "import { BarType as org_uberfire_jsbridge_tsexporter_model_RpcCallerTsClassTest_BarType } from '@kiegroup-ts-generated/ts-exporter-test';",
+                      "import { FooImpl1 as org_uberfire_jsbridge_tsexporter_model_RpcCallerTsClassTest_FooImpl1 } from '@kiegroup-ts-generated/ts-exporter-test';",
+                      "import { FooImpl2 as org_uberfire_jsbridge_tsexporter_model_RpcCallerTsClassTest_FooImpl2 } from '@kiegroup-ts-generated/ts-exporter-test';",
+                      "import { FooImpl4 as org_uberfire_jsbridge_tsexporter_model_RpcCallerTsClassTest_FooImpl4 } from '@kiegroup-ts-generated/ts-exporter-test';",
+                      "",
+                      "export class SomeOtherInterfaceOnceAgain {",
+                      "",
+                      "public someMethod(args: {  }) {",
+                      "  return rpc(\"org.uberfire.jsbridge.tsexporter.model.RpcCallerTsClassTest.SomeOtherInterfaceOnceAgain|someMethod:\", [])",
+                      "         .then((json: string) => {",
+                      "           return unmarshall(json, new Map([",
+                      "[\"org.uberfire.jsbridge.tsexporter.model.RpcCallerTsClassTest$BarType\", ((name: string) => { switch (name) { case \"BAR1\": return org_uberfire_jsbridge_tsexporter_model_RpcCallerTsClassTest_BarType.BAR1; case \"BAR2\": return org_uberfire_jsbridge_tsexporter_model_RpcCallerTsClassTest_BarType.BAR2; case \"BAR3\": return org_uberfire_jsbridge_tsexporter_model_RpcCallerTsClassTest_BarType.BAR3; default: throw new Error(`Unknown value ${name} for enum org_uberfire_jsbridge_tsexporter_model_RpcCallerTsClassTest_BarType!`); }}) as any],",
+                      "[\"org.uberfire.jsbridge.tsexporter.model.RpcCallerTsClassTest$FooImpl1\", () => new org_uberfire_jsbridge_tsexporter_model_RpcCallerTsClassTest_FooImpl1<any>({  }) as any],",
+                      "[\"org.uberfire.jsbridge.tsexporter.model.RpcCallerTsClassTest$FooImpl2\", () => new org_uberfire_jsbridge_tsexporter_model_RpcCallerTsClassTest_FooImpl2({  }) as any],",
+                      "[\"org.uberfire.jsbridge.tsexporter.model.RpcCallerTsClassTest$FooImpl4\", () => new org_uberfire_jsbridge_tsexporter_model_RpcCallerTsClassTest_FooImpl4({  }) as any]",
+                      "           ])) as Array<org_uberfire_jsbridge_tsexporter_model_RpcCallerTsClassTest_FooImpl4>;",
                       "         });",
                       "}",
                       "",

@@ -26,10 +26,10 @@ import java.util.stream.Stream;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
 
 import com.sun.tools.javac.code.Symbol;
-import org.uberfire.jsbridge.tsexporter.Main;
 import org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore;
 import org.uberfire.jsbridge.tsexporter.dependency.DependencyGraph;
 import org.uberfire.jsbridge.tsexporter.dependency.DependencyGraph.DependencyFinder;
@@ -47,8 +47,9 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 import static javax.lang.model.element.ElementKind.CLASS;
+import static javax.lang.model.element.ElementKind.ENUM;
+import static javax.lang.model.element.ElementKind.ENUM_CONSTANT;
 import static javax.lang.model.element.Modifier.ABSTRACT;
-import static javax.lang.model.element.Modifier.STATIC;
 import static org.uberfire.jsbridge.tsexporter.Main.types;
 import static org.uberfire.jsbridge.tsexporter.decorators.DecoratorStore.NO_DECORATORS;
 import static org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation.Kind.CODE;
@@ -56,6 +57,7 @@ import static org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation.Kin
 import static org.uberfire.jsbridge.tsexporter.dependency.DependencyRelation.Kind.HIERARCHY;
 import static org.uberfire.jsbridge.tsexporter.meta.Translatable.SourceUsage.TYPE_ARGUMENT_DECLARATION;
 import static org.uberfire.jsbridge.tsexporter.meta.Translatable.SourceUsage.TYPE_ARGUMENT_USE;
+import static org.uberfire.jsbridge.tsexporter.util.ElementUtils.getAllNonStaticFields;
 import static org.uberfire.jsbridge.tsexporter.util.Utils.lines;
 
 public class RpcCallerTsMethod {
@@ -170,7 +172,7 @@ public class RpcCallerTsMethod {
         return new HashSet<>(dependencyGraph.traverse(aggregatedTypesOfReturnType, traversalConfiguration)).stream()
                 .map(DependencyGraph.Vertex::getPojoClass)
                 .sorted(comparing(TsClass::getRelativePath))
-                .filter(this::isConcreteClass)
+                .filter(this::isInstantiable)
                 .distinct()
                 .map(this::toFactoriesOracleEntry)
                 .collect(joining(",\n"));
@@ -178,17 +180,43 @@ public class RpcCallerTsMethod {
 
     private String toFactoriesOracleEntry(final PojoTsClass tsClass) {
         final JavaType javaType = new JavaType(types.erasure(tsClass.getType()), owner.asType());
-        final String defaultNumbersInitialization = Main.elements.getAllMembers((TypeElement) javaType.asElement()).stream()
-                .filter(e -> e.getKind().isField())
-                .filter(e -> !e.getModifiers().contains(STATIC))
-                .filter(e -> !e.asType().toString().contains("java.util.function"))
+        return format("[\"%s\", %s]",
+                      ((Symbol) tsClass.asElement()).flatName().toString(),
+                      getOracleFactoryMethodEntry(javaType));
+    }
+
+    private String getOracleFactoryMethodEntry(final JavaType javaType) {
+
+        final TypeElement javaTypeElement = (TypeElement) javaType.asElement();
+
+        if (javaTypeElement.getKind() == ENUM) {
+            return this.toEnumFactoryMethodSource(javaType);
+        }
+
+        final String defaultNumbersInitialization = getAllNonStaticFields(javaTypeElement).stream()
                 .flatMap(field -> toOracleFactoryMethodConstructorEntry(field, new JavaType(field.asType(), javaType.getType())))
                 .collect(joining(", "));
 
-        return format("[\"%s\", () => new %s({ %s }) as any]",
-                      ((Symbol) tsClass.asElement()).flatName().toString(),
+        return format("() => new %s({ %s }) as any",
                       importing(javaType.translate(decoratorStore)).toTypeScript(TYPE_ARGUMENT_USE),
                       defaultNumbersInitialization);
+    }
+
+    private String toEnumFactoryMethodSource(final JavaType javaType) {
+
+        final TypeElement typeElement = (TypeElement) javaType.asElement();
+        final String enumName = importing(javaType.translate(decoratorStore)).toTypeScript(TYPE_ARGUMENT_USE);
+        final String caseClauses = typeElement.getEnclosedElements().stream()
+                .filter(s -> s.getKind().equals(ENUM_CONSTANT))
+                .map(f -> toEnumConstantFactorySource(enumName, f.getSimpleName()))
+                .collect(joining(" "));
+
+        final String defaultClause = format("default: throw new Error(`Unknown value ${name} for enum %s!`);", enumName);
+        return format("((name: string) => { switch (name) { %s %s }}) as any", caseClauses, defaultClause);
+    }
+
+    private String toEnumConstantFactorySource(final String enumName, final Name enumConstantName) {
+        return format("case \"%s\": return %s.%s;", enumConstantName, enumName, enumConstantName);
     }
 
     private Stream<String> toOracleFactoryMethodConstructorEntry(final Element fieldElement,
@@ -203,13 +231,17 @@ public class RpcCallerTsMethod {
         return Stream.of(format("%s: new %s(\"0\")", fieldElement.getSimpleName(), fieldType));
     }
 
-    private boolean isConcreteClass(final PojoTsClass tsClass) {
-        return tsClass.asElement().getKind().equals(CLASS) &&
-                !tsClass.asElement().getModifiers().contains(ABSTRACT);
+    private boolean isInstantiable(final PojoTsClass tsClass) {
+        final Element element = tsClass.asElement();
+        return isConcreteClass(element) || isEnumClass(element);
     }
 
-    private boolean isSubtype(final PojoTsClass tsClass, final Element element) {
-        return types.isSubtype(types.erasure(tsClass.getType()), types.erasure(element.asType()));
+    private boolean isConcreteClass(final Element element) {
+        return element.getKind().equals(CLASS) && !element.getModifiers().contains(ABSTRACT);
+    }
+
+    private boolean isEnumClass(final Element element) {
+        return element.getKind().equals(ENUM);
     }
 
     private Translatable translatedReturnType() {

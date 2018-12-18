@@ -31,7 +31,24 @@ public class PojoTsClassTestEnum {
     public void testEnum() {
         final PojoTsClass pojoTsClass = new PojoTsClass(type(E.class), NO_DECORATORS);
         assertEquals(lines("",
-                           "export enum E { A, B, C }"),
+                           "import { JavaEnum } from 'appformer-js';",
+                           "",
+                           "export class E extends JavaEnum<E> { ",
+                           "",
+                           "  public static readonly A:E = new E(\"A\");",
+                           "  public static readonly B:E = new E(\"B\");",
+                           "  public static readonly C:E = new E(\"C\");",
+                           "",
+                           "  protected readonly _fqcn: string = E.__fqcn();",
+                           "",
+                           "  public static __fqcn(): string {",
+                           "    return 'org.uberfire.jsbridge.tsexporter.model.PojoTsClassTestEnum$E';",
+                           "  }",
+                           "",
+                           "  public static values() {",
+                           "    return [E.A, E.B, E.C];",
+                           "  }",
+                           "}"),
                      pojoTsClass.toSource());
     }
 }
