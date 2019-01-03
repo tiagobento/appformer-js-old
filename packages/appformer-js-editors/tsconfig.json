@@ -1,8 +1,0 @@
-{
-  "exclude": ["./node_modules"],
-  "include": ["./src"],
-  "extends": "../../tsconfig.common.json",
-  "compilerOptions": {
-    "outDir": "./"
-  }
-}
