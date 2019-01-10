@@ -1,29 +1,34 @@
 {
-  "name": "appformer-js",
+  "name": "appformer-js-workbench-screens",
   "version": "1.0.0",
   "description": "",
   "license": "Apache-2.0",
-  "main": "./dist/appformer.js",
+  "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "dependencies": {
-    "@types/react": "^16.4.18",
-    "@types/react-dom": "^16.0.9",
-    "bignumber.js": "^7.2.1",
-    "react": "^16.6.0",
-    "react-dom": "^16.6.0"
-  },
   "scripts": {
     "lint": "tslint -c ../../tslint.common.json 'src/**/*.{ts,tsx,js,jsx}'",
     "test": "jest",
     "init": "yarn --registry http://localhost:4873 --no-lockfile",
-    "republish-local": "npm unpublish --force -reg http://localhost:4873 && npm publish -reg http://localhost:4873",
-    "build": "yarn run lint && npm test && webpack --mode production && mvn clean install -f ./jar/pom.xml"
+    "build": "yarn run lint && npm test && webpack --mode production"
   },
   "babel": {
     "presets": [
       "env",
       "react"
     ]
+  },
+  "dependencies": {
+    "@types/react": "^16.4.18",
+    "@types/react-dom": "^16.0.9",
+    "bignumber.js": "^7.2.1",
+    "react": "^16.6.0",
+    "react-dom": "^16.6.0",
+    "appformer-js": "^1.0.0",
+    "@kiegroup-ts-generated/errai-security-server-rpc": "^1.0.0",
+    "@kiegroup-ts-generated/kie-wb-common-library-api-rpc": "^1.0.0",
+    "@kiegroup-ts-generated/uberfire-preferences-api-rpc": "^1.0.0",
+    "@kiegroup-ts-generated/uberfire-project-api": "^1.0.0",
+    "@kiegroup-ts-generated/uberfire-structure-api-rpc": "^1.0.0"
   },
   "devDependencies": {
     "watch": "^1.0.2",
@@ -44,7 +49,6 @@
     "typescript": "^2.9.2",
     "webpack": "^4.15.1",
     "webpack-cli": "^3.0.8",
-    "webpack-merge": "^4.1.4",
-    "lerna": "^3.4.0"
+    "webpack-merge": "^4.1.4"
   }
 }
