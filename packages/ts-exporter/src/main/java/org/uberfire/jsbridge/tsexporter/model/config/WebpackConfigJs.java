@@ -16,9 +16,6 @@
 
 package org.uberfire.jsbridge.tsexporter.model.config;
 
-import java.util.List;
-
-import org.uberfire.jsbridge.tsexporter.model.TsClass;
 import org.uberfire.jsbridge.tsexporter.model.TsExporterResource;
 
 import static java.lang.String.format;
@@ -35,6 +32,7 @@ public class WebpackConfigJs implements TsExporterResource {
 
     @Override
     public String toSource() {
+
         return format(lines(
                 "const path = require('path');",
                 "const CleanWebpackPlugin = require('clean-webpack-plugin');",
@@ -42,14 +40,16 @@ public class WebpackConfigJs implements TsExporterResource {
                 "",
                 "module.exports = {",
                 "  mode: 'production',",
-                "  externals: {",
+                "  externals: [{",
                 "    'appformer-js': {",
                 "      root: 'AppFormer', //indicates global variable",
                 "      commonjs: 'appformer-js',",
                 "      commonjs2: 'appformer-js',",
                 "      amd: 'appformer-js'",
                 "    }",
-                "  },",
+                "  }, function(context, request, callback) { ",
+                "       return request.startsWith('.') ? callback() : callback(null, 'umd ' + request); ",
+                "  }],",
                 "  entry: {",
                 "    '%s': './src/index.ts'",
                 "  },",
