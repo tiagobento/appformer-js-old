@@ -1,6 +1,6 @@
 {
   "name": "appformer-js-workbench-screens",
-  "version": "0.0.2-ALPHA",
+  "version": "0.2.0-ALPHA",
   "description": "",
   "license": "Apache-2.0",
   "main": "./dist/index.js",
@@ -23,10 +23,7 @@
   },
   "dependencies": {
     "@types/react": "^16.4.18",
-    "@types/react-dom": "^16.0.9",
-    "bignumber.js": "^7.2.1",
     "react": "^16.6.0",
-    "react-dom": "^16.6.0",
     "appformer-js": "^1.0.0",
     "@kiegroup-ts-generated/errai-security-server-rpc": "^1.0.0",
     "@kiegroup-ts-generated/kie-wb-common-library-api-rpc": "^1.0.0",

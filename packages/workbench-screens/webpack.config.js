@@ -6,11 +6,18 @@ const CircularDependencyPlugin = require("circular-dependency-plugin");
 
 module.exports = merge(common, {
   entry: {
-    "index": "./src/index.ts"
+    "spaces-screen": "./src/spaces-screen/index.tsx",
+    "home-perspective": "./src/home-perspective/index.tsx",
+    "stunner-showcase-home-screen": "./src/stunner-showcase-home-screen/index.tsx",
+    "business-central-community-home-screen": "./src/business-central-community-home-screen/index.tsx",
+    "business-central-product-home-screen": "./src/business-central-product-home-screen/index.tsx",
+    "business-monitoring-community-home-screen": "./src/business-monitoring-community-home-screen/index.tsx",
+    "business-monitoring-product-home-screen": "./src/business-monitoring-product-home-screen/index.tsx",
+    "drools-wb-home-screen": "./src/drools-wb-home-screen/index.tsx",
   },
   output: {
     path: path.resolve(__dirname, "./dist"),
-    filename: "index.js",
+    filename: "[name]-bundle.js",
     library: "WorkbenchScreens",
     libraryTarget: "umd",
     umdNamedDefine: true

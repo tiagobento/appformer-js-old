@@ -3,6 +3,7 @@
   "include": ["./src"],
   "extends": "../../tsconfig.common.json",
   "compilerOptions": {
-    "outDir": "./"
+    "outDir": "./",
+    "declaration": false
   }
 }
