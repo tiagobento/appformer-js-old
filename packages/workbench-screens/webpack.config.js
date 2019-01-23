@@ -14,6 +14,8 @@ module.exports = merge(common, {
     "business-monitoring-community-home-screen": "./src/business-monitoring-community-home-screen/index.tsx",
     "business-monitoring-product-home-screen": "./src/business-monitoring-product-home-screen/index.tsx",
     "drools-wb-home-screen": "./src/drools-wb-home-screen/index.tsx",
+    "jbpm-wb-home-screen": "./src/jbpm-wb-home-screen/index.tsx",
+    "optaplanner-wb-home-screen": "./src/optaplanner-wb-home-screen/index.tsx",
   },
   output: {
     path: path.resolve(__dirname, "./dist"),
