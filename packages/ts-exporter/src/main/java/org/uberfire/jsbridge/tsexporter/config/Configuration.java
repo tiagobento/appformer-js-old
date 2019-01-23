@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import static java.lang.String.format;
 import static java.util.Collections.list;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
@@ -32,7 +33,19 @@ public class Configuration {
     public Configuration() {
         libsByName = list(getResources("META-INF/appformer-js.json")).stream()
                 .map(AppFormerLib::new)
-                .collect(toMap(AppFormerLib::getName, identity()));
+                .collect(toMap(AppFormerLib::getName, identity(), (lib1, lib2) -> {
+
+                    final String module1 = lib1.getAssociatedMvnModuleName();
+                    final String module2 = lib2.getAssociatedMvnModuleName();
+
+                    if (!module1.equals(module2)) {
+                        final String errorMsg = format("Multiple AppFormerLibs with same name %s! (Modules %s and %s)",
+                                                       lib1.getName(), module1, module2);
+                        throw new IllegalStateException(errorMsg);
+                    }
+
+                    return lib1;
+                }));
     }
 
     public Set<AppFormerLib> getLibraries() {
