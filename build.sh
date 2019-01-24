@@ -3,15 +3,17 @@
 C=`pwd`
 
 function check() {
- if [[ $? -ne 0 ]]; then echo "failed."; exit 1; fi
+ if [[ $? -ne 0 ]]; then echo "failed."; cd ${C}; exit 1; fi
 }
 
+#check if verdaccio is up
 
 yarn --cwd ./packages/core run init && yarn --cwd ./packages/core run build && yarn --cwd ./packages/core run republish-local
 check
 
 mvn clean install -f packages/ts-exporter/pom.xml
 check
+
 [ -e kiegroup-all ] || git clone https://github.com/tiagobento/kiegroup-all
 check
 
