@@ -36,6 +36,9 @@ check
 mvn clean install -Denforcer.skip -DskipTests -Dgwt.compiler.skip -Dgwt.skipCompilation -Pts-exporter-build,\!notProductizedProfile
 check
 
+cd ..
+check
+
 yarn --cwd ./packages/workbench-screens run init && yarn --cwd ./packages/workbench-screens run build
 check
 
