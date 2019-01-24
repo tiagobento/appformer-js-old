@@ -1,6 +1,6 @@
 {
   "name": "appformer-js",
-  "version": "0.1.0-ALPHA",
+  "version": "0.2.1-ALPHA",
   "description": "",
   "license": "Apache-2.0",
   "main": "./dist/appformer.js",
@@ -19,9 +19,9 @@
   "scripts": {
     "lint": "tslint -c ../../tslint.common.json 'src/**/*.{ts,tsx,js,jsx}'",
     "test": "jest",
-    "init": "yarn install -f --registry http://localhost:4873 --no-lockfile",
+    "init": "yarn -f --registry http://localhost:4873 --no-lockfile",
     "republish-local": "npm unpublish --force -reg http://localhost:4873 && npm publish -reg http://localhost:4873",
-    "build": "yarn run lint && npm test && webpack --mode production && mvn clean install -f ./jar/pom.xml"
+    "build": "yarn run lint && npm test && webpack --mode production"
   },
   "babel": {
     "presets": [

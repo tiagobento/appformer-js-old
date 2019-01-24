@@ -5,3 +5,4 @@ webpack.config.js
 package-lock.json
 jest.config.js
 tsconfig.json
+tsconfig.webpack.json

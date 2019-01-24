@@ -15,6 +15,20 @@ module.exports = merge(common, {
     libraryTarget: "umd",
     umdNamedDefine: true
   },
+  externals: {
+    react: {
+      root: "React", //indicates global variable
+      commonjs: "react",
+      commonjs2: "react",
+      amd: "react"
+    },
+    "react-dom": {
+      root: "ReactDOM", //indicates global variable
+      commonjs: "react-dom",
+      commonjs2: "react-dom",
+      amd: "react-dom"
+    }
+  },
   plugins: [
     new CleanWebpackPlugin(["dist"]),
     new CircularDependencyPlugin({
