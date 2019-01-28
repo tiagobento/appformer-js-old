@@ -4,6 +4,7 @@ import { Popup } from "./Popup";
 import { OrganizationalUnitService } from "@kiegroup-ts-generated/uberfire-structure-api-rpc";
 import { AuthenticationService } from "@kiegroup-ts-generated/errai-security-server-rpc";
 import { UserImpl } from "@kiegroup-ts-generated/errai-security-server";
+import { NotificationEvent, NotificationType } from "@kiegroup-ts-generated/uberfire-api";
 
 interface Props {
   onClose: () => void;
@@ -67,7 +68,19 @@ export class NewSpacePopup extends React.Component<Props, State> {
       Promise.resolve()
         .then(() => Promise.all([emptyName, duplicatedName, validGroupId]))
         .then(() => this.props.organizationalUnitService.createOrganizationalUnit0(newSpace))
-        .then(i => this.props.onClose())
+        .then(i => {
+          AppFormer.fireEvent(
+            AppFormer.marshall(
+              new NotificationEvent({
+                type: NotificationType.SUCCESS,
+                notification: AppFormer.translate("OrganizationalUnitSaveSuccess", [
+                  AppFormer.translate("OrganizationalUnitDefaultAliasInSingular", [])
+                ])
+              })
+            )
+          );
+          return this.props.onClose();
+        })
         .catch(() => this.setState(prevState => ({ displayedErrorMessages: prevState.errorMessages })))
     );
   }

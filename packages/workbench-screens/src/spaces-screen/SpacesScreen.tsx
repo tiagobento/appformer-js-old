@@ -6,6 +6,7 @@ import { OrganizationalUnit, OrganizationalUnitImpl } from "@kiegroup-ts-generat
 import { WorkspaceProjectContextChangeEvent } from "@kiegroup-ts-generated/uberfire-project-api";
 import { AuthenticationService } from "@kiegroup-ts-generated/errai-security-server-rpc";
 import { NewSpacePopup } from "./NewSpacePopup";
+import { NotificationEvent } from "@kiegroup-ts-generated/uberfire-api";
 import { PreferenceBeanServerStore } from "@kiegroup-ts-generated/uberfire-preferences-api-rpc";
 import {
   LibraryInternalPreferences as LibraryPreference,

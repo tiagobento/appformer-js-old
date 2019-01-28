@@ -1,6 +1,6 @@
 {
   "name": "appformer-js-workbench-screens",
-  "version": "0.2.1-ALPHA",
+  "version": "0.2.2-ALPHA",
   "description": "",
   "license": "Apache-2.0",
   "main": "./dist/index.js",
