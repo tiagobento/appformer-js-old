@@ -6,7 +6,6 @@ import { OrganizationalUnit, OrganizationalUnitImpl } from "@kiegroup-ts-generat
 import { WorkspaceProjectContextChangeEvent } from "@kiegroup-ts-generated/uberfire-project-api";
 import { AuthenticationService } from "@kiegroup-ts-generated/errai-security-server-rpc";
 import { NewSpacePopup } from "./NewSpacePopup";
-import { NotificationEvent } from "@kiegroup-ts-generated/uberfire-api";
 import { PreferenceBeanServerStore } from "@kiegroup-ts-generated/uberfire-preferences-api-rpc";
 import {
   LibraryInternalPreferences as LibraryPreference,
@@ -48,12 +47,13 @@ export class SpacesScreen extends React.Component<Props, State> {
   }
 
   private canCreateSpace() {
-    //FIXME: fetch permissions from somewhere
-    return true;
+    return (AppFormer as any).LibraryPermissions.canCreateSpace();
   }
 
   private openNewSpacePopup() {
-    this.setState({ newSpacePopupOpen: true });
+    if (this.canCreateSpace()) {
+      this.setState({ newSpacePopupOpen: true });
+    }
   }
 
   private closeNewSpacePopup() {
@@ -151,7 +151,7 @@ function Tile(props: { space: OrganizationalUnitImpl; onSelect: () => void }) {
       <div className={"col-xs-12 col-sm-6 col-md-4 col-lg-3"}>
         <div
           className={"card-pf card-pf-view card-pf-view-select card-pf-view-single-select"}
-          onClick={() => props.onSelect()} 
+          onClick={() => props.onSelect()}
         >
           <div className={"card-pf-body"}>
             <div>
