@@ -9,6 +9,14 @@ test("without links, should return only one element, with type text.", () => {
   expect(description.elements).toEqual(expectedElements);
 });
 
+test("without text, should return only one element, with type link.", () => {
+  const description = new CardDescriptionBuilder("{0}").addLink("link", "target").build();
+
+  const expectedElements = [new CardDescriptionLinkElement("link", "target")];
+
+  expect(description.elements).toEqual(expectedElements);
+});
+
 test("with links and indexes in order, should return a description with elements in correct order.", () => {
   const description = new CardDescriptionBuilder("You can click at {0} and {1}!")
     .addLink("link1", "foo")
@@ -42,6 +50,22 @@ test("with links and indexes mixed order, should return a description with eleme
     new CardDescriptionLinkElement("link1", "target1"),
     new CardDescriptionTextElement("!")
   ];
+
+  expect(description.elements).toEqual(expectedElements);
+});
+
+test("starting with a link, should return elements in correct order.", () => {
+  const description = new CardDescriptionBuilder("{0}!").addLink("link", "target").build();
+
+  const expectedElements = [new CardDescriptionLinkElement("link", "target"), new CardDescriptionTextElement("!")];
+
+  expect(description.elements).toEqual(expectedElements);
+});
+
+test("ending with a link, should return elements in correct order.", () => {
+  const description = new CardDescriptionBuilder("Link: {0}").addLink("link", "target").build();
+
+  const expectedElements = [new CardDescriptionTextElement("Link: "), new CardDescriptionLinkElement("link", "target")];
 
   expect(description.elements).toEqual(expectedElements);
 });

@@ -37,14 +37,22 @@ export class CardDescriptionBuilder {
 
     const elements: CardDescriptionElement[] = [];
     for (let i = 0; i < linkTokens.length; i++) {
-      elements.push(new CardDescriptionTextElement(this.getTextUntilLinkAt(this.textMask, linkTokens, i)));
+      const textBeforeLink = this.getTextUntilLinkAt(this.textMask, linkTokens, i);
+
+      if (textBeforeLink.length > 0) {
+        elements.push(new CardDescriptionTextElement(textBeforeLink));
+      }
+
       elements.push(this.links[this.linkIdxFromToken(linkTokens[i])]);
     }
 
     const lastElement = new CardDescriptionTextElement(
       this.getTextUntilLinkAt(this.textMask, linkTokens, linkTokens.length)
     );
-    elements.push(lastElement);
+
+    if (lastElement.text.length > 0) {
+      elements.push(lastElement);
+    }
 
     return new CardDescription(elements);
   }

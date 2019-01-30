@@ -1,76 +1,74 @@
 import * as React from "react";
 import {
-    Profile,
-    ProfilePreferences,
-    ProfilePreferencesPortableGeneratedImpl
+  Profile,
+  ProfilePreferences,
+  ProfilePreferencesPortableGeneratedImpl
 } from "@kiegroup-ts-generated/kie-wb-common-profile-api";
-import {PreferenceBeanServerStore} from "@kiegroup-ts-generated/uberfire-preferences-api-rpc";
-import {CardView} from "./CardView";
-import {HomeScreenProvider} from "../model/HomeScreenProvider";
-import {HomeScreen} from "../model/HomeScreen";
+import { PreferenceBeanServerStore } from "@kiegroup-ts-generated/uberfire-preferences-api-rpc";
+import { CardView } from "./CardView";
+import { HomeScreen, HomeScreenProvider } from "../model";
 
 interface Props {
-    contentProvider: HomeScreenProvider;
+  contentProvider: HomeScreenProvider;
 }
 
 interface State {
-    model?: HomeScreen;
+  model?: HomeScreen;
 }
 
 export class HomeScreenView extends React.Component<Props, State> {
+  constructor(props: Props) {
+    super(props);
 
-    constructor(props: Props) {
-        super(props);
+    this.state = {};
 
-        this.state = {};
+    this.retrieveCurrentProfile(new PreferenceBeanServerStore())
+      .then(profile => {
+        this.setState({ model: props.contentProvider.get(profile) });
+      })
+      .catch(() => new Error("Could not retrieve profile preferences."));
+  }
 
-        const that = this;
-        this.retrieveCurrentProfile(new PreferenceBeanServerStore())
-            .then(profile => {
-                that.setState({model: props.contentProvider.get(profile)});
-            });
+  public render() {
+    if (!this.state.model) {
+      return <></>;
     }
 
-    public render() {
+    const containerStyle = { backgroundImage: `url(${this.state.model.backgroundImageUrl})` };
 
-        if (!this.state.model) {
-            return (<></>);
-        }
+    // TODO: link with HomeView.less
+    return (
+      <div id="home-page">
+        <div className="kie-page">
+          <div
+            data-field="container"
+            className="kie-page__content kie-content--bg-image kie-blank-slate"
+            style={containerStyle}
+          >
+            <div className="container-fluid kie-container-fluid--blank-slate">
+              <div className="blank-slate-pf row">
+                <h1 data-field="welcome">{this.state.model.welcomeText}</h1>
 
-        const containerStyle = {backgroundImage: `url(${this.state.model.backgroundImageUrl})`};
+                <p data-field="description">{this.state.model.description}</p>
 
-        // TODO: link with HomeView.less
-        return (
-            <div id="home-page">
-                <div className="kie-page">
-                    <div data-field="container" className="kie-page__content kie-content--bg-image kie-blank-slate" style={containerStyle}>
-                        <div className="container-fluid kie-container-fluid--blank-slate">
-                            <div className="blank-slate-pf row">
-                                <h1 data-field="welcome">{this.state.model.welcomeText}</h1>
-
-                                <p data-field="description">{this.state.model.description}</p>
-
-                                <div data-field="shortcuts" className="blank-slate-pf-secondary-action">
-                                    {this.state.model.cards.map((card, idx) => (<CardView model={card} key={idx}/>))}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <div data-field="shortcuts" className="blank-slate-pf-secondary-action">
+                  {this.state.model.cards.map((card, idx) => (
+                    <CardView model={card} key={idx} />
+                  ))}
                 </div>
+              </div>
             </div>
-        );
-    }
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-    private retrieveCurrentProfile(preferencesStore: PreferenceBeanServerStore): Promise<Profile> {
+  private retrieveCurrentProfile(preferencesStore: PreferenceBeanServerStore): Promise<Profile> {
+    const args = { emptyPortablePreference: new ProfilePreferencesPortableGeneratedImpl({}) };
 
-        const args = {emptyPortablePreference: new ProfilePreferencesPortableGeneratedImpl({})};
-
-        return preferencesStore.load2<ProfilePreferences, ProfilePreferencesPortableGeneratedImpl>(args)
-            .then(pref => {
-                if (pref === undefined || pref.profile === undefined) {
-                    Promise.reject();
-                }
-                return pref.profile!;
-            });
-    }
+    return preferencesStore
+      .load2<ProfilePreferences, ProfilePreferencesPortableGeneratedImpl>(args)
+      .then(pref => pref.profile!);
+  }
 }

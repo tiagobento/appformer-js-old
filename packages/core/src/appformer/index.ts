@@ -1,6 +1,6 @@
 import { AppFormer } from "./AppFormer";
 import { Element } from "../core";
-import { findChildContainers} from "../core/ComponentEnvelope";
+import { findChildContainers } from "../core/ComponentEnvelope";
 import { Component } from "./Component";
 import { Perspective } from "./Perspective";
 import { Screen } from "./Screen";
@@ -25,7 +25,8 @@ export function initSingleton() {
   if ($wnd.AppFormerMode !== "instance") {
     singleton =
       $wnd.appformerGwtBridge ||
-      new AppFormer().init(document.body.children[0] as HTMLElement, () => {
+      new AppFormer().init((document.body.children[0] as HTMLElement) || document.createElement("div"), () => {
+        // creating div element is used in test environment, when test runner do not have a page body to access
         console.info("AppFormer _standalone_ instance initialized.");
       });
 
