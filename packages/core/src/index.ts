@@ -22,6 +22,7 @@ export * from "./appformer";
 export * from "./marshalling";
 export * from "./core";
 export * from "./java-wrappers";
+export * from "./util";
 
 // Exposes this module as a global variable
 (window as any).AppFormer = this;

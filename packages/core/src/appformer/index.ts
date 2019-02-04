@@ -14,16 +14,15 @@
  *  limitations under the License.
  */
 
-import { AppFormer } from "./AppFormer";
+import { AppFormer}  from "./AppFormer";
 import { Element } from "../core";
-import { findChildContainers } from "../core/ComponentEnvelope";
+import { findChildContainers } from "../util";
 import { Component } from "./Component";
 import { Perspective } from "./Perspective";
 import { Screen } from "./Screen";
 
 export * from "./AppFormer";
 export * from "./Components";
-export * from "./Shorthands";
 export * from "./Screen";
 export * from "./ComponentTypes";
 export * from "./Perspective";
@@ -31,7 +30,6 @@ export * from "./CompassLayoutPerspective";
 export * from "./DisplayInfo";
 export * from "./Panel";
 export * from "./Part";
-export { AppFormerContext, AppFormerContextValue } from "./AppFormerRoot";
 
 let singleton: AppFormer | undefined;
 
@@ -48,12 +46,6 @@ export function initSingleton() {
 
     $wnd.AppFormerInstance = singleton;
   }
-}
-
-export function init(container: HTMLElement): AppFormer {
-  return new AppFormer().init(container, () => {
-    console.info("AppFormer instance initialized.");
-  });
 }
 
 //
